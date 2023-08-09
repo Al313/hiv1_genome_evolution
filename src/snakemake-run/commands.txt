@@ -1,0 +1,2 @@
+snakemake -s snakefile.smk -np
+snakemake -s snakefile.smk --cores x
