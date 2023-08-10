@@ -1,129 +1,96 @@
-# 
-# # data from shared folder (annotated with USED info)
-# 
-# # meta[meta$patient.s.ID.content == "MT-2_19 EXP4 VP 280 ", "patient.s.ID.content"] <- "MT-2_19 EXP4 VP 280"
-# # meta[meta$patient.s.ID.content == "MT-2_20 EXPIII VP 410", "patient.s.ID.content"] <- "MT-2_20 EXPIV VP 410"
-# # meta[meta$patient.s.ID.content == "MT-2_20 EXPIII VP 420", "patient.s.ID.content"] <- "MT-2_20 EXPIV VP 420"
-# # meta[meta$patient.s.ID.content == "MT-2_19 EXP4 VP 280", "patient.s.ID.content"] <- "MT-2_19 EXPIV VP 280"
-# # meta[meta$patient.s.ID.content == "MT-2_17 EXPIII VP 420", "patient.s.ID.content"] <- "MT-2_17 EXPIV VP 420"
-# # meta[meta$patient.s.ID.content == "MT-2_18 EXPIII VP 420", "patient.s.ID.content"] <- "MT-2_18 EXPIV VP 420"
-# 
-# library(dplyr)
-# library(stringr)
-# 
-# 
-# meta <- read.csv(file = "/home/ali313/Documents/studies/phd/researcher/data/raw-freezed-data/NGS_samples_list_processed.csv", sep = ",", header = T, stringsAsFactors = F)
-# meta <- meta[meta$USED != "",]
-# 
-# meta[is.na(meta)] <- "NA"
-# 
-# meta <- meta[,-match(c("patient.s.ID.content", "other.ID", "other.study"), colnames(meta))] #"NGS.run.", "sample.source", "GS.FLX.gasket.s.size", "Order.ID", "ZPHI.ID", "SHCS.ID", "patient.s.initial.or.Lab.ID", "Viral.load.titre", "X", "X.1", "X.2"
-# meta$PROJECT <- "HIV_passaging"
-# 
-# 
-# colnames(meta) <- c("ngs_date", "project", "ngs_instrument", "ngs_technology", "full_sample_name", "set", "sample_set_no", "sample_date", "organism", "sample_source", "amplicon", "organism_subtype", "forward_name", "reverse_name", "extra_base_uuid", "base_uuid", "used")
-# 
-# str_split(meta$full_sample_name[1], "")[[1]][1]
-# 
-# meta$virus_line_no <- sapply(str_split(meta$full_sample_name, "MT"), "[[",1)
-# meta$cell_line_no <- sapply(str_split(meta$full_sample_name, ""), "[[",5)
-# 
-# meta$exp_no <- sapply(str_split(sapply(str_split(meta$full_sample_name, "EXP"), "[[",2), "VP"), "[[", 1)
-# 
-# meta$exp_no[meta$exp_no == "4"] <- "IV"
-# meta$exp_no[meta$exp_no == "3"] <- "III"
-# 
-# meta$transfer_no <- sapply(str_split(sapply(str_split(meta$full_sample_name, "VP"), "[[",2), "seq"), "[[", 1)
-# meta$transfer_no[str_detect(meta$transfer_no, "Full")] <- sapply(str_split(meta$transfer_no[str_detect(meta$transfer_no, "Full")], "F"), "[[",1)
-# 
-# 
-# 
-# 
-# meta <- meta[meta$included != "F",]
-# 
-# 
-# 
-# 
-# head(meta, n = 1)
-# 
-# 
-# 
-# 
-# 
-# # check the merged samples
-# unique(paste0(meta$transfer_no[meta$included == "T/2"], meta$virus_line_no[meta$included == "T/2"])) %in% names(table(paste0(meta$transfer_no, meta$virus_line_no))[table(paste0(meta$transfer_no, meta$virus_line_no)) == 2])
-# 
-# # more chekcs
-# 
-# # meta[meta$virus_line_no == 13 & meta$cell_line_no == "4",]
-# # 
-# # 
-# # meta$full_sample_name[meta$full_sample_name == "20MT4EXPIVVP10seq22072022"] <- "20MT2EXPIVVP10seq22072022"
-# # meta$cell_line_no[meta$full_sample_name == "20MT2EXPIVVP10seq22072022"] <- "2"
-# # 
-# # 
-# # meta$full_sample_name[meta$full_sample_name == "20MT4EXPIVVP380seq22072022"] <- "20MT2EXPIVVP380seq22072022"
-# # meta$cell_line_no[meta$full_sample_name == "20MT2EXPIVVP380seq22072022"] <- "2"
-# # 
-# # meta$full_sample_name[meta$full_sample_name == "13MT4EXPIIIVP440seq08122022"] <- "13MT2EXPIIIVP440seq08122022"
-# # meta$cell_line_no[meta$full_sample_name == "13MT2EXPIIIVP440seq08122022"] <- "2"
-# 
-# 
-# 
-# 
-# for (line in unique(meta$virus_line_no)){
-#   print(line)
-#   print(seq(10, 510, 10) %in% meta$transfer_no[meta$virus_line_no == line])
-# }
-# 
-# nrow(meta)
-# colnames(meta)
-# meta <- meta[,c(2, 9, 12, 10, 5, 18:21, 1, 3, 4, 7, 8, 11, 13:16, 17)]
-# 
-# 
-# 
-# 
-# 
-# meta <- meta %>% mutate_at(c('virus_line_no', 'transfer_no'), as.numeric)
-# 
-# 
-# meta <-  meta[with(meta, order(virus_line_no, transfer_no)), ]
-# 
-# 
-# 
-# meta$virus_line_transfer_no <- paste(meta$virus_line_no, meta$transfer_no, sep = "_")
-# 
-# 
-# for (i in meta$virus_line_transfer_no[duplicated(meta$virus_line_transfer_no)]){
-#   
-#   ss <- meta$full_sample_name[meta$virus_line_transfer_no == i]
-#   
-#   meta$paired_sample[meta$virus_line_transfer_no == i] <- rev(ss)
-#   
-# }
-# meta <- meta[,-match("virus_line_transfer_no", colnames(meta))]
-# 
-# 
-# lastly I add a new column to get rid of the duplicated samples for downstream analyses
-# 
-# 
-# meta$included[meta$used == "T/2" & str_detect(meta$full_sample_name, pattern = "08122022")] <- T
-# meta$included[meta$used == "T"] <- T
-# 
-# meta$included[is.na(meta$included)] <- F
-# 
-# meta <- meta[meta$included,]
-# 
-# write.table(meta, file = "/home/ali313/Documents/studies/phd/researcher/data/raw-freezed-data/NGS_samples_list_processed.csv", sep = ",", quote = F, row.names = F)
+
+# change the name of previous metadta to include version before starting
+
+library(dplyr)
+library(stringr)
+
+# set variables to process relevant metadata
+arrival_date <- "04082023"
+ngs_sample_list_version <- "414"
+
+# read in the relevant metadata
+ngs_sample_list_new <- read.csv(file = paste0("/home/amovas/data/genome-evo-proj/data/incoming-raw-data/", arrival_date, "/NGS_samples_list_all_runs_NGS_R1R2_v", ngs_sample_list_version, "_100823.csv"), sep = ",", header = T, stringsAsFactors = F)
+ngs_sample_list_new[is.na(ngs_sample_list_new)] <- "NA"
 
 
 
+# filter for relvant samples
+
+ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = "VPIII_p520-570"),]
+
+# check if the number of samples match
+nrow(ngs_sample_list_new)
+
+
+# clean the data: retain relevant fields, rename, and re-order to be consistent with my metadata version
+relevant_fields <- c("NGS.date", "PROJECT", "NGS.instrument", "NGS.technology", "sample.s.name._.name.for.the.NGS.data", "sample.set.No.", "sample.date", "organism", "sample.source", "amplicon",
+"HIV.1.subtype", "forward_name", "reverse_name", "extra_base_uuid", "base_uuid")
+
+
+ngs_sample_list_new <- ngs_sample_list_new[,relevant_fields]
+ngs_sample_list_new$PROJECT <- "HIV_passaging"
+
+colnames(ngs_sample_list_new) <- c("ngs_date", "project", "ngs_instrument", "ngs_technology", "full_sample_name", "sample_set_no", "sample_date", "organism", "sample_source", "amplicon", "organism_subtype", "forward_name", "reverse_name", "extra_base_uuid", "base_uuid")
+
+# extract following info and store them in a new field
+
+
+ngs_sample_list_new$virus_line_no <- sapply(str_split(ngs_sample_list_new$full_sample_name, "MT"), "[[",1)
+ngs_sample_list_new$cell_line_no <- sapply(str_split(ngs_sample_list_new$full_sample_name, ""), "[[",5)
+
+ngs_sample_list_new$exp_no <- sapply(str_split(sapply(str_split(ngs_sample_list_new$full_sample_name, "EXP"), "[[",2), "VP"), "[[", 1)
+
+# make sure number of experiments are consistent
+ngs_sample_list_new$exp_no[ngs_sample_list_new$exp_no == "4"] <- "IV"
+ngs_sample_list_new$exp_no[ngs_sample_list_new$exp_no == "3"] <- "III"
+
+ngs_sample_list_new$transfer_no <- sapply(str_split(sapply(str_split(ngs_sample_list_new$full_sample_name, "VP"), "[[",2), "seq"), "[[", 1)
+
+
+# set used,paired_sample,included and update later as needed
+
+ngs_sample_list_new$used <- "T"
+ngs_sample_list_new$paired_sample <- NA
+ngs_sample_list_new$included <- TRUE
+
+
+# re-order
+
+ngs_sample_list_new <- ngs_sample_list_new[,c(2, 8, 11, 9, 5, 16:19, 1, 3:4, 6:7, 10, 12:15, 20:22)]
+
+head(ngs_sample_list_new)
 
 
 
-meta <- read.csv(file = "/home/ali313/Documents/studies/phd/researcher/data/raw-freezed-data/NGS_samples_list_processed.csv", sep = ",", header = T, stringsAsFactors = F)
+# read in the previous metadata
+
+ngs_sample_list_old <- read.csv(file = paste0("/home/amovas/data/genome-evo-proj/data/freezed-raw-data/metadata/NGS_samples_list_processed_v0.csv"), sep = ",", header = T, stringsAsFactors = F)
 
 
-meta[is.na(meta)] <- "NA"
-meta$virus_line_transfer_no <- paste(meta$virus_line_no, meta$transfer_no, sep = "_")
+ngs_sample_list_updated <- rbind(ngs_sample_list_old, ngs_sample_list_new)
+
+
+########### decide how you are gonna handle repeats based on the visual inspection of coverage
+########### for 04082023 update
+
+# exclude 16MT4EXPIIIVP510seq09092022 
+# combine 13MT2EXPIIIVP450seq20052022 and 13MT2EXPIIIVP450seq13072023
+
+
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "16MT4EXPIIIVP510seq09092022",c("used", "included")] <- c("F", FALSE)
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "13MT2EXPIIIVP450seq20052022", c("used", "included")] <- c("T/2", FALSE)
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "13MT2EXPIIIVP450seq13072023", c("full_sample_name", "used", "paired_sample","included")] <- c("13MT2EXPIIIVP450combinedseq13072023", "T/2", "13MT2EXPIIIVP450seq20052022", TRUE)
+
+
+# prepare the dataframe for saving
+
+
+ngs_sample_list_updated <- ngs_sample_list_updated %>% mutate_at(c('virus_line_no', 'transfer_no'), as.numeric)
+
+
+ngs_sample_list_updated <-  ngs_sample_list_updated[with(ngs_sample_list_updated, order(virus_line_no, transfer_no)), ]
+
+
+# save the updated metadata
+write.table(ngs_sample_list_updated, file = "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", quote = F, row.names = F)
 

@@ -18,7 +18,7 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 rule all:
     input:
        "/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl",
-       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam", zip,experiment=EXP, line=LINES, sample=SAMPLES)
+       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
 
