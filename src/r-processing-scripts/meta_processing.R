@@ -63,6 +63,15 @@ head(ngs_sample_list_new)
 
 
 # read in the previous metadata
+## note that previously to process and clean up the initial meta data I had to run the following code:
+
+
+# meta$full_sample_name <- str_replace(meta$full_sample_name, pattern = "EXP4", replacement = "EXPIV")
+# meta$full_sample_name <- str_replace(meta$full_sample_name, pattern = "EXP3", replacement = "EXPIII")
+# meta$full_sample_name <- str_replace(meta$full_sample_name, pattern = "combined", replacement = "")
+# meta$full_sample_name[meta$used == "T/2"] <- str_replace(meta$full_sample_name[meta$used == "T/2"], pattern = "seq", replacement = "combinedseq")
+# meta$full_sample_name[meta$virus_line_no %in% c(13,14,17:20)] <- str_replace(meta$full_sample_name[meta$virus_line_no %in% c(13,14,17:20)], pattern = "MT4", replacement = "MT2")
+
 
 ngs_sample_list_old <- read.csv(file = paste0("/home/amovas/data/genome-evo-proj/data/freezed-raw-data/metadata/NGS_samples_list_processed_v0.csv"), sep = ",", header = T, stringsAsFactors = F)
 

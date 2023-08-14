@@ -17,8 +17,9 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 
 rule all:
     input:
-       "/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl",
-       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai", zip,experiment=EXP, line=LINES, sample=SAMPLES)
+#       "/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl",
+       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv",
+#       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
 
@@ -57,30 +58,29 @@ rule samtools_index:
         "samtools index {input}"
 
 
-"""
+
 
 rule quality_assessment:
     input:
-        bam="HIV_LTE_mappings/{experiment}/rep/{sample}_aligned.bam",
-        bai="HIV_LTE_mappings/{experiment}/rep/{sample}_aligned.bam.bai"
+        bam="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam",
+        bai="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai"
     output:
-        "quality_control/coverage_plots/{experiment}-{line}-{sample}.png",
-        "quality_control/{experiment}/rep/{sample}.quals"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/coverage_plots/{experiment}-{line}-{sample}.png",
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/{experiment}/{line}/{sample}.quals"
     script:
-        "snakemake_scripts/quality_control_mapping.py"
+        "/home/amovas/data/genome-evo-proj/src/snakemake-run/quality_control_mapping.py"
 
 rule collect_quality_assessment:
     input:
         #expand("quality_control/{exp}/{line}/{sample}.quals",
         #       zip, exp=directories,line=lines, sample=IDS),
-        expand("quality_control/{experiment}/rep/{sample}.quals",
-                zip, line=lines2, sample=IDS2)
+        expand("/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/{experiment}/{line}/{sample}.quals",
+                zip, experiment=EXP, line=LINES, sample=SAMPLES)
     output:
-        "quality_control/all.quals"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv"
     shell:
         "cat {input} >> {output}"
 
-"""
 
 
 

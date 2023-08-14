@@ -28,8 +28,8 @@ source activate ha_proj
 
 snakemake \
         -s mysnakefile.smk \
-        --jobs 408 \
-        --default-resource mem_mb=2000 \
+        --jobs 432 \
+        --default-resource mem_mb=500 \
         --cluster '
         sbatch \
                 --cpus-per-task {threads} \
