@@ -17,6 +17,7 @@ dependencies:
   - jupyter=1.0.0
   - r-ggplot2
   - r-dplyr
+  - r-ridyr
   - r-languageserver #vscode setup
   - radian #augmented R console
 #  - pysam #install by pip
