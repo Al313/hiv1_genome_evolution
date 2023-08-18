@@ -1,0 +1,24 @@
+
+
+
+```{R}
+
+# Generate 200 samples from N(0,1)
+# plot a histogram of the data
+
+x <- rnorm(200)
+hist(x)
+
+
+```
+
+
+
+
+rmarkdown::pandoc_available()
+rmarkdown::find_pandoc()
+Sys.setenv(RSTUDIO_PANDOC="/home/amovas/data/.conda/envs/ha_proj/bin/pandoc")
+file.copy(rmarkdown::pandoc_exec(), "/usr/local/bin/pandoc", overwrite = TRUE)
+rmarkdown::pandoc_exec()
+
+rmarkdown::render('~/data/genome-evo-proj/src/r-processing-scripts/reproduction/fred/rep1.Rmd', encoding = 'UTF-8')

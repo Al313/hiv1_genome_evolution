@@ -19,7 +19,8 @@ dependencies:
   - r-dplyr
   - r-ridyr
   - r-languageserver #vscode setup
-  - radian #augmented R console
+  - radian
+  - r-rmarkdown #augmented R console
 #  - pysam #install by pip
 
 
