@@ -1,5 +1,16 @@
 
 
+# Title: Overview of the dataset (Fredrick's version)
+
+In this document I have re-created some of the main analyses of Fredrick's paper that is relevant to our study.
+
+> Here's the link to the paper: https://academic.oup.com/mbe/article/36/11/2400/5524887?login=false
+
+Our dataset includes genome sequencing of two **LTEE** experiments, namely *EXPIII* & *EXPIV*, including passages up to 570 and 510 respectively.
+
+---
+***
+___
 
 ```{R}
 
@@ -9,6 +20,7 @@
 x <- rnorm(200)
 hist(x)
 
+find.package("stats")
 
 ```
 
