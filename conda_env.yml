@@ -17,10 +17,19 @@ dependencies:
   - jupyter=1.0.0
   - r-ggplot2
   - r-dplyr
-  - r-ridyr
+  - r-tidyr
   - r-languageserver #vscode setup
-  - radian
-  - r-rmarkdown #augmented R console
+  - radian #augmented R console
+  - r-rmarkdown
+  - bioconductor-biostrings
+  - r-vcfr
+  - snpeff
+  - bedtools
+  - genometools-genometools
+  - r-biocmanager
+  - r-devtools	
+  - VariantAnnotation #BiocManager::install("VariantAnnotation")
+  - radiator #devtools::install_github("thierrygosselin/radiator")
 #  - pysam #install by pip
 
 
