@@ -10,6 +10,7 @@ dependencies:
   - pandas=1.5.3
   - numpy=1.24.2
   - matplotlib=3.7.1
+  - plotly
   - bcftools=1.3.1
   - samtools=1.3.1
   - bwa=0.7.17
@@ -21,13 +22,16 @@ dependencies:
   - r-languageserver #vscode setup
   - radian #augmented R console
   - r-rmarkdown
+  - r-dt
+  - r-plotly
   - bioconductor-biostrings
   - r-vcfr
   - snpeff
   - bedtools
   - genometools-genometools
   - r-biocmanager
-  - r-devtools	
+  - r-devtools
+  - r-reticulate	
   - VariantAnnotation #BiocManager::install("VariantAnnotation")
   - radiator #devtools::install_github("thierrygosselin/radiator")
 #  - pysam #install by pip

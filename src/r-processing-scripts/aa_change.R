@@ -29,10 +29,13 @@ ann_var_df <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-rese
 colnames(ann_var_df) <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
 ann_var_df <- ann_var_df[,1:5]
 
-
 # merge the two dataset
 ann_var <- cbind(ann_var_df, ann_var_info)
 
+
+# add annotation of untranslated regions manually
+ann_var$ANN[ann_var$POS < 790] <- paste0(ann_var$ANN[ann_var$POS < 790], ",", ann_var$ALT[ann_var$POS < 790], "|untranslated_region|MODERATE|5_LTR|5_LTR||AF324490.5|||||||||")
+ann_var$ANN[ann_var$POS > 9407] <- paste0(ann_var$ANN[ann_var$POS > 9407], ",", ann_var$ALT[ann_var$POS > 9407], "|untranslated_region|MODERATE|3_LTR|3_LTR||AF324499.3|||||||||")
 
 
 ### get the name of variant classes that you want to keep
@@ -79,10 +82,11 @@ ann_of_interest <- ann_of_interest[!sapply(ann_of_interest, identical, character
 
 # unlsit the annotations to store them in a df (the added dot to the names is handy here)
 ann_of_interest <- unlist(ann_of_interest, use.names = T)
-
+head(ann_of_interest)
 # get the annotation fileds that are of interest
 ann_df <- as.data.frame(do.call(rbind, lapply(sapply(ann_of_interest, str_split, "\\|"), "[",c(2,3,7,11,12,14))))
-colnames(ann_df) <- c("effect", "impact", "gene_id", "aa_change", "loc_in_cds", "loc_in_protein")
+
+colnames(ann_df) <- c("effect", "impact", "feature_id", "aa_change", "loc_in_cds", "loc_in_protein")
 
 # assign the variant and annotation id
 ann_df$variant_id <- sapply(str_split(row.names(ann_df), pattern = "\\."), "[", 1)
@@ -98,8 +102,9 @@ row.names(ann_df) <- 1:nrow(ann_df)
 # merge variant info with annotation info
 ann_var_processed <- merge(ann_var[,-10], ann_df, by.x = "ID", by.y = "variant_id")
 
+
 # merge variant and annotation info with gene info
-ann_var_processed <- merge(ann_var_processed, features_cds[,c("gene_id","gene","ORF", "gene_range")], by="gene_id")
+ann_var_processed <- merge(ann_var_processed, features_cds[,c("feature_id","feature","ORF", "feature_range")], by="feature_id")
 
 # reorganize the dataframe
 colnames(ann_var_processed)[2:12] <- c("variant_id", "chrom", "genomic_pos", "ref_allele", "alt_allele", "allele_freq", "mut_type", "passage", "exp_line", "loss_of_function", "nonsense_mediated_decay")
