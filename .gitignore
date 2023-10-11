@@ -1,5 +1,5 @@
 .DS_Store
-data/*
+data/**/*
 !data/reference
 !data/metadata
 !data/processed-data/quality_control/3-p/all_quals.tsv.gz
