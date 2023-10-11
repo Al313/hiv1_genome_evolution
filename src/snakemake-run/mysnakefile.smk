@@ -18,7 +18,7 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 rule all:
     input:
 #       "/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv",
+       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv.gz",
 #       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
@@ -77,9 +77,9 @@ rule collect_quality_assessment:
         expand("/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/{experiment}/{line}/{sample}.quals",
                 zip, experiment=EXP, line=LINES, sample=SAMPLES)
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv.gz"
     shell:
-        "cat {input} >> {output}"
+        "cat {input} | gzip >> {output}"
 
 
 
