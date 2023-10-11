@@ -27,11 +27,11 @@ def good_alignment(samfile):
 
 
     average = np.mean(coverage_full)
-    average_a = np.mean(coverage_full[450:2250])
-    average_b = np.mean(coverage_full[2250:4000])
-    average_c = np.mean(coverage_full[4000:5800])
-    average_d = np.mean(coverage_full[5800:7400])
-    average_e = np.mean(coverage_full[7400:9700])
+    average_a = np.mean(coverage_full[450:2200])
+    average_b = np.mean(coverage_full[3000:4000])
+    average_c = np.mean(coverage_full[4800:5900])
+    average_d = np.mean(coverage_full[6600:7400])
+    average_e = np.mean(coverage_full[8400:9150])
     cover = average > 5000
     cover_all = all([i>= 1000 for i in [average_a,average_b,average_c,average_d,average_e]])
     
