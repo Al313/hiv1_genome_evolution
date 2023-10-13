@@ -68,6 +68,7 @@ library(dplyr)
 library(tidyr)
 library(Biostrings)
 library(stringr)
+library(magrittr)
 
 ```
 
@@ -291,6 +292,110 @@ fig
 ___
 ___
 
+We can also plot the number of new `r category` mutations that appear or disppear compared to the immediate previous passage.
+
+```{r prepare difference dataframe}
+
+
+passages <- seq(10,570, 10)
+diff_df <- data.frame()
+
+
+for (i in 1:56){
+    for (exp_line in c("MT2_1", "MT2_2", "MT4_1", "MT4_2")){
+        prev_in <- passages[i]
+        pres_in <- passages[i+1]
+
+        prev <- variants_ann_expiii$mut_info[variants_ann_expiii$exp_line == exp_line & variants_ann_expiii$passage == prev_in & variants_ann_expiii$allele_freq >= 0.5]
+
+        pres <- variants_ann_expiii$mut_info[variants_ann_expiii$exp_line == exp_line & variants_ann_expiii$passage == pres_in & variants_ann_expiii$allele_freq >= 0.5]
+
+        addition <- length(setdiff(pres, prev))
+        removal <- length(setdiff(prev,pres))
+
+        diff_df <- rbind(diff_df, c(exp_line, passages[i+1], addition, removal))
+
+    }
+    
+}
+
+diff_df %<>% set_colnames(c("exp_line", "passage", "addition", "removal")) %>%
+              arrange(exp_line) %>%
+              mutate(host_line = ifelse(exp_line %in% c("MT2_1", "MT2_2"), "MT2", "MT4")) %>%
+              mutate_at(c(1,5), as.factor) %>%
+              mutate_at(2:4, as.numeric)
+
+
+```
+
+
+```{r}
+
+
+# prepare the data for statistical test
+counts <- diff_df %>%
+            group_by(passage, host_line) %>%
+            summarize(addition_mean = mean(addition),
+                      removal_mean = mean(removal), .groups = 'drop')
+
+# store the statistical test result
+t_test_result_addition <- t.test(counts$addition_mean[counts$host_line == "MT2"], counts$addition_mean[counts$host_line == "MT4"], paired = TRUE, alternative = "two.sided")
+
+t_test_result_removal <- t.test(counts$removal_mean[counts$host_line == "MT2"], counts$removal_mean[counts$host_line == "MT4"], paired = TRUE, alternative = "two.sided")
+
+```
+
+
+In MT2 lines we observe average of `r mean(counts$addition_mean[counts$host_line == "MT2"])` new `r category` mutations compared to 10 passage earlier while this number for HIV-1 evolved in MT4 is
+`r mean(counts$addition_mean[counts$host_line == "MT4"])`. The number of new mutations per passage in MT2 is significantly higher than MT4 (paired T-test p_val of `r format(t_test_result_addition$p.value, scientific=TRUE)`)
+
+Interestingly enough number of mutations disppearing from population compared to 10 previous passage in MT2 is also higher than MT4 (mean of `r mean(counts$removal_mean[counts$host_line == "MT2"])` and `r mean(counts$removal_mean[counts$host_line == "MT4"])`, respectively) 
+which is also significant (paired T-test p_val of `r format(t_test_result_removal$p.value, scientific=TRUE)`)
+
+
+```{r plot addition plot, results=TRUE}
+
+
+
+# visualize using plotly
+fig <- plot_ly(diff_df, x = ~passage, y = ~addition, 
+            type = 'scatter', mode = "lines", color = ~exp_line, linetype= ~host_line)
+fig <- fig %>% layout(title = paste0(category, " Mutations Emergence") ,
+                      xaxis = list(title = 'Passage'),
+                      yaxis = list(title = 'Count'))
+
+fig
+
+
+```
+
+
+
+```{r plot removal plot, results=TRUE}
+
+
+
+# visualize using plotly
+fig <- plot_ly(as.data.frame(diff_df), x = ~passage, y = ~removal, 
+            type = 'scatter', mode = "lines", color = ~exp_line, linetype= ~host_line)
+fig <- fig %>% layout(title = paste0(category, " Mutations Disappearance") ,
+                      xaxis = list(title = 'Passage'),
+                      yaxis = list(title = 'Count'))
+
+fig
+
+
+```
+
+
+
+
+
+
+
+
+___
+___
 
 If we plot the accumulation of `r category` mutations based on the effect type, we can visualize
 the trends for S (synonymous), N (non-synonomous), and U (untranslated) mutations.

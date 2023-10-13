@@ -59,12 +59,14 @@ In this experiment each viral transfer was done through a titer bottlenecking of
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
+library(ggplot2)
 library(plotly)
 library(DT)
 library(dplyr)
 library(tidyr)
 library(Biostrings)
 library(stringr)
+library(magrittr)
 
 ```
 
@@ -256,6 +258,86 @@ fig
 
 
 ```
+
+
+___
+___
+
+We can also plot the number of new `r category` mutations that appear or disppear compared to the immediate previous passage.
+
+```{r prepare difference dataframe}
+
+
+passages <- seq(10,510, 10)
+diff_df <- data.frame()
+
+
+for (i in 1:50){
+    for (exp_line in c("MT2_1", "MT2_2", "MT2_3", "MT2_4")){
+        prev_in <- passages[i]
+        pres_in <- passages[i+1]
+
+        prev <- variants_ann_expiv$mut_info[variants_ann_expiv$exp_line == exp_line & variants_ann_expiv$passage == prev_in & variants_ann_expiv$allele_freq >= 0.5]
+
+        pres <- variants_ann_expiv$mut_info[variants_ann_expiv$exp_line == exp_line & variants_ann_expiv$passage == pres_in & variants_ann_expiv$allele_freq >= 0.5]
+
+        addition <- length(setdiff(pres, prev))
+        removal <- length(setdiff(prev,pres))
+
+        diff_df <- rbind(diff_df, c(exp_line, passages[i+1], addition, removal))
+
+    }
+    
+}
+
+diff_df %<>% set_colnames(c("exp_line", "passage", "addition", "removal")) %>%
+              arrange(exp_line) %>%
+              mutate_at(1, as.factor) %>%
+              mutate_at(2:4, as.numeric)
+
+
+```
+
+
+
+In this experiment the average rate of mutation emergence across all four lines is `r mean(diff_df$addition[!(diff_df$exp_line == "MT2_3" & diff_df$passage == 440)])` while the average rate of 
+mutation disappearance is `r mean(diff_df$removal[!(diff_df$exp_line == "MT2_3" & diff_df$passage == 430)])`.
+
+```{r plot addition plot, results=TRUE}
+
+
+
+# visualize using plotly
+fig <- plot_ly(diff_df, x = ~passage, y = ~addition, 
+            type = 'scatter', mode = "lines", color = ~exp_line)
+fig <- fig %>% layout(title = paste0(category, " Mutations Emergence") ,
+                      xaxis = list(title = 'Passage'),
+                      yaxis = list(title = 'Count'))
+
+fig
+
+
+```
+
+
+
+```{r plot removal plot, results=TRUE}
+
+
+
+# visualize using plotly
+fig <- plot_ly(as.data.frame(diff_df), x = ~passage, y = ~removal, 
+            type = 'scatter', mode = "lines", color = ~exp_line)
+fig <- fig %>% layout(title = paste0(category, " Mutations Disappearance") ,
+                      xaxis = list(title = 'Passage'),
+                      yaxis = list(title = 'Count'))
+
+fig
+
+
+```
+
+
 
 
 
