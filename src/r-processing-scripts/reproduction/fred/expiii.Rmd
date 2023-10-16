@@ -97,7 +97,6 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 # add a field containing pos, ref, and alt info of muts
 variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
 
-
 ## only keep the EXPIII data
 
 variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
