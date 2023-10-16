@@ -1,7 +1,10 @@
 
 # load libraries
 
-library(stringr)
+library("stringr")
+library("dplyr")
+library("magrittr")
+
 
 # read in raw feature list doownloaded as gff3 from NCBI for HIV-1 NL4-3 strain
 features <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/reference/annotations/features/sequence-features.tsv", sep = "\t", stringsAsFactors = F, header = T)
@@ -12,10 +15,14 @@ colnames(features) <- c("seqid", "source", "type", "start", "end", "score", "str
 
 # setting the correct LTR coordination for 5' and 3'
 features$end[features$type == "long_terminal_repeat" & features$start == 1] <- 789
-features$start[features$type == "long_terminal_repeat" & features$end == 9709] <- 9408
+features$start[features$type == "long_terminal_repeat" & features$end == 789] <- 454 # from beginning of 5' repeat region till the end of 5' utr
+features$end[features$type == "long_terminal_repeat" & features$start == 9076] <- 9626 # from beginning of 3'utr till the end of 3' repeat region
+
+features %<>% mutate(type = ifelse(type=="long_terminal_repeat", "untranslated_region", type))
+
 
 # filter out features other than CDS
-features_of_interest <- features[features$type %in% c("CDS", "long_terminal_repeat"),]
+features_of_interest <- features[features$type %in% c("CDS", "untranslated_region"),]
 
 
 row.names(features_of_interest) <- 1:nrow(features_of_interest)
@@ -41,8 +48,8 @@ att_of_interest <- mapply(function(x,y) x[[y]], x=attributes, y=sapply(att_of_in
 product_name <- sapply(str_split(sapply(str_split(att_of_interest, pattern = " "), "[[", 1), pattern = "="), "[[",2)
 
 features_of_interest$feature <- product_name
-features_of_interest$feature[1] <- "5LTR"
-features_of_interest$feature[13] <- "3LTR"
+features_of_interest$feature[1] <- "5UTR"
+features_of_interest$feature[13] <- "3UTR"
 
 # extract gene ids
 

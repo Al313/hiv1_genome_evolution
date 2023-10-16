@@ -455,7 +455,7 @@ for (host_line in c("MT2", "MT4")){
     s_n <- append(s_n, sum(as.numeric(counts["S"]),as.numeric(counts["N"])))
   }
   # normalize for length
-  u <- u*100/(9709-9407+790)
+  u <- u*100/(9626-9076+789-454)
   s_n <- s_n*100/(9407-790)
   t_test_result <- t.test(u, s_n, paired = TRUE, alternative = "two.sided")
   t_test_res <- append(t_test_res, t_test_result$p.value)
@@ -485,7 +485,7 @@ counts <- variants_ann_expiii %>%
             summarise(nr_majority = n()) %>%
             mutate_at(c(2,4), as.numeric) %>%
             mutate_at(c(1,3), as.factor) %>%
-            mutate(nr_majority_density = ifelse(effect_simplified2 == "S/N", nr_majority*100/(9407-790),nr_majority*100/(9709-9407+790)))
+            mutate(nr_majority_density = ifelse(effect_simplified2 == "S/N", nr_majority*100/(9407-790),nr_majority*100/(9626-9076+789-454)))
 
 # make the visualization
 fig <- plot_ly(as.data.frame(counts), x = ~passage, y = ~nr_majority_density, 
@@ -550,8 +550,8 @@ for the length of the genome):
 
 
 # based on feature range
-feature_length <- data.frame(feature = c("5LTR", "gag", "pol", "vif","vpr", "tat","rev","vpu","envelope","nef","3LTR"),
-                            feature_length = c(789,1503,3012,579,291,261,351,246,2565,621,302))
+feature_length <- data.frame(feature = c("5UTR", "gag", "pol", "vif","vpr", "tat","rev","vpu","envelope","nef","3UTR"),
+                            feature_length = c(335,1503,3012,579,291,261,351,246,2565,621,550))
 
 
 # prepare data for visualization

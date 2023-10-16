@@ -32,10 +32,11 @@ ann_var_df <- ann_var_df[,1:5]
 # merge the two dataset
 ann_var <- cbind(ann_var_df, ann_var_info)
 
+head(ann_var$ANN[ann_var$POS >= 454 & ann_var$POS < 790])
 
 # add annotation of untranslated regions manually
-ann_var$ANN[ann_var$POS < 790] <- paste0(ann_var$ANN[ann_var$POS < 790], ",", ann_var$ALT[ann_var$POS < 790], "|untranslated_region|MODERATE|5_LTR|5_LTR||AF324490.5|||||||||")
-ann_var$ANN[ann_var$POS > 9407] <- paste0(ann_var$ANN[ann_var$POS > 9407], ",", ann_var$ALT[ann_var$POS > 9407], "|untranslated_region|MODERATE|3_LTR|3_LTR||AF324499.3|||||||||")
+ann_var$ANN[ann_var$POS >= 454 & ann_var$POS < 790] <- paste0(ann_var$ANN[ann_var$POS >= 454 & ann_var$POS < 790], ",", ann_var$ALT[ann_var$POS >= 454 & ann_var$POS < 790], "|untranslated_region|MODERATE|5_UTR|5_UTR||AF324490.5|||||||||")
+ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS < 9627] <- paste0(ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS < 9627], ",", ann_var$ALT[ann_var$POS >= 9076 & ann_var$POS < 9627], "|untranslated_region|MODERATE|3_UTR|3_UTR||AF324499.3|||||||||")
 
 
 ### get the name of variant classes that you want to keep
@@ -118,7 +119,15 @@ write.table(ann_var_processed, file = "/Users/alimos313/Documents/studies/phd/hp
 
 
 
+
+
+
 ### inspecting the data
+
+tail(ann_var_processed)
+
+min(ann_var_processed$genomic_pos)
+head(ann_var_processed[ann_var_processed$genomic_pos == 5580,])
 
 fixed <- ann_var_processed[ann_var_processed$allele_freq >= 0.99,]
 

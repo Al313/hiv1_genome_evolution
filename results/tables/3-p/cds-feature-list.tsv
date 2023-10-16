@@ -8,5 +8,5 @@ AAK08487.1	AF324493.2	Genbank	CDS	.	+	rev	rev_5969_6044|rev_8369_8643	1|3
 AAK08488.1	AF324493.2	Genbank	CDS	.	+	vpu	vpu_6061_6306	3
 AAK08489.2	AF324493.2	Genbank	CDS	.	+	envelope	envelope_6221_8785	1
 AAK08490.1	AF324493.2	Genbank	CDS	.	+	nef	nef_8787_9407	2
-AF324490.5	AF324493.2	Genbank	long_terminal_repeat	.	+	5LTR	5LTR_1_789	NA
-AF324499.3	AF324493.2	Genbank	long_terminal_repeat	.	+	3LTR	3LTR_9408_9709	NA
+AF324490.5	AF324493.2	Genbank	untranslated_region	.	+	5UTR	5UTR_454_789	NA
+AF324499.3	AF324493.2	Genbank	untranslated_region	.	+	3UTR	3UTR_9076_9626	NA
