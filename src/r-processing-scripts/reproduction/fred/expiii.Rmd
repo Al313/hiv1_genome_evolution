@@ -388,11 +388,6 @@ fig
 
 
 
-
-
-
-
-
 ___
 ___
 
@@ -596,6 +591,70 @@ dev.off()
 
 
 ```
+
+
+Additionally we can look at the normalized count of mutations per genomic features for previous passages
+to get a sense for whether and how they are changing over time. In the following you can view the plots for
+passages 100, 200, 300, and 400. (for a better visualization view the pdf version)
+
+
+
+```{r plot normalized majority mut counts per feature for past passages, results=TRUE}
+
+
+# based on feature range
+feature_length <- data.frame(feature = c("5UTR", "gag", "pol", "vif","vpr", "tat","rev","vpu","envelope","nef","3UTR"),
+                            feature_length = c(335,1503,3012,579,291,261,351,246,2565,621,550))
+
+
+# prepare data for visualization
+counts <- variants_ann_expiii %>% 
+            filter(allele_freq >= threshold) %>%
+            mutate(mut_type = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+            mutate(mut_type = replace_na(mut_type, "N")) %>%
+            filter(passage %in% c(100,200,300,400, 560)) %>%
+            group_by(exp_line, passage, feature, mut_type) %>%
+            summarise(count = n()) %>%
+            mutate_at(1:4, as.factor) %>%
+            left_join(feature_length, by = join_by(feature == feature)) %>%
+            mutate(normalized_count = count*100/feature_length)
+
+
+# make the visualization
+fig <- ggplot(counts) +
+  geom_bar(aes(x = mut_type, y = normalized_count, fill = exp_line),
+           position = "stack",
+           stat = "identity") +
+  labs(x = "Genomic Features", y = "Normalized Count", fill = "Line")+
+  facet_grid(~ feature + passage, switch = "x") +
+  theme(strip.placement = "outside",
+        strip.background = element_rect(fill = NA, color = "white"),
+        panel.spacing = unit(-.01,"cm"))+
+  theme(axis.title = element_text(size = 20),
+  axis.text.x = element_text(size = 10),
+  axis.text.y = element_text(size = 10),
+  strip.text.x = element_text(size = 15, angle=90),
+  legend.text=element_text(size=15),
+  legend.title = element_text(size=10))
+
+fig
+```
+
+
+
+```{r, include = FALSE}
+
+pdf("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/fearure-count-history-iii.pdf"
+    , width = 24.5, height = 14)
+fig
+dev.off()
+
+
+```
+
+
+
+
 
 
 
