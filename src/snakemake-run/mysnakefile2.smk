@@ -17,7 +17,7 @@ SAMPLES = ["20MT2EXPIVVP180seq09052019_S24_L001","20MT2EXPIVVP410combinedseq0812
 
 rule all:
     input:
-       "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl",
+       "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl.gz",
 #       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/all_quals.tsv.gz",
 #       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram.crai", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
@@ -97,7 +97,7 @@ rule collect_mutations:
     output:
         #"mutations/all_ins.pkl",
         #"mutations/all_dels.pkl",
-        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl"
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl.gz"
     shell:
         "python /home/amovas/data/genome-evo-proj/src/snakemake-run/my_collect_mutations.py {input}"
 
