@@ -1,5 +1,5 @@
 
-# change the name of previous metadta to include version before starting
+# change the name of previous metadata to include version before starting
 
 library(dplyr)
 library(stringr)
@@ -14,7 +14,7 @@ ngs_sample_list_new[is.na(ngs_sample_list_new)] <- "NA"
 
 
 
-# filter for relvant samples
+# filter for relevant samples
 
 ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = "VPIII_p520-570"),]
 
