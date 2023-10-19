@@ -13,7 +13,7 @@ quals = quals[,-1]
 
 
 # read in the metadata
-meta = read.table(file = "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
+meta = read.table(file = "/home/amovas/data/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
 meta = meta[meta$included == TRUE,]
 
 
