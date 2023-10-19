@@ -4,6 +4,8 @@ data/*
 !data/reference
 
 !data/metadata
+!data/incoming-raw-data
+
 
 !data/processed-data/
 data/processed-data/*
