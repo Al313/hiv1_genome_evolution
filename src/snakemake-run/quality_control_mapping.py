@@ -35,13 +35,13 @@ def good_alignment(samfile):
     cover = average > 5000
     cover_all = all([i>= 1000 for i in [average_a,average_b,average_c,average_d,average_e]])
     
-    mapped = samfile.mapped/float((samfile.mapped+samfile.unmapped))
+    mapped = 0 # for bam you can do this: samfile.mapped/float((samfile.mapped+samfile.unmapped))
     mapping = mapped > 0.99
 
     mapquality = 0
     for read in samfile.fetch():
         mapquality += read.mapping_quality
-    mapquality = mapquality/float(samfile.mapped)
+    mapquality = 0 # for bam you can do this mapquality/float(samfile.mapped)
     quality = mapquality > 55
 
     plt.title('{:.0f},{:.3f},{:.2f},{}'.format(average,mapped, mapquality, cover and mapping and quality))

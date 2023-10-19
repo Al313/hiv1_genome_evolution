@@ -195,7 +195,6 @@ def find_indels(samfile,coverage,contig_name,muts=None,n=None,start=0,stop=None,
 
 
 if __name__ == '__main__':
-    print("hi")
     alignment_file = sys.argv[1] #"/home/ali313/Desktop/ltee_raw/test-snakemake/HIV_LTE_mappings/III/13/13MT2EXPIIIVP190seq10102019_S1_L001_aligned.bam"      # sys.argv[1]
     ancestor_file = sys.argv[2] #"/home/ali313/Desktop/ltee_raw/test-snakemake/HIV_LTE_mappings/ancestor/ancestor_consensus.fasta"        #sys.argv[2]
     contig_name = sys.argv[3] #"NL43seq210314" #"NL43_ann_wk0virusPassRef_SEQregion"   #"K03455.1"    #sys.argv[3]
@@ -233,11 +232,8 @@ if __name__ == '__main__':
         all_coverage = np.array(samfile.count_coverage(contig_name, start=start,
                                                        stop=stop,quality_threshold=35))
 
-        print("works fine 1")
         dels = find_large_dels(samfile)
-        print("works fine 2")
         muts = find_indels(samfile,np.sum(all_coverage,0),contig_name,dels)
-        print("works fine 3")
         muts+=find_point_muts(all_coverage, ancestor,min_coverage=1000)
         for mut in muts:
             for i in mut:

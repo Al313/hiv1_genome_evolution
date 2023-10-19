@@ -74,11 +74,11 @@ if __name__ == "__main__":
         
     variants = pd.DataFrame(flatten(variants),columns=['start','end','ref','alt','mut_type','fraction','reads','coverage','line','passage'])
     variants.sort_values(by='fraction',ascending=False,inplace=True)
-    variants.to_pickle('/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl',protocol=2)
+    variants.to_pickle('/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl',protocol=2)
 
     # convert the pkl object to csv for further downstream analyses
-    with open("/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl", "rb") as f:
+    with open("/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl", "rb") as f:
         object = pkl.load(f)
         
     df = pd.DataFrame(object)
-    df.to_csv("/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.csv", index=False)
+    df.to_csv("/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.csv", index=False)
