@@ -9,7 +9,7 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 
 #EXP = ["iv","iv", "iii", "iii"]
 #LINES = ["20","20", "15", "15"]
-#SAMPLES = ["20MT2EXPIVVP180seq09052019_S24_L001","20MT2EXPIVVP410seq08122022_S33_L001", "15MT4EXPIIIVP440seq20052022_S16_L001", "15MT4EXPIIIVP510seq09092022_S9_L001"]
+#SAMPLES = ["20MT2EXPIVVP180seq09052019_S24_L001","20MT2EXPIVVP410combinedseq08122022_S33_L001", "15MT4EXPIIIVP440seq20052022_S16_L001", "15MT4EXPIIIVP510seq09092022_S9_L001"]
 
 
 
@@ -17,9 +17,9 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 
 rule all:
     input:
-#       "/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv.gz",
-#       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai", zip,experiment=EXP, line=LINES, sample=SAMPLES)
+       "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl.gz",
+#       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/all_quals.tsv.gz",
+#       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
 
@@ -29,31 +29,20 @@ rule bwa_map:
         "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/{sample}_R1_001.fastq.gz",
         "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/{sample}_R2_001.fastq.gz"
     output:
-        temp("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}.bam.temp")
-    log:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/logs/{experiment}_{line}_{sample}.log"
-    threads: 1
+        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram"
     shell:
-        "(bwa mem -t {threads} {input} | "
-        "samtools view -Sb - > {output}) 2> {log}"
-
-
-
-rule samtools_sort:
-    input:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}.bam.temp"
-    output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam"
-    shell:
-        "samtools sort {input} > {output}"
+        "bwa mem -t {threads} {input} | "
+        "samtools sort -O bam -l 0 -T /tmp - | "
+        "samtools view -T /home/amovas/data/genome-evo-proj/data/reference/plasmid/hiv_plasmid_ref_genome.fasta -C -o /home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{wildcards.experiment}/{wildcards.line}/{wildcards.sample}_sorted.cram -"
+        
 
 
 
 rule samtools_index:
     input:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram"
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram.crai"
     shell:
         "samtools index {input}"
 
@@ -62,11 +51,11 @@ rule samtools_index:
 
 rule quality_assessment:
     input:
-        bam="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam",
-        bai="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai"
+        bam="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram",
+        bai="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram.crai"
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/coverage_plots/{experiment}-{line}-{sample}.png",
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/{experiment}/{line}/{sample}.quals"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/coverage_plots/{experiment}-{line}-{sample}.png",
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/{experiment}/{line}/{sample}.quals"
     script:
         "/home/amovas/data/genome-evo-proj/src/snakemake-run/quality_control_mapping.py"
 
@@ -74,10 +63,10 @@ rule collect_quality_assessment:
     input:
         #expand("quality_control/{exp}/{line}/{sample}.quals",
         #       zip, exp=directories,line=lines, sample=IDS),
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/{experiment}/{line}/{sample}.quals",
+        expand("/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/{experiment}/{line}/{sample}.quals",
                 zip, experiment=EXP, line=LINES, sample=SAMPLES)
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv.gz"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/all_quals.tsv.gz"
     shell:
         "cat {input} | gzip >> {output}"
 
@@ -86,12 +75,12 @@ rule collect_quality_assessment:
 
 rule bam_to_mutations:
     input:
-        bam="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam",
-        bai="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/3-p/{experiment}/{line}/{sample}_aligned.bam.bai"
+        cram="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram",
+        crai="/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram.crai"
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/mutations/3-p/{experiment}/{line}/{sample}.csv"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/mutations/2-p/{experiment}/{line}/{sample}.csv"
     shell:
-        "python /home/amovas/data/genome-evo-proj/src/snakemake-run/my_call_mutations.py {input.bam} /home/amovas/data/genome-evo-proj/data/reference/plasmid/hiv_plasmid_ref_genome.fasta AF324493.2 > {output}"
+        "python /home/amovas/data/genome-evo-proj/src/snakemake-run/my_call_mutations.py {input.cram} /home/amovas/data/genome-evo-proj/data/reference/plasmid/hiv_plasmid_ref_genome.fasta AF324493.2 > {output}"
 
 # AF324493.2
 # NL43seq210314
@@ -102,12 +91,12 @@ rule bam_to_mutations:
 
 rule collect_mutations:
     input:
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/mutations/3-p/{experiment}/{line}/{sample}.csv",
+        expand("/home/amovas/data/genome-evo-proj/data/processed-data/mutations/2-p/{experiment}/{line}/{sample}.csv",
                 zip, experiment=EXP, line=LINES, sample=SAMPLES)
     output:
         #"mutations/all_ins.pkl",
         #"mutations/all_dels.pkl",
-        "/home/amovas/data/genome-evo-proj/results/tables/3-p/all_variants.pkl"
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl.gz"
     shell:
         "python /home/amovas/data/genome-evo-proj/src/snakemake-run/my_collect_mutations.py {input}"
 
