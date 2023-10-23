@@ -17,7 +17,7 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 
 rule all:
     input:
-       "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl.gz",
+       "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv",
 #       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/2-p/all_quals.tsv.gz",
 #       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
@@ -96,7 +96,45 @@ rule collect_mutations:
     output:
         #"mutations/all_ins.pkl",
         #"mutations/all_dels.pkl",
-        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.pkl.gz"
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.csv.gz"
     shell:
         "python /home/amovas/data/genome-evo-proj/src/snakemake-run/my_collect_mutations.py {input}"
 
+
+rule varaint_to_vcf:
+    input:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.csv.gz"
+    output:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf"
+    script:
+        "/home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/variant_to_vcf.R"
+
+
+
+rule annotate_vcf:
+    input:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf"
+    output:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf.gz"
+    shell:
+        "cd /home/amovas/data/genome-evo-proj/data/reference/annotations && snpEff -v hiv_plasmid_ref_genome /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf > /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf \
+	&& gzip /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf"
+
+
+rule prep_feature_list:
+    input:
+        "/home/amovas/data/genome-evo-proj/data/reference/annotations/features/sequence-features.tsv"
+    output:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/cds_feature_list.tsv"
+    script:
+        "/home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/prep_feature_list.R"
+
+
+rule extract_annotation:
+    input:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/cds_feature_list.tsv",
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf.gz"
+    output:
+        "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv"
+    shell:
+        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/aa_change.R && Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/add_mut_context.R"
