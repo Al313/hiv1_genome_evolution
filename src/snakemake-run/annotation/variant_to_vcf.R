@@ -18,7 +18,7 @@ variants <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/
 # remove the large deletion variations
 variants<-variants[variants$mut_type!= "LD",]
 # remove variants with AF below 0.01
-variants <- variants[variants$fraction > 0.01,]
+# variants <- variants[variants$fraction > 0.01,]
 
 # 1st field of VCF in CHROM
 variants$CHROM <- "AF324493.2"

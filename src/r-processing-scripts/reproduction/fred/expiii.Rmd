@@ -76,7 +76,7 @@ library(magrittr)
 ```{r read-in the data}
 
 # read in the data
-variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/3-p/all_annotated_variants.tsv", 
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 # set correct data types
