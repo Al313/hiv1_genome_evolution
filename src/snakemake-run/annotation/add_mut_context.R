@@ -40,4 +40,4 @@ variants_ann$mut_5_context <- apply(variants_ann,1,get_mut_5_context, sequence)
 
 # save results
 write.table(variants_ann, 
-    file = "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv", sep = "\t", row.names = F, quote = F)
+    file = gzfile("/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz"), sep = "\t", row.names = F, quote = F)

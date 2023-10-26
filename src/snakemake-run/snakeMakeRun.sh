@@ -21,7 +21,7 @@ job_file=${job_dir}/snakemake.job
 echo "#!/bin/bash
 #SBATCH --cpus-per-task=1
 #SBATCH --time=24:00:00
-#SBATCH --mem=1G
+#SBATCH --mem=5G
 #SBATCH --output=${out_dir}/snakemake.out
 
 source activate ha_proj
@@ -29,7 +29,7 @@ source activate ha_proj
 snakemake \
         -s mysnakefile.smk \
         --jobs 432 \
-        --default-resource mem_mb=5000 \
+        --default-resource mem_mb=30000 \
         --cluster '
         sbatch \
                 --cpus-per-task {threads} \
