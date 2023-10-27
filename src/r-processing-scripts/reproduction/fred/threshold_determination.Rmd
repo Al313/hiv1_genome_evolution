@@ -7,6 +7,7 @@ author:
     "Ali Movasati"  
 output:  
     html_document:
+        #css: style.css
         toc: true
         toc_depth: 3
         toc_float: true
@@ -54,12 +55,11 @@ m <- list(
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library(ggplot2)
-library(reshape2)
-library(plotly)
-library(htmltools)
-library(magrittr)
-library(dplyr)
+library("ggplot2")
+library("reshape2")
+library("plotly")
+library("magrittr")
+library("dplyr")
 
 ```
 
@@ -69,7 +69,7 @@ library(dplyr)
 ```{r read-in the data}
 
 # read in the data
-variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/3-p/all_annotated_variants.tsv", 
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 # set correct data types
@@ -107,6 +107,7 @@ variants_ann <- variants_ann %>%
                             mutate(exp_line = case_when(exp_line==13 ~ "III_MT2_1", exp_line==14 ~ "III_MT2_2", exp_line==15 ~ "III_MT4_1", exp_line==16 ~ "III_MT4_2",
                             exp_line==17 ~ "IV_MT2_1", exp_line==18 ~ "IV_MT2_2", exp_line==19 ~ "IV_MT2_3", exp_line==20 ~ "IV_MT2_4"))
 
+variants <- variants_ann %>% filter(!duplicated(variant_id))
 
 
 ```
@@ -123,7 +124,7 @@ Majority mutations: AF >= 0.5 & AF < 0.99
 Fixated mutations: AF >= 0.99
 
 
-I will plot the mutation accumultion with different cut-off sets and provide some basic statistics for EXPIII and EXPIV data separately.
+I will plot the mutation accumulation with different cut-off sets and provide some basic statistics for EXPIII and EXPIV data separately.
 
 
 ## Allele Frequency distribution
@@ -134,7 +135,7 @@ Let's first take a look at the allele frequency distribution of all mutations re
 ```{r, results=TRUE}
 
 
-gg_fig <- ggplot(variants_ann, aes(x=allele_freq)) + 
+gg_fig <- ggplot(variants, aes(x=allele_freq)) + 
     geom_histogram(aes(y=..count..),      # Histogram with density instead of count on y-axis
                    binwidth=.01,
                    colour="black", fill="white") +
@@ -161,7 +162,7 @@ ply_fig
 
 
 
-The distribution of AF seems to be following a bi-modal distribution in both experiemnts.
+The distribution of AF seems to be following a bi-modal distribution in both experiments.
 
 
 
@@ -183,18 +184,18 @@ max_threshold <- 0.50
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -236,18 +237,18 @@ max_threshold <- 0.50
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -286,18 +287,18 @@ max_threshold <- 0.50
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -341,12 +342,12 @@ for (i in 1:3){
   min_threshold <- min_thresholds[i]
   max_threshold <- 0.50
 
-  counts <- variants_ann %>%
+  counts <- variants %>%
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
             group_by(exp, exp_line, passage) %>%
             count() %>%
             mutate(definition = def) %>%
-            rename("mut_count" = "n") %>%
+            dplyr::rename(mut_count = n) %>%
             mutate_at(c(1,2,5), as.factor) %>%
             mutate_at(3:4, as.numeric)
 
@@ -377,7 +378,7 @@ ply_fig
 ```
 
 
-#### Summary Statisitcs
+#### Summary Statistics
 
 Below you can see summary statistics of range of mutation count difference between different definitions for each experimental line. 
 ```{r, results = TRUE}
@@ -431,18 +432,18 @@ max_threshold <- 0.9
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -480,18 +481,18 @@ max_threshold <- 0.95
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -529,18 +530,18 @@ max_threshold <- 0.99
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -585,12 +586,12 @@ for (i in 1:3){
   max_threshold <- max_thresholds[i]
   
 
-  counts <- variants_ann %>%
+  counts <- variants %>%
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
             group_by(exp, exp_line, passage) %>%
             count() %>%
             mutate(definition = def) %>%
-            rename("mut_count" = "n") %>%
+            dplyr::rename(mut_count = n) %>%
             mutate_at(c(1,2,5), as.factor) %>%
             mutate_at(3:4, as.numeric)
 
@@ -621,7 +622,7 @@ ply_fig
 ```
 
 
-#### Summary Statisitcs
+#### Summary Statistics
 
 Below you can see summary statistics of range of mutation count difference between different definitions for each experimental line. 
 ```{r, results = TRUE}
@@ -672,18 +673,18 @@ min_threshold <- 0.9
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -721,18 +722,18 @@ min_threshold <- 0.95
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -770,18 +771,18 @@ min_threshold <- 0.99
 
 ```{r, results=TRUE}
 # prepare data for visualization
-counts <- variants_ann %>%
+counts <- variants %>%
               filter(allele_freq >= min_threshold) %>%
               group_by(exp, exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(c(1,2), as.factor) %>%
               mutate_at(3:4, as.numeric)
 
 
 
 # visualize using plotly
-gg_fig <- counts %>% ggplot(aes(x = passage, y = n, color = exp_line)) +
+gg_fig <- counts %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
                       geom_line() +
                       facet_wrap(~exp, scale = "free", ncol = 1) +
                       labs(title = paste0(category, " Mutation Accumulation"), x = "Passage", y = "Counts") +
@@ -826,12 +827,12 @@ for (i in 1:3){
   min_threshold <- min_thresholds[i]
   
 
-  counts <- variants_ann %>%
+  counts <- variants %>%
             filter(allele_freq >= min_threshold) %>%
             group_by(exp, exp_line, passage) %>%
             count() %>%
             mutate(definition = def) %>%
-            rename("mut_count" = "n") %>%
+            dplyr::rename(mut_count = n) %>%
             mutate_at(c(1,2,5), as.factor) %>%
             mutate_at(3:4, as.numeric)
 
@@ -863,7 +864,7 @@ ply_fig
 ```
 
 
-#### Summary Statisitcs
+#### Summary Statistics
 
 Below you can see summary statistics of range of mutation count difference between different definitions for each experimental line. 
 

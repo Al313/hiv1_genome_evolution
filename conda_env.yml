@@ -35,6 +35,7 @@ dependencies:
   - VariantAnnotation #BiocManager::install("VariantAnnotation")
   - radiator #devtools::install_github("thierrygosselin/radiator")
 #  - pysam #install by pip
+  - r-ggvenn
 
 
 

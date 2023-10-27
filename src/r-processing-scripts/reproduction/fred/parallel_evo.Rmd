@@ -1,0 +1,183 @@
+---
+title:  
+    "Parallel Evolution Analysis"
+date: 
+    "Oct 27th, 2023"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+---
+
+
+
+
+```{r setting global chunk parameters, include=FALSE}
+
+# options for code chunk and output inclusion 
+knitr::opts_chunk$set(
+  message = FALSE, echo = TRUE, warning=FALSE, results = "hide"
+)
+
+# options for figures
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 8, fig.align = "center"
+)
+
+# options(scipen=999)
+
+# margin of plotly
+m <- list(
+  l = 150,
+  r = 150,
+  b = 100,
+  t = 100,
+  pad = 4
+)
+
+
+```
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("plotly")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("ggvenn")
+
+```
+
+
+# Introduction
+
+In this document I will try to provide an overview of parallel evolution among different lines of each LTEE experiment. I'll try to dissect the extent of parallelism in HIV-1 evolution and depict a detailed
+picture of its characteristics.
+
+
+
+
+```{r read-in the data}
+
+# read in the data
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+# set correct data types
+variants_ann$exp_line <- as.integer(variants_ann$exp_line)
+
+
+# set host cell line info
+variants_ann$host_line <- ifelse(variants_ann$exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")
+
+
+# account for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+# add a field containing pos, ref, and alt info of muts
+variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
+
+## only keep the EXPIII data
+
+variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_passage <- 560
+variants_ann_expiii <- variants_ann_expiii %>%
+                              mutate(exp_line = case_when(exp_line==13 ~ "MT2_1", exp_line==14 ~ "MT2_2", exp_line==15 ~ "MT4_1", exp_line==16 ~ "MT4_2"))
+
+variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
+
+```
+
+
+
+```{r}
+
+mut_category <- "Majority"
+threshold <- 0.5
+
+variants_expiii %<>% 
+                        filter(allele_freq >= threshold)
+
+
+head(variants_expiii)
+
+table(duplicated(variants_expiii$variant_id))
+
+
+
+variants_expiii %>%
+                        filter(exp_line == "MT4_2") %>%
+                        select(mut_info) %>%
+                        distinct() %>%
+                        nrow()
+
+
+par_whole <- variants_expiii %>%
+                        filter(allele_freq >= threshold) %>%
+                        group_by(exp_line) %>%
+                        select(mut_info) %>%
+                        distinct()
+
+table(as.numeric(table(par_whole$mut_info)))
+
+par <- variants_expiii %>%
+                        filter(allele_freq >= threshold & passage == end_passage) %>%
+                        group_by(exp_line) %>%
+                        select(mut_info) %>%
+                        distinct()
+
+
+head(par)
+table(as.numeric(table(par$mut_info)))
+241+177+166+157
+442+2*86+3*29+4*10
+
+muts <- list(par$mut_info)
+names(muts) <- par$exp_line
+head(muts)
+
+muts <- lapply(split(muts, names(muts)), unname)
+
+
+
+ggvenn(muts)
+```
+
+
+
+```{r creating demo data}
+
+
+set.seed(20190708)
+genes <- paste("gene",1:1000,sep="")
+x <- list(
+  A = sample(genes,300), 
+  B = sample(genes,525), 
+  C = sample(genes,440),
+  D = sample(genes,350)
+  )
+x
+
+```
+
+
+
+

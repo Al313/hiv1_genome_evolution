@@ -7,6 +7,7 @@ author:
     "Ali Movasati"  
 output:  
     html_document:
+        #css: style.css
         toc: true
         toc_depth: 3
         toc_float: true
@@ -47,7 +48,7 @@ m <- list(
 
 # Introduction
 
-In this document I will analyse the data for **EXPIV** of HIV-1 LTEE dataset. The data of this experiment has not been previously analyzed. This document will only 
+In this document I will analyze the data for **EXPIV** of HIV-1 LTEE dataset. The data of this experiment has not been previously analyzed. This document will only 
 cover the basic overview of the dataset, and in a new document I will compare the results from EXPIV to that of expIII.
 
 EXPIV dataset includes genomic sequencing data of HIV-1 NL4-3 passages up to 510 (lines 17-20). There are four independent lines that have been passaged in MT2 T-cell lines.
@@ -59,14 +60,14 @@ In this experiment each viral transfer was done through a titer bottlenecking of
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library(ggplot2)
-library(plotly)
-library(DT)
-library(dplyr)
-library(tidyr)
-library(Biostrings)
-library(stringr)
-library(magrittr)
+library("ggplot2")
+library("plotly")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
 
 ```
 
@@ -75,7 +76,7 @@ library(magrittr)
 ```{r read-in the data}
 
 # read in the data
-variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/3-p/all_annotated_variants.tsv", 
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 # set correct data types
@@ -106,6 +107,7 @@ end_passage <- 510
 variants_ann_expiv <- variants_ann_expiv %>%
                               mutate(exp_line = case_when(exp_line==17 ~ "MT2_1", exp_line==18 ~ "MT2_2", exp_line==19 ~ "MT2_3", exp_line==20 ~ "MT2_4"))
 
+variants_expiv <- variants_ann_expiv %>% filter(!duplicated(variant_id))
 
 ```
 
@@ -126,36 +128,36 @@ min_threshold <- 0.05
 max_threshold <- 0.50
 
 # get numbers for in-text reporting
-variants_ann_expiv_subset <- variants_ann_expiv %>%
+variants_expiv_subset <- variants_expiv %>%
                                 filter(allele_freq >= min_threshold & allele_freq <= max_threshold)
 
-a <- nrow(variants_ann_expiv_subset)
-b <- length(unique(variants_ann_expiv_subset$mut_info))
+a <- nrow(variants_expiv_subset)
+b <- length(unique(variants_expiv_subset$mut_info))
 
 
 ```
 
 We observe a total of `r a` `r category` mutations across the four evolution lines of EXP III (`r b` unique mutations).
 
-> `r category` mutations are the mutations that became reliabely detectable in the population (a.k.a, allele frequency above `r threshold`)!
+> `r category` mutations are the mutations that became reliably detectable in the population (a.k.a, allele frequency above `r threshold`)!
 
 
 
 ```{r timewise min mut accumulation, results=TRUE}
 
 # prepare data for visualization
-counts <- variants_ann_expiv %>%
+counts <- variants_expiv %>%
               filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
               group_by(exp_line, passage) %>%
               count() %>%
-#              rename("mut_count" = "n") %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(1, as.factor) %>%
               mutate_at(2:3, as.numeric)
 
 # visualize using plotly
 
 
-fig <- plot_ly(as.data.frame(counts), x = ~passage, y = ~n, 
+fig <- plot_ly(as.data.frame(counts), x = ~passage, y = ~mut_count, 
             type = 'scatter', mode = "lines", color = ~exp_line, linetype= ~host_line)
 fig <- fig %>% layout(title = paste0(category, " Mutations Accumulation"),
                       xaxis = list(title = 'Passage'),
@@ -172,16 +174,16 @@ The mutations spectra of all 4 lines look similar for minority mutations!
 
 ```{r min mutation spectrum, results=TRUE}
 
-# prepare data for visualizzation
-counts <- variants_ann_expiv %>%
+# prepare data for visualization
+counts <- variants_expiv %>%
             filter(allele_freq >= threshold) %>%
             filter(mut_type=="M") %>%
             mutate(mut_subtype=paste0(ref_allele, ">", alt_allele)) %>%
             group_by(exp_line, passage, mut_subtype) %>%
             count() %>%
-#            rename(count=n) %>%
+            dplyr::rename(count=n) %>%
             group_by(exp_line,passage) %>%
-            mutate(pct =  100 *n/sum(n)) %>%
+            mutate(pct =  100 *count/sum(count)) %>%
             ungroup() %>%
             mutate_at(2:3, as.factor)
 
@@ -190,7 +192,7 @@ counts <- variants_ann_expiv %>%
 fig <- as.data.frame(counts) %>% ggplot(aes(x=passage, y = pct, fill = mut_subtype)) +
                                   geom_bar(position="stack", stat="identity") + 
                                   facet_wrap(~exp_line) +
-                                  labs(x="Passage", y= "Percentage", fill = "Base Subsitution")+
+                                  labs(x="Passage", y= "Percentage", fill = "Base Substitution")+
                                   theme_bw() +
                                   theme(axis.title = element_text(size = 20),
                                   axis.text.x = element_blank(),
@@ -228,8 +230,8 @@ category <- "Majority"
 threshold <- 0.5
 
 # get numbers for in-text reporting
-a <- nrow(variants_ann_expiv[variants_ann_expiv$passage == end_passage,])
-b <- length(unique(variants_ann_expiv$mut_info[variants_ann_expiv$passage == end_passage]))
+a <- nrow(variants_expiv[variants_expiv$passage == end_passage,])
+b <- length(unique(variants_expiv$mut_info[variants_expiv$passage == end_passage]))
 
 ```
 
@@ -239,20 +241,20 @@ We observe a total of `r a` `r category` mutations across the four evolution lin
 
 
 
-```{r timewise maj mut accumulation, results=TRUE}
+```{r time-wise maj mut accumulation, results=TRUE}
 
 
 # prepare data for visualization
-counts <- variants_ann_expiv %>%
+counts <- variants_expiv %>%
               filter(allele_freq >= threshold) %>%
               group_by(exp_line, passage) %>%
               count() %>%
-#              rename(mut_count = n) %>%
+              dplyr::rename(mut_count = n) %>%
               mutate_at(1, as.factor) %>%
               mutate_at(2:3, as.numeric)
 
 # visualize using plotly
-fig <- plot_ly(as.data.frame(counts), x = ~passage, y = ~n, 
+fig <- plot_ly(as.data.frame(counts), x = ~passage, y = ~mut_count, 
             type = 'scatter', mode = "lines", color = ~exp_line)
 fig <- fig %>% layout(title = paste0(category, " Mutations Accumulation") ,
                       xaxis = list(title = 'Passage'),
@@ -267,7 +269,7 @@ fig
 ___
 ___
 
-We can also plot the number of new `r category` mutations that appear or disppear compared to the immediate previous passage.
+We can also plot the number of new `r category` mutations that appear or disappear compared to the immediate previous passage.
 
 ```{r prepare difference dataframe}
 
@@ -281,9 +283,9 @@ for (i in 1:50){
         prev_in <- passages[i]
         pres_in <- passages[i+1]
 
-        prev <- variants_ann_expiv$mut_info[variants_ann_expiv$exp_line == exp_line & variants_ann_expiv$passage == prev_in & variants_ann_expiv$allele_freq >= 0.5]
+        prev <- variants_expiv$mut_info[variants_expiv$exp_line == exp_line & variants_expiv$passage == prev_in & variants_expiv$allele_freq >= 0.5]
 
-        pres <- variants_ann_expiv$mut_info[variants_ann_expiv$exp_line == exp_line & variants_ann_expiv$passage == pres_in & variants_ann_expiv$allele_freq >= 0.5]
+        pres <- variants_expiv$mut_info[variants_expiv$exp_line == exp_line & variants_expiv$passage == pres_in & variants_expiv$allele_freq >= 0.5]
 
         addition <- length(setdiff(pres, prev))
         removal <- length(setdiff(prev,pres))
@@ -350,7 +352,7 @@ ___
 
 
 If we plot the accumulation of `r category` mutations based on the effect type, we can visualize
-the trends for S (synonymous), N (non-synonomous), and U (untranslated) mutations.
+the trends for S (synonymous), N (non-synonymous), and U (untranslated) mutations.
 
 ```{r mut effect plot, results=TRUE}
 
@@ -382,7 +384,7 @@ fig
 
 Alternatively, we can plot the same accumulation for different effect types but corrected for the 
 genomic length that each mutation can occur in. Unlike EXPIII, in EXPIV HIV-1 genomes we see that density of
-synanymous and non-synanymous Majority mutations are higher than mutations in untranslated regions, especially towards the end of experiment.
+synonymous and non-synonymous Majority mutations are higher than mutations in untranslated regions, especially towards the end of experiment.
 
 
 
@@ -625,7 +627,7 @@ minority mutations of all 4 lines of EXPIV.
 
 
 # add subtype info
-variants_ann_expiv_sub <-  variants_ann_expiv %>% mutate(mut_type_sub = ifelse(mut_type == "M", paste0(ref_allele,">",alt_allele), mut_type))
+variants_expiv_sub <-  variants_expiv %>% mutate(mut_type_sub = ifelse(mut_type == "M", paste0(ref_allele,">",alt_allele), mut_type))
 
 
 # minority
@@ -635,20 +637,18 @@ threshold <- 0.05
 
 
 # prepare data for visualization (unique mutations)
-mut_profile_min_unique <- variants_ann_expiv_sub %>% filter(allele_freq >= threshold) %>%
+mut_profile_min_unique <- variants_expiv_sub %>% filter(allele_freq >= threshold) %>%
                             select(mut_info, mut_type_sub) %>%
                             distinct() %>%
                             group_by(mut_type_sub) %>%
                             summarise(count = n())
-#                            rename(mut_sub_type = mut_type_sub)
 
 
 
 # prepare data for visualization (all mutations)
-mut_profile_min_all <- variants_ann_expiv_sub %>% filter(allele_freq >= threshold) %>%
+mut_profile_min_all <- variants_expiv_sub %>% filter(allele_freq >= threshold) %>%
                             group_by(mut_type_sub) %>%
                             summarise(count = n())
-#                            rename(mut_sub_type = mut_type_sub)
 
 
 
@@ -669,7 +669,7 @@ subset_name <- "Majority"
 threshold <- 0.5
 
 # prepare data for visualization
-mut_profile_maj_unique <- variants_ann_expiv_sub %>% filter(allele_freq >= threshold) %>%
+mut_profile_maj_unique <- variants_expiv_sub %>% filter(allele_freq >= threshold) %>%
                             select(mut_info, mut_type_sub) %>%
                             distinct() %>%
                             group_by(mut_type_sub) %>%
@@ -678,7 +678,7 @@ mut_profile_maj_unique <- variants_ann_expiv_sub %>% filter(allele_freq >= thres
 
 
 # prepare data for visualization
-mut_profile_maj_all <- variants_ann_expiv_sub %>% filter(allele_freq >= threshold) %>%
+mut_profile_maj_all <- variants_expiv_sub %>% filter(allele_freq >= threshold) %>%
                             group_by(mut_type_sub) %>%
                             summarise(count = n())
 #                            rename(mut_sub_type = mut_type_sub)
