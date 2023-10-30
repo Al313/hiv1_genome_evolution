@@ -52,6 +52,7 @@ m <- list(
 
 # loading libraries
 library("plotly")
+library("ggplot2")
 library("DT")
 library("dplyr")
 library("tidyr")
@@ -59,6 +60,9 @@ library("Biostrings")
 library("stringr")
 library("magrittr")
 library("ggvenn")
+library("VennDiagram")
+library("ggVennDiagram")
+
 
 ```
 
@@ -92,92 +96,260 @@ variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] 
 variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
+
+
+variants_ann$exp_line[variants_ann$exp_line == 18 & variants_ann$passage > 350] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
+
+
 # add a field containing pos, ref, and alt info of muts
 variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
 
-## only keep the EXPIII data
+## EXPIII data
 
 variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
-end_passage <- 560
 variants_ann_expiii <- variants_ann_expiii %>%
-                              mutate(exp_line = case_when(exp_line==13 ~ "MT2_1", exp_line==14 ~ "MT2_2", exp_line==15 ~ "MT4_1", exp_line==16 ~ "MT4_2"))
+                            mutate(exp_line = case_when(exp_line==13 ~ "MT2_1", exp_line==14 ~ "MT2_2", exp_line==15 ~ "MT4_1", exp_line==16 ~ "MT4_2"))
 
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
+
+
+## EXPIV data
+
+variants_ann_expiv <- variants_ann[variants_ann$exp_line %in% 17:20,]
+variants_ann_expiv <- variants_ann_expiv %>%
+                            mutate(exp_line = case_when(exp_line==17 ~ "MT2_1", exp_line==18 ~ "MT2_2", exp_line==19 ~ "MT2_3", exp_line==20 ~ "MT2_4"))
+
+variants_expiv <- variants_ann_expiv %>% filter(!duplicated(variant_id))
+
+
 ```
 
+# Overview
 
+## EXPIII
 
 ```{r}
 
-mut_category <- "Majority"
+exp <- "EXPIII"
+category <- "Majority"
 threshold <- 0.5
+end_passage <- 560
 
+# keep majority mutations
 variants_expiii %<>% 
                         filter(allele_freq >= threshold)
 
 
-head(variants_expiii)
-
-table(duplicated(variants_expiii$variant_id))
-
-
-
-variants_expiii %>%
-                        filter(exp_line == "MT4_2") %>%
-                        select(mut_info) %>%
-                        distinct() %>%
-                        nrow()
-
-
-par_whole <- variants_expiii %>%
-                        filter(allele_freq >= threshold) %>%
-                        group_by(exp_line) %>%
-                        select(mut_info) %>%
-                        distinct()
-
-table(as.numeric(table(par_whole$mut_info)))
-
-par <- variants_expiii %>%
-                        filter(allele_freq >= threshold & passage == end_passage) %>%
-                        group_by(exp_line) %>%
-                        select(mut_info) %>%
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- variants_expiii %>%
+                        select(c(exp_line,mut_info)) %>%
                         distinct()
 
 
-head(par)
-table(as.numeric(table(par$mut_info)))
-241+177+166+157
-442+2*86+3*29+4*10
+#table(as.numeric(table(par_whole$mut_info)))
 
-muts <- list(par$mut_info)
-names(muts) <- par$exp_line
-head(muts)
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
 
+# convert named vector to list
 muts <- lapply(split(muts, names(muts)), unname)
 
 
+# visualization
+ggvenn(muts) +
+        labs(title = paste0(category, " Mutations throughout the ", exp))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
 
-ggvenn(muts)
+
+
+
+# uniqueness of majority mutations present at the end passage
+end_maj <- variants_expiii %>%
+                        filter(passage == end_passage) %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+
+#table(as.numeric(table(par$mut_info)))
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts) +
+        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+```
+
+
+```{r number of maj mutations}
+
+
+# get numbers for in-text reporting
+
+a <- nrow(variants_expiii[variants_expiii$passage == end_passage,])
+b <- length(unique(variants_expiii$mut_info[variants_expiii$passage == end_passage]))
+
+
+
+```
+
+We observe a total of `r a` `r category` mutations across the four evolution lines of EXP III (`r b` unique mutations) at passage `r end_passage`.
+
+
+## EXPIV
+
+```{r }
+exp <- "EXPIV"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 510
+
+# keep majority mutations
+variants_expiv %<>% 
+                        filter(allele_freq >= threshold)
+
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- variants_expiv %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+nrow(throughout_maj)
+#table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
+
+# convert named vector to list
+muts <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts) +
+        labs(title = paste0(category, " Mutations throughout the ", exp))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+
+# uniqueness of majority mutations present at the end passage
+end_maj <- variants_expiv %>%
+                        filter(passage == end_passage) %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+
+#table(as.numeric(table(par$mut_info)))
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts) +
+        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
 ```
 
 
 
-```{r creating demo data}
 
 
-set.seed(20190708)
-genes <- paste("gene",1:1000,sep="")
-x <- list(
-  A = sample(genes,300), 
-  B = sample(genes,525), 
-  C = sample(genes,440),
-  D = sample(genes,350)
-  )
-x
+## MT2 of EXPIII and EXPIV
+
+```{r , results = T}
+exp <- "EXPIII/IV"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 510
+
+
+
+variants_ann_all <- variants_ann %>%
+                            mutate(exp_line = case_when(exp_line==13 ~ "III_MT2_1", exp_line==14 ~ "III_MT2_2", exp_line==15 ~ "III_MT4_1", exp_line==16 ~ "III_MT4_2",
+                            exp_line==17 ~ "IV_MT2_1", exp_line==18 ~ "IV_MT2_2", exp_line==19 ~ "IV_MT2_3", exp_line==20 ~ "IV_MT2_4"))
+
+variants_all <- variants_ann_all %>% filter(allele_freq >= threshold & str_detect(exp_line, pattern = "MT2"))
+
+
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- variants_all %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+#table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
+
+# convert named vector to list
+muts <- lapply(split(muts, names(muts)), unname)
+# visualization
+ggVennDiagram(muts) +
+        labs(title = paste0(category, " Mutations throughout the ", exp))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+
+# uniqueness of majority mutations present at the end passage
+end_maj <- variants_all %>%
+                        filter(passage == end_passage) %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+
+#table(as.numeric(table(par$mut_info)))
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggVennDiagram(muts) +
+        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
 
 ```
-
-
-
-

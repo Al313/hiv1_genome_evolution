@@ -242,11 +242,15 @@ category <- "Majority"
 threshold <- 0.5
 
 # get numbers for in-text reporting
-a <- nrow(variants_expiii[variants_expiii$passage == end_passage,])
-b <- length(unique(variants_expiii$mut_info[variants_expiii$passage == end_passage]))
+
+variants_expiii_subset <- variants_expiii %>%
+                                filter(allele_freq >= threshold)
+
+a <- nrow(variants_expiii_subset[variants_expiii_subset$passage == end_passage,])
+b <- length(unique(variants_expiii_subset$mut_info[variants_expiii_subset$passage == end_passage]))
 
 # prepare the data for statistical test
-counts <- variants_expiii %>%
+counts <- variants_expiii_subset %>%
               filter(allele_freq >= threshold) %>%
               group_by(passage, host_line) %>%
               count()
