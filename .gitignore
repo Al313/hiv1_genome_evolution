@@ -15,6 +15,9 @@ data/processed-data/quality_control/*
 data/processed-data/quality_control/3-p/*
 !data/processed-data/quality_control/3-p/all_quals.tsv.gz
 
+!data/processed-data/quality_control/2-p/
+data/processed-data/quality_control/2-p/*
+!data/processed-data/quality_control/2-p/all_quals.tsv.gz
 
 src/snakemake-run/.snakemake/
 results/tables/3-p/all_variants.ann.vcf
