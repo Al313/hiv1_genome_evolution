@@ -109,6 +109,7 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
 variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
 
 ## EXPIII data
+threshold <- 0.5
 
 variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
 variants_ann_expiii <- variants_ann_expiii %>%
@@ -299,6 +300,94 @@ b <- length(unique(variants_expiii$mut_info[variants_expiii$passage == end_passa
 > We observe a total of `r a` `r category` mutations across the four evolution lines of `r exp` (`r b` unique mutations) at passage `r end_passage`.
 
 
+### Evolution of single mutations
+
+```{r define plotting function}
+
+plot_mut_af <- function(data, mutations){
+
+
+        # check whether the inputted data is from expiii or expiv
+
+        if (any(data$host_line == "MT4")){
+                exp <- "EXPIII"
+                end_passage <- 570
+        } else {exp <- "EXPIV"
+                end_passage <- 510}
+
+        final_df <- data.frame()
+        for (mut in mutations){
+                
+                df <- data %>% filter(data$mut_info == mut)
+                
+                for (exp_line in unique(df$exp_line)){
+                        for (psg in seq(0,end_passage,10)){
+                                if (nrow(df[df$exp_line == exp_line & df$passage == psg,]) == 0){
+                                addition <- df[1,]
+                                addition[5] <- 0
+                                addition[7] <- psg
+                                addition[8] <- exp_line
+                                df <- rbind(df, addition)
+                        }
+                }
+                }
+                df <- df[order(df$exp_line, df$passage),]
+                
+                final_df <- rbind(final_df, df)
+        }
+
+        plt <- ggplot(final_df, aes(x=passage, y=allele_freq, color = exp_line)) +
+        facet_wrap(~ mut_info, ncol = 2) +
+        geom_line() +
+        labs(title = exp) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5))
+        
+        ggplotly(plt)
+}
+
+```
+
+
+```{r plot af evolution for certain mutations in EXPIII, results = T}
+
+
+
+variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+variants_ann_expiii <- variants_ann_expiii %>%
+                        mutate(exp_line = case_when(exp_line==13 ~ "MT2_1", exp_line==14 ~ "MT2_2", exp_line==15 ~ "MT4_1", exp_line==16 ~ "MT4_2"))
+
+variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
+
+
+
+plot_mut_af(variants_expiii, c("6238_G_A", "9412_G_A", "9528_T_G"))
+
+
+
+```
+
+
+
+9412_G_A abruptly is removed from the population in line MT2_1. To see if possibly the rise of another mutation in the population
+might have caused this phenomena or not I looked at the allele frequency dynamics of majority mutations absent in passage 330 
+and present in 340 in line MT2_1.
+
+
+```{r additional, results = T}
+
+plot_mut_af(variants_expiii, c("5436_G_A", "8270_A_G", "9292_G_A", "9293_C_G"))
+
+```
+
+
+
+Another abnormal observation is the absence of 9528_T_G in line MT4_2 (line number 15) in only two passages 490 and 500. After 
+checking the mapping files I realized the reason of these mutations is not being detected is the low coverage towards the end of the virus genome.
+The coverage of the sequencing in these two samples fall between 900-1000 from position 9520. 
+
+> What should we do to address this issue?
+
 
 ## EXPIV
 
@@ -315,7 +404,7 @@ throughout_maj <- variants_expiv %>%
                         distinct()
 
 
-#table(as.numeric(table(par_whole$mut_info)))
+# table(as.numeric(table(par_whole$mut_info)))
 
 # create a named vector from the df
 muts <- throughout_maj$mut_info
@@ -461,7 +550,25 @@ b <- length(unique(variants_expiv$mut_info[variants_expiv$passage == end_passage
 
 
 
+### Evolution of single mutations
 
+
+```{r plot af evolution for certain mutations in EXPIV, results = T}
+
+
+
+variants_ann_expiv <- variants_ann[variants_ann$exp_line %in% 17:20,]
+variants_ann_expiv <- variants_ann_expiv %>%
+                        mutate(exp_line = case_when(exp_line==17 ~ "MT2_1", exp_line==18 ~ "MT2_2", exp_line==19 ~ "MT2_3", exp_line==20 ~ "MT2_4"))
+
+variants_expiv <- variants_ann_expiv %>% filter(!duplicated(variant_id))
+
+
+plot_mut_af(variants_expiv, c("7700_G_A", "8910_G_A", "9412_G_A"))
+
+
+
+```
 
 
 
