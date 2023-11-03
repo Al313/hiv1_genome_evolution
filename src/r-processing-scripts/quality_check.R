@@ -5,8 +5,11 @@ library(ggplot2)
 library(stringr)
 library(tidyr)
 
+# define own functions
+`%notin%` <- Negate(`%in%`)
+
 # read in quality table
-quals = read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/processed-data/quality_control/3-p/all_quals.tsv.gz", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
+quals = read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/processed-data/quality_control/2-p/all_quals.tsv.gz", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
 colnames(quals) = c("file","average","cover","average_a","average_b","average_c","average_d","average_e","cover_all","mapped", "mapquality")
 quals$full_sample_name = as.character(lapply(str_split(lapply(str_split(quals$file, pattern = "/"), "[[", 12), pattern = "_"), "[[", 1))
 quals = quals[,-1]
@@ -17,20 +20,19 @@ meta = read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/ge
 meta = meta[meta$included == TRUE,]
 
 
-
 # merge the two dataset
-quals_meta <- merge(quals,meta, by = "full_sample_name")
+quals_meta <- merge(quals, meta, by = "full_sample_name")
 
 
 # check merged worked fine
 nrow(quals_meta)
-quals[!(quals$full_sample_name %in% quals_meta$full_sample_name),]
+quals[quals$full_sample_name %notin% quals_meta$full_sample_name,]
 
 
 ##### plot
 
 # keep relevant fields
-quals <- quals_meta[,c("full_sample_name", "average_a", "average_b", "average_c", "average_d", "average_e", "virus_line_no", "cover_all")]
+quals <- quals_meta[,c("full_sample_name", "average_a", "average_b", "average_c", "average_d", "average_e", "virus_line_no", "transfer_no", "cover_all")]
 
 # reshape the dataset and prepare for plotting
 quals_gathered <- gather(quals, key = "amplicon", value = "average_depth", 2:6)
@@ -46,7 +48,7 @@ lapply(quals_gathered,class)
 # sort the dataset (optional)
 quals_gathered <- quals_gathered[order(quals_gathered$full_sample_name),]
 
-# logorithmize the depth value for better visualization
+# logarithmize the depth value for better visualization
 quals_gathered$average_depth <- log10(quals_gathered$average_depth)
 
 

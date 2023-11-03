@@ -374,19 +374,30 @@ might have caused this phenomena or not I looked at the allele frequency dynamic
 and present in 340 in line MT2_1.
 
 
-```{r additional, results = T}
+#### Sequencing coverage at the ends
 
-plot_mut_af(variants_expiii, c("5436_G_A", "8270_A_G", "9292_G_A", "9293_C_G"))
+
+As you can see the 9528_T_G mutation in line MT4_2 (15 in lab) is missing in 2 passages. It looked suspicious and to check it I looked at the coverage at the end of the viral genome in those two samples. Indeed the problem seems to 
+be that this mutation is missed due to low coverage. However, since the average coverage of the amplicon D is high enough these samples are not selected for repeats. To further check how this problem can affect our data I looked at
+other mutations that happen very close to the end of viral genome. Below you can see their AF dynamics. As you can see this phenomenon is more rampant and can affect different mutations at different passages.  
+
+To address this problem we can either lower the coverage threshold for the ends of the virus or repeat these samples (probably not practical?). Also to further detect the low coverage at the end of the virus genome I added a new range to 
+quality assessment in addition to the range of the 5 amplicons: 5_end from 454 to 789 and 3_end from 9076 to 9626 and reran the quality assessment.
+
+
+> What should we do to address this issue?
+
+
+```{r end mutation af dynamics,results = T}
+
+plot_mut_af(variants_expiii, c("484_T_C", "477_C_A", "9559_T_C", "9552_C_A"))
+
 
 ```
 
 
 
-Another abnormal observation is the absence of 9528_T_G in line MT4_2 (line number 15) in only two passages 490 and 500. After 
-checking the mapping files I realized the reason of these mutations is not being detected is the low coverage towards the end of the virus genome.
-The coverage of the sequencing in these two samples fall between 900-1000 from position 9520. 
 
-> What should we do to address this issue?
 
 
 ## EXPIV
