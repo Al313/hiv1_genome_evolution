@@ -27,13 +27,15 @@ def good_alignment(samfile):
 
 
     average = np.mean(coverage_full)
+    average_5 = np.mean(coverage_full[450:790])
     average_a = np.mean(coverage_full[450:2200])
     average_b = np.mean(coverage_full[3000:4000])
     average_c = np.mean(coverage_full[4800:5900])
     average_d = np.mean(coverage_full[6600:7400])
     average_e = np.mean(coverage_full[8400:9150])
+    average_3 = np.mean(coverage_full[9500:9700])
     cover = average > 5000
-    cover_all = all([i>= 1000 for i in [average_a,average_b,average_c,average_d,average_e]])
+    cover_all = all([i>= 1000 for i in [average_5,average_a,average_b,average_c,average_d,average_e,average_3]])
     
     mapped = 0 # for bam you can do this: samfile.mapped/float((samfile.mapped+samfile.unmapped))
     mapping = mapped > 0.99
@@ -46,7 +48,7 @@ def good_alignment(samfile):
 
     plt.title('{:.0f},{:.3f},{:.2f},{}'.format(average,mapped, mapquality, cover and mapping and quality))
     plt.savefig(snakemake.output[0])
-    return average,cover,average_a,average_b,average_c,average_d,average_e,cover_all,mapped, mapquality and mapping and quality
+    return average,cover,average_5,average_a,average_b,average_c,average_d,average_e,average_3,cover_all,mapped, mapquality and mapping and quality
 
 try:
     samfile = pysam.AlignmentFile(snakemake.input[0])
@@ -63,7 +65,7 @@ if samfile is not None:
         f.write('\n')
 else:
     with open(snakemake.output[1],'w') as f:
-        f.write(snakemake.input[0]+'\t0\tFalse\t0\t0\t0\t0\t0\tFalse\t0\t0\n')
+        f.write(snakemake.input[0]+'\t0\tFalse\t0\t0\t0\t0\t0\t0\t0\tFalse\t0\t0\n')
         plt.plot([],[])
         plt.savefig(snakemake.output[0])
 
