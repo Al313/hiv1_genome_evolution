@@ -123,6 +123,7 @@ variants_expiv <- variants_ann_expiv %>% filter(!duplicated(variant_id))
 
 ```{r number of min mutations}
 
+exp <- "EXPIV"
 category <- "Minority"
 min_threshold <- 0.05
 max_threshold <- 0.50
@@ -205,17 +206,11 @@ fig <- as.data.frame(counts) %>% ggplot(aes(x=passage, y = pct, fill = mut_subty
 fig
 
 
-
-
-
-```
-
-```{r}
-
 png("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/270923/spectrum-iv.png"
     , width = 1600, height = 1200)
 fig
 dev.off()
+
 
 ```
 

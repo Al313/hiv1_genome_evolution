@@ -158,6 +158,33 @@ ply_fig <- ggplotly(gg_fig)
 
 ply_fig
 
+
+
+
+gg_fig <- ggplot(variants[variants$allele_freq >= 0.01,], aes(x=allele_freq)) + 
+    geom_histogram(aes(y=..count..),      # Histogram with density instead of count on y-axis
+                   binwidth=.01,
+                   colour="black", fill="white") +
+    facet_wrap(~exp) +
+    geom_density(aes(y = ..count.. * .01), alpha=.3, fill="#FF6666") +
+    labs(title = "Allele Freq. Distribution (AF>=0.01)", x = "Allele Freq.", y = "Count") +
+    theme_bw() +
+    theme(
+    plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 20),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 10),
+    strip.text.x = element_text(size = 25),
+    legend.title = element_text(size=15),
+    legend.text = element_text(size = 10),
+    plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+ply_fig <- ggplotly(gg_fig)
+
+ply_fig
+
+
 ```
 
 
@@ -173,7 +200,7 @@ The distribution of AF seems to be following a bi-modal distribution in both exp
 ```{r}
 
 category <- "Minority"
-min_threshold <- 0.01
+min_threshold <- 0.0001
 max_threshold <- 0.50
 
 
@@ -218,9 +245,78 @@ ply_fig
 
 
 
+### Definition A*
 
 
+```{r, results=T}
 
+category <- "Minority"
+min_threshold_tests <- c(0.001,0.0001,0.00001,0.000001)
+max_threshold <- 0.50
+
+
+counts <- data.frame()
+for (min_threshold_test in min_threshold_tests){
+  count <- variants %>%
+              filter(allele_freq >= min_threshold_test & allele_freq < max_threshold) %>%
+              group_by(exp, exp_line, passage) %>%
+              count() %>%
+              dplyr::rename(mut_count = n) %>%
+              mutate_at(c(1,2), as.factor) %>%
+              mutate_at(3:4, as.numeric) %>%
+              mutate(min_threshold = min_threshold_test)
+
+  counts <- rbind(counts, count)
+}
+head(counts)
+counts_iii <- counts[counts$exp == "EXPIII",]
+counts_iv <- counts[counts$exp == "EXPIV",]
+
+# visualize using plotly
+gg_fig <- counts_iii %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
+                      geom_line() +
+                      facet_wrap(~min_threshold, scale = "free", ncol = 1) +
+                      labs(title = paste0(category, " Mutation Accumulation of EXPIII"), x = "Passage", y = "Counts") +
+                      theme_bw() +
+                      theme(
+                      plot.title = element_text(size = 30, hjust = 0.5),
+                      axis.title = element_text(size = 20),
+                      axis.text.x = element_text(size = 10),
+                      axis.text.y = element_text(size = 10),
+                      strip.text.x = element_text(size = 25),
+                      legend.title = element_text(size=15),
+                      legend.text = element_text(size = 10),
+                      plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+ply_fig <- ggplotly(gg_fig)
+
+ply_fig
+
+
+# visualize using plotly
+gg_fig <- counts_iv %>% ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
+                      geom_line() +
+                      facet_wrap(~min_threshold, scale = "free", ncol = 1) +
+                      labs(title = paste0(category, " Mutation Accumulation of EXPIV"), x = "Passage", y = "Counts") +
+                      theme_bw() +
+                      theme(
+                      plot.title = element_text(size = 30, hjust = 0.5),
+                      axis.title = element_text(size = 20),
+                      axis.text.x = element_text(size = 10),
+                      axis.text.y = element_text(size = 10),
+                      strip.text.x = element_text(size = 25),
+                      legend.title = element_text(size=15),
+                      legend.text = element_text(size = 10),
+                      plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+ply_fig <- ggplotly(gg_fig)
+
+ply_fig
+
+
+```
 ### Definition B
 
 ```{r}

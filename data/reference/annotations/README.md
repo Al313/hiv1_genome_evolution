@@ -16,7 +16,7 @@ hiv_plasmid_ref_genome.genome : HIV_1
 
 Run the below command to build the database:
 $ snpEff build -c snpEff.config -genbank -v hiv_plasmid_ref_genome > snpEff.stderr 2> snpEff.stdout
-Run the below command to take a pick into the database:
+Run the below command to take a peek into the database:
 $ snpEff dump hiv_plasmid_ref_genome | less
 
 To do the annotation after the reference database is prepared:
