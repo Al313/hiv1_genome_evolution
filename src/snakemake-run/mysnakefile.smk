@@ -136,5 +136,7 @@ rule extract_annotation:
         "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf.gz"
     output:
         "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz"
+    resources:
+        mem_mb=20000
     shell:
         "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/aa_change.R && Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/add_mut_context.R"

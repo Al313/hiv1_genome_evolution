@@ -2,16 +2,16 @@ Building DAG of jobs...
 Using shell: /usr/bin/bash
 Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954
+Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Mon Nov 20 16:33:06 2023]
+[Mon Nov 20 20:41:08 2023]
 rule extract_annotation:
     input: /home/amovas/data/genome-evo-proj/results/tables/2-p/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf.gz
     output: /home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz
     jobid: 0
     reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz
-    resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+    resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
 
    *****       ***   vcfR   ***       *****
@@ -37,16 +37,50 @@ Warning message:
 package ‘dplyr’ was built under R version 4.2.3 
 Warning message:
 package ‘stringr’ was built under R version 4.2.3 
-/usr/bin/bash: line 1: 2335149 Killed                  Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/aa_change.R
-[Mon Nov 20 16:34:00 2023]
-Error in rule extract_annotation:
-    jobid: 0
-    input: /home/amovas/data/genome-evo-proj/results/tables/2-p/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf.gz
-    output: /home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz
-    shell:
-        Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/aa_change.R && Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/add_mut_context.R
-        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+Loading required package: BiocGenerics
 
-Shutting down, this might take some time.
-Exiting because a job execution failed. Look above for error message
-slurmstepd: error: Detected 1 oom-kill event(s) in StepId=6638309.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+    colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+    get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+    Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which.max, which.min
+
+Loading required package: S4Vectors
+Loading required package: stats4
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:base’:
+
+    expand.grid, I, unname
+
+Loading required package: IRanges
+Loading required package: XVector
+Loading required package: GenomeInfoDb
+
+Attaching package: ‘Biostrings’
+
+The following object is masked from ‘package:base’:
+
+    strsplit
+
+Warning messages:
+1: package ‘Biostrings’ was built under R version 4.2.3 
+2: package ‘S4Vectors’ was built under R version 4.2.3 
+3: package ‘IRanges’ was built under R version 4.2.3 
+4: package ‘XVector’ was built under R version 4.2.3 
+5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
+Warning message:
+package ‘stringr’ was built under R version 4.2.3 
+[Mon Nov 20 21:53:46 2023]
+Finished job 0.
+1 of 1 steps (100%) done
