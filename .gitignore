@@ -21,3 +21,4 @@ data/processed-data/quality_control/2-p/*
 
 src/snakemake-run/.snakemake/
 results/tables/3-p/all_variants.ann.vcf
+results/tables/2-p/all_variants.ann.vcf

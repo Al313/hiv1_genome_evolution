@@ -28,6 +28,7 @@ source activate ha_proj
 
 snakemake \
         -s mysnakefile.smk \
+        -R mapping_to_mutations \
         --jobs 432 \
         --default-resource mem_mb=2000 \
         --cluster '

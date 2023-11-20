@@ -233,8 +233,8 @@ if __name__ == '__main__':
                                                        stop=stop,quality_threshold=35))
 
         dels = find_large_dels(samfile)
-        muts = find_indels(samfile,np.sum(all_coverage,0),contig_name,dels)
-        muts+=find_point_muts(all_coverage, ancestor,min_coverage=1000)
+        muts = find_indels(samfile,np.sum(all_coverage,0),contig_name,dels,min_coverage=100)
+        muts+=find_point_muts(all_coverage, ancestor,min_coverage=100)
         for mut in muts:
             for i in mut:
                 print(f"{i},",end='')
