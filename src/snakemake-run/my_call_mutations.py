@@ -40,7 +40,7 @@ def find_point_muts(coverage,ancestor,min_coverage=1000):
         ref_base = ancestor[loc]
         coverage_here = total_coverage[loc]
         if coverage_here>min_coverage:
-            muts_to_return.append(('M',loc,loc+1,ref_base,bases[new],fraction,n_changed,coverage_here)) # +1 for 0-based indexing format
+            muts_to_return.append(('P',loc,loc+1,ref_base,bases[new],fraction,n_changed,coverage_here)) # +1 for 0-based indexing format
     return muts_to_return
 
 

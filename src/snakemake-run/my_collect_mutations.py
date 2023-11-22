@@ -48,7 +48,7 @@ def read_files(filename,lines=None,passage=None):
                 
                 insertions.append([from_pos, end_pos, ref_base, alt_base, fields[0], float(fields[5]),int(fields[6]),int(fields[7]),
                                    lines,passage])
-            elif fields[0] == 'M':
+            elif fields[0] == 'P':
                 
                 mutations.append([from_pos, end_pos, ref_base, alt_base, fields[0], float(fields[5]),int(fields[6]),int(fields[7]),
                                   lines,passage])

@@ -107,7 +107,7 @@ rule varaint_to_vcf:
     output:
         "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf.gz"
     shell:
-        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/variant_to_vcf.R && gzip /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf"
+        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/annotation/variant_to_vcf.R"
 
 
 

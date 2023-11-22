@@ -131,11 +131,16 @@ gg_var_list <- list(EXPIII = list(line_palette = c("#ff00ff", "#ff2400", "#6600c
 gg_size_list <- list(ggplot = list(title.size = 50, axis.title.size = 45, axis.text.size = 40, legend.title.size = 35, legend.text.size = 30, strip.text.x.size = 35),
                     plotly = list(title.size = 25, axis.title.size = 20, axis.text.size = 10, legend.title.size = 20, legend.text.size = 15, strip.text.x.size = 20))
 
+# reordering the variant dataframe
 
+# variants_ann <- variants_ann[,-match(c("chrom", "loss_of_function", "nonsense_mediated_decay", "mut_3_context", "mut_5_context", "mut_info"), colnames(variants_ann))]
+# variants_ann <- variants_ann[,c("exp", "host_line", "exp_line", "passage", "variant_id", "genomic_pos", "ref_allele", "alt_allele", "mut_type", "allele_freq", "mut_cat", "feature_id", "feature", "feature_range", "ORF", "annotation_id", "impact", "effect", "aa_change", "loc_in_cds", "loc_in_protein", "mut_context")]
 
 
 ```
 
+
+## translational impact of variants
 
 
 In this paper, four line of evidence is suggested to reject the drift hypothesis outlined by the author. The first evidence suggests that under the drift hypothesis we would expect to see higher number of synonymous than
@@ -288,6 +293,7 @@ datatable(t_test_res_all)
 ```
 
 
+## Characterization of HIV-1 genome 
 
 Let's see what are the chances of a point mutation in the protein-coding regions of HIV-1 to be synonymous vs nonsynonymous
 and subsequently normalize all these counts base on that.
@@ -405,7 +411,7 @@ aa_summary$sum <- rowSums(aa_summary[,3:ncol(aa_summary)])
 mypaste <- function(x,y) paste(x, "(%", y, ")", sep="")
 
 # percentage of aa throughout the genome
-datatable(as.data.frame(colMeans(round(aa_summary[,3:(ncol(aa_summary)-1)]/aa_summary[,ncol(aa_summary)]*100, 1))))
+datatable(as.data.frame(round(colMeans(round(aa_summary[,3:(ncol(aa_summary)-1)]/aa_summary[,ncol(aa_summary)]*100, 1)),2)))
 
 # percentage and count of aa per gene
 aa_summary[,3:(ncol(aa_summary)-1)] <- mapply(mypaste, aa_summary[,3:(ncol(aa_summary)-1)], round(aa_summary[,3:(ncol(aa_summary)-1)]/aa_summary[,ncol(aa_summary)]*100, 1))

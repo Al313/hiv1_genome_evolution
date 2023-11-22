@@ -25,9 +25,9 @@ variants$CHROM <- "AF324493.2"
 
 # 2nd filed of VCF is POS and 3rd and 4th are REF and ALT fileds (remember that they are all in 1-based index coordinate system)
 ## for single base substitutions the conversion is pretty simple and straightforward.
-variants$POS[variants$mut_type=="M"] <- variants$end[variants$mut_type=="M"] #end and start positions for SBS are the same and can be used interchangeably
-variants$REF[variants$mut_type=="M"] <- variants$ref[variants$mut_type=="M"]
-variants$ALT[variants$mut_type=="M"] <- variants$alt[variants$mut_type=="M"]
+variants$POS[variants$mut_type=="P"] <- variants$end[variants$mut_type=="P"] #end and start positions for SBS are the same and can be used interchangeably
+variants$REF[variants$mut_type=="P"] <- variants$ref[variants$mut_type=="P"]
+variants$ALT[variants$mut_type=="P"] <- variants$alt[variants$mut_type=="P"]
 
 ## for small insertions the conversion is done as follow:
 ### first the position of the insertion is the 1-based position of the base before the actual inseriton
@@ -58,7 +58,7 @@ variants$FILTER <- "."
 # 8th field of a VCF is the INFO field. It can contain any information that are not stored by other fields. It has to be in the correct format. Later on when I do the annotation
 # with snpEff the annotation will be added to this field.
 #variants$INFO <- "."
-variants$INFO <- paste0("AF=",variants$fraction, ";MT=", variants$mut_type, ";PASSAGE=", variants$passage, ";LINE=", variants$line)
+variants$INFO <- paste0("AF=",variants$fraction, ";MT=", variants$mut_type, ";PASSAGE=", variants$passage, ";LINE=", variants$line, ";COVERAGE=", variants$coverage)
 
 # Last and 9th field of a VCF is the FORMAT which can contain some technical information. In our case it is empty.
 variants$FORMAT <- "."
@@ -74,9 +74,10 @@ vcf_variants <- vcf_variants[,c(1,2,5,3,4,6,7,8,9)]
 vcf_header <- '##fileformat=VCFv4.3
 ##contig=<ID=AF324493.2,length=14825>
 ##INFO=<ID=AF,Number=1,Type=Float,Description="Allele Freq.">
-##INFO=<ID=MT,Number=1,Type=String,Description="Allele Freq.">
-##INFO=<ID=PASSAGE,Number=1,Type=Integer,Description="Allele Freq.">
-##INFO=<ID=LINE,Number=1,Type=Integer,Description="Allele Freq.">'
+##INFO=<ID=MT,Number=1,Type=String,Description="Mutation Type">
+##INFO=<ID=PASSAGE,Number=1,Type=Integer,Description="Passage Nr.">
+##INFO=<ID=LINE,Number=1,Type=Integer,Description="Virus Line">
+##INFO=<ID=COVERAGE,Number=1,Type=Integer,Description="Coverage">'
 
 
 colnames(vcf_variants)[1] <- paste0("#",colnames(vcf_variants)[1])
@@ -89,5 +90,5 @@ colnames(vcf_variants)[1] <- paste0("#",colnames(vcf_variants)[1])
 
 cat(vcf_header, file = '/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf', sep = '\n')
 
-write.table(vcf_variants, file = '/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf', sep = "\t", row.names = F, quote = F, append = T)  
+write.table(vcf_variants, file = gzfile('/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf.gz'), sep = "\t", row.names = F, quote = F, append = T)  
 
