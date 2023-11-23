@@ -5,7 +5,7 @@
 library(Biostrings)
 library(stringr)
 
-variants_ann <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv", 
+variants_ann <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 

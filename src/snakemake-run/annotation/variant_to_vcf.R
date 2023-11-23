@@ -90,5 +90,5 @@ colnames(vcf_variants)[1] <- paste0("#",colnames(vcf_variants)[1])
 
 cat(vcf_header, file = '/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf', sep = '\n')
 
-write.table(vcf_variants, file = gzfile('/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf.gz'), sep = "\t", row.names = F, quote = F, append = T)  
+write.table(vcf_variants, file = '/home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.vcf', sep = "\t", row.names = F, quote = F, append = T)  
 

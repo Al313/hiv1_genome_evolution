@@ -101,19 +101,19 @@ row.names(ann_df) <- 1:nrow(ann_df)
 ### merging variants and annotations
 
 # merge variant info with annotation info
-ann_var_processed <- merge(ann_var[,-10], ann_df, by.x = "ID", by.y = "variant_id")
+ann_var_processed <- merge(ann_var[,-11], ann_df, by.x = "ID", by.y = "variant_id")
 
 
 # merge variant and annotation info with gene info
 ann_var_processed <- merge(ann_var_processed, features_cds[,c("feature_id","feature","ORF", "feature_range")], by="feature_id")
 
 # reorganize the dataframe
-colnames(ann_var_processed)[2:12] <- c("variant_id", "chrom", "genomic_pos", "ref_allele", "alt_allele", "allele_freq", "mut_type", "passage", "exp_line", "loss_of_function", "nonsense_mediated_decay")
-ann_var_processed <- ann_var_processed[,c(3:10,1,19,21,20,2,18,13:17,11:12)]
+colnames(ann_var_processed)[2:13] <- c("variant_id", "chrom", "genomic_pos", "ref_allele", "alt_allele", "allele_freq", "mut_type", "passage", "exp_line", "coverage", "loss_of_function", "nonsense_mediated_decay")
+ann_var_processed <- ann_var_processed[,c(3:11,1,20,22,21,2,19,14:18,12:13)]
 ann_var_processed <- ann_var_processed[order(ann_var_processed$genomic_pos,ann_var_processed$allele_freq),]
 
 # save the data frame
-write.table(ann_var_processed, file = "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv",
+write.table(ann_var_processed, file = gzfile("/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz"),
     sep = "\t", quote = F, row.names = F)
 
 
