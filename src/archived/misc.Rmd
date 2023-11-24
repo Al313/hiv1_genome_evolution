@@ -1,0 +1,46 @@
+
+
+
+Prepare annotated table of fixated variants for karin:
+
+```{r}
+
+# first read in the annotated variant data from appropriate script
+
+
+
+
+for (virus_line in unique(variants_ann$exp_line)){
+  print(virus_line)
+  for (mut in unique(variants_ann$mut_info[variants_ann$mut_cat == "Fixated" & variants_ann$exp_line == virus_line])){
+      emergence_psg <- min(variants_ann$passage[variants_ann$exp_line == virus_line & variants_ann$mut_info == mut & variants_ann$allele_freq >= 0.01])
+      fixation_psg <- min(variants_ann$passage[variants_ann$exp_line == virus_line & variants_ann$mut_info == mut & variants_ann$allele_freq >= 0.99])
+
+      variants_ann$emergence_passage[variants_ann$mut_info == mut & variants_ann$exp_line == virus_line] <- emergence_psg
+      variants_ann$fixation_passage[variants_ann$mut_info == mut & variants_ann$exp_line == virus_line] <- fixation_psg
+  }
+
+}
+variants_ann_fixated <- 
+            variants_ann %>%
+            filter(allele_freq >= 0.99) %>%
+            filter(genomic_pos != 3086) %>%
+            mutate(allele_freq = round(allele_freq,3))
+
+
+
+
+
+variants_ann_fixated <- variants_ann_fixated[,-match(c("chrom", "loss_of_function", "nonsense_mediated_decay", "mut_3_context", "mut_5_context", "mut_info"), colnames(variants_ann))]
+variants_ann_fixated <- variants_ann_fixated[,c("exp", "host_line", "exp_line", "passage", "coverage", "variant_id", "genomic_pos", "ref_allele", 
+                                                "alt_allele", "mut_type", "allele_freq", "mut_cat", "feature_id", "feature", "feature_range", "ORF", "annotation_id", "impact", "effect", "aa_change", "loc_in_cds", "loc_in_protein", "mut_context", "emergence_passage", "fixation_passage")]
+
+sum(variants_ann_fixated$coverage < 500)
+datatable(variants_ann, filter = "bottom")
+
+write.table(variants_ann_fixated, file = "/Users/alimos313/Desktop/fixated_variants_ann_2.csv", sep = ",", row.names = F)
+
+
+
+
+```
