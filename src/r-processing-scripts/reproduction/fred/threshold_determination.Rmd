@@ -72,13 +72,6 @@ library("dplyr")
 variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
-# set correct data types
-variants_ann$exp_line <- as.integer(variants_ann$exp_line)
-
-
-# set host cell line info
-variants_ann$host_line <- ifelse(variants_ann$exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")
-
 
 # account for the switched experimental lines
 variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
@@ -95,17 +88,22 @@ variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] 
 variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
 
-# add a field containing pos, ref, and alt info of muts
-variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
+## prepare data
 
+variants_ann %<>% 
+                filter(coverage >= 500) %>%
+                mutate(exp = case_when(exp_line %in% 13:16 ~ "EXPIII", exp_line %in% 17:20 ~ "EXPIV")) %>% # add experiment number info
+                mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% # add host cell line info
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2",
+                                            exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv")) %>%
+                mutate(mut_cat = case_when((allele_freq < 0.01) ~ "Unreliable",
+                                        (allele_freq >= 0.01 & allele_freq < 0.05) ~ "Sporadic", 
+                                        (allele_freq >= 0.05 & allele_freq < 0.5) ~ "Minority",
+                                        (allele_freq >= 0.5 & allele_freq < 0.99) ~ "Majority", 
+                                        (allele_freq >= 0.99) ~ "Fixated"))
 
-## label experimental line numbers
-
-
-variants_ann <- variants_ann %>%
-                            mutate(exp = case_when(exp_line%in%13:16 ~ "EXPIII", exp_line%in%17:20 ~ "EXPIV")) %>%
-                            mutate(exp_line = case_when(exp_line==13 ~ "III_MT2_1", exp_line==14 ~ "III_MT2_2", exp_line==15 ~ "III_MT4_1", exp_line==16 ~ "III_MT4_2",
-                            exp_line==17 ~ "IV_MT2_1", exp_line==18 ~ "IV_MT2_2", exp_line==19 ~ "IV_MT2_3", exp_line==20 ~ "IV_MT2_4"))
+variants <- variants_ann %>% filter(!duplicated(variant_id))
 
 variants <- variants_ann %>% filter(!duplicated(variant_id))
 

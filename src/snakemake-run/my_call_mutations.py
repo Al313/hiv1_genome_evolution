@@ -132,7 +132,7 @@ def find_indels(samfile,coverage,contig_name,muts=None,n=None,start=0,stop=None,
     ends = [i[2] for i in muts if i[0] == 'D']
 
     for read in samfile.fetch(contig=contig_name,start=start,stop=stop):
-        if read.mapping_quality > 35: # filter on mapping quality was missing in eva's version! # changed from 30 to 35 to be consitent with coverage that is inputed into the function later on
+        if read.mapping_quality > 35: # filter on mapping quality was missing in eva's version! # changed from 30 to 35 to be consistent with coverage that is imputed into the function later on
             del_counter = 0
             cigar = read.cigar
             read_location = 0 # to keep everythin 0-based (checked with bam files when set to 1)

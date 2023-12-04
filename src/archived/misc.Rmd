@@ -9,7 +9,7 @@ Prepare annotated table of fixated variants for karin:
 
 
 
-
+head(variants_ann)
 for (virus_line in unique(variants_ann$exp_line)){
   print(virus_line)
   for (mut in unique(variants_ann$mut_info[variants_ann$mut_cat == "Fixated" & variants_ann$exp_line == virus_line])){
@@ -44,3 +44,222 @@ write.table(variants_ann_fixated, file = "/Users/alimos313/Desktop/fixated_varia
 
 
 ```
+
+
+fixated variants that are missed by different coverage thresholds
+
+Based on the analysis below, there are mainly to fixated-label mutations that are missed due to coverage below 
+threshold 500, both in the end of virus sample from line 15 passage 500. (positions 9521 and 9558).
+
+Another observation, specifically for mutation at position 483 in line 15 and passage 530, is that when the coverage is low,
+a fixated mutation's allele frequency arguably has more variations and might fall under the 0.99 threshold. For this mutation
+and in this line this phenomenon happens multiple times. On the other side from passage 370 to 400 it seems to be
+correctly identified as majority as the coverage is above 2000 but allele freq around 0.93. One solution to address this
+issue could be setting 0.95 as fixated threshold. Should be tested and decided upon.
+
+Last but not least, doing this check another problem came to my attention and that is the mutations that happen to be in the regions that
+later on in viral evolution will be removed due to LD or small deletions. Here two points are noteworthy:
+
+1. First, the LD are not called based on the current mutation calling script. Therefore, while they exist 
+almost homogeneously in certain populations (), they are not called by the pipeline and are absent in the variant tables.
+
+2. Some mutations will inevitably disappear from the population due to small or large deletions. When comparing the rate of mutation disappearance
+I have to keep that in mind. 
+
+
+```{r}
+
+
+# read in the data
+variants <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_variants.csv.gz", 
+sep = ",", stringsAsFactors = FALSE, header = TRUE)
+
+
+
+variants_fixated <- 
+            variants %>%
+            filter(fraction >= 0.95) %>%
+            filter(start != 3086) 
+
+
+
+View(variants_fixated[variants_fixated$coverage < 500 & ((variants_fixated$start >= 454 & variants_fixated$start <= 550) | (variants_fixated$start >= 9500 & variants_fixated$start <= 9626)),])
+View(variants_fixated[variants_fixated$start == 483 & variants_fixated$line == 15,][order(variants_fixated$passage[variants_fixated$start == 483 & variants_fixated$line == 15]),])
+
+
+
+```
+
+
+
+## Genetic drift simulation
+
+
+
+```{r}
+
+population_size <- 100
+transfer_size <- population_size/2
+starting_freq <- 50/100
+generation_number <- log2(population_size/(population_size-transfer_size))
+
+nr_line <- 5
+nr_passage <- 200
+
+allele_freq_records <- list()
+
+set.seed(625)
+i <- 0
+while (i < nr_line){
+  i <- i + 1
+  print(i)
+  
+  alleles <- c(rep("A", times = population_size*starting_freq), rep("B", times = population_size*(1-starting_freq)))
+  allele_freq_record <- c(starting_freq)
+
+  j <- 1
+  while (j < nr_passage){
+    j <- j + 1
+    alleles <- sample(alleles, size = transfer_size, replace = F)
+    if ("A" %in% alleles){
+      alleles <- rep(alleles, each = 2^generation_number)
+      current_freq <- as.numeric((table(alleles)/population_size)["A"])
+      allele_freq_record <- append(allele_freq_record, current_freq)
+    } else {
+      allele_freq_record <- append(allele_freq_record, 0)
+    }
+  }
+  
+  allele_freq_records <- append(allele_freq_records, list(allele_freq_record))
+}
+
+
+allele_freq_records_df <- as.data.frame(allele_freq_records)
+colnames(allele_freq_records_df) <- 1:nr_line
+allele_freq_records_df$passage <- 1:nr_passage
+
+allele_freq_records_df2 <- gather(allele_freq_records_df, key = "line", value = "allele_freq", 1:nr_line)
+
+fig <- allele_freq_records_df2 %>% 
+          ggplot(aes(x = passage, y = allele_freq, color = line)) +
+          geom_line(size=2) +
+          labs(x="\nPassage", y= "Allele Frequency\n", color = "Virus Line", title = paste0("Simulation of Genetic Drift (Population Size: ", population_size,")\n"))+
+          scale_y_continuous(breaks = seq(0,1,0.1), limits = c(0,1)) +
+          geom_hline(yintercept = 0.5, color = "black", size = 2) +
+          theme_bw() +
+          theme(plot.title = element_text(size = 50, hjust = 0.5),
+          axis.title = element_text(size = 45),
+          axis.text.x = element_text(size = 40, angle = 90),
+          axis.text.y = element_text(size = 40),
+          legend.title = element_text(size=35),
+          legend.text = element_text(size = 30))
+
+
+
+png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/301123/genetic_drift_sim_popsize_", population_size, ".png")
+    , width = 1500, height = 1500)
+fig
+dev.off()
+
+
+### ========================================================================================================================================================
+
+# What are the chances of a new mutation with starting allele frequency of 1/2N to reach fixation? How long will it take for all potential positions to have the chance to reach fixation?
+
+
+mu <- 3/10000
+genome_length <- 10000
+
+
+
+
+population_size <- 50000
+transfer_size <- population_size/4
+starting_freq <- 1/100
+generation_number <- log2((population_size/transfer_size))
+
+nr_cycles <- population_size - transfer_size
+
+nr_mutations_per_genome_per_generation <- nr_cycles * mu
+
+
+likelihood_of_fixation <- 1/(population_size)
+
+
+nr_passage  <- genome_length/(likelihood_of_fixation * nr_mutations_per_genome_per_generation)
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r G>A in their context}
+
+threshold <- 0.01
+experiment <- "EXPIII"
+
+
+mapping_vec <- c(A = "T", T = "A", C = "G", G = "C")
+
+variants_sub <- variants %>%
+                    filter(allele_freq >= threshold) %>%
+                    filter(exp == experiment)
+
+
+for (i in 1:nrow(variants_sub)){
+    if (variants_sub$ref_allele[i] %in% c("G", "A")){
+        context <- variants_sub$mut_context[i]
+        rev_context <- paste0(as.character(mapping_vec[str_sub(context,3,3)]),
+                                        as.character(mapping_vec[str_sub(context,2,2)]), 
+                                        as.character(mapping_vec[str_sub(context,1,1)]))
+        variants_sub$mut_context_6[i] <- rev_context
+    } else {
+        variants_sub$mut_context_6[i] <- variants_sub$mut_context[i]
+    }
+}
+head(variants_sub)
+
+variants_sub2 <- variants_sub %>%
+                    filter((ref_allele == "G" & alt_allele == "A") | (ref_allele == "C" & alt_allele == "T")) %>% 
+                    select(genomic_pos, exp_line, exp, mut_context_6) %>%
+                    distinct() %>%
+                    group_by(exp_line) %>%
+                    count(mut_context_6) %>%
+                    dplyr::rename(count = n) %>%
+                    mutate(perc = count/sum(count))
+
+
+
+variants_sub2 %>% ggplot(aes(x = mut_context_6, y = perc)) +
+        geom_bar(stat = "identity") +
+        facet_wrap(~exp_line)
+
+
+variants_sub3 <- variants_sub %>%
+                    filter((ref_allele == "G" & alt_allele == "A")) %>% 
+                    select(genomic_pos, exp_line, exp, mut_3_context) %>%
+                    distinct() %>%
+                    group_by(exp_line) %>%
+                    count(mut_3_context) %>%
+                    dplyr::rename(count = n) %>%
+                    mutate(perc = count/sum(count))
+
+variants_sub3 %>% ggplot(aes(x = mut_3_context, y = perc)) +
+        geom_bar(stat = "identity") +
+        facet_wrap(~exp_line)
+
+```
+
+

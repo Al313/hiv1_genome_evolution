@@ -178,7 +178,7 @@ The mutations spectra of all 4 lines look similar for minority mutations!
 # prepare data for visualization
 counts <- variants_expiv %>%
             filter(allele_freq >= threshold) %>%
-            filter(mut_type=="M") %>%
+            filter(mut_type=="P") %>%
             mutate(mut_subtype=paste0(ref_allele, ">", alt_allele)) %>%
             group_by(exp_line, passage, mut_subtype) %>%
             count() %>%
@@ -626,7 +626,7 @@ minority mutations of all 4 lines of EXPIV.
 
 
 # add subtype info
-variants_expiv_sub <-  variants_expiv %>% mutate(mut_type_sub = ifelse(mut_type == "M", paste0(ref_allele,">",alt_allele), mut_type))
+variants_expiv_sub <-  variants_expiv %>% mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type))
 
 
 # minority

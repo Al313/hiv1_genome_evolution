@@ -39,4 +39,5 @@ dependencies:
 #  - r-ggvenndiagram # to install it, the two following packages were installed using conda and then this package was installed from within R using install.packages
   - r-units
   - r-sf
+  - r-lsr
 

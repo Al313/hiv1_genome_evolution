@@ -189,7 +189,7 @@ been shown that environment impacts the mutational profile of HIV-1, that affect
 # prepare data for visualization
 counts <- variants_expiii %>%
             filter(allele_freq >= min_threshold & allele_freq <= max_threshold) %>%
-            filter(mut_type=="M") %>%
+            filter(mut_type=="P") %>%
             mutate(mut_subtype=paste0(ref_allele, ">", alt_allele)) %>%
             group_by(exp_line, passage, mut_subtype) %>%
             count() %>%
@@ -198,7 +198,6 @@ counts <- variants_expiii %>%
             mutate(pct =  100 *count/sum(count)) %>%
             ungroup() %>%
             mutate_at(2:3, as.factor)
-
 
 # visualize using ggplot
 fig <- as.data.frame(counts) %>% ggplot(aes(x=passage, y = pct, fill = mut_subtype)) +
@@ -672,7 +671,7 @@ minority mutations of all 4 lines of EXPIII.
 
 
 # add subtype info
-variants_expiii_sub <-  variants_expiii %>% mutate(mut_type_sub = ifelse(mut_type == "M", paste0(ref_allele,">",alt_allele), mut_type))
+variants_expiii_sub <-  variants_expiii %>% mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type))
 
 # minority
 
