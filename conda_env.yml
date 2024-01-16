@@ -40,4 +40,4 @@ dependencies:
   - r-units
   - r-sf
   - r-lsr
-
+  - natsort #this is a python package to sort strings containing numbers based on their numeric value

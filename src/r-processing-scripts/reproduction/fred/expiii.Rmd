@@ -9,17 +9,73 @@ output:
     html_document:
         #css: style.css
         toc: true
-        toc_depth: 3
+        toc_depth: 2
         toc_float: true
         number_sections: true
         theme: lumen
         highlight: zenburn
         code_folding: hide
+        code_download: true # to make the Rmd source code available
 ---
 
+```{css, echo=F}
+
+#TOC {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  overflow:auto;
+}
+
+body, td {
+  font-family: sans-serif;
+  background-color: white;
+  font-size: 16px;
+}
 
 
-```{r setting global chunk parameters, include=FALSE}
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 30px;
+}
+
+
+p.caption {
+  font-size: 0.9em;
+  font-style: italic;
+  color: grey;
+  margin-right: 10%;
+  margin-left: 10%;  
+  text-align: justify;
+}
+
+
+/* scrollable code chunks, limit code chunk window height */
+
+pre {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 300px;
+}
+
+
+/* scrollable output of code chunks */
+/* add class.output="scroll-100" to code chunks */
+
+.scroll-100 {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+```
+
+
+
+```{r setting global code chunk parameters, include=FALSE}
 
 # options for code chunk and output inclusion 
 knitr::opts_chunk$set(
@@ -30,6 +86,7 @@ knitr::opts_chunk$set(
 knitr::opts_chunk$set(
   fig.width = 8, fig.height = 8, fig.align = "center"
 )
+
 
 # options(scipen=999)
 
@@ -44,6 +101,7 @@ m <- list(
 
 
 ```
+
 
 
 
@@ -82,41 +140,42 @@ library("magrittr")
 variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
-# set correct data types
-variants_ann$exp_line <- as.integer(variants_ann$exp_line)
+str(variants_ann)
 
-
-# set host cell line info
-variants_ann$host_line <- ifelse(variants_ann$exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")
-
-
-# account for the switched experimental lines
+# correct for the switched experimental lines
 variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
 variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
 
 variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
-# add a field containing pos, ref, and alt info of muts
-variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
 
-## only keep the EXPIII data
+# only keep the EXPIII data
 
 variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
-end_passage <- 560
-variants_ann_expiii <- variants_ann_expiii %>%
-                              mutate(exp_line = case_when(exp_line==13 ~ "MT2_1", exp_line==14 ~ "MT2_2", exp_line==15 ~ "MT4_1", exp_line==16 ~ "MT4_2"))
 
+
+# format the dataframe
+variants_ann_expiii <- variants_ann_expiii %>%
+                              mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
+                                exp_line = case_when(exp_line==13 ~ "MT2_1", exp_line==14 ~ "MT2_2", exp_line==15 ~ "MT4_1", exp_line==16 ~ "MT4_2"), # update exp line labels
+                                mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) # add a field containing pos, ref, and alt info of muts
+
+# remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
+
+
+# last passage 
+
+end_passage <- 560
 
 ```
 
 
 
-# Overview
+# Overview {.tabset .tabset-pills}
 
 ## Minority Mutations
-
 
 
 ```{r number of min mutations}
@@ -660,7 +719,7 @@ dev.off()
 
 
 
-## Mutational profile
+# Mutational profile
 
 
 In the chart below you can see the mutation subtypes of all/unique majority and 
@@ -750,16 +809,14 @@ sequence = paste(fastaFile)
 g_percent <- str_count(sequence, pattern = "G")/nchar(sequence)
 ```
 
-<!--
-As it is evident almost `r #mut_profile_min$count[mut_profile_min$mut_sub_type == "G>A"]/nrow(variants_expiii_min)`% of minority and 
+<!-- As it is evident almost `r #mut_profile_min$count[mut_profile_min$mut_sub_type == "G>A"]/nrow(variants_expiii_min)`% of minority and 
 `r #mut_profile_maj$count[mut_profile_maj$mut_sub_type == "G>A"]/nrow(variants_expiii_maj)`% of majority mutations are "G>A" mutations. This is while Guanine constitutes 
-`r #g_percent`% of HIV-1 genome.
--->
+`r #g_percent`% of HIV-1 genome. -->
 
 
 
 
-### APOBEC3G
+## APOBEC3G
 
 ```{r proportion of G2A mutations}
 
@@ -831,5 +888,4 @@ in MT2 is not significantly higher than in MT4 (p_val of `r t_test_result$p.valu
 it might be of interest to compare the frequency and context of G-A mutations that are hypermutants (2 or more G-A mutations in in the same read pair). Also based on that we might 
 be able to define hotspot regions for these mutations as well. These are some extra analyses that I will do in the future to further delineate the impact of APOBEC mutagenesis
 on the mutational profile of HIV-1 virus.
-
 

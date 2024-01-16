@@ -1,0 +1,50 @@
+
+
+```{r}
+
+
+exp <- "EXPIII"
+
+if (exp == "EXPIII"){
+    line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+    breaks_step <- 50
+    line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+} else{
+    line_palette <- c("#66ff66", "#009900", "#00cc99", "#558000")
+    breaks_step <- 5
+    line_labels <- c("MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+}
+
+counts[counts$exp_line == "MT2_3" & counts$passage == 430,"mut_count"] <- 125
+
+head(counts)
+str(counts)
+
+fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation in ", exp))+
+        scale_x_continuous(breaks = seq(0,570,50)) +
+        scale_y_continuous(limits = c(0,400),breaks = seq(0,400,50)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 60, hjust = 0.5),
+        axis.title = element_text(size = 55),
+        axis.text.x = element_text(size = 45, angle = 90),
+        axis.text.y = element_text(size = 45),
+        legend.title = element_text(size=50),
+        legend.text = element_text(size = 45))
+
+
+png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/candoc/", category, "_accumulation_", exp, ".png")
+    , width = 1400, height = 1600)
+fig
+dev.off()
+
+
+pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/candoc/", category, "_accumulation_", exp, ".pdf")
+    , width = 21, height = 23)
+fig
+dev.off()
+
+
+```
