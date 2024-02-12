@@ -27,7 +27,10 @@ dev.off()
 
 
 # SIMULATED 
-
+head(permuted_df_all)
+str(permuted_df_all)
+permuted_df_all[,2]
+permuted_df_all[permuted_df_all]
 plt <- ggplot(data = as.data.frame(permuted_df_all), aes(x=line1, y=line2, fill= round(permute_ave,1))) + 
         geom_tile() +
         geom_text(aes(line1, line2, label = round(permute_ave,1)), color = "black", size = 15) +
@@ -44,7 +47,7 @@ plt <- ggplot(data = as.data.frame(permuted_df_all), aes(x=line1, y=line2, fill=
 
 ggplotly(plt)
 
-png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/301123/parallel_evo_sim_boxplot.png")
+png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/301123/parallel_evo_sim_boxplot2.png")
     , width = 1500, height = 1500)
 plt
 dev.off()
@@ -68,7 +71,7 @@ plt <- ggvenn(muts_list, text_size = 15, set_name_size = 20) +
 
 
 png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/301123/parallel_evo_venn_", experiment, ".png")
-    , width = 1500, height = 1500)
+    , width = 1800, height = 1800)
 plt
 dev.off()
 ```
@@ -190,7 +193,7 @@ dev.off()
 
 ```{r}
 
-exp <- "EXPIV"
+exp <- "EXPIII"
 
 if (exp == "EXPIII"){
     line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
@@ -208,7 +211,7 @@ fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
         geom_line(size=2) +
         labs(x="\nPassage", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation in ", exp, "\n"))+
         scale_x_continuous(breaks = seq(0,510,50)) +
-        scale_y_continuous(limits = c(0,350),breaks = seq(0,350,50)) +
+        scale_y_continuous(limits = c(0,250),breaks = seq(0,250,50)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
         theme_bw() +
         theme(plot.title = element_text(size = 50, hjust = 0.5),
@@ -219,7 +222,7 @@ fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
         legend.text = element_text(size = 30))
 
 
-png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/301123/minority_accumulation_", exp, ".png")
+png(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/301123/majority_accumulation_", exp, ".png")
     , width = 1400, height = 1600)
 fig
 dev.off()
