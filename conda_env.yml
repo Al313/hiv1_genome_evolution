@@ -43,3 +43,4 @@ dependencies:
   - natsort #this is a python package to sort strings containing numbers based on their numeric value
   - r-ape #phylogenetics
   - phyml
+  - graphviz=8.0.3 #this package is used to visualized the DAG of a snakemake file

@@ -1,2 +1,8 @@
+# dry-run
 snakemake -s snakefile.smk -np
+# run
 snakemake -s snakefile.smk --cores x
+# force-run from a specific rule
+snakemake -s snakefile.smk --cores x -R xxx
+# visualize the dag
+snakemake -s mysnakefile.smk --rulegraph all | dot -Tpdf > dag.pdf
