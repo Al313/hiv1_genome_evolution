@@ -8,15 +8,26 @@ library("dplyr")
 library("tidyr")
 
 
+# take command line variables
 args <- commandArgs(trailingOnly = TRUE)
 
-print(args[1])
+if (length(args) == 0){
+    cl_line <- 13
+} else {
+    cl_line <- args[1]
+}
 
 
 
+if (dir.exists("/Users/alimos313")){
+    main_wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/"
+} else {
+    main_wd <- "/home/amovas/data/"
+}
 
-# read in the data
-variants_ann <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
+
+# read in the variant data
+variants_ann <- read.table(file = paste0(main_wd, "genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz"), 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 
@@ -53,53 +64,61 @@ variants_ann %<>%
 variants <- variants_ann %>% filter(!duplicated(variant_id))
 
 
-variants %<>% filter(exp_line == args[1]) 
+variants %<>% filter(exp_line == cl_line) 
 
 
+# define function to calculate Shannon entropy
 shannon <- function(x){
     -x*log2(x)
 }
 
+
+# create a dataframe to store Shannon entropy results
 shannon_df <- data.frame()
 
 
+
+exp <- "EXPIII"
+line <- names(table(variants_sub$exp_line))
+psg <- 10
+
+head(variants_sub3)
+
 for (exp in c("EXPIII", "EXPIV")){
 
-    print(exp)
 
     variants_sub <- variants[variants$exp == exp,]
 
     for (line in names(table(variants_sub$exp_line))){
 
-        print(line)
         variants_sub2 <- variants_sub[variants_sub$exp_line == line,]
 
         for (psg in sort(unique(variants_sub$passage))){
 
-            print(psg)
             variants_sub3 <- variants_sub2[variants_sub2$passage == psg,]
             variants_sub3 <- variants_sub3[variants_sub3$genomic_pos >= 454 & variants_sub3$genomic_pos <= 9626,]
 
-            for (i in unique(variants_sub3$genomic_pos)){
-                ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
-                if (nrow(ss) >= 1){
-
+            for (i in seq(454,9626)){
+                
+                if (i %in% variants_sub3$genomic_pos){
+                    ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
                     alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
                     ref_shannon <- shannon(1-sum(ss$allele_freq))
                     total_shannon <- alt_shannon + ref_shannon
-
-                } else{
+                } else {
                     total_shannon <- 0
                 }
+                
                 shannon_df <- rbind(shannon_df, c(exp, line, psg, i, total_shannon))
             }
         }
     }
 }
 
+
 colnames(shannon_df) <- c("experiment", "exp_line", "passage", "genomic_position", "shannon_entropy")
 
 
-write.table(shannon_df, file = paste0("/home/amovas/data/genome-evo-proj/results/tables/misc/", args[1],"_shannon_entropy.tsv"), quote = F, row.names = F, sep = "\t")
+write.table(shannon_df, file = paste0("/home/amovas/data/genome-evo-proj/results/tables/misc/", cl_line,"_shannon_entropy.tsv"), quote = F, row.names = F, sep = "\t")
 
 

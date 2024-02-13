@@ -1,0 +1,46 @@
+
+In this R Markdown document I will process the shannon entropy values.
+
+
+First let's take a look at one line at a time.
+
+
+
+```{r load libraries}
+
+library(tidyr)
+library(magrittr)
+library(dplyr)
+```
+
+```{r load the data}
+
+
+lines <- c(13:20)
+
+shannon_df <- data.frame()
+
+for (line in lines){
+    shannon_df <- rbind(shannon_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_shannon_entropy.tsv"), sep = "\t", header = T))
+}
+
+
+head(shannon_df)
+
+d <- shannon_df %>% group_by(exp_line,passage) %>% summarise (sum_salary = sum(shannon_entropy, na.rm = T), .groups = 'drop')
+
+dd <- shannon_df %>% group_by(exp_line,genomic_position) %>% summarise (sum_salary = sum(shannon_entropy, na.rm = T), .groups = 'drop')
+
+
+View(dd)
+
+plot(x = d$passage, y = d$sum_salary)
+den <- density(shannon_df$shannon_entropy[shannon_df$passage == 500], na.rm =T)
+plot(den)
+
+length(shannon_df$shannon_entropy[shannon_df$passage == 570])
+
+
+shannon_df$shannon_entropy[shannon_df$passage == 90]
+
+```
