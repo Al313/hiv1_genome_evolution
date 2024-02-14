@@ -78,11 +78,6 @@ shannon_df <- data.frame()
 
 
 
-exp <- "EXPIII"
-line <- names(table(variants_sub$exp_line))
-psg <- 10
-
-head(variants_sub3)
 
 for (exp in c("EXPIII", "EXPIV")){
 
