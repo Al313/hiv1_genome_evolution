@@ -44,3 +44,4 @@ dependencies:
   - r-ape #phylogenetics
   - phyml
   - graphviz=8.0.3 #this package is used to visualized the DAG of a snakemake file
+  - cmake # to compile c++ code

@@ -140,7 +140,7 @@ library("magrittr")
 variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
-str(variants_ann)
+
 
 # correct for the switched experimental lines
 variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
