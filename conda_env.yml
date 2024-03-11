@@ -1,4 +1,4 @@
-name: ha_proj
+name: ha_proj_test
 channels:
   - conda-forge
   - bioconda
@@ -45,3 +45,5 @@ dependencies:
   - phyml
   - graphviz=8.0.3 #this package is used to visualized the DAG of a snakemake file
   - cmake # to compile c++ code
+  - fastqc=0.12.1
+  - multiqc=1.21

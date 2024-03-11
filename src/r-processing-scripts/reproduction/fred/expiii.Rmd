@@ -136,10 +136,18 @@ library("magrittr")
 
 ```{r read-in the data}
 
-# read in the data
-variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz", 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+# determine the server path
 
+if (file.exists("/home/amovas/")){
+  print("HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+variants_ann <- read.table(file = paste0(wd, "results/tables/2-pp/all_annotated_variants.tsv.gz"), 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 
 # correct for the switched experimental lines

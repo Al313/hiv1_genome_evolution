@@ -5,12 +5,12 @@ Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Thu Nov 23 00:50:13 2023]
+[Mon Mar 11 14:11:21 2024]
 rule extract_annotation:
-    input: /home/amovas/data/genome-evo-proj/results/tables/2-p/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/2-p/all_variants.ann.vcf.gz
-    output: /home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz
+    input: /home/amovas/data/genome-evo-proj/results/tables/2-pp/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/2-pp/all_variants.ann.vcf.gz
+    output: /home/amovas/data/genome-evo-proj/results/tables/2-pp/all_annotated_variants.tsv.gz
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/2-p/all_annotated_variants.tsv.gz
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/2-pp/all_annotated_variants.tsv.gz
     resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
 
@@ -81,6 +81,6 @@ Warning messages:
 5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
 Warning message:
 package ‘stringr’ was built under R version 4.2.3 
-[Thu Nov 23 01:56:41 2023]
+[Mon Mar 11 15:18:40 2024]
 Finished job 0.
 1 of 1 steps (100%) done

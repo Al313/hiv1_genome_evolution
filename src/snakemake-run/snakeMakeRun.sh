@@ -3,34 +3,41 @@
 
 
 
-job_dir="/home/amovas/scratch/.slurm/jobs"
-out_dir="/home/amovas/scratch/.slurm/outs"
+timestamp=$(date +%F_%T)
+
+job_dir="/home/amovas/scratch/.slurm/jobs/${timestamp}"
 
 
 if [ ! -d ${job_dir} ]; then
   mkdir -p ${job_dir};
 fi
 
-if [ ! -d ${out_dir} ]; then
-  mkdir -p ${out_dir};
+job_file=${job_dir}/snakemake.job
+
+
+
+
+output_dir="/home/amovas/scratch/.slurm/outs/${timestamp}"
+
+if [ ! -d ${output_dir} ]; then
+  mkdir -p ${output_dir};
 fi
 
 
-job_file=${job_dir}/snakemake.job
 
 echo "#!/bin/bash
 #SBATCH --cpus-per-task=1
 #SBATCH --time=24:00:00
 #SBATCH --mem=10G
-#SBATCH --output=${out_dir}/snakemake.out
+#SBATCH --output=${output_dir}/snakemake.out
 
 source activate ha_proj
 
 snakemake \
         -s mysnakefile.smk \
-	-R extract_annotation \
-        --jobs 432 \
-        --default-resource mem_mb=2000 \
+        -R varaint_to_vcf \
+	--jobs 432 \
+        --default-resource mem_mb=4000 \
         --cluster '
         sbatch \
                 --cpus-per-task {threads} \

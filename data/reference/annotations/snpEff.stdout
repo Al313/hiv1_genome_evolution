@@ -1,0 +1,57 @@
+00:00:00 SnpEff version SnpEff 5.1d (build 2022-04-19 15:49), by Pablo Cingolani
+00:00:00 Command: 'build'
+00:00:00 Building database for 'hiv_plasmid_ref_genome'
+00:00:00 Reading configuration file 'snpEff.config'. Genome: 'hiv_plasmid_ref_genome'
+00:00:00 Reading config file: /data/amovas/genome-evo-proj/data/reference/annotations/snpEff.config
+00:00:01 done
+00:00:01 Chromosome: 'AF324493.2'	length: 14825
+00:00:01 Create exons from CDS (if needed): 
+00:00:01 Exons created for 10 transcripts.
+00:00:01 Deleting redundant exons (if needed): 
+00:00:01 	Total transcripts with deleted exons: 0
+00:00:01 Collapsing zero length introns (if needed): 
+00:00:01 	Total collapsed transcripts: 0
+00:00:01 		Adding genomic sequences to genes: 
+00:00:01 	Done (3 sequences added).
+00:00:01 		Adding genomic sequences to exons: 
+00:00:01 	Done (12 sequences added, 0 ignored).
+00:00:01 Finishing up genome
+00:00:01 Adjusting transcripts: 
+00:00:01 Adjusting genes: 
+00:00:01 Adjusting chromosomes lengths: 
+00:00:01 Ranking exons: 
+00:00:01 Create UTRs from CDS (if needed): 
+00:00:01 Remove empty chromosomes: 
+00:00:01 Marking as 'coding' from CDS information: 
+00:00:01 Done: 0 transcripts marked
+00:00:02 
+00:00:02 Caracterizing exons by splicing (stage 1) : 
+
+00:00:02 Caracterizing exons by splicing (stage 2) : 
+00:00:02 done.
+00:00:02 [Optional] Rare amino acid annotations
+WARNING_FILE_NOT_FOUND: Rare Amino Acid analysis: Cannot read protein sequence file '/data/amovas/genome-evo-proj/data/reference/annotations/./data/hiv_plasmid_ref_genome/protein.fa', nothing done.
+00:00:02 CDS check: GenBank file format, skipping
+
+00:00:02 Protein check file: '/data/amovas/genome-evo-proj/data/reference/annotations/./data/hiv_plasmid_ref_genome/genes.gbk'
+
+00:00:02 Checking database using protein sequences
+00:00:02 Comparing Proteins...
+	Labels:
+		'+' : OK
+		'.' : Missing
+		'*' : Error
+00:00:02 
+
+00:00:02 Saving database
+00:00:02 Saving sequences for small chromosmes to file '/data/amovas/genome-evo-proj/data/reference/annotations/./data/hiv_plasmid_ref_genome/sequence.bin'
+00:00:02 [Optional] Reading regulation elements: GFF
+WARNING_FILE_NOT_FOUND: Cannot read optional regulation file '/data/amovas/genome-evo-proj/data/reference/annotations/./data/hiv_plasmid_ref_genome/regulation.gff', nothing done.
+00:00:02 [Optional] Reading regulation elements: BED 
+00:00:02 Cannot find optional regulation dir '/data/amovas/genome-evo-proj/data/reference/annotations/./data/hiv_plasmid_ref_genome/regulation.bed/', nothing done.
+00:00:02 [Optional] Reading motifs: GFF
+WARNING_FILE_NOT_FOUND: Cannot open PWMs file /data/amovas/genome-evo-proj/data/reference/annotations/./data/hiv_plasmid_ref_genome/pwms.bin. Nothing done
+00:00:02 Done
+00:00:02 Logging
+00:00:03 Checking for updates...
+00:00:05 Done.
