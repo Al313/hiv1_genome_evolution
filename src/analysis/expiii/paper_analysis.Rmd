@@ -1,0 +1,811 @@
+---
+title:  
+    "Jeffrey Barrick et al. 2009 Analysis"
+date: 
+    "Nov 15th, 2023"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+---
+
+
+
+
+```{r setting global chunk parameters, include=FALSE}
+
+# options for code chunk and output inclusion 
+knitr::opts_chunk$set(
+  message = FALSE, echo = TRUE, warning=FALSE, results = "hide"
+)
+
+# options for figures
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 8, fig.align = "center"
+)
+
+# options(scipen=999)
+
+# margin of plotly
+m <- list(
+  l = 150,
+  r = 150,
+  b = 100,
+  t = 100,
+  pad = 4
+)
+
+
+```
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("plotly")
+library("ggplot2")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("ggvenn")
+library("VennDiagram")
+library("ggVennDiagram")
+
+
+```
+
+
+# Introduction
+
+
+In this document I will try to reproduce some of the analysis provided and ideas presented by Jeffrey Barrick et al. (2019).
+
+[Jeffrey Barrick](https://www.nature.com/articles/nature08480)
+
+
+
+
+```{r read-in the data}
+
+# read in the data
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz", 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+
+# account for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+
+
+variants_ann$exp_line[variants_ann$exp_line == 18 & variants_ann$passage > 350] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
+
+
+## prepare data
+
+variants_ann %<>% 
+                filter(coverage >= 500) %>%
+                mutate(exp = case_when(exp_line %in% 13:16 ~ "EXPIII", exp_line %in% 17:20 ~ "EXPIV")) %>% # add experiment number info
+                mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% # add host cell line info
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2",
+                                            exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv")) %>%
+                mutate(mut_cat = case_when((allele_freq < 0.01) ~ "Unreliable",
+                                        (allele_freq >= 0.01 & allele_freq < 0.05) ~ "Sporadic", 
+                                        (allele_freq >= 0.05 & allele_freq < 0.5) ~ "Minority",
+                                        (allele_freq >= 0.5 & allele_freq < 0.99) ~ "Majority", 
+                                        (allele_freq >= 0.99) ~ "Fixated"))
+
+variants <- variants_ann %>% filter(!duplicated(variant_id))
+
+
+# set the ggplot variables
+
+gg_var_list <- list(EXPIII = list(line_palette = c("#ff00ff", "#ff2400", "#6600cc", "#0000ff"), break_step = 50),
+                    EXPIV = list(line_palette = c("#68FF00", "#22E9AA", "#0DD100", "#009163"), break_step = 5))
+
+gg_size_list <- list(ggplot = list(title.size = 50, axis.title.size = 45, axis.text.size = 40, legend.title.size = 35, legend.text.size = 30, strip.text.x.size = 35),
+                    plotly = list(title.size = 25, axis.title.size = 20, axis.text.size = 10, legend.title.size = 20, legend.text.size = 15, strip.text.x.size = 20))
+
+# reordering the variant dataframe
+
+# variants_ann <- variants_ann[,-match(c("chrom", "loss_of_function", "nonsense_mediated_decay", "mut_3_context", "mut_5_context", "mut_info"), colnames(variants_ann))]
+# variants_ann <- variants_ann[,c("exp", "host_line", "exp_line", "passage", "variant_id", "genomic_pos", "ref_allele", "alt_allele", "mut_type", "allele_freq", "mut_cat", "feature_id", "feature", "feature_range", "ORF", "annotation_id", "impact", "effect", "aa_change", "loc_in_cds", "loc_in_protein", "mut_context")]
+
+
+# facors
+
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+mut_cat_factor <- c("Sporadic", "Minority", "Majority", "Fixated")
+
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+
+```
+
+
+
+In this paper, four line of evidence is suggested to reject the drift hypothesis outlined by the author. The first evidence suggests that under the drift hypothesis we would expect to see higher number of synonymous than
+non-synonymous mutations. First let's plot the number of these mutations types for each experiment and each mutation category.
+
+## Raw data 
+
+Let's first take a look at the accumulation of synonymous and nonsynonymous mutations over time.
+
+```{r mutation accumulation plot stratified by translational impact, results=T}
+
+
+plt_type <- "plotly"
+
+for (experiment in unique(variants$exp)){
+
+    counts <- variants %>%
+        filter(exp == experiment) %>%
+        mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+        mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+        filter(effect_simplified != "U") %>%
+        group_by(exp_line, passage, mut_cat, effect_simplified) %>%
+        count() %>%
+        mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+        dplyr::rename(mut_count = n) %>%
+        mutate_at(c(1,3,4,6), as.factor) %>%
+        mutate(mut_cat = factor(mut_cat, levels = c("Sporadic", "Minority", "Majority", "Fixated"))) %>%
+        mutate_at(c(2,5), as.numeric) 
+    
+    
+    fig <- counts %>%  
+        ggplot(aes(x=passage, y = mut_count, color = exp_line, linetype=effect_simplified)) +
+        geom_line(size=1) +
+        facet_wrap(~mut_cat, scales = "free")+
+        labs(x="\nPassage", y= "Mutation Count\n", title = paste0("Mutation Accumulation in ", experiment, "\n"))+
+        scale_color_manual(name = "Virus Line", values = gg_var_list[[experiment]][["line_palette"]]) +
+        scale_linetype_manual(name = "Translational Effect", , values = c("dashed", "solid")) +
+        theme_bw() +
+        theme(plot.title = element_text(size = gg_size_list[[plt_type]][["title.size"]], hjust = 0.5),
+        axis.title = element_text(size = gg_size_list[[plt_type]][["axis.title.size"]]),
+        axis.text.x = element_text(size = gg_size_list[[plt_type]][["axis.text.size"]], angle = 90),
+        axis.text.y = element_text(size = gg_size_list[[plt_type]][["axis.text.size"]]),
+        legend.title = element_text(size=gg_size_list[[plt_type]][["legend.title.size"]]),
+        legend.text = element_text(size = gg_size_list[[plt_type]][["legend.text.size"]]))
+
+    print(fig)
+
+    # save pngs
+
+    pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/jeffrey-barrick/syn_vs_nonsyn_", experiment, ".pdf")
+    , width = 21, height = 21)
+    print(fig)
+    dev.off()
+}
+
+```
+
+
+## Characterization of HIV-1 genome 
+
+Let's see what are the chances of a point mutation in the protein-coding regions of HIV-1 to be synonymous vs nonsynonymous
+and subsequently normalize all these counts base on that.
+
+
+```{r number of all possible mutations + percentage of synonymous ones, results=T}
+
+# read in ancestral reference sequence 
+fastaFile <- readDNAStringSet("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/reference/plasmid/hiv_plasmid_ref_genome.fasta")
+seq_name = names(fastaFile)
+sequence = paste(fastaFile)
+
+
+# read in feature coordinate data
+
+features <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv", sep = "\t", header = T)
+
+# by looking at the features list:
+
+features2 <- data.frame(name = c("gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef"),
+                        start = c(790, 2085, 5041, 5559, 5830, 5969, 6061, 6221, 8369+2-1, 8369+3-1, 8787),
+                        end = c(2292, 5096, 5619, 5849, 6044-2, 6044-1, 6306, 8785, 8414, 8643, 9407))
+
+# check
+# (features2$end-features2$start+1)/3
+
+
+
+# make objects containing bases and aas
+bases <- c("A", "T", "C", "G")
+aa <- unique(GENETIC_CODE)
+
+
+gene_summary <- data.frame()
+aa_summary <- data.frame()
+
+for (gene in features2$name){ 
+    # counters and value containers
+    syn_count <- 0
+    nonsyn_count <- 0
+    aa_ref_composition <- c()
+    aa_alt_composition <- c()
+
+    start_pos <- features2$start[features2$name == gene]
+    end_pos <- features2$end[features2$name == gene]
+    gene_length <- end_pos - start_pos + 1
+    codon_count <- gene_length/3
+
+    # get the codons
+    codons <- substring(substring(sequence,start_pos, end_pos), seq(1, end_pos-start_pos+1, 3), seq(3, end_pos-start_pos+1, 3))
+
+    # iterate over the codons
+    for (i in 1:length(codons)){
+        
+        ref_codon = codons[i]
+        # GENETIC_CODE from biostrings
+        ref_aa <- GENETIC_CODE[[ref_codon]]
+
+        aa_ref_composition <- append(aa_ref_composition,ref_aa)
+
+        # iterate over possible mutations for each codon
+        for (j in 1:3){
+            mutation <- bases != str_sub(ref_codon, start = j, end = j)
+            for (k in bases[mutation]){
+                
+                alt_codon <- ref_codon
+                substring(alt_codon,j, j) <- k
+                alt_aa <- GENETIC_CODE[[alt_codon]]
+                
+                if (alt_aa == ref_aa){
+                    syn_count <- syn_count + 1
+                } else {
+                    nonsyn_count <- nonsyn_count + 1
+                    aa_alt_composition <- append(aa_alt_composition,alt_aa)
+                }
+            }   
+        }
+    } 
+    all_count <- syn_count + nonsyn_count
+    gene_summary <- rbind(gene_summary, c(gene, gene_length, syn_count, syn_count/all_count, nonsyn_count, nonsyn_count/all_count, all_count))
+    
+    # counts amino acids in reference and their possibilities to be produced
+    aa_ref_composition <- factor(aa_ref_composition, levels = aa)
+    aa_ref_composition_tbl <- table(aa_ref_composition)
+
+    aa_alt_composition <- factor(aa_alt_composition, levels = aa)
+    aa_alt_composition_tbl <- table(aa_alt_composition)
+
+    aa_summary <- rbind(aa_summary, c(gene, "ref_composition", as.integer(aa_ref_composition_tbl)))
+    aa_summary <- rbind(aa_summary, c(gene, "alt_composition", as.integer(aa_alt_composition_tbl)))
+}
+
+colnames(gene_summary) <- c("gene", "gene_length", "synonymous_count", "synonymous_percentage", "nonsynonymous_count", "nonsynonymous_percentage", "all_count")
+colnames(aa_summary) <- c("gene", "mode", aa)
+
+
+
+datatable(gene_summary, filter = "bottom", caption = "Gene-level summary of Positional Synonymity")
+
+
+gene_summary %<>% mutate_at(2:ncol(gene_summary), as.numeric)
+
+
+
+datatable(as.data.frame(colMeans(gene_summary[,c(4,6)])), filter = "bottom", caption = "Genome-level summary of Positional Synonymity", colnames = "Mean")
+
+
+
+aa_summary %<>% 
+    mutate_at(3:ncol(aa_summary), as.numeric)
+
+aa_summary$sum <- rowSums(aa_summary[,3:ncol(aa_summary)])
+
+
+
+mypaste <- function(x,y) paste(x, "(%", y, ")", sep="")
+
+# percentage of aa throughout the genome
+datatable(as.data.frame(round(colMeans(round(aa_summary[,3:(ncol(aa_summary)-1)]/aa_summary[,ncol(aa_summary)]*100, 1)),2)),
+        filter = "bottom", caption = "Genome_level Amino Acid Composition", colnames = "Percent")
+
+
+# percentage and count of aa per gene
+aa_summary[,3:(ncol(aa_summary)-1)] <- mapply(mypaste, aa_summary[,3:(ncol(aa_summary)-1)], round(aa_summary[,3:(ncol(aa_summary)-1)]/aa_summary[,ncol(aa_summary)]*100, 1))
+
+datatable(aa_summary, filter = "bottom", caption = "Gene_level Amino Acid Composition")
+
+
+
+```
+
+
+
+
+## dN/dS Analysis
+
+
+### Per Gene Plot
+
+In this analysis I try to obtain and comapre the dN/dS measurements for each gene separately. We would like to see how they change over time, how they compare between the two environments or the two experiments.
+
+!! Due to high number of plots view them as pdf in the designated direcotry. !!
+```{r gene dn/ds,results=T}
+
+# plot the difference of synonymous and non-synonymous mutations
+plt_type <- "plotly"
+
+
+# prepare the synonymous and nonsynonymous likelihoods data frame for processing
+gene_summary %<>%
+            select(!c("synonymous_percentage", "nonsynonymous_percentage"))
+
+
+gene_summary <- 
+            rbind(gene_summary, 
+            c("tat", colSums(gene_summary[gene_summary$gene %in% c("tat1", "tat2"),2:ncol(gene_summary)])),
+            c("rev", colSums(gene_summary[gene_summary$gene %in% c("rev1", "rev2"),2:ncol(gene_summary)])))
+
+gene_summary <- gene_summary[!(gene_summary$gene %in% c("tat1", "tat2", "rev1", "rev2")),]
+
+gene_summary %<>%
+        mutate(gene = factor(gene, levels = gene_factor)) %>%
+        mutate_at(2:ncol(gene_summary), as.numeric)
+
+
+# iterate over genes and experiments and plot
+
+for (gene in gene_summary$gene){
+    
+    
+    syn_pos <- gene_summary$synonymous_count[gene_summary$gene == gene]
+    nonsyn_pos <- gene_summary$nonsynonymous_count[gene_summary$gene == gene]
+
+    for (experiment in unique(variants$exp)){
+        counts <- variants %>%
+            mutate(mut_cat = factor(mut_cat, levels = mut_cat_factor)) %>%
+            filter(exp == experiment) %>%
+            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+            filter(feature == gene) %>%
+            mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+            group_by(exp_line, passage, mut_cat, effect_simplified, .drop=F) %>%
+            count() %>%
+            dplyr::rename(mut_count = n) %>%
+            mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+            mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+            mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+            mutate(host_line = factor(host_line, levels = c("MT2", "MT4")))
+        
+        counts_plt <- 
+            counts %>%
+            spread(key = effect_simplified, mut_count) %>%
+            mutate(S = case_when(S == 0 ~ S+0.01 , S !=0 ~ S)) %>%
+            mutate(`dN/dS` = log((N/nonsyn_pos)/(S/syn_pos))) 
+        
+        counts_plt$`dN/dS`[is.infinite(counts_plt$`dN/dS`) | is.nan(counts_plt$`dN/dS`)] <- 0
+        
+        
+        fig <- counts_plt %>%  
+            ggplot(aes(x=passage, y = `dN/dS`, color = exp_line)) +
+            geom_line(size=1) +
+            facet_wrap(~mut_cat, scales = "free")+
+            labs(x="\nPassage", y= "Log2(dN/dS)\n", color = "Virus Line", title = paste0("dN/dS Over Time\n in ", experiment, " for ", gene, "\n"))+
+            scale_color_manual(values = gg_var_list[[experiment]][["line_palette"]]) +
+            scale_y_continuous() +
+            geom_hline(yintercept = 0, color = "black", size = 2) +
+            theme_bw() +
+            theme(plot.title = element_text(size = gg_size_list[[plt_type]][["title.size"]], hjust = 0.5),
+            axis.title = element_text(size = gg_size_list[[plt_type]][["axis.title.size"]]),
+            axis.text.x = element_text(size = gg_size_list[[plt_type]][["axis.text.size"]], angle = 90),
+            axis.text.y = element_text(size = gg_size_list[[plt_type]][["axis.text.size"]]),
+            legend.title = element_text(size=gg_size_list[[plt_type]][["legend.title.size"]]),
+            legend.text = element_text(size = gg_size_list[[plt_type]][["legend.text.size"]]))
+
+        # save pdfs
+
+        pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/jeffrey-barrick/dn_ds_", experiment, "_", gene, ".pdf")
+        , width = 21, height = 21)
+        print(fig)
+        dev.off()
+    }
+}
+
+
+
+
+
+```
+
+
+
+
+
+
+### Per Gene Statistical Significance
+
+#### positive vs purifying selection in each virus line
+
+```{r, results=T}
+
+t_test_res_all <- data.frame()
+for (gene in gene_summary$gene){
+    
+    
+    syn_pos <- gene_summary$synonymous_count[gene_summary$gene == gene]
+    nonsyn_pos <- gene_summary$nonsynonymous_count[gene_summary$gene == gene]
+
+    for (experiment in unique(variants$exp)){
+        counts <- variants %>%
+            mutate(mut_cat = factor(mut_cat, levels = mut_cat_factor)) %>%
+            filter(exp == experiment) %>%
+            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+            filter(feature == gene) %>%
+            mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+            group_by(exp_line, passage, mut_cat, effect_simplified, .drop=F) %>%
+            count() %>%
+            dplyr::rename(mut_count = n) %>%
+            mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+            mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+            mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+            mutate(host_line = factor(host_line, levels = c("MT2", "MT4"))) %>%
+            spread(key = effect_simplified, mut_count) %>%
+            mutate(S = case_when(S == 0 ~ S+0.01 , S !=0 ~ S)) %>%
+            mutate(`dN/dS` = log((N/nonsyn_pos)/(S/syn_pos)))
+         
+        
+        counts$`dN/dS`[is.infinite(counts$`dN/dS`) | is.nan(counts$`dN/dS`)] <- 0
+        
+        for (mut_cat in mut_cat_factor){
+            for (host_line in unique(counts$host_line)){
+                dnds <- counts$`dN/dS`[counts$mut_cat == mut_cat & counts$host_line == host_line]
+                
+                t_test_res <- t.test(dnds, mu = 0, alternative = "two.sided")
+                
+                t_test_res_all <- rbind(t_test_res_all, c(experiment, host_line, gene, mut_cat, round(mean(dnds),3), t_test_res$p.value))
+            
+        }
+        }
+        
+
+    }
+}
+
+colnames(t_test_res_all) <- c("exp", "host", "gene", "mut_cat", "mean(dN/dS)", "p-value")
+
+datatable(t_test_res_all, filter = "bottom")
+
+
+
+
+```
+
+
+
+#### dN/dS level tests between each virus line group
+
+```{r, results = T}
+
+
+
+
+
+t_test_res_all <- data.frame()
+for (gene in gene_summary$gene){
+    print(gene)
+    
+    syn_pos <- gene_summary$synonymous_count[gene_summary$gene == gene]
+    nonsyn_pos <- gene_summary$nonsynonymous_count[gene_summary$gene == gene]
+
+    
+    counts <- variants %>%
+        mutate(mut_cat = factor(mut_cat, levels = mut_cat_factor)) %>%
+        mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+        mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+        filter(feature == gene) %>%
+        mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+        filter(exp != "EXPIII" | passage <= 510) %>%
+        mutate(passage = factor(passage)) %>%
+        group_by(exp_line, passage, mut_cat, effect_simplified, .drop=F) %>%
+        count() %>%
+        dplyr::rename(mut_count = n) %>%
+        mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+        mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+        mutate(host_line = factor(host_line, levels = c("MT2", "MT4"))) %>%
+        spread(key = effect_simplified, mut_count) %>%
+        mutate(S = case_when(S == 0 ~ S+0.01 , S !=0 ~ S)) %>%
+        mutate(`dN/dS` = log((N/nonsyn_pos)/(S/syn_pos)))
+    
+    
+    counts$`dN/dS`[is.infinite(counts$`dN/dS`) | is.nan(counts$`dN/dS`)] <- 0
+    
+    # counts_deformed[counts_deformed$exp_line == "III_MT-2" & counts_deformed$passage == 30 & counts_deformed$mut_cat == "Sporadic",]
+    
+    counts_deformed <- counts %>% 
+                select(!c("N", "S")) %>%
+                mutate(exp_line = case_when(exp_line %in% exp_line_factor[1:2] ~ "III_MT-2",
+                                            exp_line %in% exp_line_factor[3:4] ~ "III_MT-4",
+                                            exp_line %in% exp_line_factor[4:8] ~ "IV_MT-2")) %>%
+                mutate(exp_line = factor(exp_line, levels = c("III_MT-2", "III_MT-4", "IV_MT-2"))) %>%
+                select(-"host_line") %>%
+                group_by(exp_line, passage, mut_cat) %>%
+                summarise(`dN/dS mean` = mean(`dN/dS`)) %>%
+                ungroup()
+
+    for (mut_cat in mut_cat_factor){
+        
+        dnds1 <- counts_deformed$`dN/dS mean`[counts_deformed$mut_cat == mut_cat & counts_deformed$exp_line == "III_MT-2"]
+        dnds2 <- counts_deformed$`dN/dS mean`[counts_deformed$mut_cat == mut_cat & counts_deformed$exp_line == "III_MT-4"]
+        dnds3 <- counts_deformed$`dN/dS mean`[counts_deformed$mut_cat == mut_cat & counts_deformed$exp_line == "IV_MT-2"]
+
+        t_test_res1 <- t.test(dnds1, dnds2, paired = T, alternative = "two.sided")
+        
+        t_test_res_all <- rbind(t_test_res_all, c("III_MT-2 vs III_MT-4", gene, mut_cat, round(mean(dnds1),3), round(mean(dnds2),3), t_test_res1$p.value))
+
+        t_test_res2 <- t.test(dnds1, dnds3, paired = T, alternative = "two.sided")
+        
+        t_test_res_all <- rbind(t_test_res_all, c("III_MT-2 vs IV_MT-2", gene, mut_cat, round(mean(dnds1),3), round(mean(dnds3),3), t_test_res2$p.value))
+    
+        t_test_res3 <- t.test(dnds2, dnds3, paired = T, alternative = "two.sided")
+        
+        t_test_res_all <- rbind(t_test_res_all, c("III_MT-4 vs IV_MT-2", gene, mut_cat, round(mean(dnds2),3), round(mean(dnds3),3), t_test_res3$p.value))
+    
+    }
+    
+
+
+}
+
+colnames(t_test_res_all) <- c("comparison", "gene", "mut_cat", "mean(dN/dS) 1st", "mean(dN/dS) 2nd", "p-value")
+
+datatable(t_test_res_all, filter = "bottom")
+
+
+
+
+
+```
+
+
+
+
+### Whole Genome Plot
+
+let's plot the dN/dS trends over time for the whole HIV-1 genome
+
+```{r whole genome dn/ds,results=T}
+
+# plot the difference eof synonymous and non-synonymous mutations
+plt_type <- "plotly"
+
+# get the synonymous and nonsynonymous likelihoods number for processing entire genome
+
+
+
+syn_pos <- as.numeric(sum(gene_summary[,3]))
+nonsyn_pos <- as.numeric(sum(gene_summary[,4]))
+
+# iterate over experiments and plot
+
+for (experiment in unique(variants$exp)){
+    counts <- variants %>%
+        mutate(mut_cat = factor(mut_cat, levels = mut_cat_factor)) %>%
+        filter(exp == experiment) %>%
+        mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+        mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+        filter(effect_simplified != "U") %>%
+        mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+        group_by(exp_line, passage, mut_cat, effect_simplified, .drop=F) %>%
+        count() %>%
+        dplyr::rename(mut_count = n) %>%
+        mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+        mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+        mutate(host_line = factor(host_line, levels = c("MT2", "MT4")))
+    
+    counts_plt <- 
+        counts %>%
+        spread(key = effect_simplified, mut_count) %>%
+        mutate(S = case_when(S == 0 ~ S+0.01 , S !=0 ~ S)) %>%
+        mutate(`dN/dS` = log((N/nonsyn_pos)/(S/syn_pos))) 
+    
+    counts_plt$`dN/dS`[is.infinite(counts_plt$`dN/dS`) | is.nan(counts_plt$`dN/dS`)] <- 0
+    
+    
+    fig <- counts_plt %>%  
+        ggplot(aes(x=passage, y = `dN/dS`, color = exp_line)) +
+        geom_line(size=1) +
+        facet_wrap(~mut_cat, scales = "free")+
+        labs(x="\nPassage", y= "Log2(dN/dS)\n", color = "Virus Line", title = paste0("dN/dS Over Time\n in ", experiment, " for the Whole Genome", "\n"))+
+        scale_color_manual(values = gg_var_list[[experiment]][["line_palette"]]) +
+        scale_y_continuous() +
+        geom_hline(yintercept = 0, color = "black", size = 2) +
+        theme_bw() +
+        theme(plot.title = element_text(size = gg_size_list[[plt_type]][["title.size"]], hjust = 0.5),
+        axis.title = element_text(size = gg_size_list[[plt_type]][["axis.title.size"]]),
+        axis.text.x = element_text(size = gg_size_list[[plt_type]][["axis.text.size"]], angle = 90),
+        axis.text.y = element_text(size = gg_size_list[[plt_type]][["axis.text.size"]]),
+        legend.title = element_text(size=gg_size_list[[plt_type]][["legend.title.size"]]),
+        legend.text = element_text(size = gg_size_list[[plt_type]][["legend.text.size"]]))
+
+    print(fig)
+
+    # save pngs
+
+    pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/jeffrey-barrick/dn_ds_", experiment, "_whole_genome", ".pdf")
+    , width = 21, height = 21)
+    print(fig)
+    dev.off()
+    
+}
+
+
+
+
+
+```
+
+
+
+
+
+### Whole Genome Statistical Significance
+
+#### positive vs purifying selection in each virus line
+
+```{r, results=T}
+
+
+
+
+syn_pos <- as.numeric(sum(gene_summary[,3]))
+nonsyn_pos <- as.numeric(sum(gene_summary[,4]))
+
+
+t_test_res_all <- data.frame()
+
+for (experiment in unique(variants$exp)){
+    counts <- variants %>%
+        mutate(mut_cat = factor(mut_cat, levels = mut_cat_factor)) %>%
+        filter(exp == experiment) %>%
+        mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+        mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+        mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+        group_by(exp_line, passage, mut_cat, effect_simplified, .drop=F) %>%
+        count() %>%
+        dplyr::rename(mut_count = n) %>%
+        mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+        mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+        mutate(host_line = factor(host_line, levels = c("MT2", "MT4"))) %>%
+        spread(key = effect_simplified, mut_count) %>%
+        mutate(S = case_when(S == 0 ~ S+0.01 , S !=0 ~ S)) %>%
+        mutate(`dN/dS` = log((N/nonsyn_pos)/(S/syn_pos)))
+        
+    
+    counts$`dN/dS`[is.infinite(counts$`dN/dS`) | is.nan(counts$`dN/dS`)] <- 0
+    
+    for (mut_cat in mut_cat_factor){
+        for (host_line in unique(counts$host_line)){
+            dnds <- counts$`dN/dS`[counts$mut_cat == mut_cat & counts$host_line == host_line]
+            
+            t_test_res <- t.test(dnds, mu = 0, alternative = "two.sided")
+            
+            t_test_res_all <- rbind(t_test_res_all, c(experiment, host_line, mut_cat, round(mean(dnds),3), t_test_res$p.value))
+        
+    }
+    }
+    
+
+}
+
+
+colnames(t_test_res_all) <- c("exp", "host", "mut_cat", "mean(dN/dS)", "p-value")
+
+datatable(t_test_res_all, filter = "bottom")
+
+
+
+
+```
+
+
+
+#### dN/dS level tests between each virus line group
+
+```{r, results = T}
+
+
+
+
+
+t_test_res_all <- data.frame()
+
+counts <- variants %>%
+    filter(exp != "EXPIII" | passage <= 510) %>%
+    mutate(mut_cat = factor(mut_cat, levels = mut_cat_factor)) %>%
+    mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+    mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+    mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+    group_by(exp_line, passage, mut_cat, effect_simplified, .drop=F) %>%
+    count() %>%
+    dplyr::rename(mut_count = n) %>%
+    mutate(host_line = ifelse(exp_line %in% c("MT-4_1","MT-4_2"), "MT4", "MT2")) %>%
+    mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+    mutate(effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+    mutate(host_line = factor(host_line, levels = c("MT2", "MT4"))) %>%
+    spread(key = effect_simplified, mut_count) %>%
+    mutate(S = case_when(S == 0 ~ S+0.01 , S !=0 ~ S)) %>%
+    mutate(`dN/dS` = log((N/nonsyn_pos)/(S/syn_pos)))
+
+
+counts$`dN/dS`[is.infinite(counts$`dN/dS`) | is.nan(counts$`dN/dS`)] <- 0
+
+# counts_deformed[counts_deformed$exp_line == "III_MT-2" & counts_deformed$passage == 30 & counts_deformed$mut_cat == "Sporadic",]
+
+counts_deformed <- counts %>% 
+            select(!c("N", "S")) %>%
+            mutate(exp_line = case_when(exp_line %in% exp_line_factor[1:2] ~ "III_MT-2",
+                                        exp_line %in% exp_line_factor[3:4] ~ "III_MT-4",
+                                        exp_line %in% exp_line_factor[4:8] ~ "IV_MT-2")) %>%
+            mutate(exp_line = factor(exp_line, levels = c("III_MT-2", "III_MT-4", "IV_MT-2"))) %>%
+            select(-"host_line") %>%
+            group_by(exp_line, passage, mut_cat) %>%
+            summarise(`dN/dS mean` = mean(`dN/dS`)) %>%
+            ungroup()
+
+for (mut_cat in mut_cat_factor){
+
+    dnds1 <- counts_deformed$`dN/dS mean`[counts_deformed$mut_cat == mut_cat & counts_deformed$exp_line == "III_MT-2"]
+    dnds2 <- counts_deformed$`dN/dS mean`[counts_deformed$mut_cat == mut_cat & counts_deformed$exp_line == "III_MT-4"]
+    dnds3 <- counts_deformed$`dN/dS mean`[counts_deformed$mut_cat == mut_cat & counts_deformed$exp_line == "IV_MT-2"]
+
+    t_test_res1 <- t.test(dnds1, dnds2, paired = T, alternative = "two.sided")
+    
+    t_test_res_all <- rbind(t_test_res_all, c("III_MT-2 vs III_MT-4", mut_cat, round(mean(dnds1),3), round(mean(dnds2),3), t_test_res1$p.value))
+
+    t_test_res2 <- t.test(dnds1, dnds3, paired = T, alternative = "two.sided")
+    
+    t_test_res_all <- rbind(t_test_res_all, c("III_MT-2 vs IV_MT-2", mut_cat, round(mean(dnds1),3), round(mean(dnds3),3), t_test_res2$p.value))
+
+    t_test_res3 <- t.test(dnds2, dnds3, paired = T, alternative = "two.sided")
+    
+    t_test_res_all <- rbind(t_test_res_all, c("III_MT-4 vs IV_MT-2", mut_cat, round(mean(dnds2),3), round(mean(dnds3),3), t_test_res3$p.value))
+
+}
+    
+
+
+
+
+colnames(t_test_res_all) <- c("comparison", "mut_cat", "mean(dN/dS) 1st", "mean(dN/dS) 2nd", "p-value")
+
+datatable(t_test_res_all, filter = "bottom")
+
+
+
+
+
+```
+
+
+
+
+Next step would be to profile the nonsynonymous mutations in terms of the amino acid changes that they cause and profile the synonymous mutations 
+in terms of the codon usage changes (one can test this with permutation of mutations and simulating data)

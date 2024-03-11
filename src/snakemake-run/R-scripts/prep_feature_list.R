@@ -86,5 +86,5 @@ features_of_interest <- features_of_interest[,-7]
 
 # write the table
 
-write.table(features_of_interest, file = "/home/amovas/data/genome-evo-proj/results/tables/2-pp/cds_feature_list.tsv", sep = "\t", row.names = F, quote = F)
+write.table(features_of_interest, file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv", sep = "\t", row.names = F, quote = F)
 

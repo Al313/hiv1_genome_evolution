@@ -10,13 +10,13 @@ library(stringr)
 
 # read in cds feature list 
 
-features_cds <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/2-pp/cds_feature_list.tsv", 
+features_cds <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv", 
                             sep = "\t", header = T, stringsAsFactors = F)
 
 
 # read in annotated variants in vcf format to extract the INFO filed
 
-ann_var_vcf <- read.vcfR(file = "/home/amovas/data/genome-evo-proj/results/tables/2-pp/all_variants.ann.vcf.gz")
+ann_var_vcf <- read.vcfR(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz")
 ann_var_info <- vcfR::INFO2df(ann_var_vcf)
 #ann_var_info <- ann_var_info[,-(6:7)]
 #head(ann_var_info[ann_var_info$AF>= 0.9,], n = 1)
@@ -24,7 +24,7 @@ ann_var_info <- vcfR::INFO2df(ann_var_vcf)
 
 # read in the variant table
 
-ann_var_df <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/2-pp/all_variants.ann.vcf.gz", header = F,
+ann_var_df <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz", header = F,
                           sep = "\t", stringsAsFactors = F)
 colnames(ann_var_df) <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
 ann_var_df <- ann_var_df[,1:5]
@@ -117,7 +117,7 @@ ann_var_processed <- ann_var_processed[order(ann_var_processed$genomic_pos,ann_v
 ann_var_processed[,1] <- "NL43_ann_wk0virusPassRef_plasmid"
 
 # save the data frame
-write.table(ann_var_processed, file = gzfile("/home/amovas/data/genome-evo-proj/results/tables/2-pp/all_annotated_variants.tsv.gz"),
+write.table(ann_var_processed, file = gzfile("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"),
     sep = "\t", quote = F, row.names = F)
 
 

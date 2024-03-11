@@ -13,7 +13,7 @@ sequence = paste(fastaFile)
 
 
 # read in the variant file
-variants <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/2-pp/all_variants.csv.gz", sep = ",", stringsAsFactors = F, header = T)
+variants <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.csv.gz", sep = ",", stringsAsFactors = F, header = T)
 
 # remove the large deletion variations
 variants<-variants[variants$mut_type!= "LD",]
@@ -88,7 +88,7 @@ colnames(vcf_variants)[1] <- paste0("#",colnames(vcf_variants)[1])
 #sed '11673q;d' all.variants.ann.vcf
 
 
-cat(vcf_header, file = '/home/amovas/data/genome-evo-proj/results/tables/2-pp/all_variants.vcf', sep = '\n')
+cat(vcf_header, file = '/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.vcf', sep = '\n')
 
-write.table(vcf_variants, file = '/home/amovas/data/genome-evo-proj/results/tables/2-pp/all_variants.vcf', sep = "\t", row.names = F, quote = F, append = T)  
+write.table(vcf_variants, file = '/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.vcf', sep = "\t", row.names = F, quote = F, append = T)  
 

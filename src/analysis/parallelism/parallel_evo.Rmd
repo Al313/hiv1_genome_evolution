@@ -1,0 +1,1227 @@
+---
+title:  
+    "Parallel Evolution Analysis"
+date: 
+    "Oct 27th, 2023"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        toc: true
+        toc_depth: 3
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+---
+
+
+
+
+```{r setting global chunk parameters, include=FALSE}
+
+# options for code chunk and output inclusion 
+knitr::opts_chunk$set(
+  message = FALSE, echo = TRUE, warning=FALSE, results = "hide"
+)
+
+# options for figures
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 8, fig.align = "center"
+)
+
+# options(scipen=999)
+
+# margin of plotly
+m <- list(
+  l = 150,
+  r = 150,
+  b = 100,
+  t = 100,
+  pad = 4
+)
+
+
+```
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("plotly")
+library("ggplot2")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("ggvenn")
+library("VennDiagram")
+library("ggVennDiagram")
+library("lsr")
+
+```
+
+
+# Introduction
+
+In this document I will try to provide an overview of parallel evolution among different lines of each LTEE experiment. I'll try to dissect the extent of parallelism in HIV-1 evolution and depict a detailed
+picture of its characteristics.
+
+
+
+
+```{r read-in the data}
+
+# read in the data
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz", 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+
+# account for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+
+
+variants_ann$exp_line[variants_ann$exp_line == 18 & variants_ann$passage > 350] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
+
+
+## prepare data
+
+variants_ann %<>% 
+                filter(coverage >= 500) %>%
+                mutate(exp = case_when(exp_line %in% 13:16 ~ "EXPIII", exp_line %in% 17:20 ~ "EXPIV")) %>% # add experiment number info
+                mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% # add host cell line info
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2",
+                                            exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv")) %>%
+                mutate(mut_cat = case_when((allele_freq < 0.01) ~ "Unreliable",
+                                        (allele_freq >= 0.01 & allele_freq < 0.05) ~ "Sporadic", 
+                                        (allele_freq >= 0.05 & allele_freq < 0.5) ~ "Minority",
+                                        (allele_freq >= 0.5 & allele_freq < 0.99) ~ "Majority", 
+                                        (allele_freq >= 0.99) ~ "Fixated"))
+
+variants <- variants_ann %>% filter(!duplicated(variant_id))
+
+
+
+
+# facors
+
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+mut_cat_factor <- c("Sporadic", "Minority", "Majority", "Fixated")
+
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+
+## data.table option
+
+tbl_opt_list <- list(pageLength = 10, columnDefs = list(list(targets = 1, render = JS(
+    "function(data, type, row, meta) {",
+    "return type === 'display' && data.length > 10 ?",
+    "'<span title=\"' + data + '\">' + data.substr(0, 10) + '...</span>' : data;",
+    "}"))))
+
+
+```
+
+# Overview
+
+## EXPIII
+
+```{r throughout expiii data (venn diagram), results=T}
+
+experiment <- "EXPIII"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 560
+
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- 
+                variants %>%
+                filter(exp == experiment) %>%
+                filter(allele_freq >= threshold) %>%
+                select(c(exp_line,mut_info)) %>%
+                distinct()
+
+
+#table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts_list) +
+        labs(title = paste0(category, " Mutations throughout the ", experiment))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+```
+
+
+```{r throughout expiii data (table), results=T}
+variants_expiii_subset <- 
+                        variants %>% 
+                        filter(exp == experiment) %>%
+                        filter(allele_freq >= threshold) %>%
+                        select(c("mut_type", "feature_id", "feature", "feature_range", "ORF", "effect", "impact", "aa_change", "loc_in_cds", "loc_in_protein", "loss_of_function", "nonsense_mediated_decay", "mut_context", "mut_3_context", "mut_5_context", "mut_info")) %>%
+                        distinct()
+
+
+counts_sep_df <- as.data.frame(table(muts, names(muts)))
+counts_sep_df %<>% spread(Var2, Freq)
+counts_sum_df <- as.data.frame(table(muts))
+
+
+counts_df <- merge(counts_sep_df, counts_sum_df, by = "muts")
+
+
+counts_df_complete <- merge(counts_df, variants_expiii_subset, by.x = "muts", by.y = "mut_info")
+
+
+counts_df_complete <- counts_df_complete[order(counts_df_complete$Freq, decreasing = T),]
+rownames(counts_df_complete) <- 1:nrow(counts_df_complete)
+
+
+datatable(counts_df_complete)
+
+
+```
+
+
+
+```{r number of maj mutations throughout}
+
+# define a function to find instances of unique values in a given list
+unic <- function(list){
+        return(list[!(duplicated(list, fromLast = F) | duplicated(list, fromLast = T))])
+}
+
+
+# get numbers for in-text reporting
+
+a <- length(unique(throughout_maj$mut_info))
+b <- length(unic(throughout_maj$mut_info))
+
+
+```
+
+
+> We observe a total of `r a` unique `r category` mutations across the four evolution lines of `r experiment` throughout the experiment out of which `r b` are only seen in one line (`r b/a`%)
+
+
+
+
+
+
+```{r end passage expiii data (venn diagram), results=T}
+# uniqueness of majority mutations present at the end passage
+end_maj <- 
+        variants %>%
+        filter(exp == experiment) %>%
+        filter(allele_freq >= threshold) %>%
+        filter(passage == end_passage) %>%
+        select(c(exp_line,mut_info)) %>%
+        distinct()
+
+
+
+#table(as.numeric(table(par$mut_info)))
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts_list) +
+        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+```
+
+
+```{r end passage expiii data (table), results=T}
+variants_expiii_subset <- 
+                        variants %>% 
+                        filter(exp == experiment) %>%
+                        filter(allele_freq >= threshold) %>%
+                        select(c("mut_type", "feature_id", "feature", "feature_range", "ORF", "effect", "impact", "aa_change", "loc_in_cds", "loc_in_protein", "loss_of_function", "nonsense_mediated_decay", "mut_context", "mut_3_context", "mut_5_context", "mut_info")) %>%
+                        distinct()
+
+
+counts_sep_df <- as.data.frame(table(muts, names(muts)))
+counts_sep_df %<>% spread(Var2, Freq)
+counts_sum_df <- as.data.frame(table(muts))
+
+
+counts_df <- merge(counts_sep_df, counts_sum_df, by = "muts")
+
+
+counts_df_complete <- merge(counts_df, variants_expiii_subset, by.x = "muts", by.y = "mut_info")
+
+
+counts_df_complete <- counts_df_complete[order(counts_df_complete$Freq, decreasing = T),]
+rownames(counts_df_complete) <- 1:nrow(counts_df_complete)
+
+
+datatable(counts_df_complete)
+
+
+```
+
+
+```{r number of maj mutations end passage}
+
+
+# get numbers for in-text reporting
+
+a <- length(unique(end_maj$mut_info))
+b <- length(unic(end_maj$mut_info))
+
+
+```
+
+
+> We observe a total of `r a` unique `r category` mutations across the four evolution lines of `r experiment` at passage `r end_passage` out of which `r b` are only seen in one line (`r b/a`%)
+
+
+### Evolution of single mutations
+
+```{r define plotting function}
+
+plot_mut_af <- function(data, mutations){
+
+
+        # check whether the inputted data is from expiii or expiv
+
+        if (any(data$host_line == "MT4")){
+                exp <- "EXPIII"
+                end_passage <- 570
+        } else {exp <- "EXPIV"
+                end_passage <- 510}
+
+        final_df <- data.frame()
+        for (mut in mutations){
+                
+                df <- data %>% filter(data$mut_info == mut)
+                
+                for (exp_line in unique(df$exp_line)){
+                        for (psg in seq(0,end_passage,10)){
+                                if (nrow(df[df$exp_line == exp_line & df$passage == psg,]) == 0){
+                                addition <- df[1,]
+                                addition[5] <- 0
+                                addition[7] <- psg
+                                addition[8] <- exp_line
+                                df <- rbind(df, addition)
+                        }
+                }
+                }
+                df <- df[order(df$exp_line, df$passage),]
+                
+                final_df <- rbind(final_df, df)
+        }
+
+        plt <- ggplot(final_df, aes(x=passage, y=allele_freq, color = exp_line)) +
+        facet_wrap(~ mut_info, ncol = 2) +
+        geom_line() +
+        labs(title = exp) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5))
+        
+        ggplotly(plt)
+}
+
+```
+
+
+```{r plot af evolution for certain mutations in EXPIII, results = T}
+
+
+plot_mut_af(variants[variants$exp == experiment,], c("6238_G_A", "9412_G_A", "9528_T_G"))
+
+
+
+```
+
+
+
+9412_G_A abruptly is removed from the population in line MT2_1. To see if possibly the rise of another mutation in the population
+might have caused this phenomena or not I looked at the allele frequency dynamics of majority mutations absent in passage 330 
+and present in 340 in line MT2_1.
+
+
+#### Sequencing coverage at the ends
+
+
+As you can see the 9528_T_G mutation in line MT4_2 (15 in lab) is missing in 2 passages. It looked suspicious and to check it I looked at the coverage at the end of the viral genome in those two samples. Indeed the problem seems to 
+be that this mutation is missed due to low coverage. However, since the average coverage of the amplicon D is high enough these samples are not selected for repeats. To further check how this problem can affect our data I looked at
+other mutations that happen very close to the end of viral genome. Below you can see their AF dynamics. As you can see this phenomenon is more rampant and can affect different mutations at different passages.  
+
+To address this problem we can either lower the coverage threshold for the ends of the virus or repeat these samples (probably not practical?). Also to further detect the low coverage at the end of the virus genome I added a new range to 
+quality assessment in addition to the range of the 5 amplicons: 5_end from 454 to 789 and 3_end from 9076 to 9626 and reran the quality assessment.
+
+
+> What should we do to address this issue?
+
+
+```{r end mutation af dynamics,results = T}
+
+plot_mut_af(variants[variants$exp == experiment,], c("484_T_C", "477_C_A", "9559_T_C", "9552_C_A"))
+
+
+```
+
+
+
+
+
+
+## EXPIV
+
+```{r throughout expiv data (venn diagram)}
+experiment <- "EXPIV"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 510
+
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- 
+                variants %>%
+                filter(exp == experiment) %>%
+                filter(allele_freq >= threshold) %>%
+                select(c(exp_line,mut_info)) %>%
+                distinct()
+
+
+# table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts_list) +
+        labs(title = paste0(category, " Mutations throughout the ", experiment))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+```
+
+
+```{r throughout expiv data (table), results=T}
+variants_expiv_subset <- 
+                        variants %>% 
+                        filter(exp == experiment) %>%
+                        filter(allele_freq >= threshold) %>%
+                        select(c("mut_type", "feature_id", "feature", "feature_range", "ORF", "effect", "impact", "aa_change", "loc_in_cds", "loc_in_protein", "loss_of_function", "nonsense_mediated_decay", "mut_context", "mut_3_context", "mut_5_context", "mut_info")) %>%
+                        distinct()
+
+
+counts_sep_df <- as.data.frame(table(muts, names(muts)))
+counts_sep_df %<>% spread(Var2, Freq)
+counts_sum_df <- as.data.frame(table(muts))
+
+
+counts_df <- merge(counts_sep_df, counts_sum_df, by = "muts")
+
+
+counts_df_complete <- merge(counts_df, variants_expiv_subset, by.x = "muts", by.y = "mut_info")
+
+
+counts_df_complete <- counts_df_complete[order(counts_df_complete$Freq, decreasing = T),]
+rownames(counts_df_complete) <- 1:nrow(counts_df_complete)
+
+
+datatable(counts_df_complete)
+
+
+```
+
+
+
+```{r number of maj mutations expiv throughout}
+
+
+# get numbers for in-text reporting
+
+a <- length(unique(throughout_maj$mut_info))
+b <- length(unic(throughout_maj$mut_info))
+
+
+
+```
+
+
+> We observe a total of `r a` unique `r category` mutations across the four evolution lines of `r experiment` throughout the experiment out of which `r b` are only seen in one line (`r b/a`%).
+
+
+
+
+
+
+```{r end passage expiv data (venn diagram), results=T}
+
+
+
+
+# uniqueness of majority mutations present at the end passage
+end_maj <- 
+        variants %>%
+        filter(exp == experiment) %>%
+        filter(allele_freq >= threshold) %>%
+        filter(passage == end_passage) %>%
+        select(c(exp_line,mut_info)) %>%
+        distinct()
+
+
+
+#table(as.numeric(table(par$mut_info)))
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggvenn(muts_list) +
+        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+```
+
+
+```{r end passage expiv data (table), results=T}
+
+counts_sep_df <- as.data.frame(table(muts, names(muts)))
+counts_sep_df %<>% spread(Var2, Freq)
+counts_sum_df <- as.data.frame(table(muts))
+
+
+counts_df <- merge(counts_sep_df, counts_sum_df, by = "muts")
+
+
+counts_df_complete <- merge(counts_df, variants_expiv_subset, by.x = "muts", by.y = "mut_info")
+
+
+counts_df_complete <- counts_df_complete[order(counts_df_complete$Freq, decreasing = T),]
+rownames(counts_df_complete) <- 1:nrow(counts_df_complete)
+
+
+datatable(counts_df_complete)
+
+
+```
+
+
+
+```{r number of maj mutations expiv end passage}
+
+
+# get numbers for in-text reporting
+
+a <- length(unique(end_maj$mut_info))
+b <- length(unic(end_maj$mut_info))
+
+# ddd <- variants$mut_info[variants$exp == experiment & variants$allele_freq >= threshold & variants$passage == end_passage]
+
+# sum(duplicated(ddd) | duplicated(ddd,fromLast=TRUE))
+
+
+```
+
+
+> We observe a total of `r a` unique `r category` mutations across the four evolution lines of `r experiment` at passage `r end_passage` out of which `r b` are only seen in one line (`r b/a`%)
+
+
+
+
+
+
+
+
+### Evolution of single mutations
+
+
+```{r plot af evolution for certain mutations in EXPIV, results = T}
+
+
+
+
+plot_mut_af(variants[variants$exp == experiment,], c("7700_G_A", "8910_G_A", "9412_G_A"))
+
+
+
+```
+
+
+
+
+
+
+
+
+
+## MT2 of EXPIII and EXPIV
+
+```{r throughout expiii/iv data (venn diagram), results = T}
+
+experiment <- "EXPIII/IV"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 510
+
+
+
+variants_all <- 
+                variants %>% 
+                filter(allele_freq >= threshold) %>% 
+                filter(str_detect(exp_line, pattern = "MT-2"))
+
+
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- variants_all %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+#table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+# visualization
+ggVennDiagram(muts_list) +
+        labs(title = paste0(category, " Mutations throughout the ", experiment))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+```
+
+```{r throughout expiii/iv data (table), results=T}
+
+counts_sep_df <- as.data.frame(table(muts, names(muts)))
+counts_sep_df %<>% spread(Var2, Freq)
+counts_sum_df <- as.data.frame(table(muts))
+
+
+counts_df <- merge(counts_sep_df, counts_sum_df, by = "muts")
+
+
+counts_df_complete <- merge(counts_df, variants_expiv_subset, by.x = "muts", by.y = "mut_info")
+
+
+counts_df_complete <- counts_df_complete[order(counts_df_complete$Freq, decreasing = T),]
+rownames(counts_df_complete) <- 1:nrow(counts_df_complete)
+
+
+datatable(counts_df_complete)
+
+
+```
+
+
+```{r end passage expiii/iv data (venn diagram), results = T}
+
+# uniqueness of majority mutations present at the end passage
+end_maj <- variants_all %>%
+                        filter(passage == end_passage) %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+
+#table(as.numeric(table(par$mut_info)))
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+ggVennDiagram(muts_list) +
+        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+```
+
+
+```{r end passage expiii/iv data (table), results=T}
+
+counts_sep_df <- as.data.frame(table(muts, names(muts)))
+counts_sep_df %<>% spread(Var2, Freq)
+counts_sum_df <- as.data.frame(table(muts))
+
+
+counts_df <- merge(counts_sep_df, counts_sum_df, by = "muts")
+
+
+counts_df_complete <- merge(counts_df, variants_expiv_subset, by.x = "muts", by.y = "mut_info")
+
+
+counts_df_complete <- counts_df_complete[order(counts_df_complete$Freq, decreasing = T),]
+rownames(counts_df_complete) <- 1:nrow(counts_df_complete)
+
+
+datatable(counts_df_complete)
+
+
+```
+
+
+
+## Summary heatmap
+
+
+
+
+
+```{r throughout summary heatmap, results = T}
+experiment <- "EXPIII/IV"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 510
+
+
+
+
+variants_all <- 
+                variants %>% 
+                filter(allele_freq >= threshold)
+
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout_maj <- variants_all %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+
+
+# create a named vector from the df
+muts <- throughout_maj$mut_info
+names(muts) <- throughout_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+shared_percent <- c()
+
+for (i in 1:8){
+        dd <- muts_list[[i]]
+        for (j in 1:8){
+                shared_percent <- append(shared_percent,100*(sum(dd %in% muts_list[[j]])/(length(muts_list[[i]])+length(muts_list[[j]])-sum(dd %in% muts_list[[j]]))))
+        }
+        
+}
+
+
+shared_mat <- matrix(shared_percent, ncol = 8)
+shared_df <- as.data.frame(shared_mat) %>% 
+                        `colnames<-`(names(muts_list)) %>%
+                        mutate(line1 = names(muts_list)) %>%
+                        mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                        gather(key = "line2", value = "val", 1:8) %>%
+                        mutate(line2 = factor(line2, levels = exp_line_factor)) %>%
+                        mutate(val = round(val, 2))
+
+
+
+plt <- ggplot(data = as.data.frame(shared_df), aes(x=line1, y=line2, fill=val)) + 
+        geom_tile() +
+        geom_text(aes(line1, line2, label = val), color = "black", size = 4) +
+        labs(title = paste0("Majority Mutation Parallelism until Passage #", end_passage)) +
+        scale_fill_gradient2(low = "white", high = "red", 
+        midpoint = 1, limit = c(0,100), space = "Lab", 
+        name="Shared %") +
+        theme(
+        axis.title = element_blank(),
+        plot.title = element_text(size = 20, hjust = 0.5)
+        )
+
+ggplotly(plt)
+
+```
+
+
+
+```{r end passage summary heatmap, results = T}
+experiment <- "EXPIII/IV"
+category <- "Majority"
+threshold <- 0.5
+end_passage <- 510
+
+
+
+variants_all <- variants %>% 
+                        filter(allele_freq >= threshold)
+
+
+# uniqueness of majority mutations observed at the end of experiment
+end_maj <- variants_all %>%
+                        filter(passage == end_passage) %>%
+                        select(c(exp_line,mut_info)) %>%
+                        distinct()
+
+
+
+
+# create a named vector from the df
+muts <- end_maj$mut_info
+names(muts) <- end_maj$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+shared_percent <- c()
+
+
+for (i in 1:8){
+        dd <- muts_list[[i]]
+        for (j in 1:8){
+                shared_percent <- append(shared_percent,100*(sum(dd %in% muts_list[[j]])/(length(muts_list[[i]])+length(muts_list[[j]])-sum(dd %in% muts_list[[j]]))))
+        }
+        
+}
+
+
+shared_mat <- matrix(shared_percent, ncol = 8)
+shared_df <- as.data.frame(shared_mat) %>% 
+                        `colnames<-`(names(muts_list)) %>%
+                        mutate(line1 = names(muts_list)) %>%
+                        mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                        gather(key = "line2", value = "val", 1:8) %>%
+                        mutate(line2 = factor(line2, levels = exp_line_factor)) %>%
+                        mutate(val = round(val, 2))
+
+
+
+
+plt <- ggplot(data = as.data.frame(shared_df), aes(x=line1, y=line2, fill=val)) + 
+        geom_tile() +
+        geom_text(aes(line1, line2, label = val), color = "black", size = 4) +
+        labs(title = paste0("Majority Mutation Parallelism at Passage #", end_passage)) +
+        scale_fill_gradient2(low = "white", high = "red", 
+        midpoint = 1, limit = c(0,100), space = "Lab", 
+        name="Shared %") +
+        theme(
+        axis.title = element_blank(),
+        plot.title = element_text(size = 20, hjust = 0.5)
+        )
+
+ggplotly(plt)
+
+```
+
+
+## Simulated data
+
+
+```{r parallel evolution permutation and data simulation, results = TRUE}
+# let's compute expected parallelism among the independent lines by permuting mutations of each line.
+# What I want to do is to get the list of all fixated mutations for each line separately,
+# then get the list of positions of the ancestral genome where the ref alleles are the same,
+# and randomely sample from those and permute the actual mutations and assign them to the sampled positions
+# I need to do this iteratively for each line, and at least for 100 times. Each time I need to store
+# the measures of parallelism and later compare the their distribution with the observed values.
+
+
+# read in ancestral reference sequence 
+fastaFile <- readDNAStringSet("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/reference/plasmid/hiv_plasmid_ref_genome.fasta")
+seq_name = names(fastaFile)
+sequence = paste(fastaFile)
+
+sequence <- str_sub(sequence, start = 454, end = 9626)
+
+
+
+# get the fixated mutations list for each line
+
+sim_file <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/parallel_evo_simulation.tsv.gz"
+
+if (file.exists(sim_file)){
+        run_simulation = FALSE
+} else {
+        run_simulation = TRUE
+}
+
+if (run_simulation){
+
+        threshold <- 0.5
+        bases <- c("A", "T", "C", "G")
+
+
+
+        i <- 0
+        permuted_df_all <- data.frame()
+        permutation_nr <- 1000
+
+        while (i < permutation_nr){
+
+                i <- i + 1
+                line_variants_all <- data.frame()
+
+                for (j in 1:length(exp_line_factor)) {
+                        virus_line <- exp_line_factor[j]
+                        line_variants <- variants %>%
+                                                filter(exp_line == virus_line) %>%
+                                                filter(allele_freq >= threshold) %>%
+                                                filter(mut_type == "P") %>%
+                                                select(c(exp_line, ref_allele, alt_allele, mut_type, mut_info)) %>%
+                                                distinct()
+
+                        line_variants %<>%
+                                        mutate(permuted_genomic_pos = numeric(length = nrow(line_variants))) %>%
+                                        mutate(permuted_mut_info = character(length = nrow(line_variants)))
+
+                        for (jj in 1:length(bases)){
+                                base <- bases[jj]
+                                num <- nrow(line_variants[line_variants$ref_allele == base,])
+                                pos <- as.data.frame(str_locate_all(sequence, base))[,1]
+                                set.seed(i+j+jj+1)
+                                permuted_pos <- sample(pos, num)
+                                line_variants %<>%
+                                        mutate(permuted_genomic_pos = replace(x = permuted_genomic_pos,
+                                                                                list = (ref_allele == base),
+                                                                                values = permuted_pos))
+
+
+                        }
+
+                        line_variants %<>%
+                                mutate(permuted_mut_info = paste(permuted_genomic_pos,ref_allele, alt_allele, sep = "_"))
+
+                        line_variants_all <- rbind(line_variants_all, line_variants)
+
+                }
+
+                line_variants_all %<>% 
+                                mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+                                select(c(exp_line,permuted_mut_info)) %>%
+                                distinct()
+
+
+                # create a named vector from the df
+                muts <- line_variants_all$permuted_mut_info
+                names(muts) <- line_variants_all$exp_line
+
+                # convert named vector to list
+                muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+                permuted_percent <- c()
+
+                for (k in 1:8){
+                        dd <- muts_list[[k]]
+                        for (kk in 1:8){
+                                permuted_percent <- append(permuted_percent,100*(sum(dd %in% muts_list[[kk]])/(length(muts_list[[k]])+length(muts_list[[kk]])-sum(dd %in% muts_list[[kk]]))))
+                        }
+                        
+                }
+
+
+                permuted_mat <- matrix(permuted_percent, ncol = 8)
+                permuted_df <- as.data.frame(permuted_mat) %>% 
+                                        `colnames<-`(names(muts_list)) %>%
+                                        mutate(line1 = names(muts_list)) %>%
+                                        mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                                        gather(key = "line2", value = "val", 1:8) %>%
+                                        mutate(line2 = factor(line2, levels = exp_line_factor)) %>%
+                                        mutate(val = round(val, 2))
+
+                print(i)
+                if (i == 1){
+                        print("hi")
+                        permuted_df_all <- permuted_df
+                        print(permuted_df_all)
+                } else {
+                        permuted_df_all <- cbind(permuted_df_all, permuted_df[,3])
+                }
+                
+        }
+
+        head(permuted_df_all)
+        colnames(permuted_df_all)[3:ncol(permuted_df_all)] <- paste0("permute_", 1:permutation_nr)
+
+
+        permuted_df_all %<>%
+                mutate(permute_ave = round(as.numeric(rowMeans(permuted_df_all[,3:ncol(permuted_df_all)])),2)) %>%
+                mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                mutate(line2 = factor(line2, levels = exp_line_factor))
+
+        write.table(permuted_df_all, file = gzfile(sim_file), sep = "\t", row.names = F, quote = F)
+} else {
+        permuted_df_all <- read.table(file = gzfile(sim_file), sep = "\t", header = T)
+}
+
+
+permuted_df_all %<>%
+                mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                mutate(line2 = factor(line2, levels = exp_line_factor))
+
+plt <- ggplot(data = as.data.frame(permuted_df_all), aes(x=line1, y=line2, fill=permute_ave)) + 
+        geom_tile() +
+        geom_text(aes(line1, line2, label = permute_ave), color = "black", size = 4) +
+        labs(title = paste0("Simulated Majority Mutation Parallelism until Passage #", end_passage, " Permutation)\n")) +
+        scale_fill_gradient2(low = "white", high = "red", 
+        midpoint = 1, limit = c(0,100), space = "Lab", 
+        name="Shared %") +
+        theme(
+                axis.title = element_blank(),
+                plot.title = element_text(size = 18, hjust = 0.5))
+
+ggplotly(plt)
+
+pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/parallel-evo-sim/parallel_evo_sim_boxplot.pdf")
+    , width = 14, height = 14)
+plt
+dev.off()
+
+
+
+
+```
+
+
+```{r parallel evolution permutation and data simulation at end passage, results = TRUE}
+
+# get the fixated mutations list for each line
+
+end_passage <- 510
+
+sim_file <- paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/parallel_evo_simulation_", end_passage,".tsv.gz")
+
+if (file.exists(sim_file)){
+        run_simulation = FALSE
+} else {
+        run_simulation = TRUE
+}
+
+if (run_simulation){
+
+        threshold <- 0.5
+        bases <- c("A", "T", "C", "G")
+
+
+
+        i <- 0
+        permuted_df_all <- data.frame()
+        permutation_nr <- 1000
+
+        while (i < permutation_nr){
+
+                i <- i + 1
+                line_variants_all <- data.frame()
+
+                for (j in 1:length(exp_line_factor)) {
+                        virus_line <- exp_line_factor[j]
+                        line_variants <- variants %>%
+                                                filter(exp_line == virus_line) %>%
+                                                filter(allele_freq >= threshold) %>%
+                                                filter(mut_type == "P") %>%
+                                                filter(passage == end_passage) %>%
+                                                select(c(exp_line, ref_allele, alt_allele, mut_type, mut_info)) %>%
+                                                distinct()
+
+                        line_variants %<>%
+                                        mutate(permuted_genomic_pos = numeric(length = nrow(line_variants))) %>%
+                                        mutate(permuted_mut_info = character(length = nrow(line_variants)))
+
+                        for (jj in 1:length(bases)){
+                                base <- bases[jj]
+                                num <- nrow(line_variants[line_variants$ref_allele == base,])
+                                pos <- as.data.frame(str_locate_all(sequence, base))[,1]
+                                set.seed(i+j+jj+1)
+                                permuted_pos <- sample(pos, num)
+                                line_variants %<>%
+                                        mutate(permuted_genomic_pos = replace(x = permuted_genomic_pos,
+                                                                                list = (ref_allele == base),
+                                                                                values = permuted_pos))
+
+
+                        }
+
+                        line_variants %<>%
+                                mutate(permuted_mut_info = paste(permuted_genomic_pos,ref_allele, alt_allele, sep = "_"))
+
+                        line_variants_all <- rbind(line_variants_all, line_variants)
+
+                }
+
+                line_variants_all %<>% 
+                                mutate(exp_line = factor(exp_line, levels = exp_line_factor)) %>%
+                                select(c(exp_line,permuted_mut_info)) %>%
+                                distinct()
+
+
+                # create a named vector from the df
+                muts <- line_variants_all$permuted_mut_info
+                names(muts) <- line_variants_all$exp_line
+
+                # convert named vector to list
+                muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+                permuted_percent <- c()
+
+                for (k in 1:8){
+                        dd <- muts_list[[k]]
+                        for (kk in 1:8){
+                                permuted_percent <- append(permuted_percent,100*(sum(dd %in% muts_list[[kk]])/(length(muts_list[[k]])+length(muts_list[[kk]])-sum(dd %in% muts_list[[kk]]))))
+                        }
+                        
+                }
+
+
+                permuted_mat <- matrix(permuted_percent, ncol = 8)
+                permuted_df <- as.data.frame(permuted_mat) %>% 
+                                        `colnames<-`(names(muts_list)) %>%
+                                        mutate(line1 = names(muts_list)) %>%
+                                        mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                                        gather(key = "line2", value = "val", 1:8) %>%
+                                        mutate(line2 = factor(line2, levels = exp_line_factor)) %>%
+                                        mutate(val = round(val, 2))
+
+                print(i)
+                if (i == 1){
+                        print("hi")
+                        permuted_df_all <- permuted_df
+                        print(permuted_df_all)
+                } else {
+                        permuted_df_all <- cbind(permuted_df_all, permuted_df[,3])
+                }
+                
+        }
+
+        head(permuted_df_all)
+        colnames(permuted_df_all)[3:ncol(permuted_df_all)] <- paste0("permute_", 1:permutation_nr)
+
+
+        permuted_df_all %<>%
+                mutate(permute_ave = round(as.numeric(rowMeans(permuted_df_all[,3:ncol(permuted_df_all)])),2)) %>%
+                mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                mutate(line2 = factor(line2, levels = exp_line_factor))
+
+        write.table(permuted_df_all, file = gzfile(sim_file), sep = "\t", row.names = F, quote = F)
+} else {
+        permuted_df_all <- read.table(file = gzfile(sim_file), sep = "\t", header = T)
+}
+
+
+permuted_df_all %<>%
+                mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+                mutate(line2 = factor(line2, levels = exp_line_factor))
+
+plt <- ggplot(data = as.data.frame(permuted_df_all), aes(x=line1, y=line2, fill=permute_ave)) + 
+        geom_tile() +
+        geom_text(aes(line1, line2, label = permute_ave), color = "black", size = 4) +
+        labs(title = paste0("Simulated Majority Mutation Parallelism until Passage #", end_passage, " Permutation)\n")) +
+        scale_fill_gradient2(low = "white", high = "red", 
+        midpoint = 1, limit = c(0,100), space = "Lab", 
+        name="Shared %") +
+        theme(
+                axis.title = element_blank(),
+                plot.title = element_text(size = 18, hjust = 0.5))
+
+ggplotly(plt)
+
+pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/parallel-evo-sim/parallel_evo_sim_boxplot.pdf")
+    , width = 14, height = 14)
+plt
+dev.off()
+
+
+
+
+```
+
+```{r statistical comparison of observed and simulated data, results = T}
+
+# Here I'd like to compute the significance (p value) and effect size (Cohen's D) of observed and simulated data.
+
+eff_size <- c()
+p_val <- c()
+
+for (i in 1:nrow(shared_df)){
+        
+        sim_vals <- as.numeric(permuted_df_all[i,3:(ncol(permuted_df_all)-1)])
+        
+        eff_size <- append(eff_size, cohensD(shared_df[i,"val"], sim_vals))
+        
+        p_val <- append(p_val, tryCatch(t.test(sim_vals, mu = shared_df[i,"val"])$p.value, error = function(e){return(NaN)}))
+}
+
+
+shared_df_new <- cbind(shared_df, eff_size,p_val)
+
+shared_df_new <- shared_df_new[!is.nan(shared_df_new$eff_size),]
+
+
+shared_df_new %>% ggplot(aes(x = val, y = eff_size)) +
+                        geom_point(size = 2) +
+                        geom_text(aes(label = paste0(line1, "|", line2)), size = 5, vjust = 2) +
+        labs(x="\nPercent Shared", y= "Effect Size (Cohen's D)\n", title = paste0("Observed vs Simulated\n"))+
+        scale_x_continuous(breaks = seq(0,20,2.5)) +
+        #scale_y_continuous(breaks = seq(0,400,breaks_step)) +
+        #scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 50, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 40, angle = 90),
+        axis.text.y = element_text(size = 40),
+        #legend.title = element_text(size=35),
+        #legend.text = element_text(size = 30)
+        )
+
+```
