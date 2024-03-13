@@ -20,7 +20,8 @@ rule all:
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz",
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
        expand("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html", zip, experiment=EXP, line=LINES),
-       expand("/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES)
+       expand("/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
+       expand("/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted_stats/qualimapReport.html", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
 rule sequencing_quality:
