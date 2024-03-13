@@ -35,7 +35,6 @@ source activate ha_proj
 
 snakemake \
         -s mysnakefile.smk \
-        -R varaint_to_vcf \
 	--jobs 432 \
         --default-resource mem_mb=4000 \
         --cluster '

@@ -18,10 +18,28 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 rule all:
     input:
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/quality_control/pipeline-outputs/all_quals.tsv.gz",
-#       expand("/home/amovas/data/genome-evo-proj/data/processed-data/mappings/2-p/{experiment}/{line}/{sample}_sorted.cram", zip,experiment=EXP, line=LINES, sample=SAMPLES)
+       "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
+       expand("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html", zip, experiment=EXP, line=LINES),
+       expand("/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
+rule sequencing_quality:
+    input:
+        read1="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/{sample}_R1_001.fastq.gz",
+        read2="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/{sample}_R2_001.fastq.gz"
+    output:
+        "/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html",
+        "/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R2_001_fastqc.html"
+    shell:
+        "fastqc {input.read1} -o /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{wildcards.experiment}/{wildcards.line} && fastqc {input.read2} -o /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{wildcards.experiment}/{wildcards.line}"
+
+rule collect_sequencing_quality:
+    input:
+        "/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}"
+    output:
+        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html"
+    shell:
+        "cd {input} && multiqc . -o multiqc && cp multiqc/multiqc_report.html {output}"
 
 rule bwa_map:
     input:
@@ -60,25 +78,33 @@ rule samtools_index:
 
 
 
+rule mapping_quality:
+    input:
+        bam="/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam"
+    output:
+        "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted_stats/qualimapReport.html"
+    shell:
+        "qualimap bamqc -bam {input.bam}"
 
-rule quality_assessment:
+
+rule coverage_assessment:
     input:
         bam="/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam",
         bai="/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam.bai"
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality-control/pipeline-outputs/coverage-plots/{experiment}-{line}-{sample}.png",
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality-control/pipeline-outputs/{experiment}/{line}/{sample}.quals"
+        "/home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/coverage-plots/{experiment}-{line}-{sample}.png",
+        "/home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/{experiment}/{line}/{sample}.quals"
     script:
         "/home/amovas/data/genome-evo-proj/src/snakemake-run/python-scripts/quality_control_mapping.py"
 
-rule collect_quality_assessment:
+rule collect_coverage_assessment:
     input:
         #expand("quality_control/{exp}/{line}/{sample}.quals",
         #       zip, exp=directories,line=lines, sample=IDS),
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/quality-control/pipeline-outputs/{experiment}/{line}/{sample}.quals",
+        expand("/home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/{experiment}/{line}/{sample}.quals",
                 zip, experiment=EXP, line=LINES, sample=SAMPLES)
     output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/quality-control/pipeline-outputs/all_quals.tsv.gz"
+        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz"
     shell:
         "cat {input} | gzip >> {output}"
 
@@ -113,7 +139,7 @@ rule collect_mutations:
         "python /home/amovas/data/genome-evo-proj/src/snakemake-run/python-scripts/my_collect_mutations.py {input}"
 
 
-rule varaint_to_vcf:
+rule variant_to_vcf:
     input:
         "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.csv.gz"
     output:
