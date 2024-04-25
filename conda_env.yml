@@ -1,4 +1,4 @@
-name: ha_proj_test
+name: ha_proj
 channels:
   - conda-forge
   - bioconda
@@ -13,10 +13,12 @@ dependencies:
   - plotly
   - bcftools=1.3.1
   - samtools=1.3.1
+  - seqtk
   - bwa=0.7.17
   - tqdm=4.65.0
   - jupyter=1.0.0
   - r-ggplot2
+  - r-hrbrthemes
   - r-dplyr
   - r-tidyr
   - r-languageserver #vscode setup
@@ -31,7 +33,7 @@ dependencies:
   - genometools-genometools
   - r-biocmanager
   - r-devtools
-  - r-reticulate	
+  - r-reticulate
   - VariantAnnotation #BiocManager::install("VariantAnnotation")
   - radiator #devtools::install_github("thierrygosselin/radiator")
 #  - pysam #install by pip
@@ -47,3 +49,6 @@ dependencies:
   - cmake # to compile c++ code
   - fastqc=0.12.1
   - multiqc=1.21
+  - r-gganimate
+  - r-gifski
+  - r-ggfortify 

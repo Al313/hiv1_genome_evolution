@@ -5,4 +5,4 @@ snakemake -s snakefile.smk --cores x
 # force-run from a specific rule
 snakemake -s snakefile.smk --cores x -R xxx
 # visualize the dag
-snakemake -s mysnakefile.smk --rulegraph all | dot -Tpdf > dag.pdf
+snakemake -s mysnakefile.smk --rulegraph all | dot -Tpdf > /home/amovas/data/genome-evo-proj/results/figs/publication/supp/dag.pdf

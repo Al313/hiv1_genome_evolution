@@ -8,8 +8,17 @@ library(tidyr)
 # define own functions
 `%notin%` <- Negate(`%in%`)
 
+# determine the server path
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
 # read in quality table
-quals = read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/processed-data/quality_control/pipeline-outputs/all_quals.tsv.gz", sep = "\t", header = FALSE, stringsAsFactors = FALSE)
+quals = read.table(file = paste0(wd, "results/tables/pipeline-outputs/qc/all_quals.tsv.gz"), sep = "\t", header = FALSE, stringsAsFactors = FALSE)
 colnames(quals) = c("file","average","cover","average_5","average_a","average_b","average_c","average_d","average_e","average_3","cover_all","mapped", "mapquality")
 quals$full_sample_name = as.character(lapply(str_split(lapply(str_split(quals$file, pattern = "/"), "[[", 12), pattern = "_"), "[[", 1))
 quals = quals[,-1]
@@ -56,7 +65,7 @@ quals_gathered$average_depth <- log10(quals_gathered$average_depth)
 # render the ggplot object
 
 coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,group=full_sample_name))+
-    geom_line(linetype="dashed", color="blue", size=1.2) +
+    geom_line(linetype="dashed", color="blue", linewidth=1.2) +
     geom_point(color="red", size=3) +
     geom_text(data=subset(quals_gathered, cover_all == "False" & average_depth <= 3),
     aes(x=amplicon,y=average_depth,label=full_sample_name),size = 6) +
@@ -73,7 +82,7 @@ coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,
 
 
 # save the ggplot object
-png(filename = "/home/amovas/data/genome-evo-proj/results/figs/png/coverage_map.png",
+png(filename = paste0(wd, "results/figs/png/coverage_map.png"),
     width = 1500,
     height = 1800)
 coverage_map
