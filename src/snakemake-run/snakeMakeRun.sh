@@ -28,15 +28,15 @@ fi
 echo "#!/bin/bash
 #SBATCH --cpus-per-task=1
 #SBATCH --time=24:00:00
-#SBATCH --mem=10G
+#SBATCH --mem=5G
 #SBATCH --output=${output_dir}/snakemake.out
 
-source activate ha_proj
+source activate hc_proj
 
 snakemake \
         -s mysnakefile.smk \
 	--jobs 432 \
-        --default-resource mem_mb=4000 \
+        --default-resource mem_mb=2000 \
         --cluster '
         sbatch \
                 --cpus-per-task {threads} \
