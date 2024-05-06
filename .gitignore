@@ -1,23 +1,17 @@
 .DS_Store
 
 data/*
-!data/reference
+!data/*/
 
-!data/metadata
-!data/incoming-raw-data
+data/HIV-LTE_scripts_for_paper/*
+data/freezed-raw-data/*
 
+data/processed-data/mutations
+data/processed-data/fastqc-reports
+data/processed-data/coverage-assessment
 
-!data/processed-data/
-data/processed-data/*
-!data/processed-data/quality_control/
-data/processed-data/quality_control/*
-!data/processed-data/quality_control/3-p/
-data/processed-data/quality_control/3-p/*
-!data/processed-data/quality_control/3-p/all_quals.tsv.gz
-
-!data/processed-data/quality_control/2-p/
-data/processed-data/quality_control/2-p/*
-!data/processed-data/quality_control/2-p/all_quals.tsv.gz
+data/processed-data/consensus/pipeline-outputs/*
+!data/processed-data/consensus/pipeline-outputs/*.fasta
 
 src/snakemake-run/.snakemake/
 results/tables/3-p/all_variants.ann.vcf
@@ -25,4 +19,6 @@ results/tables/2-p/all_variants.ann.vcf
 results/tables/2-p/all_annotated_variants.tsv
 
 src/r-processing-scripts/phylogenetics/manuals/
+
+
 
