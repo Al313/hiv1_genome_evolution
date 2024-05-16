@@ -7,6 +7,9 @@ snakemake -s snakefile.smk --cores x -R xxx
 # visualize the dag
 snakemake -s mysnakefile.smk --rulegraph all | dot -Tpdf > /home/amovas/data/genome-evo-proj/results/figs/publication/supp/dag.pdf
 # to get 50th interval of consensus sequences from the collected files:
+## on Linux
 cat all_consensus_gagpol.fasta | grep --no-group-separator -A 1 -E ">(13|14|15|16).*VP(10|50|100|150|200|250|300|350|400|450|500|550|570)[^0-9+\-]" > 50th_consensus_ggpol.fasta
+## on MAC
+cat all_consensus_p17.fasta | grep -A 1 -E ">(13|14|15|16).*VP(10|50|100|150|200|250|300|350|400|450|500|550|570)[^0-9+\-]" | grep -v -- "^--$" > 50th_consensus_p17.fasta
 
 #note that to run "samtools consensus" a more recent version of samtools package than what is installed in ha_proj environment is required. However, when I try to update the package, i get the "unsolvable environment" error. Therefore, as a temporary solution, when I want to run samtools consensus I switch to hc_proj environment.

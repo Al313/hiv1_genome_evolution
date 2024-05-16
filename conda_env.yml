@@ -1,5 +1,6 @@
 name: ha_proj
 channels:
+  - defaults
   - conda-forge
   - bioconda
   - R
@@ -43,12 +44,18 @@ dependencies:
   - r-sf
   - r-lsr
   - natsort #this is a python package to sort strings containing numbers based on their numeric value
-  - r-ape #phylogenetics
-  - phyml
   - graphviz=8.0.3 #this package is used to visualized the DAG of a snakemake file
   - cmake # to compile c++ code
   - fastqc=0.12.1
   - multiqc=1.21
   - r-gganimate
   - r-gifski
-  - r-ggfortify 
+  - r-ggfortify
+  - r-ape #phylogenetics
+  - figtree # view phylogenetic trees in the terminal
+  - phyml
+  - iqtree
+# MSA methods:
+  - clustalw
+  - clustalo
+  - muscle
