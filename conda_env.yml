@@ -19,6 +19,8 @@ dependencies:
   - tqdm=4.65.0
   - jupyter=1.0.0
   - r-ggplot2
+  - r-ggally
+  - r-ggcorrplot
   - r-hrbrthemes
   - r-dplyr
   - r-tidyr
