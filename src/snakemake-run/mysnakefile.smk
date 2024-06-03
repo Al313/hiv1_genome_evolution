@@ -15,13 +15,9 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 
 rule all:
     input:
-       "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz",
+       #"/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz",
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_full.fasta",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_p17.fasta",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_gagpol.fasta",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_env.fasta",
-       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_gagpolenv.fasta",
+       #"/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_full.fasta",
        expand("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html", zip, experiment=EXP, line=LINES),
        expand("/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
        expand("/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted_stats/qualimapReport.html", zip,experiment=EXP, line=LINES, sample=SAMPLES)
@@ -43,7 +39,7 @@ rule collect_sequencing_quality:
     output:
         "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html"
     shell:
-        "cd {input} && multiqc . -o multiqc && cp multiqc/multiqc_report.html {output}"
+        "cd {input} && multiqc . -o multiqc && cp multiqc/multiqc_report.html {output} && rm -rf multiqc"
 
 rule bwa_map:
     input:
@@ -80,7 +76,7 @@ rule samtools_index:
     shell:
         "samtools index {input}"
 
-########
+####
 
 rule get_consensus_full:
     input:
@@ -102,89 +98,6 @@ rule collect_consensus_full:
     shell:
         "cat {input} >> {output}"
 
-
-rule get_consensus_p17:
-    input:
-        "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam"
-    output:
-        tmp1=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/p17/{experiment}/{line}/{sample}.fa"),
-        tmp2=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/p17/{experiment}/{line}/{sample}.fa1"),
-        final_cons="/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/p17/{experiment}/{line}/{sample}.fasta"
-    conda:
-        "hc_proj"
-    shell:
-        "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c790-1185 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
-
-rule collect_consensus_p17:
-    input:
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/p17/{experiment}/{line}/{sample}.fasta", zip, experiment=EXP, line=LINES, sample=SAMPLES)
-    output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_p17.fasta"
-    shell:
-        "cat {input} >> {output}"
-
-
-rule get_consensus_gagpol:
-    input:
-        "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam"
-    output:
-        tmp1=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpol/{experiment}/{line}/{sample}.fa"),
-        tmp2=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpol/{experiment}/{line}/{sample}.fa1"),
-        final_cons="/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpol/{experiment}/{line}/{sample}.fasta"
-    conda:
-        "hc_proj"
-    shell:
-        "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c790-5096 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
-
-rule collect_consensus_gagpol:
-    input:
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpol/{experiment}/{line}/{sample}.fasta", zip, experiment=EXP, line=LINES, sample=SAMPLES)
-    output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_gagpol.fasta"
-    shell:
-        "cat {input} >> {output}"
-
-
-rule get_consensus_env:
-    input:
-        "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam"
-    output:
-        tmp1=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/env/{experiment}/{line}/{sample}.fa"),
-        tmp2=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/env/{experiment}/{line}/{sample}.fa1"),
-        final_cons="/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/env/{experiment}/{line}/{sample}.fasta"
-    conda:
-        "hc_proj"
-    shell:
-        "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c6225-8795 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
-
-rule collect_consensus_env:
-    input:
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/env/{experiment}/{line}/{sample}.fasta", zip, experiment=EXP, line=LINES, sample=SAMPLES)
-    output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_env.fasta"
-    shell:
-        "cat {input} >> {output}"
-
-
-rule get_consensus_gagpolenv:
-    input:
-        "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam"
-    output:
-        tmp1=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpolenv/{experiment}/{line}/{sample}.fa"),
-        tmp2=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpolenv/{experiment}/{line}/{sample}.fa1"),
-        final_cons="/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpolenv/{experiment}/{line}/{sample}.fasta"
-    conda:
-        "hc_proj"
-    shell:
-        "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c790-5096,6225-8795 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
-
-rule collect_consensus_gagpolenv:
-    input:
-        expand("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/gagpolenv/{experiment}/{line}/{sample}.fasta", zip, experiment=EXP, line=LINES, sample=SAMPLES)
-    output:
-        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_gagpolenv.fasta"
-    shell:
-        "cat {input} >> {output}"
 
 ####
 
