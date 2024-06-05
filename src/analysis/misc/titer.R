@@ -156,16 +156,15 @@ dev.off()
 
 ## moi
 
-head(data)
-table(data$Source_abv)
-data_sub <- data[data$Source_abv %in% c("2022_rfc_i","2022_rfc_ii", "2024_christine"),]
+
+data_sub <- data[data$Source_abv %in% c("2022_rfc_i","2022_rfc_ii", "2018_christine","2024_christine"),]
 data_sub <- data_sub[data_sub$passage != "NL4_3",]
 
 data_sub$passage <- as.numeric(data_sub$passage)
 data_sub$lines <- factor(data_sub$lines, levels = c("13", "14", "15", "16"))
-data_sub$Source_abv <- factor(data_sub$Source_abv, levels = c("2024_christine","2022_rfc_i","2022_rfc_ii"))
+data_sub$Source_abv <- factor(data_sub$Source_abv, levels = c("2024_christine","2018_christine","2022_rfc_i","2022_rfc_ii"))
 
-head(data_sub)
+
 
 moi__fig <- data_sub %>% ggplot(aes(x = passage, y = log10(MOI), color = lines)) +
                 geom_line(aes(linetype=Source_abv)) +
