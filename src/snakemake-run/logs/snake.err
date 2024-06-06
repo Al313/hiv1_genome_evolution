@@ -2,119 +2,18 @@ Building DAG of jobs...
 Using shell: /usr/bin/bash
 Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954
-Conda environments: ignored
-Select jobs to execute...
-Building DAG of jobs...
-Building DAG of jobs...
-Building DAG of jobs...
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954
-Conda environments: ignored
-Select jobs to execute...
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954
-Conda environments: ignored
-Select jobs to execute...
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954
+Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
 Conda environments: ignored
 Select jobs to execute...
 
-[Mon Jun  3 23:33:45 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/18
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_18_multiqc_report.html
+[Thu Jun  6 14:27:55 2024]
+rule collect_coverage_assessment:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/iv/20/20MT2EXPIVVP180seq09052019_S24_L001.quals, /home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/iv/20/20MT2EXPIVVP410combinedseq08122022_S33_L001.quals, /home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/iii/15/15MT4EXPIIIVP30seq08122022_S6_L001.quals, /home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/iii/15/15MT4EXPIIIVP130seq18042019_S13_L001.quals, /home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/iii/15/15MT4EXPIIIVP440seq20052022_S16_L001.quals, /home/amovas/data/genome-evo-proj/data/processed-data/coverage-assessment/pipeline-outputs/iii/15/15MT4EXPIIIVP510seq09092022_S9_L001.quals
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_18_multiqc_report.html
-    wildcards: experiment=iv, line=18
-    resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz
+    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-
-[Mon Jun  3 23:33:45 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/17
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_17_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_17_multiqc_report.html
-    wildcards: experiment=iv, line=17
-    resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-
-
-[Mon Jun  3 23:33:45 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/19
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_19_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_19_multiqc_report.html
-    wildcards: experiment=iv, line=19
-    resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-
-
-[Mon Jun  3 23:33:45 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/20
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_20_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_20_multiqc_report.html
-    wildcards: experiment=iv, line=20
-    resources: mem_mb=2000, mem_mib=1908, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-|           multiqc | MultiQC Version v1.22.2 now available!
-|           multiqc | MultiQC Version v1.22.2 now available!
-|           multiqc | MultiQC Version v1.22.2 now available!
-|           multiqc | MultiQC Version v1.22.2 now available!
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/18
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/17
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/20
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/19
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 260/260  
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 260/260  
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 260/260  
-|            fastqc | Found 126 reports
-|            fastqc | Found 130 reports
-|            fastqc | Found 130 reports
-|            fastqc | Found 130 reports
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-[Mon Jun  3 23:33:58 2024]
-Finished job 0.
-1 of 1 steps (100%) done
-[Mon Jun  3 23:33:58 2024]
-Finished job 0.
-1 of 1 steps (100%) done
-[Mon Jun  3 23:33:58 2024]
-Finished job 0.
-1 of 1 steps (100%) done
-[Mon Jun  3 23:33:58 2024]
+[Thu Jun  6 14:27:55 2024]
 Finished job 0.
 1 of 1 steps (100%) done

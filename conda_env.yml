@@ -62,3 +62,4 @@ dependencies:
   - clustalo
   - muscle
   - r-readxl
+  - trimmomatic # for read qc
