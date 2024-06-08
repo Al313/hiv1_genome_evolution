@@ -67,7 +67,7 @@ def find_large_dels(samfile,start=0,stop=None,threshold=5):
     dels = []
 
     for read in samfile.fetch(contig=contig_name,start=start,stop=stop):
-        if read.mapping_quality>30:
+        if read.mapping_quality>35:
             if 'H' in read.cigarstring or 'S' in read.cigarstring:
                 deletion = None
                 #already get the real starts and ends of this read (not only where mapping starts and ends)
@@ -81,7 +81,7 @@ def find_large_dels(samfile,start=0,stop=None,threshold=5):
                 if 'SA' in tags.keys():
                     #find chimera
                     fields = tags['SA'].split(',') #the SA tag holds information on chimeric reads
-                    if int(fields[4])>30: #if mapping quality of the chimera is high enough
+                    if int(fields[4])>35: #if mapping quality of the chimera is high enough
                         chimera_cigar = parse_cigar(fields[3])
 
                         chimera_start_offset = chimera_cigar[0][1] if chimera_cigar[0][0] in [4,5] else 0

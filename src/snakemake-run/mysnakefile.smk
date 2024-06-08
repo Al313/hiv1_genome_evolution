@@ -7,21 +7,22 @@ EXP,LINES,SAMPLES = glob_wildcards("/home/amovas/data/genome-evo-proj/data/freez
 
 # If you want to run the pipeline for a subset of samples use these assignments:
 
-EXP = ["iv","iv", "iii", "iii", "iii", "iii"]
-LINES = ["20","20", "15", "15", "15", "15"]
-SAMPLES = ["20MT2EXPIVVP180seq09052019_S24_L001","20MT2EXPIVVP410combinedseq08122022_S33_L001", "15MT4EXPIIIVP30seq08122022_S6_L001", "15MT4EXPIIIVP130seq18042019_S13_L001", "15MT4EXPIIIVP440seq20052022_S16_L001", "15MT4EXPIIIVP510seq09092022_S9_L001"]
-
+#EXP = ["iv","iv", "iii", "iii", "iii", "iii"]
+#LINES = ["20","20", "15", "15", "15", "15"]
+#SAMPLES = ["20MT2EXPIVVP180seq09052019_S24_L001","20MT2EXPIVVP410combinedseq08122022_S33_L001", "15MT4EXPIIIVP30seq08122022_S6_L001", "15MT4EXPIIIVP130seq18042019_S13_L001", "15MT4EXPIIIVP440seq20052022_S16_L001", "15MT4EXPIIIVP510seq09092022_S9_L001"]
 
 
 rule all:
     input:
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz",
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
-       #"/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_full.fasta",
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/all_consensus_full.fasta",
        expand("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html", zip, experiment=EXP, line=LINES),
        expand("/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
        expand("/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted_stats/qualimapReport.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
-       expand("/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_1P.fastq.gz", zip,experiment=EXP, line=LINES, sample=SAMPLES)
+       expand("/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_1P.fastq.gz", zip,experiment=EXP, line=LINES, sample=SAMPLES),
+       expand("/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_2P.fastq.gz", zip,experiment=EXP, line=LINES, sample=SAMPLES),
+       expand("/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam", zip,experiment=EXP, line=LINES, sample=SAMPLES)
 
 
 rule sequencing_quality:
@@ -42,31 +43,31 @@ rule collect_sequencing_quality:
     shell:
         "cd {input} && multiqc . -o multiqc && cp multiqc/multiqc_report.html {output} && rm -rf multiqc"
 
-rule read_qc:
+rule read_trim:
     input:
         one="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/{sample}_R1_001.fastq.gz",
         two="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/{sample}_R2_001.fastq.gz"
     output:
-        one="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_1P",
-        two="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_2P"
+        one="/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_1P",
+        two="/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_2P"
     shell:
         "x={output.one} && y=${{x%%_1P*}} && trimmomatic PE -phred33 {input.one} {input.two} -baseout ${{y}} LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:36"
 
-rule read_qc_post_processing:
+rule read_trim_post_processing:
     input:
-        one="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_1P",
-        two="/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_2P"
+        one="/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_1P",
+        two="/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_2P"
     output:
-        "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_1P.fastq.gz",
-        "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_2P.fastq.gz"
+        one="/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_1P.fastq.gz",
+        two="/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_2P.fastq.gz"
     shell:
-        "gzip -S '.fastq.gz' {input.one} & gzip -S '.fastq.gz' {input.two}"
+        "gzip -S '.fastq.gz' {input.one} && gzip -S '.fastq.gz' {input.two}"
 
 rule bwa_map:
     input:
         "/home/amovas/data/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta", #ancestor/ancestor_consensus.fasta
-        "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_1P.fastq.gz",
-        "/home/amovas/data/genome-evo-proj/data/freezed-raw-data/fastq/{experiment}/{line}/trimmed/{sample}_2P.fastq.gz"
+        "/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_1P.fastq.gz",
+        "/home/amovas/shared/genome-evo-proj/data/freezed-raw-data/fastq/trimmed/{experiment}/{line}/{sample}_2P.fastq.gz"
     output:
         temp("/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}.bam.temp")
     log:
@@ -106,8 +107,6 @@ rule get_consensus_full:
         tmp1=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/{experiment}/{line}/{sample}.fa"),
         tmp2=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/{experiment}/{line}/{sample}.fa1"),
         final_cons="/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/{experiment}/{line}/{sample}.fasta"
-    conda:
-        "hc_proj"
     shell:
         "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c456-9625 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
 
