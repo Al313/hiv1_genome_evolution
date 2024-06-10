@@ -75,9 +75,10 @@ library("magrittr")
 
 ```{r read-in the data}
 
-# read in the data
+
 variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz", 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
 
 # set correct data types
 variants_ann$exp_line <- as.integer(variants_ann$exp_line)
@@ -100,10 +101,10 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
 variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele, variants_ann$alt_allele, sep = "_")
 
 
-## only keep the EXPIII data
+## only keep the EXPIV data
 
 variants_ann_expiv <- variants_ann[variants_ann$exp_line %in% 17:20,]
-end_passage <- 510
+end_passage <- 570
 variants_ann_expiv <- variants_ann_expiv %>%
                               mutate(exp_line = case_when(exp_line==17 ~ "MT2_1", exp_line==18 ~ "MT2_2", exp_line==19 ~ "MT2_3", exp_line==20 ~ "MT2_4"))
 
@@ -159,7 +160,7 @@ counts <- variants_expiv %>%
 
 
 fig <- plot_ly(as.data.frame(counts), x = ~passage, y = ~mut_count, 
-            type = 'scatter', mode = "lines", color = ~exp_line, linetype= ~host_line)
+            type = 'scatter', mode = "lines", color = ~exp_line)
 fig <- fig %>% layout(title = paste0(category, " Mutations Accumulation"),
                       xaxis = list(title = 'Passage'),
                       yaxis = list(title = 'Count'))
