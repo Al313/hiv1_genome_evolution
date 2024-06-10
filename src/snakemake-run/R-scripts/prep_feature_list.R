@@ -6,17 +6,30 @@ library("dplyr")
 library("magrittr")
 
 
-# read in raw feature list doownloaded as gff3 from NCBI for HIV-1 NL4-3 strain
-features <- read.table(file = "/home/amovas/data/genome-evo-proj/data/reference/annotations/features/sequence-features.tsv", sep = "\t", stringsAsFactors = F, header = T)
+# determine the server path
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
 
+# read in raw feature list downloaded as gff3 from NCBI for HIV-1 NL4-3 strain
+features <- read.table(file = paste0(wd,"data/reference/annotations/features/sequence-features.tsv"), sep = "\t", stringsAsFactors = F, header = T)
+View(features)
 
 # assign the column names (gff3 format)
 colnames(features) <- c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
 
 # setting the correct LTR coordination for 5' and 3'
-features$end[features$type == "long_terminal_repeat" & features$start == 1] <- 789
-features$start[features$type == "long_terminal_repeat" & features$end == 789] <- 454 # from beginning of 5' repeat region till the end of 5' utr
-features$end[features$type == "long_terminal_repeat" & features$start == 9076] <- 9626 # from beginning of 3'utr till the end of 3' repeat region
+features$end[features$type == "long_terminal_repeat" & features$start == 1] <- 634
+features$start[features$type == "long_terminal_repeat" & features$end == 634] <- 551 # from beginning of 5' repeat region till the end of 5' utr
+features$end[features$type == "long_terminal_repeat" & features$start == 9076] <- 9528 # from beginning of 3'utr till the end of 3' repeat region
+
+
+
+
 
 features %<>% mutate(type = ifelse(type=="long_terminal_repeat", "untranslated_region", type))
 
@@ -86,5 +99,5 @@ features_of_interest <- features_of_interest[,-7]
 
 # write the table
 
-write.table(features_of_interest, file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv", sep = "\t", row.names = F, quote = F)
+write.table(features_of_interest, file = paste0(wd,"results/tables/pipeline-outputs/cds_feature_list.tsv"), sep = "\t", row.names = F, quote = F)
 

@@ -7,16 +7,25 @@ library(stringr)
 
 ### read-in the data
 
+# determine the server path
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
 
 # read in cds feature list 
 
-features_cds <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv", 
+features_cds <- read.table(file = paste0(wd,"results/tables/pipeline-outputs/cds_feature_list.tsv"), 
                             sep = "\t", header = T, stringsAsFactors = F)
 
 
 # read in annotated variants in vcf format to extract the INFO filed
 
-ann_var_vcf <- read.vcfR(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz")
+ann_var_vcf <- read.vcfR(file = paste0(wd,"results/tables/pipeline-outputs/all_variants.ann.vcf.gz"))
 ann_var_info <- vcfR::INFO2df(ann_var_vcf)
 #ann_var_info <- ann_var_info[,-(6:7)]
 #head(ann_var_info[ann_var_info$AF>= 0.9,], n = 1)
@@ -24,7 +33,7 @@ ann_var_info <- vcfR::INFO2df(ann_var_vcf)
 
 # read in the variant table
 
-ann_var_df <- read.table(file = "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz", header = F,
+ann_var_df <- read.table(file = paste0(wd,"results/tables/pipeline-outputs/all_variants.ann.vcf.gz"), header = F,
                           sep = "\t", stringsAsFactors = F)
 colnames(ann_var_df) <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
 ann_var_df <- ann_var_df[,1:5]
@@ -35,8 +44,8 @@ ann_var <- cbind(ann_var_df, ann_var_info)
 
 
 # add annotation of untranslated regions manually
-ann_var$ANN[ann_var$POS >= 454 & ann_var$POS < 790] <- paste0(ann_var$ANN[ann_var$POS >= 454 & ann_var$POS < 790], ",", ann_var$ALT[ann_var$POS >= 454 & ann_var$POS < 790], "|untranslated_region|MODERATE|5_UTR|5_UTR||AF324490.5|||||||||")
-ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS < 9627] <- paste0(ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS < 9627], ",", ann_var$ALT[ann_var$POS >= 9076 & ann_var$POS < 9627], "|untranslated_region|MODERATE|3_UTR|3_UTR||AF324499.3|||||||||")
+ann_var$ANN[ann_var$POS >= 551 & ann_var$POS <= 634] <- paste0(ann_var$ANN[ann_var$POS >= 551 & ann_var$POS <= 634], ",", ann_var$ALT[ann_var$POS >= 551 & ann_var$POS <= 634], "|untranslated_region|MODERATE|5_UTR|5_UTR||AF324490.5|||||||||")
+ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS <= 9528] <- paste0(ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS <= 9528], ",", ann_var$ALT[ann_var$POS >= 9076 & ann_var$POS <= 9528], "|untranslated_region|MODERATE|3_UTR|3_UTR||AF324499.3|||||||||")
 
 
 ### get the name of variant classes that you want to keep
