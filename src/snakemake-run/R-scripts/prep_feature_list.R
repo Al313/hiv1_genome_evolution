@@ -17,7 +17,6 @@ if (file.exists("/home/amovas/")){
 
 # read in raw feature list downloaded as gff3 from NCBI for HIV-1 NL4-3 strain
 features <- read.table(file = paste0(wd,"data/reference/annotations/features/sequence-features.tsv"), sep = "\t", stringsAsFactors = F, header = T)
-View(features)
 
 # assign the column names (gff3 format)
 colnames(features) <- c("seqid", "source", "type", "start", "end", "score", "strand", "phase", "attributes")
