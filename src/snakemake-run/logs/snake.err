@@ -5,7 +5,7 @@ Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Mon Jun 10 21:46:59 2024]
+[Tue Jun 11 01:17:34 2024]
 rule extract_annotation:
     input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz
     output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz
@@ -81,6 +81,6 @@ Warning messages:
 5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
 Warning message:
 package ‘stringr’ was built under R version 4.2.3 
-[Mon Jun 10 22:51:42 2024]
+[Tue Jun 11 02:11:38 2024]
 Finished job 0.
 1 of 1 steps (100%) done
