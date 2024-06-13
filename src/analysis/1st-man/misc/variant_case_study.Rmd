@@ -1,0 +1,118 @@
+---
+title:  
+    "Variant case-study"
+date: 
+    "Jun 11th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+```{r load libraries}
+
+
+
+```
+
+
+
+```{r read-in data}
+
+
+
+
+# read in the data
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz", 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+head(variants_ann)
+
+# account for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+
+
+variants_ann$exp_line[variants_ann$exp_line == 18 & variants_ann$passage > 350] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
+
+
+## prepare data
+
+variants_ann %<>% 
+                filter(coverage >= 100) %>%
+                mutate(exp = case_when(exp_line %in% 13:16 ~ "EXPIII", exp_line %in% 17:20 ~ "EXPIV")) %>% # add experiment number info
+                mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% # add host cell line info
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2",
+                                            exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv")) %>%
+                mutate(mut_cat = case_when((allele_freq < 0.01) ~ "Unreliable",
+                                        (allele_freq >= 0.01 & allele_freq < 0.05) ~ "Sporadic", 
+                                        (allele_freq >= 0.05 & allele_freq < 0.5) ~ "Minority",
+                                        (allele_freq >= 0.5 & allele_freq < 0.99) ~ "Majority", 
+                                        (allele_freq >= 0.99) ~ "Fixated"))
+
+variants <- variants_ann %>% filter(!duplicated(variant_id))
+
+
+# facors
+
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+mut_cat_factor <- c("Sporadic", "Minority", "Majority", "Fixated")
+
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+
+## data.table option
+
+tbl_opt_list <- list(pageLength = 10, columnDefs = list(list(targets = 1, render = JS(
+    "function(data, type, row, meta) {",
+    "return type === 'display' && data.length > 10 ?",
+    "'<span title=\"' + data + '\">' + data.substr(0, 10) + '...</span>' : data;",
+    "}"))))
+
+
+
+
+```
+
+
+
+```{r}
+# epistasis of two mutations in a single codon of rev
+plt <- variants[variants$exp_line == "MT-2_1" & variants$mut_info %in% c("8479_T_A", "8480_A_T"),] %>% ggplot(aes(x = passage, y = allele_freq, fill = mut_info)) +
+                                                                                            geom_line()
+
+
+ggpplotly(plt)
+
+```
+
+```{r}
+
+# mutation in R region
+
+plt <- variants[variants$exp_line == "MT-4_2" & variants$mut_info %in% c("484_T_C", "9559_T_C"),] %>% ggplot(aes(x = passage, y = allele_freq, fill = mut_info)) +
+                                                                                            geom_line()
+
+
+ggplotly(plt)
+
+```

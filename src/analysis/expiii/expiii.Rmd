@@ -18,125 +18,6 @@ output:
         code_download: true # to make the Rmd source code available
 ---
 
-```{css, echo=F}
-
-#TOC {
-  position: fixed;
----
-title:  
-    "Overview of HIV-1 LTEE genomic data (EXPIII)"
-date: 
-    "Oct 3rd, 2023"
-author:  
-    "Ali Movasati"  
-output:  
-    html_document:
-        #css: style.css
-        toc: true
-        toc_depth: 2
-        toc_float: true
-        number_sections: true
-        theme: lumen
-        highlight: zenburn
-        code_folding: hide
-        code_download: true # to make the Rmd source code available
----
-
-```{css, echo=F}
-
-#TOC {
-  position: fixed;
----
-title:  
-    "Overview of HIV-1 LTEE genomic data (EXPIII)"
-date: 
-    "Oct 3rd, 2023"
-author:  
-    "Ali Movasati"  
-output:  
-    html_document:
-        #css: style.css
-        toc: true
-        toc_depth: 2
-        toc_float: true
-        number_sections: true
-        theme: lumen
-        highlight: zenburn
-        code_folding: hide
-        code_download: true # to make the Rmd source code available
----
-
-```{css, echo=F}
-
-#TOC {
-  position: fixed;
----
-title:  
-    "Overview of HIV-1 LTEE genomic data (EXPIII)"
-date: 
-    "Oct 3rd, 2023"
-author:  
-    "Ali Movasati"  
-output:  
-    html_document:
-        #css: style.css
-        toc: true
-        toc_depth: 2
-        toc_float: true
-        number_sections: true
-        theme: lumen
-        highlight: zenburn
-        code_folding: hide
-        code_download: true # to make the Rmd source code available
----
-
-```{css, echo=F}
-
-#TOC {
-  position: fixed;
----
-title:  
-    "Overview of HIV-1 LTEE genomic data (EXPIII)"
-date: 
-    "Oct 3rd, 2023"
-author:  
-    "Ali Movasati"  
-output:  
-    html_document:
-        #css: style.css
-        toc: true
-        toc_depth: 2
-        toc_float: true
-        number_sections: true
-        theme: lumen
-        highlight: zenburn
-        code_folding: hide
-        code_download: true # to make the Rmd source code available
----
-
-```{css, echo=F}
-
-#TOC {
-  position: fixed;
----
-title:  
-    "Overview of HIV-1 LTEE genomic data (EXPIII)"
-date: 
-    "Oct 3rd, 2023"
-author:  
-    "Ali Movasati"  
-output:  
-    html_document:
-        #css: style.css
-        toc: true
-        toc_depth: 2
-        toc_float: true
-        number_sections: true
-        theme: lumen
-        highlight: zenburn
-        code_folding: hide
-        code_download: true # to make the Rmd source code available
----
 
 ```{css, echo=F}
 
@@ -629,6 +510,7 @@ ggplotly(fig)
 
 category <- "Majority"
 min_threshold <- 0.5
+threshold <- 0.5
 max_threshold <- 1.01
 
 # get numbers for in-text reporting
@@ -653,7 +535,7 @@ t_test_result <- t.test(counts$n[counts$host_line == "MT2"], counts$n[counts$hos
 
 We observe a total of `r a` `r category` mutations across the four evolution lines of EXP III (`r b` unique mutations).
 
-> `r category` mutations are the mutations that became more frequent in the population than the wild-type nucleotide (a.k.a, allele frequency above `r threshold`)!
+> `r category` mutations are the mutations that became more frequent in the population than the wild-type nucleotide (a.k.a, allele frequency above `r min_threshold`)!
 
 Of note, we do observe deceleration of mutation accumulation towards the end of the experiment compared to first 100 passages. Another observation is the overall higher number of
 `r category` mutations in MT2 host cell lines compared to MT4 (p_val of `r format(t_test_result$p.value, scientific=TRUE)`). This is while we see opposite trend for [Minority](#minority-mutations) mutations.
