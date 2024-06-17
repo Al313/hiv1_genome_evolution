@@ -31,7 +31,7 @@ echo "#!/bin/bash
 #SBATCH --mem=5G
 #SBATCH --output=${output_dir}/snakemake.out
 
-source activate ha_proj
+source activate hc_proj
 
 snakemake \
         -s mysnakefile.smk \

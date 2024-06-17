@@ -50,7 +50,7 @@ ann_var$ANN[ann_var$POS >= 9076 & ann_var$POS <= 9528] <- paste0(ann_var$ANN[ann
 # add annotation of additional untranslated regions manually
 ann_var$ANN[ann_var$POS >= 454 & ann_var$POS <= 550] <- paste0(ann_var$ANN[ann_var$POS >= 454 & ann_var$POS <= 550], ",", ann_var$ALT[ann_var$POS >= 454 & ann_var$POS <= 550], "|untranslated_region|MODERATE|5_R|5_R||AF324489.5|||||||||")
 ann_var$ANN[ann_var$POS >= 635 & ann_var$POS <= 789] <- paste0(ann_var$ANN[ann_var$POS >= 635 & ann_var$POS <= 789], ",", ann_var$ALT[ann_var$POS >= 635 & ann_var$POS <= 789], "|untranslated_region|MODERATE|5_LTR_LS|5_LTR_LS||AF324491.5|||||||||")
-ann_var$ANN[ann_var$POS >= 9529 & ann_var$POS <= 9626] <- paste0(ann_var$ANN[ann_var$POS >= 9529 & ann_var$POS <= 9626], ",", ann_var$ALT[ann_var$POS >= 9529 & ann_var$POS <= 9626], "|untranslated_region|MODERATE|3_R|3_R||AF324500.3|||||||||")
+ann_var$ANN[ann_var$POS >= 9529 & ann_var$POS <= 9625] <- paste0(ann_var$ANN[ann_var$POS >= 9529 & ann_var$POS <= 9625], ",", ann_var$ALT[ann_var$POS >= 9529 & ann_var$POS <= 9625], "|untranslated_region|MODERATE|3_R|3_R||AF324500.3|||||||||")
 
 
 ### get the name of variant classes that you want to keep

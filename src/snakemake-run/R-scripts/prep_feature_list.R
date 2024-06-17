@@ -99,7 +99,7 @@ features_of_interest <- features_of_interest[,-7]
 
 ## add additional features to the list
 
-features_of_interest <- rbind(features_of_interest,c("AF324489.5","AF324493.2","Genbank","untranslated_region",".","+","5R","5R_454_550",NA), c("AF324491.5","AF324493.2","Genbank","untranslated_region",".","+","5LTRLS","5LTRLS_635_789",NA),c("AF324500.3","AF324493.2","Genbank","untranslated_region",".","+","3R","3R_9529_9626",NA)) 
+features_of_interest <- rbind(features_of_interest,c("AF324489.5","AF324493.2","Genbank","untranslated_region",".","+","5R","5R_454_550",NA), c("AF324491.5","AF324493.2","Genbank","untranslated_region",".","+","5LTRLS","5LTRLS_635_789",NA),c("AF324500.3","AF324493.2","Genbank","untranslated_region",".","+","3R","3R_9529_9625",NA)) 
 
 
 # write the table

@@ -3,15 +3,19 @@
 data/*
 !data/*/
 
+
 data/HIV-LTE_scripts_for_paper/*
 data/freezed-raw-data/*
+
 
 data/processed-data/mutations
 data/processed-data/fastqc-reports
 data/processed-data/coverage-assessment
 
-data/processed-data/consensus/pipeline-outputs/*
-!data/processed-data/consensus/pipeline-outputs/*.fasta
+
+data/processed-data/consensus/pipeline-outputs/full/iii
+data/processed-data/consensus/pipeline-outputs/full/iv
+
 
 src/snakemake-run/.snakemake/
 results/tables/3-p/all_variants.ann.vcf
