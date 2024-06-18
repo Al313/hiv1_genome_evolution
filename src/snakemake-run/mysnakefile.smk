@@ -118,9 +118,21 @@ rule collect_consensus_full:
     shell:
         "cat {input} >> {output}"
 
-rule consensus_50th_interval:
+
+rule consensus_line_swap:
    input:
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full.fasta"
+   output:
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full2.fasta"
+   shell:
+       "cat {input} | sed -E 's/>15(MT4EXPIIIVP[4,5])/>a\1/g' | sed -E 's/>16(MT4EXPIIIVP[4,5])/>b\1/g' | sed -E 's/>a(MT4EXPIIIVP[4,5])/>16\1/g' | sed -E 's/>b(MT4EXPIIIVP[4,5])/>15\1/g' > {output} && rm {input}"
+
+
+
+
+rule consensus_50th_interval:
+   input:
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full2.fasta"
    output:
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full.fasta"
    shell:
@@ -154,8 +166,8 @@ rule msa_post_processing:
     output:
         "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta"
     shell:
-        "sed -i -e 's/*/-/g' {input} && cat {input} | sed -E 's/([0-9]{2})MT[0-9]EXPIIIVP([0-9]{2,3}).*_L001?/\1:\2/g' | sed -E 's/([0-9]{2})MT[0-9]EXPIVVP([0-9]{2,3}).*_L001?/\1:\2/g' > {output} && \
-         sed -i -e 's/13:/MT-2_1:/g' {output} && sed -i -e 's/14:/MT-2_2:/g' {output} && sed -i -e 's/15:/MT-4_1:/g' {output} && sed -i -e 's/16:/MT-4_2:/g' {output}"
+       "sed -i -e 's/*/-/g' {input} && cat {input} | sed -E 's/([0-9]{{2}})MT[0-9]EXPIIIVP([0-9]{{2,3}}).*_L001?/\\1:\\2/g' | sed -E 's/([0-9]{{2}})MT[0-9]EXPIVVP([0-9]{{2,3}}).*_L001?/\\1:\\2/g' > {output} && \
+        sed -i -e 's/13:/MT-2_1:/g' {output} && sed -i -e 's/14:/MT-2_2:/g' {output} && sed -i -e 's/15:/MT-4_1:/g' {output} && sed -i -e 's/16:/MT-4_2:/g' {output}"
 
 
 rule tree_inference:

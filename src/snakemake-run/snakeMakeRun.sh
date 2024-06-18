@@ -31,12 +31,12 @@ echo "#!/bin/bash
 #SBATCH --mem=5G
 #SBATCH --output=${output_dir}/snakemake.out
 
-source activate hc_proj
+source activate ha_proj
 
 snakemake \
         -s mysnakefile.smk \
 	--jobs 456 \
-        --default-resource mem_mb=5000 \
+        --default-resource mem_mb=10000 \
         --cluster '
         sbatch \
                 --cpus-per-task {threads} \

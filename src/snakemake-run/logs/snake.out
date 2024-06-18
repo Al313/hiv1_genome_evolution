@@ -1,0 +1,263 @@
+IQ-TREE multicore version 2.3.4 COVID-edition for Linux x86 64-bit built Jun  5 2024
+Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung, Olga Chernomor,
+Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
+
+Host:    u20-chii000-405 (AVX512, FMA3, 377 GB RAM)
+Command: iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta -m MFP -B 1000 -redo
+Seed:    988158 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Tue Jun 18 10:17:43 2024
+Kernel:  AVX+FMA - 1 threads (2 CPU cores detected)
+
+HINT: Use -nt option to specify number of threads because your CPU has 2 cores!
+HINT: -nt AUTO will automatically determine the best number of threads to use.
+
+Reading alignment file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta ... Fasta format detected
+Reading fasta file: done in 0.0131664 secs using 94.03% CPU
+Alignment most likely contains DNA/RNA sequences
+Alignment has 42 sequences with 9183 columns, 209 distinct patterns
+175 parsimony-informative, 1327 singleton sites, 7680 constant sites
+WARNING: Some sequence names are changed as follows:
+MT-4_2:100 -> MT-4_2_100
+MT-2_1:10 -> MT-2_1_10
+MT-2_2:200 -> MT-2_2_200
+MT-4_1:100 -> MT-4_1_100
+MT-2_2:400 -> MT-2_2_400
+MT-2_1:300 -> MT-2_1_300
+MT-2_1:400 -> MT-2_1_400
+MT-2_2:550 -> MT-2_2_550
+MT-2_1:200 -> MT-2_1_200
+MT-2_1:50 -> MT-2_1_50
+MT-2_2:450 -> MT-2_2_450
+MT-2_2:250 -> MT-2_2_250
+MT-2_2:50 -> MT-2_2_50
+MT-4_2:350 -> MT-4_2_350
+MT-4_2:300 -> MT-4_2_300
+MT-2_1:250 -> MT-2_1_250
+MT-2_2:570 -> MT-2_2_570
+MT-2_2:150 -> MT-2_2_150
+MT-4_2:10 -> MT-4_2_10
+MT-2_1:550 -> MT-2_1_550
+MT-2_1:350 -> MT-2_1_350
+MT-2_1:500 -> MT-2_1_500
+MT-2_1:100 -> MT-2_1_100
+MT-4_1:250 -> MT-4_1_250
+MT-2_2:10 -> MT-2_2_10
+MT-4_2:150 -> MT-4_2_150
+MT-4_2:200 -> MT-4_2_200
+MT-4_1:350 -> MT-4_1_350
+MT-2_2:100 -> MT-2_2_100
+MT-4_1:200 -> MT-4_1_200
+MT-4_2:250 -> MT-4_2_250
+MT-4_1:300 -> MT-4_1_300
+MT-2_1:570 -> MT-2_1_570
+MT-4_1:150 -> MT-4_1_150
+MT-4_1:10 -> MT-4_1_10
+MT-2_2:300 -> MT-2_2_300
+MT-2_1:150 -> MT-2_1_150
+MT-2_2:350 -> MT-2_2_350
+MT-2_2:500 -> MT-2_2_500
+MT-2_1:450 -> MT-2_1_450
+
+                                  Gap/Ambiguity  Composition  p-value
+Analyzing sequences: done in 2.00442e-05 secs using 94.79% CPU
+   1  MT-4_2_100                         53.10%    passed     99.45%
+   2  MT-2_1_10                          53.10%    passed     99.02%
+   3  MT-2_2_200                         53.11%    passed     97.83%
+   4  MT-4_1_100                         53.10%    passed     99.57%
+   5  MT-2_2_400                         53.10%    passed     82.70%
+   6  MT-2_1_300                         53.11%    passed     90.13%
+   7  MT-2_1_400                         53.10%    passed     75.24%
+   8  MT-2_2_550                         53.11%    passed     76.40%
+   9  MT-2_1_200                         53.10%    passed     98.21%
+  10  MT-2_1_50                          53.10%    passed     99.27%
+  11  MT-2_2_450                         53.10%    passed     82.97%
+  12  MT-2_2_250                         53.10%    passed     96.23%
+  13  MT-2_2_50                          53.10%    passed     98.82%
+  14  K03455.1                            0.00%    failed      0.00%
+  15  MT-4_2_350                         53.12%    passed     97.74%
+  16  MT-4_2_300                         53.10%    passed     98.23%
+  17  MT-2_1_250                         53.10%    passed     95.07%
+  18  MT-2_2_570                         53.11%    passed     68.51%
+  19  MT-2_2_150                         53.10%    passed     98.25%
+  20  MT-4_2_10                          53.10%    passed     99.23%
+  21  MT-2_1_550                         53.10%    passed     71.17%
+  22  MT-2_1_350                         53.10%    passed     85.20%
+  23  MT-2_1_500                         53.10%    passed     73.83%
+  24  MT-2_1_100                         53.11%    passed     99.35%
+  25  MT-4_1_250                         53.10%    passed     98.16%
+  26  MT-2_2_10                          53.10%    passed     99.23%
+  27  MT-4_2_150                         53.11%    passed     99.12%
+  28  NL43_ann_wk0virusPassRef_plasmid    0.12%    failed      0.00%
+  29  MT-4_2_200                         53.10%    passed     99.36%
+  30  MT-4_1_350                         53.10%    passed     97.60%
+  31  MT-2_2_100                         53.10%    passed     98.95%
+  32  MT-4_1_200                         53.10%    passed     98.56%
+  33  MT-4_2_250                         53.10%    passed     98.42%
+  34  MT-4_1_300                         53.10%    passed     96.26%
+  35  MT-2_1_570                         53.20%    passed     76.96%
+  36  MT-4_1_150                         53.10%    passed     99.25%
+  37  MT-4_1_10                          53.10%    passed     99.23%
+  38  MT-2_2_300                         53.10%    passed     95.61%
+  39  MT-2_1_150                         53.10%    passed     98.90%
+  40  MT-2_2_350                         53.10%    passed     94.49%
+  41  MT-2_2_500                         53.11%    passed     79.47%
+  42  MT-2_1_450                         53.10%    passed     73.74%
+WARNING: 40 sequences contain more than 50% gaps/ambiguity
+****  TOTAL                              50.58%  2 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: MT-2_2_10 is identical to MT-4_2_10 but kept for subsequent analysis
+NOTE: 1 identical sequences (see below) will be ignored for subsequent analysis
+NOTE: MT-4_1_10 (identical to MT-4_2_10) is ignored but added at the end
+Alignment was printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.uniqueseq.phy
+
+For your convenience alignment with unique sequences printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.uniqueseq.phy
+
+
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.001 seconds
+Perform fast likelihood tree search using GTR+I+G model...
+Estimate model parameters (epsilon = 5.000)
+Perform nearest neighbor interchange...
+Estimate model parameters (epsilon = 1.000)
+1. Initial log-likelihood: -19719.218
+2. Current log-likelihood: -19717.793
+3. Current log-likelihood: -19716.270
+Optimal log-likelihood: -19715.171
+Rate parameters:  A-C: 1.02126  A-G: 4.12456  A-T: 0.88803  C-G: 0.15279  C-T: 4.81226  G-T: 1.00000
+Base frequencies:  A: 0.387  C: 0.171  G: 0.232  T: 0.210
+Proportion of invariable sites: 0.392
+Gamma shape alpha: 0.149
+Parameters optimization took 3 rounds (0.042 sec)
+Time for fast ML tree search: 0.204 seconds
+
+NOTE: ModelFinder requires 3 MB RAM!
+ModelFinder will test up to 484 DNA models (sample size: 9183) ...
+ No. Model         -LnL         df  AIC          AICc         BIC
+  1  GTR+F         19911.663    87  39997.325    39999.009    40617.210
+  2  GTR+F+I       19709.963    88  39595.925    39597.648    40222.935
+  3  GTR+F+G4      19727.122    88  39630.244    39631.966    40257.253
+  4  GTR+F+I+G4    19712.046    89  39602.091    39603.853    40236.226
+  5  GTR+F+R2      19759.900    89  39697.799    39699.561    40331.934
+  6  GTR+F+R3      19747.802    91  39677.603    39679.445    40325.988
+  7  GTR+F+R4      19738.047    93  39662.095    39664.018    40324.730
+  8  GTR+F+R5      19731.607    95  39653.214    39655.221    40330.099
+ 14  GTR+F+I+R2    19712.174    90  39604.349    39606.150    40245.609
+ 15  GTR+F+I+R3    19711.218    92  39606.436    39608.318    40261.946
+ 24  SYM+I         20047.654    85  40265.307    40266.914    40870.942
+ 46  TVM+F+I       19709.946    87  39593.892    39595.576    40213.777
+ 68  TVMe+I        20052.978    84  40273.956    40275.525    40872.465
+ 90  TIM3+F+I      19714.011    86  39600.023    39601.668    40212.782
+112  TIM3e+I       20057.837    83  40281.674    40283.207    40873.059
+134  TIM2+F+I      19712.442    86  39596.884    39598.529    40209.644
+156  TIM2e+I       20052.311    83  40270.623    40272.155    40862.007
+178  TIM+F+I       19712.728    86  39597.456    39599.101    40210.216
+200  TIMe+I        20057.951    83  40281.902    40283.435    40873.286
+222  TPM3u+F+I     19714.446    85  39598.893    39600.500    40204.527
+244  TPM3+I        20063.397    82  40290.795    40292.290    40875.053
+266  TPM2u+F+I     19713.077    85  39596.155    39597.762    40201.789
+288  TPM2+I        20056.846    82  40277.692    40279.188    40861.951
+310  K3Pu+F+I      19713.309    85  39596.618    39598.226    40202.253
+332  K3P+I         20062.996    82  40289.992    40291.488    40874.251
+354  TN+F+I        19714.174    85  39598.347    39599.954    40203.981
+376  TNe+I         20059.424    82  40282.847    40284.343    40867.106
+398  HKY+F+I       19714.742    84  39597.485    39599.054    40195.994
+420  K2P+I         20064.484    81  40290.967    40292.427    40868.101
+442  F81+F+I       19853.804    83  39873.607    39875.140    40464.992
+464  JC+I          20234.514    80  40629.028    40630.452    41199.037
+Akaike Information Criterion:           TVM+F+I
+Corrected Akaike Information Criterion: TVM+F+I
+Bayesian Information Criterion:         HKY+F+I
+Best-fit model: HKY+F+I chosen according to BIC
+
+All model information printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.model.gz
+CPU time for ModelFinder: 9.394 seconds (0h:0m:9s)
+Wall-clock time for ModelFinder: 9.565 seconds (0h:0m:9s)
+Generating 1000 samples for ultrafast bootstrap (seed: 988158)...
+
+NOTE: 1 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -19714.742
+Optimal log-likelihood: -19714.728
+Rate parameters:  A-C: 1.00000  A-G: 10.50020  A-T: 1.00000  C-G: 1.00000  C-T: 10.50020  G-T: 1.00000
+Base frequencies:  A: 0.387  C: 0.171  G: 0.232  T: 0.210
+Proportion of invariable sites: 0.783
+Parameters optimization took 1 rounds (0.002 sec)
+Wrote distance file to... 
+Computing ML distances based on estimated model parameters...
+Calculating distance matrix: done in 0.00880753 secs using 99.68% CPU
+Computing ML distances took 0.008996 sec (of wall-clock time) 0.008976 sec (of CPU time)
+Setting up auxiliary I and S matrices: done in 0.000162554 secs using 99.04% CPU
+Computing RapidNJ tree took 0.000828 sec (of wall-clock time) 0.000831 sec (of CPU time)
+Log-likelihood of RapidNJ tree: -19823.221
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 0.238 second
+Computing log-likelihood of 98 initial trees ... 0.154 seconds
+Current best score: -19714.728
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -19714.721
+BETTER TREE FOUND at iteration 2: -19714.719
+UPDATE BEST LOG-LIKELIHOOD: -19714.719
+Iteration 10 / LogL: -19714.719 / Time: 0h:0m:10s
+UPDATE BEST LOG-LIKELIHOOD: -19714.719
+Iteration 20 / LogL: -19714.726 / Time: 0h:0m:10s
+Finish initializing candidate tree set (5)
+Current best tree score: -19714.719 / CPU time: 0.975
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Iteration 30 / LogL: -19714.721 / Time: 0h:0m:11s (0h:0m:3s left)
+Iteration 40 / LogL: -19714.727 / Time: 0h:0m:11s (0h:0m:2s left)
+Iteration 50 / LogL: -19714.767 / Time: 0h:0m:11s (0h:0m:2s left)
+Log-likelihood cutoff on original alignment: -19749.418
+Iteration 60 / LogL: -19714.732 / Time: 0h:0m:12s (0h:0m:1s left)
+Iteration 70 / LogL: -19714.732 / Time: 0h:0m:12s (0h:0m:1s left)
+Iteration 80 / LogL: -19714.735 / Time: 0h:0m:12s (0h:0m:0s left)
+Iteration 90 / LogL: -19714.733 / Time: 0h:0m:12s (0h:0m:0s left)
+Iteration 100 / LogL: -19714.735 / Time: 0h:0m:13s (0h:0m:0s left)
+Log-likelihood cutoff on original alignment: -19749.418
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.997
+TREE SEARCH COMPLETED AFTER 103 ITERATIONS / Time: 0h:0m:13s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -19714.719
+Optimal log-likelihood: -19714.715
+Rate parameters:  A-C: 1.00000  A-G: 10.34572  A-T: 1.00000  C-G: 1.00000  C-T: 10.34572  G-T: 1.00000
+Base frequencies:  A: 0.387  C: 0.171  G: 0.232  T: 0.210
+Proportion of invariable sites: 0.783
+Parameters optimization took 1 rounds (0.002 sec)
+BEST SCORE FOUND : -19714.715
+Creating bootstrap support values...
+Split supports printed to NEXUS file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex
+Total tree length: 1.272
+
+Total number of iterations: 103
+CPU time used for tree search: 3.369 sec (0h:0m:3s)
+Wall-clock time used for tree search: 3.598 sec (0h:0m:3s)
+Total CPU time used: 12.892 sec (0h:0m:12s)
+Total wall-clock time used: 13.464 sec (0h:0m:13s)
+
+Computing bootstrap consensus tree...
+Reading input file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex...
+41 taxa and 201 splits.
+Consensus tree written to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
+Reading input trees file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
+Log-likelihood of consensus tree: -19714.789
+
+Analysis results written to: 
+  IQ-TREE report:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
+  Maximum-likelihood tree:       /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.treefile
+  Likelihood distances:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.mldist
+
+Ultrafast bootstrap approximation results written to:
+  Split support values:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex
+  Consensus tree:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
+  Screen log file:               /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.log
+
+Date and Time: Tue Jun 18 10:17:56 2024
