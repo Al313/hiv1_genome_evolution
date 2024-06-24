@@ -2,253 +2,309 @@ IQ-TREE multicore version 2.3.4 COVID-edition for Linux x86 64-bit built Jun  5 
 Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung, Olga Chernomor,
 Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
 
-Host:    u20-chii000-405 (AVX512, FMA3, 377 GB RAM)
+Host:    u20-cva0000-007 (AVX2, FMA3, 30 GB RAM)
 Command: iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta -m MFP -B 1000 -redo
-Seed:    988158 (Using SPRNG - Scalable Parallel Random Number Generator)
-Time:    Tue Jun 18 10:17:43 2024
-Kernel:  AVX+FMA - 1 threads (2 CPU cores detected)
-
-HINT: Use -nt option to specify number of threads because your CPU has 2 cores!
-HINT: -nt AUTO will automatically determine the best number of threads to use.
+Seed:    562296 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Sun Jun 23 14:33:02 2024
+Kernel:  AVX+FMA - 1 threads (1 CPU cores detected)
 
 Reading alignment file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta ... Fasta format detected
-Reading fasta file: done in 0.0131664 secs using 94.03% CPU
+Reading fasta file: done in 0.00436477 secs using 95.4% CPU
 Alignment most likely contains DNA/RNA sequences
-Alignment has 42 sequences with 9183 columns, 209 distinct patterns
-175 parsimony-informative, 1327 singleton sites, 7680 constant sites
+Alignment has 54 sequences with 4307 columns, 208 distinct patterns
+194 parsimony-informative, 116 singleton sites, 3997 constant sites
 WARNING: Some sequence names are changed as follows:
-MT-4_2:100 -> MT-4_2_100
-MT-2_1:10 -> MT-2_1_10
-MT-2_2:200 -> MT-2_2_200
-MT-4_1:100 -> MT-4_1_100
-MT-2_2:400 -> MT-2_2_400
-MT-2_1:300 -> MT-2_1_300
-MT-2_1:400 -> MT-2_1_400
-MT-2_2:550 -> MT-2_2_550
-MT-2_1:200 -> MT-2_1_200
-MT-2_1:50 -> MT-2_1_50
-MT-2_2:450 -> MT-2_2_450
-MT-2_2:250 -> MT-2_2_250
-MT-2_2:50 -> MT-2_2_50
-MT-4_2:350 -> MT-4_2_350
-MT-4_2:300 -> MT-4_2_300
-MT-2_1:250 -> MT-2_1_250
-MT-2_2:570 -> MT-2_2_570
-MT-2_2:150 -> MT-2_2_150
-MT-4_2:10 -> MT-4_2_10
-MT-2_1:550 -> MT-2_1_550
-MT-2_1:350 -> MT-2_1_350
-MT-2_1:500 -> MT-2_1_500
-MT-2_1:100 -> MT-2_1_100
-MT-4_1:250 -> MT-4_1_250
-MT-2_2:10 -> MT-2_2_10
-MT-4_2:150 -> MT-4_2_150
-MT-4_2:200 -> MT-4_2_200
-MT-4_1:350 -> MT-4_1_350
-MT-2_2:100 -> MT-2_2_100
-MT-4_1:200 -> MT-4_1_200
 MT-4_2:250 -> MT-4_2_250
-MT-4_1:300 -> MT-4_1_300
-MT-2_1:570 -> MT-2_1_570
-MT-4_1:150 -> MT-4_1_150
-MT-4_1:10 -> MT-4_1_10
-MT-2_2:300 -> MT-2_2_300
-MT-2_1:150 -> MT-2_1_150
-MT-2_2:350 -> MT-2_2_350
-MT-2_2:500 -> MT-2_2_500
+MT-2_2:550 -> MT-2_2_550
+MT-2_1:400 -> MT-2_1_400
+MT-4_2:450 -> MT-4_2_450
+MT-2_2:400 -> MT-2_2_400
+MT-4_2:100 -> MT-4_2_100
+MT-2_1:350 -> MT-2_1_350
+MT-2_2:570 -> MT-2_2_570
+MT-2_1:50 -> MT-2_1_50
+MT-4_2:570 -> MT-4_2_570
 MT-2_1:450 -> MT-2_1_450
+MT-2_1:500 -> MT-2_1_500
+MT-4_2:200 -> MT-4_2_200
+MT-4_1:300 -> MT-4_1_300
+MT-4_1:450 -> MT-4_1_450
+MT-4_2:550 -> MT-4_2_550
+MT-2_1:10 -> MT-2_1_10
+MT-2_1:300 -> MT-2_1_300
+MT-4_2:150 -> MT-4_2_150
+MT-4_2:350 -> MT-4_2_350
+MT-2_2:250 -> MT-2_2_250
+MT-2_1:100 -> MT-2_1_100
+MT-4_1:50 -> MT-4_1_50
+MT-4_1:350 -> MT-4_1_350
+MT-2_2:150 -> MT-2_2_150
+MT-2_2:450 -> MT-2_2_450
+MT-2_2:200 -> MT-2_2_200
+MT-2_1:570 -> MT-2_1_570
+MT-2_1:200 -> MT-2_1_200
+MT-4_2:50 -> MT-4_2_50
+MT-2_2:10 -> MT-2_2_10
+MT-2_2:50 -> MT-2_2_50
+MT-2_2:500 -> MT-2_2_500
+MT-2_1:250 -> MT-2_1_250
+MT-2_1:550 -> MT-2_1_550
+MT-4_1:200 -> MT-4_1_200
+MT-4_2:500 -> MT-4_2_500
+MT-4_1:150 -> MT-4_1_150
+MT-4_2:10 -> MT-4_2_10
+MT-4_1:570 -> MT-4_1_570
+MT-2_2:100 -> MT-2_2_100
+MT-4_1:250 -> MT-4_1_250
+MT-2_1:150 -> MT-2_1_150
+MT-4_1:10 -> MT-4_1_10
+MT-4_2:400 -> MT-4_2_400
+MT-4_1:400 -> MT-4_1_400
+MT-4_2:300 -> MT-4_2_300
+MT-2_2:350 -> MT-2_2_350
+MT-2_2:300 -> MT-2_2_300
+MT-4_1:500 -> MT-4_1_500
+MT-4_1:100 -> MT-4_1_100
+MT-4_1:550 -> MT-4_1_550
 
                                   Gap/Ambiguity  Composition  p-value
-Analyzing sequences: done in 2.00442e-05 secs using 94.79% CPU
-   1  MT-4_2_100                         53.10%    passed     99.45%
-   2  MT-2_1_10                          53.10%    passed     99.02%
-   3  MT-2_2_200                         53.11%    passed     97.83%
-   4  MT-4_1_100                         53.10%    passed     99.57%
-   5  MT-2_2_400                         53.10%    passed     82.70%
-   6  MT-2_1_300                         53.11%    passed     90.13%
-   7  MT-2_1_400                         53.10%    passed     75.24%
-   8  MT-2_2_550                         53.11%    passed     76.40%
-   9  MT-2_1_200                         53.10%    passed     98.21%
-  10  MT-2_1_50                          53.10%    passed     99.27%
-  11  MT-2_2_450                         53.10%    passed     82.97%
-  12  MT-2_2_250                         53.10%    passed     96.23%
-  13  MT-2_2_50                          53.10%    passed     98.82%
-  14  K03455.1                            0.00%    failed      0.00%
-  15  MT-4_2_350                         53.12%    passed     97.74%
-  16  MT-4_2_300                         53.10%    passed     98.23%
-  17  MT-2_1_250                         53.10%    passed     95.07%
-  18  MT-2_2_570                         53.11%    passed     68.51%
-  19  MT-2_2_150                         53.10%    passed     98.25%
-  20  MT-4_2_10                          53.10%    passed     99.23%
-  21  MT-2_1_550                         53.10%    passed     71.17%
-  22  MT-2_1_350                         53.10%    passed     85.20%
-  23  MT-2_1_500                         53.10%    passed     73.83%
-  24  MT-2_1_100                         53.11%    passed     99.35%
-  25  MT-4_1_250                         53.10%    passed     98.16%
-  26  MT-2_2_10                          53.10%    passed     99.23%
-  27  MT-4_2_150                         53.11%    passed     99.12%
-  28  NL43_ann_wk0virusPassRef_plasmid    0.12%    failed      0.00%
-  29  MT-4_2_200                         53.10%    passed     99.36%
-  30  MT-4_1_350                         53.10%    passed     97.60%
-  31  MT-2_2_100                         53.10%    passed     98.95%
-  32  MT-4_1_200                         53.10%    passed     98.56%
-  33  MT-4_2_250                         53.10%    passed     98.42%
-  34  MT-4_1_300                         53.10%    passed     96.26%
-  35  MT-2_1_570                         53.20%    passed     76.96%
-  36  MT-4_1_150                         53.10%    passed     99.25%
-  37  MT-4_1_10                          53.10%    passed     99.23%
-  38  MT-2_2_300                         53.10%    passed     95.61%
-  39  MT-2_1_150                         53.10%    passed     98.90%
-  40  MT-2_2_350                         53.10%    passed     94.49%
-  41  MT-2_2_500                         53.11%    passed     79.47%
-  42  MT-2_1_450                         53.10%    passed     73.74%
-WARNING: 40 sequences contain more than 50% gaps/ambiguity
-****  TOTAL                              50.58%  2 sequences failed composition chi2 test (p-value<5%; df=3)
-NOTE: MT-2_2_10 is identical to MT-4_2_10 but kept for subsequent analysis
-NOTE: 1 identical sequences (see below) will be ignored for subsequent analysis
-NOTE: MT-4_1_10 (identical to MT-4_2_10) is ignored but added at the end
+Analyzing sequences: done in 2.75229e-05 secs using 98.1% CPU
+   1  MT-4_2_250                          0.00%    passed     99.78%
+   2  MT-2_2_550                          0.02%    passed     94.18%
+   3  MT-2_1_400                          0.00%    passed     92.66%
+   4  MT-4_2_450                          0.00%    passed     99.92%
+   5  MT-2_2_400                          0.00%    passed     97.08%
+   6  MT-4_2_100                          0.00%    passed     99.29%
+   7  MT-2_1_350                          0.00%    passed     97.48%
+   8  MT-2_2_570                          0.02%    passed     90.03%
+   9  K03455.1                            0.00%    passed     96.75%
+  10  MT-2_1_50                           0.00%    passed     98.46%
+  11  MT-4_2_570                          0.02%    passed     99.75%
+  12  MT-2_1_450                          0.00%    passed     91.96%
+  13  MT-2_1_500                          0.00%    passed     92.07%
+  14  MT-4_2_200                          0.00%    passed     99.57%
+  15  MT-4_1_300                          0.00%    passed     99.93%
+  16  MT-4_1_450                          0.00%    passed     99.75%
+  17  MT-4_2_550                          0.00%    passed     99.99%
+  18  MT-2_1_10                           0.00%    passed     96.83%
+  19  MT-2_1_300                          0.02%    passed     99.19%
+  20  MT-4_2_150                          0.02%    passed     99.48%
+  21  MT-4_2_350                          0.05%    passed     99.88%
+  22  MT-2_2_250                          0.00%    passed     99.95%
+  23  MT-2_1_100                          0.02%    passed     98.67%
+  24  MT-4_1_50                           0.00%    passed     97.24%
+  25  MT-4_1_350                          0.00%    passed     99.92%
+  26  MT-2_2_150                          0.00%    passed     99.78%
+  27  MT-2_2_450                          0.00%    passed     96.97%
+  28  MT-2_2_200                          0.02%    passed     99.92%
+  29  MT-2_1_570                          0.21%    passed     93.24%
+  30  MT-2_1_200                          0.00%    passed     99.71%
+  31  MT-4_2_50                           0.00%    passed     97.24%
+  32  MT-2_2_10                           0.00%    passed     96.58%
+  33  MT-2_2_50                           0.00%    passed     96.53%
+  34  MT-2_2_500                          0.02%    passed     95.95%
+  35  MT-2_1_250                          0.00%    passed     99.96%
+  36  MT-2_1_550                          0.00%    passed     90.08%
+  37  MT-4_1_200                          0.00%    passed     99.96%
+  38  MT-4_2_500                          0.02%    passed     99.91%
+  39  MT-4_1_150                          0.00%    passed     99.26%
+  40  MT-4_2_10                           0.00%    passed     96.58%
+  41  NL43_ann_wk0virusPassRef_plasmid    0.00%    passed     96.58%
+  42  MT-4_1_570                          0.02%    passed     99.65%
+  43  MT-2_2_100                          0.00%    passed     98.14%
+  44  MT-4_1_250                          0.00%    passed     99.96%
+  45  MT-2_1_150                          0.00%    passed     99.62%
+  46  MT-4_1_10                           0.00%    passed     96.58%
+  47  MT-4_2_400                          0.05%    passed     99.99%
+  48  MT-4_1_400                          0.00%    passed     99.80%
+  49  MT-4_2_300                          0.00%    passed     99.90%
+  50  MT-2_2_350                          0.00%    passed     99.85%
+  51  MT-2_2_300                          0.00%    passed     99.97%
+  52  MT-4_1_500                          0.00%    passed     99.70%
+  53  MT-4_1_100                          0.00%    passed     99.45%
+  54  MT-4_1_550                          0.02%    passed     99.75%
+****  TOTAL                               0.01%  0 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: MT-4_2_10 is identical to MT-2_2_10 but kept for subsequent analysis
+NOTE: 2 identical sequences (see below) will be ignored for subsequent analysis
+NOTE: NL43_ann_wk0virusPassRef_plasmid (identical to MT-2_2_10) is ignored but added at the end
+NOTE: MT-4_1_10 (identical to MT-2_2_10) is ignored but added at the end
 Alignment was printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.uniqueseq.phy
 
 For your convenience alignment with unique sequences printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.uniqueseq.phy
 
 
-Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.001 seconds
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.002 seconds
 Perform fast likelihood tree search using GTR+I+G model...
 Estimate model parameters (epsilon = 5.000)
 Perform nearest neighbor interchange...
 Estimate model parameters (epsilon = 1.000)
-1. Initial log-likelihood: -19719.218
-2. Current log-likelihood: -19717.793
-3. Current log-likelihood: -19716.270
-Optimal log-likelihood: -19715.171
-Rate parameters:  A-C: 1.02126  A-G: 4.12456  A-T: 0.88803  C-G: 0.15279  C-T: 4.81226  G-T: 1.00000
-Base frequencies:  A: 0.387  C: 0.171  G: 0.232  T: 0.210
-Proportion of invariable sites: 0.392
-Gamma shape alpha: 0.149
-Parameters optimization took 3 rounds (0.042 sec)
-Time for fast ML tree search: 0.204 seconds
+1. Initial log-likelihood: -8712.344
+Optimal log-likelihood: -8712.322
+Rate parameters:  A-C: 1.06614  A-G: 7.82091  A-T: 0.63421  C-G: 0.26762  C-T: 8.62972  G-T: 1.00000
+Base frequencies:  A: 0.390  C: 0.170  G: 0.231  T: 0.209
+Proportion of invariable sites: 0.466
+Gamma shape alpha: 0.092
+Parameters optimization took 1 rounds (0.011 sec)
+Time for fast ML tree search: 0.133 seconds
 
-NOTE: ModelFinder requires 3 MB RAM!
-ModelFinder will test up to 484 DNA models (sample size: 9183) ...
+NOTE: ModelFinder requires 4 MB RAM!
+ModelFinder will test up to 484 DNA models (sample size: 4307) ...
  No. Model         -LnL         df  AIC          AICc         BIC
-  1  GTR+F         19911.663    87  39997.325    39999.009    40617.210
-  2  GTR+F+I       19709.963    88  39595.925    39597.648    40222.935
-  3  GTR+F+G4      19727.122    88  39630.244    39631.966    40257.253
-  4  GTR+F+I+G4    19712.046    89  39602.091    39603.853    40236.226
-  5  GTR+F+R2      19759.900    89  39697.799    39699.561    40331.934
-  6  GTR+F+R3      19747.802    91  39677.603    39679.445    40325.988
-  7  GTR+F+R4      19738.047    93  39662.095    39664.018    40324.730
-  8  GTR+F+R5      19731.607    95  39653.214    39655.221    40330.099
- 14  GTR+F+I+R2    19712.174    90  39604.349    39606.150    40245.609
- 15  GTR+F+I+R3    19711.218    92  39606.436    39608.318    40261.946
- 24  SYM+I         20047.654    85  40265.307    40266.914    40870.942
- 46  TVM+F+I       19709.946    87  39593.892    39595.576    40213.777
- 68  TVMe+I        20052.978    84  40273.956    40275.525    40872.465
- 90  TIM3+F+I      19714.011    86  39600.023    39601.668    40212.782
-112  TIM3e+I       20057.837    83  40281.674    40283.207    40873.059
-134  TIM2+F+I      19712.442    86  39596.884    39598.529    40209.644
-156  TIM2e+I       20052.311    83  40270.623    40272.155    40862.007
-178  TIM+F+I       19712.728    86  39597.456    39599.101    40210.216
-200  TIMe+I        20057.951    83  40281.902    40283.435    40873.286
-222  TPM3u+F+I     19714.446    85  39598.893    39600.500    40204.527
-244  TPM3+I        20063.397    82  40290.795    40292.290    40875.053
-266  TPM2u+F+I     19713.077    85  39596.155    39597.762    40201.789
-288  TPM2+I        20056.846    82  40277.692    40279.188    40861.951
-310  K3Pu+F+I      19713.309    85  39596.618    39598.226    40202.253
-332  K3P+I         20062.996    82  40289.992    40291.488    40874.251
-354  TN+F+I        19714.174    85  39598.347    39599.954    40203.981
-376  TNe+I         20059.424    82  40282.847    40284.343    40867.106
-398  HKY+F+I       19714.742    84  39597.485    39599.054    40195.994
-420  K2P+I         20064.484    81  40290.967    40292.427    40868.101
-442  F81+F+I       19853.804    83  39873.607    39875.140    40464.992
-464  JC+I          20234.514    80  40629.028    40630.452    41199.037
-Akaike Information Criterion:           TVM+F+I
-Corrected Akaike Information Criterion: TVM+F+I
+  1  GTR+F         8892.232     109 18002.465    18008.178    18696.576
+  2  GTR+F+I       8712.523     110 17645.046    17650.866    18345.526
+  3  GTR+F+G4      8740.506     110 17701.012    17706.832    18401.492
+  4  GTR+F+I+G4    8712.315     111 17646.629    17652.556    18353.477
+  5  GTR+F+R2      8710.412     111 17642.823    17648.750    18349.671
+  6  GTR+F+R3      8710.224     113 17646.447    17652.592    18366.031
+ 14  GTR+F+I+R2    8710.917     112 17645.834    17651.869    18359.049
+ 15  GTR+F+I+R3    8710.658     114 17649.315    17655.570    18375.267
+ 24  SYM+I         8961.737     107 18137.475    18142.979    18818.851
+ 26  SYM+I+G4      8962.207     108 18140.414    18146.023    18828.158
+ 27  SYM+R2        8957.308     108 18130.617    18136.225    18818.361
+ 46  TVM+F+I       8712.843     109 17643.686    17649.400    18337.798
+ 48  TVM+F+I+G4    8712.592     110 17645.184    17651.004    18345.664
+ 49  TVM+F+R2      8710.520     110 17641.040    17646.860    18341.519
+ 68  TVMe+I        8966.937     106 18145.873    18151.274    18820.881
+ 70  TVMe+I+G4     8967.607     107 18149.213    18154.718    18830.589
+ 71  TVMe+R2       8963.252     107 18140.504    18146.008    18821.880
+ 90  TIM3+F+I      8716.633     108 17649.266    17654.874    18337.009
+ 92  TIM3+F+I+G4   8716.371     109 17650.742    17656.456    18344.854
+ 93  TIM3+F+R2     8714.294     109 17646.588    17652.302    18340.700
+112  TIM3e+I       8968.166     105 18146.332    18151.631    18814.972
+114  TIM3e+I+G4    8968.532     106 18149.063    18154.464    18824.071
+115  TIM3e+R2      8964.009     106 18140.019    18145.420    18815.026
+134  TIM2+F+I      8716.252     108 17648.503    17654.112    18336.247
+136  TIM2+F+I+G4   8716.015     109 17650.031    17655.744    18344.142
+137  TIM2+F+R2     8713.926     109 17645.853    17651.566    18339.964
+156  TIM2e+I       8965.649     105 18141.298    18146.597    18809.938
+158  TIM2e+I+G4    8966.149     106 18144.298    18149.699    18819.305
+159  TIM2e+R2      8961.089     106 18134.177    18139.578    18809.185
+178  TIM+F+I       8713.787     108 17643.574    17649.182    18331.318
+180  TIM+F+I+G4    8713.525     109 17645.051    17650.764    18339.163
+181  TIM+F+R2      8711.611     109 17641.223    17646.936    18335.335
+200  TIMe+I        8965.924     105 18141.848    18147.147    18810.488
+202  TIMe+I+G4     8966.283     106 18144.566    18149.967    18819.574
+203  TIMe+R2       8961.891     106 18135.782    18141.183    18810.789
+222  TPM3u+F+I     8716.958     107 17647.916    17653.420    18329.292
+224  TPM3u+F+I+G4  8716.650     108 17649.300    17654.908    18337.044
+225  TPM3u+F+R2    8714.424     108 17644.848    17650.457    18332.592
+244  TPM3+I        8973.282     104 18154.564    18159.761    18816.835
+246  TPM3+I+G4     8973.775     105 18157.550    18162.848    18826.189
+247  TPM3+R2       8969.926     105 18149.852    18155.150    18818.491
+266  TPM2u+F+I     8716.571     107 17647.143    17652.647    18328.518
+268  TPM2u+F+I+G4  8716.293     108 17648.585    17654.194    18336.329
+269  TPM2u+F+R2    8714.019     108 17644.038    17649.647    18331.782
+288  TPM2+I        8970.928     104 18149.856    18155.053    18812.128
+290  TPM2+I+G4     8971.581     105 18153.162    18158.461    18821.802
+291  TPM2+R2       8967.174     105 18144.349    18149.648    18812.989
+310  K3Pu+F+I      8714.114     107 17642.227    17647.731    18323.603
+312  K3Pu+F+I+G4   8713.805     108 17643.609    17649.218    18331.353
+313  K3Pu+F+R2     8711.756     108 17639.511    17645.120    18327.255
+332  K3P+I         8971.075     104 18150.151    18155.348    18812.423
+334  K3P+I+G4      8971.555     105 18153.110    18158.408    18821.749
+335  K3P+R2        8967.808     105 18145.616    18150.914    18814.255
+354  TN+F+I        8716.639     107 17647.278    17652.782    18328.654
+356  TN+F+I+G4     8716.365     108 17648.730    17654.338    18336.474
+357  TN+F+R2       8714.294     108 17644.589    17650.197    18332.332
+376  TNe+I         8968.434     104 18144.869    18150.066    18807.141
+378  TNe+I+G4      8968.798     105 18147.596    18152.894    18816.235
+379  TNe+R2        8964.220     105 18138.441    18143.740    18807.081
+398  HKY+F+I       8716.961     106 17645.922    17651.323    18320.929
+400  HKY+F+I+G4    8716.653     107 17647.305    17652.809    18328.681
+401  HKY+F+R2      8714.432     107 17642.864    17648.369    18324.240
+420  K2P+I         8973.581     103 18153.162    18158.259    18809.066
+422  K2P+I+G4      8974.062     104 18156.123    18161.321    18818.395
+423  K2P+R2        8970.215     104 18148.431    18153.628    18810.702
+442  F81+F+I       8942.698     105 18095.397    18100.695    18764.036
+444  F81+F+I+G4    8942.819     106 18097.639    18103.040    18772.646
+445  F81+F+R2      8941.184     106 18094.367    18099.768    18769.375
+464  JC+I          9222.434     102 18648.868    18653.866    19298.404
+466  JC+I+G4       9222.837     103 18651.675    18656.772    19307.579
+467  JC+R2         9220.348     103 18646.697    18651.794    19302.600
+Akaike Information Criterion:           K3Pu+F+R2
+Corrected Akaike Information Criterion: K3Pu+F+R2
 Bayesian Information Criterion:         HKY+F+I
 Best-fit model: HKY+F+I chosen according to BIC
 
 All model information printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.model.gz
-CPU time for ModelFinder: 9.394 seconds (0h:0m:9s)
-Wall-clock time for ModelFinder: 9.565 seconds (0h:0m:9s)
-Generating 1000 samples for ultrafast bootstrap (seed: 988158)...
+CPU time for ModelFinder: 8.208 seconds (0h:0m:8s)
+Wall-clock time for ModelFinder: 8.250 seconds (0h:0m:8s)
+Generating 1000 samples for ultrafast bootstrap (seed: 562296)...
 
 NOTE: 1 MB RAM (0 GB) is required!
 Estimate model parameters (epsilon = 0.100)
-1. Initial log-likelihood: -19714.742
-Optimal log-likelihood: -19714.728
-Rate parameters:  A-C: 1.00000  A-G: 10.50020  A-T: 1.00000  C-G: 1.00000  C-T: 10.50020  G-T: 1.00000
-Base frequencies:  A: 0.387  C: 0.171  G: 0.232  T: 0.210
-Proportion of invariable sites: 0.783
-Parameters optimization took 1 rounds (0.002 sec)
+1. Initial log-likelihood: -8716.961
+Optimal log-likelihood: -8716.961
+Rate parameters:  A-C: 1.00000  A-G: 10.80790  A-T: 1.00000  C-G: 1.00000  C-T: 10.80790  G-T: 1.00000
+Base frequencies:  A: 0.390  C: 0.170  G: 0.231  T: 0.209
+Proportion of invariable sites: 0.865
+Parameters optimization took 1 rounds (0.003 sec)
 Wrote distance file to... 
 Computing ML distances based on estimated model parameters...
-Calculating distance matrix: done in 0.00880753 secs using 99.68% CPU
-Computing ML distances took 0.008996 sec (of wall-clock time) 0.008976 sec (of CPU time)
-Setting up auxiliary I and S matrices: done in 0.000162554 secs using 99.04% CPU
-Computing RapidNJ tree took 0.000828 sec (of wall-clock time) 0.000831 sec (of CPU time)
-Log-likelihood of RapidNJ tree: -19823.221
+Calculating distance matrix: done in 0.0037437 secs using 99.5% CPU
+Computing ML distances took 0.003814 sec (of wall-clock time) 0.003800 sec (of CPU time)
+Setting up auxiliary I and S matrices: done in 0.000122601 secs using 99.51% CPU
+Computing RapidNJ tree took 0.000453 sec (of wall-clock time) 0.000452 sec (of CPU time)
+Log-likelihood of RapidNJ tree: -8724.022
 --------------------------------------------------------------------
 |             INITIALIZING CANDIDATE TREE SET                      |
 --------------------------------------------------------------------
-Generating 98 parsimony trees... 0.238 second
-Computing log-likelihood of 98 initial trees ... 0.154 seconds
-Current best score: -19714.728
+Generating 98 parsimony trees... 0.222 second
+Computing log-likelihood of 98 initial trees ... 0.137 seconds
+Current best score: -8715.833
 
 Do NNI search on 20 best initial trees
 Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 1: -19714.721
-BETTER TREE FOUND at iteration 2: -19714.719
-UPDATE BEST LOG-LIKELIHOOD: -19714.719
-Iteration 10 / LogL: -19714.719 / Time: 0h:0m:10s
-UPDATE BEST LOG-LIKELIHOOD: -19714.719
-Iteration 20 / LogL: -19714.726 / Time: 0h:0m:10s
-Finish initializing candidate tree set (5)
-Current best tree score: -19714.719 / CPU time: 0.975
+BETTER TREE FOUND at iteration 1: -8715.435
+Iteration 10 / LogL: -8717.185 / Time: 0h:0m:8s
+Iteration 20 / LogL: -8717.033 / Time: 0h:0m:9s
+Finish initializing candidate tree set (7)
+Current best tree score: -8715.435 / CPU time: 0.768
 Number of iterations: 20
 --------------------------------------------------------------------
 |               OPTIMIZING CANDIDATE TREE SET                      |
 --------------------------------------------------------------------
-Iteration 30 / LogL: -19714.721 / Time: 0h:0m:11s (0h:0m:3s left)
-Iteration 40 / LogL: -19714.727 / Time: 0h:0m:11s (0h:0m:2s left)
-Iteration 50 / LogL: -19714.767 / Time: 0h:0m:11s (0h:0m:2s left)
-Log-likelihood cutoff on original alignment: -19749.418
-Iteration 60 / LogL: -19714.732 / Time: 0h:0m:12s (0h:0m:1s left)
-Iteration 70 / LogL: -19714.732 / Time: 0h:0m:12s (0h:0m:1s left)
-Iteration 80 / LogL: -19714.735 / Time: 0h:0m:12s (0h:0m:0s left)
-Iteration 90 / LogL: -19714.733 / Time: 0h:0m:12s (0h:0m:0s left)
-Iteration 100 / LogL: -19714.735 / Time: 0h:0m:13s (0h:0m:0s left)
-Log-likelihood cutoff on original alignment: -19749.418
-NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.997
-TREE SEARCH COMPLETED AFTER 103 ITERATIONS / Time: 0h:0m:13s
+Iteration 30 / LogL: -8725.981 / Time: 0h:0m:9s (0h:0m:2s left)
+Iteration 40 / LogL: -8715.495 / Time: 0h:0m:9s (0h:0m:2s left)
+Iteration 50 / LogL: -8716.015 / Time: 0h:0m:9s (0h:0m:1s left)
+Log-likelihood cutoff on original alignment: -8746.160
+Iteration 60 / LogL: -8715.466 / Time: 0h:0m:10s (0h:0m:1s left)
+Iteration 70 / LogL: -8715.459 / Time: 0h:0m:10s (0h:0m:1s left)
+Iteration 80 / LogL: -8715.528 / Time: 0h:0m:10s (0h:0m:0s left)
+Iteration 90 / LogL: -8715.485 / Time: 0h:0m:11s (0h:0m:0s left)
+Iteration 100 / LogL: -8715.494 / Time: 0h:0m:11s (0h:0m:0s left)
+Log-likelihood cutoff on original alignment: -8746.160
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.999
+TREE SEARCH COMPLETED AFTER 102 ITERATIONS / Time: 0h:0m:11s
 
 --------------------------------------------------------------------
 |                    FINALIZING TREE SEARCH                        |
 --------------------------------------------------------------------
 Performs final model parameters optimization
 Estimate model parameters (epsilon = 0.010)
-1. Initial log-likelihood: -19714.719
-Optimal log-likelihood: -19714.715
-Rate parameters:  A-C: 1.00000  A-G: 10.34572  A-T: 1.00000  C-G: 1.00000  C-T: 10.34572  G-T: 1.00000
-Base frequencies:  A: 0.387  C: 0.171  G: 0.232  T: 0.210
-Proportion of invariable sites: 0.783
-Parameters optimization took 1 rounds (0.002 sec)
-BEST SCORE FOUND : -19714.715
+1. Initial log-likelihood: -8715.435
+Optimal log-likelihood: -8715.434
+Rate parameters:  A-C: 1.00000  A-G: 10.94896  A-T: 1.00000  C-G: 1.00000  C-T: 10.94896  G-T: 1.00000
+Base frequencies:  A: 0.390  C: 0.170  G: 0.231  T: 0.209
+Proportion of invariable sites: 0.865
+Parameters optimization took 1 rounds (0.003 sec)
+BEST SCORE FOUND : -8715.434
 Creating bootstrap support values...
 Split supports printed to NEXUS file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex
-Total tree length: 1.272
+Total tree length: 0.110
 
-Total number of iterations: 103
-CPU time used for tree search: 3.369 sec (0h:0m:3s)
-Wall-clock time used for tree search: 3.598 sec (0h:0m:3s)
-Total CPU time used: 12.892 sec (0h:0m:12s)
-Total wall-clock time used: 13.464 sec (0h:0m:13s)
+Total number of iterations: 102
+CPU time used for tree search: 3.103 sec (0h:0m:3s)
+Wall-clock time used for tree search: 3.238 sec (0h:0m:3s)
+Total CPU time used: 11.430 sec (0h:0m:11s)
+Total wall-clock time used: 11.665 sec (0h:0m:11s)
 
 Computing bootstrap consensus tree...
 Reading input file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex...
-41 taxa and 201 splits.
+52 taxa and 236 splits.
 Consensus tree written to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
 Reading input trees file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
-Log-likelihood of consensus tree: -19714.789
+Log-likelihood of consensus tree: -8715.656
 
 Analysis results written to: 
   IQ-TREE report:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
@@ -260,4 +316,4 @@ Ultrafast bootstrap approximation results written to:
   Consensus tree:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
   Screen log file:               /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.log
 
-Date and Time: Tue Jun 18 10:17:56 2024
+Date and Time: Sun Jun 23 14:33:14 2024

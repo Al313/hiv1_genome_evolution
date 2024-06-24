@@ -1,11 +1,11 @@
 Building DAG of jobs...
 Using shell: /usr/bin/bash
-Provided cores: 2
+Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Tue Jun 18 10:17:42 2024]
+[Sun Jun 23 14:33:02 2024]
 rule tree_inference:
     input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta
     output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
@@ -13,6 +13,6 @@ rule tree_inference:
     reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
     resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-[Tue Jun 18 10:17:56 2024]
+[Sun Jun 23 14:33:14 2024]
 Finished job 0.
 1 of 1 steps (100%) done
