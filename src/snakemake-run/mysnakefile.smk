@@ -108,7 +108,7 @@ rule get_consensus_full:
         tmp2=temp("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/{experiment}/{line}/{sample}.fa1"),
         final_cons="/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/{experiment}/{line}/{sample}.fasta"
     shell:
-        "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c790-5096 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
+        "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c790-2085 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
 
 rule collect_consensus_full:
     input:
@@ -146,9 +146,9 @@ rule consensus_additions:
     shell:
        "cat {input} > {output} && \
         sed -n 1p /home/amovas/data/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta >> {output} && \
-        sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta | cut -c790-5096 >> {output} && \
+        sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta | cut -c790-2085 >> {output} && \
         sed -n 1p /home/amovas/data/genome-evo-proj/data/reference/hxb2/hxb2_seq_ncbi.fasta | cut -d ' ' -f1 >> {output} && \
-        sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/hxb2/hxb2_seq_ncbi.fasta | cut -c790-5096 >> {output}"
+        sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/hxb2/hxb2_seq_ncbi.fasta | cut -c790-2085 >> {output}"
 
 
 rule msa:
