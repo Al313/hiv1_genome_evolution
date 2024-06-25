@@ -136,7 +136,7 @@ rule consensus_50th_interval:
    output:
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full.fasta"
    shell:
-       "cat {input} | grep -A 1 -E '>(13|14|15|16).*VP(10|50|100|150|200|250|300|350|400|450|500|550|570)[^0-9+\-]' | grep -v -- '^--$' > {output}"
+       "cat {input} | grep -A 1 -E '>(13|14|15|16).*VP(50|100|150|200|250|300|350|400|450|500|550|570)[^0-9+\-]' | grep -v -- '^--$' > {output}"
 
 rule consensus_additions:
     input:
