@@ -21,6 +21,7 @@ dependencies:
   - r-ggplot2
   - r-ggally
   - r-ggcorrplot
+  - r-ggpubr
   - r-hrbrthemes
   - r-dplyr
   - r-tidyr
@@ -63,3 +64,4 @@ dependencies:
   - muscle
   - r-readxl
   - trimmomatic # for read qc
+  - r-rstatix

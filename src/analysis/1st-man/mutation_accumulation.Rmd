@@ -25,13 +25,17 @@ output:
 
 # loading libraries
 library("ggplot2")
+library("ggpubr")
 library("plotly")
+library("ggvenn")
+library("hrbrthemes")
 library("DT")
 library("dplyr")
 library("tidyr")
 library("Biostrings")
 library("stringr")
 library("magrittr")
+library("rstatix")
 
 
 ```
@@ -72,7 +76,7 @@ variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
 host_factor <- c("MT2", "MT4")
 exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
-
+translational_impacts <- c("U", "S", "N")
 gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
 feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
 
@@ -81,9 +85,12 @@ variants_ann_expiii <- variants_ann_expiii %>%
                             mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
                             exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
                             mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
+                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
                             mutate(passage = as.factor(passage),
                             exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor)) 
+                            host_line = factor(host_line, levels = host_factor),
+                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
 
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
@@ -103,12 +110,14 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 ```
 
+
+
 # Accumulation
 
 ```{r text numbers}
 
 # set parameters
-category <- "Majority"
+category <- "Fixed"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -126,11 +135,15 @@ if (category == "Sporadic"){
 
 # get numbers for in-text reporting
 variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & allele_freq < max_threshold,passage == end_passage)
-
+                                filter(allele_freq >= min_threshold & allele_freq < max_threshold & mut_type != "P") #& mut_type == "P"
+head(variants_expiii)
+table(variants_expiii$host_line)
 
 a <- nrow(variants_expiii_subset)
 b <- length(unique(variants_expiii_subset$mut_info))
+c <- length(setdiff(unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT4"]),unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT2"])))
+d <- length(setdiff(unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT2"]),unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT4"])))
+e <- length(intersect(unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT2"]),unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT4"])))
 
 
 ```
@@ -142,7 +155,7 @@ b <- length(unique(variants_expiii_subset$mut_info))
 # prepare data for visualization
 counts <- variants_expiii %>%
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            group_by(exp_line, passage) %>%
+            group_by(exp_line, passage, .drop = FALSE) %>%
             count() %>%
             dplyr::rename(mut_count = n) %>%
             mutate(host_line = ifelse(exp_line %in% c("MT-2_1","MT-2_2"), "MT2", "MT4")) %>%
@@ -156,7 +169,7 @@ counts <- variants_expiii %>%
 
 fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
         geom_line(linewidth=2) +
-        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation in ", exp))+
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation"))+
         scale_x_continuous(breaks = seq(0,570,50)) +
         scale_y_continuous(limits = c(0,max(counts$mut_count)+20),breaks = seq(0,max(counts$mut_count)+20,50)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
@@ -185,23 +198,30 @@ dev.off()
 
 
 
-```{r visualization1: Unique mutation Accumulation plot}
+```{r visualization1: Unique mutation appearance plot}
+
 
 
 # prepare data for visualization
 variants_expiii_subset <- variants_expiii %>%
             filter(allele_freq >= min_threshold & allele_freq < max_threshold)
+str(variants_expiii_subset)
 
-for (mut in variants_expiii_subset$mut_info){
-    variants_expiii_subset$appearance[variants_expiii_subset$mut_info == mut] <- min(as.numeric(as.character(variants_expiii_subset$passage[variants_expiii_subset$mut_info == mut])))
+
+for (line in line_labels){
+    variants_expiii_subset2 <- variants_expiii_subset[variants_expiii_subset$exp_line == line,]
+    for (mut in unique(variants_expiii_subset2$mut_info)){
+        variants_expiii_subset$appearance[variants_expiii_subset$mut_info == mut & variants_expiii_subset$exp_line == line] <- min(as.numeric(as.character(variants_expiii_subset2$passage[variants_expiii_subset2$mut_info == mut])))
+    }
 }
 
+variants_expiii_subset$appearance <- factor(variants_expiii_subset$appearance, levels = seq(10,570,10))
 
 # prepare data for visualization
 counts <- variants_expiii_subset %>%
             select(exp_line, appearance, mut_info) %>%
             distinct() %>%
-            group_by(exp_line, appearance) %>%
+            group_by(exp_line, appearance, .drop = FALSE) %>%
             count() %>%
             dplyr::rename(mut_count = n) %>%
             mutate(host_line = ifelse(exp_line %in% c("MT-2_1","MT-2_2"), "MT2", "MT4")) %>%
@@ -210,15 +230,16 @@ counts <- variants_expiii_subset %>%
             mutate_at(3, as.numeric)
 
 
-
-
 # visualize 
+
+low<-findInterval(max(counts$mut_count),c(5,10,20,50,100))
+step <- c(5,10,20,50,100)[low - 1]
 
 fig <- counts %>%  ggplot(aes(x=appearance, y = mut_count, color = exp_line)) +
         geom_line(linewidth=2) +
-        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation in ", exp))+
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0("Appearance of Unique ", category, " Mutations"))+
         scale_x_continuous(breaks = seq(0,570,50)) +
-        scale_y_continuous(limits = c(0,max(counts$mut_count)+20),breaks = seq(0,max(counts$mut_count)+20,50)) +
+        scale_y_continuous(limits = c(0,max(counts$mut_count)+step),breaks = seq(0,max(counts$mut_count)+step,step)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
         theme_bw() +
         theme(plot.title = element_text(size = 30, hjust = 0.5),
@@ -243,4 +264,41 @@ dev.off()
 
 ```
 
+```{r visualization1: throughout venn diagram}
+
+# prepare data for visualization
+variants_expiii_subset <- variants_expiii %>%
+            filter(allele_freq >= min_threshold & allele_freq < max_threshold)
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout <- variants_expiii_subset %>%
+                select(c(exp_line,mut_info)) %>%
+                distinct()
+
+
+#table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout$mut_info
+names(muts) <- throughout$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+fig <- ggvenn(muts_list) +
+        labs(title = paste0(category, " Mutations Occurrence Venn Diagram"))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_occurrence_venn.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
 
