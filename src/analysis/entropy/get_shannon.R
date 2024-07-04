@@ -17,7 +17,7 @@ if (length(args) == 0){
     cl_line <- args[1]
 }
 
-print(cl_line)
+
 
 
 
@@ -66,56 +66,58 @@ variants_ann %<>%
 variants <- variants_ann %>% filter(!duplicated(variant_id))
 
 
-variants %<>% filter(exp_line == cl_line) 
 
 
 # define function to calculate Shannon entropy
-shannon <- function(x){
-    -x*log2(x)
+shannon <- function(x, seq_err = 0.01){
+    if(x >= seq_err) {-x*log2(x)} else (0)
 }
+
+# define function to determine polymorphism
+
+polymorph <- function(x){
+    ifelse(any(x >= 0.01), T, F)
+}
+
 
 
 # create a dataframe to store Shannon entropy results
-shannon_df <- data.frame()
+diversity_df <- data.frame()
+head(diversity_df)
 
 
 
+line <- cl_line
+variants_sub <- variants[variants$exp_line == line,]
 
-for (exp in c("EXPIII", "EXPIV")){
+for (psg in sort(unique(variants_sub$passage))){
 
+    variants_sub2 <- variants_sub[variants_sub$passage == psg,]
+    variants_sub2 <- variants_sub2[variants_sub2$genomic_pos >= 454 & variants_sub2$genomic_pos <= 470,]
 
-    variants_sub <- variants[variants$exp == exp,]
+    for (i in seq(454,470)){
+        if (i %in% variants_sub2$genomic_pos){
+            ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
+            alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
+            ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
+            total_shannon <- alt_shannon + ref_shannon
 
-    for (line in names(table(variants_sub$exp_line))){
-
-        variants_sub2 <- variants_sub[variants_sub$exp_line == line,]
-
-        for (psg in sort(unique(variants_sub$passage))){
-
-            variants_sub3 <- variants_sub2[variants_sub2$passage == psg,]
-            variants_sub3 <- variants_sub3[variants_sub3$genomic_pos >= 454 & variants_sub3$genomic_pos <= 9625,]
-
-            for (i in seq(454,9626)){
-                print(i)
-                if (i %in% variants_sub3$genomic_pos){
-                    ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
-                    alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
-                    ref_shannon <- shannon(1-sum(ss$allele_freq))
-                    total_shannon <- alt_shannon + ref_shannon
-                } else {
-                    total_shannon <- 0
-                }
-                
-                shannon_df <- rbind(shannon_df, c(exp, line, psg, i, total_shannon))
-            }
+            polymorphic <- polymorph(ss$allele_freq)
+        } else {
+            total_shannon <- 0
+            polymorphic <- 0
         }
+        
+        diversity_df <- rbind(diversity_df, c(line, psg, i, polymorphic, total_shannon))
     }
+
 }
 
 
-colnames(shannon_df) <- c("experiment", "exp_line", "passage", "genomic_position", "shannon_entropy")
+
+colnames(diversity_df) <- c("exp_line", "passage", "genomic_position", "polymorphic", "shannon_entropy")
 
 
-write.table(shannon_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/", cl_line,"_shannon_entropy.tsv"), quote = F, row.names = F, sep = "\t")
+write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/", cl_line,"_shannon_entropy.tsv"), quote = F, row.names = F, sep = "\t")
 
 

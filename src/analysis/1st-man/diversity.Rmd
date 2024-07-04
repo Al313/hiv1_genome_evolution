@@ -104,7 +104,8 @@ end_passage <- 560
 
 # Visual settings
 
-line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+names(line_col_palette) <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 breaks_step <- 50
 line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
@@ -112,3 +113,248 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```
 
 
+
+```{r read in the data}
+
+
+lines <- c(13:16)
+
+shannon_df <- data.frame()
+
+for (line in lines){
+    shannon_df <- rbind(shannon_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_shannon_entropy.tsv"), sep = "\t", header = T))
+}
+
+# set the correct viral line names and  add host info
+
+shannon_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"))
+
+```
+
+
+> First let's take a look at total and mean entropy per sample. 
+
+```{r entropy per sample, results=TRUE}
+
+
+
+d <- shannon_df %>% group_by(experiment,host_line,exp_line,passage) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), .groups = 'drop')
+
+d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+fig <- ggplot(d, aes(x = passage, y = sum_ent, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Total Entropy\n", color = "Virus Line", title = paste0("Sum of Entropy per Sample")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15))
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_sample_sum.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Mean\n", color = "Virus Line", title = paste0("Mean of Entropy per Sample")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        axis.title = element_text(size = 15),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 10))
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_sample_mean.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+
+```{r entropy per position, results=TRUE}
+
+dd <- shannon_df %>% group_by(experiment,host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), var_ent = var(shannon_entropy, na.rm = T),.groups = 'drop')
+
+
+fig <- ggplot(dd, aes(x=genomic_position, y = mean_ent)) + facet_wrap(~exp_line, ncol=4) +
+    geom_point() +
+    labs(x="\nPosition", y= "Entropy Mean \n", title = paste0("Mean of Entropy per Genomic Position")) +
+    theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        axis.title = element_text(size = 15),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10))
+
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_mean.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+
+
+```{r entropy change per position, results=TRUE}
+
+
+dd <- shannon_df %>% group_by(experiment,host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(abs(diff(shannon_entropy)), na.rm = T), var_ent = var(abs(diff(shannon_entropy)), na.rm = T),.groups = 'drop')
+
+dd %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+fig <- ggplot(dd, aes(x=genomic_position, y = mean_ent)) + facet_wrap(~exp_line, ncol=4) +
+    geom_point() +
+    labs(x="\nPosition", y= "Mean of Entropy Difference\n", title = paste0("Mean of Entropy Difference per Genomic Position")) +
+    theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15),
+        strip.text = element_text(size = 20))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_change_mean.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+fig <- ggplot(dd, aes(x=genomic_position, y = var_ent)) + facet_wrap(~exp_line, ncol=4) +
+    geom_point() +
+    labs(x="\nPosition", y= "Variance of Entropy Difference\n", title = paste0("Variance of Entropy Difference per Genomic Position")) +
+    theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        axis.title = element_text(size = 15),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_change_variance.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+
+```
+
+What can be observed from these data is that overall the rate of entropy change for 3 and 5 prime untranslated regions is higher.
+
+```{r distribution of mean entropy difference, results=TRUE}
+
+
+fig <- dd %>% ggplot(aes(x=mean_ent)) +
+        facet_wrap(~exp_line) +
+        geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth=0.01) +
+        scale_y_continuous(labels = scales::percent) +
+        labs(x="\nMean Entropy Difference", y= "Percentage\n", title = "Distribution of Mean Entropy Difference for MT-2_1") +
+        theme_bw() +
+                theme(plot.title = element_text(size = 20, hjust = 0.5),
+                axis.title = element_text(size = 15),
+                axis.text.x = element_text(size = 10, angle = 90),
+                axis.text.y = element_text(size = 10))
+
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_distribution.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+```{r}
+
+cor_coefs <- data.frame()
+
+for (i in levels(dd$exp_line)){
+  for (j in levels(dd$exp_line)[levels(dd$exp_line) != i]){
+    cor_res <- cor.test(dd$mean_ent[dd$exp_line == i], dd$mean_ent[dd$exp_line == j], method = 'spearman', exact = FALSE)
+    cor_coefs <- rbind(cor_coefs, c(i , j, cor_res$estimate))
+    print(paste0("Spearman's Rho between ", i, " and ", j, " is ", cor_res$estimate, " and p.value is ", cor_res$p.value))
+  }
+}
+
+
+cor_coefs <- as.data.frame(cor_coefs) %>% 
+                        `colnames<-`(c("line1", "line2", "Rho")) %>%
+                        mutate(line1 = factor(line1, levels = names(line_col_palette))) %>%
+                        mutate(line2 = factor(line2, levels = names(line_col_palette))) %>%
+                        mutate(Rho = round(as.numeric(Rho), 2))
+
+
+
+
+fig <- ggplot(data = as.data.frame(cor_coefs), aes(x=line1, y=line2, fill=100*Rho)) + 
+        geom_tile() +
+        geom_text(aes(line1, line2, label = Rho), color = "black", size = 4) +
+        labs(title = paste0("Spearman's Rho Coorelation Coefficient for Positional Entropy")) +
+        scale_fill_gradient2(low = "white", high = "red", 
+        midpoint = 1, limit = c(0,100), space = "Lab", 
+        name="Shared %") +
+        theme(
+        axis.title = element_blank(),
+        plot.title = element_text(size = 20, hjust = 0.5)
+        )
+
+fig
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_spearman_correlation.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+
+```{r}
+
+### calculate number of polymorphic sites
+### definition of polymorphic sites: any position where the allele frequency of none of the bases is above a certain cutoff, in our case: 99%
+
+
+
+
+
+
+
+```
