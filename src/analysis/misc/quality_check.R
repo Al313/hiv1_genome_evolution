@@ -69,8 +69,8 @@ coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,
     geom_point(color="red", size=3) +
     geom_text(data=subset(quals_gathered, cover_all == "False" & average_depth <= log10(200)),
     aes(x=amplicon,y=average_depth,label=full_sample_name),size = 6) +
-    labs(title = "Coverage Check!\n", x = "\nAmplicons", y = "Average Depth (log10)\n") +
-    scale_x_discrete(labels = c("5_utr", "Amp_A","Amp_B","Amp_C","Amp_D","Amp_E", "3_utr")) +
+    labs(title = "Coverage Check!\n", x = "\nAmplicons", y = "Average Sequencing Depth (log10)\n") +
+    scale_x_discrete(labels = c("Amp-A (5utr)", "Amp_A","Amp_B","Amp_C","Amp_D","Amp_E", "Amp-E (3utr)")) +
     scale_y_continuous(limit = c(-1,6), breaks = 0:6) +
     geom_hline(yintercept = log10(200), linetype="dashed") +
     theme_bw() +
@@ -87,14 +87,6 @@ png(filename = paste0(wd, "results/figs/png/coverage_map.png"),
     height = 1800)
 coverage_map
 dev.off()
-
-
-
-
-# a box plot?
-
-
-
 
 
 

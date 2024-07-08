@@ -138,10 +138,11 @@ shannon_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18",
 ```{r entropy per sample, results=TRUE}
 
 
-
-d <- shannon_df %>% group_by(experiment,host_line,exp_line,passage) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), .groups = 'drop')
+d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), .groups = 'drop')
 
 d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+# sum of entropy per sample 
 
 fig <- ggplot(d, aes(x = passage, y = sum_ent, color = exp_line)) +
   geom_line(linewidth=2) + 
@@ -162,6 +163,10 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "shannon_per_sample_sum.pdf"), height = 14, width = 14)
 fig
 dev.off()
+
+
+
+# mean of entropy per sample 
 
 fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line)) +
   geom_line(linewidth=2) + 
@@ -191,7 +196,7 @@ dev.off()
 
 ```{r entropy per position, results=TRUE}
 
-dd <- shannon_df %>% group_by(experiment,host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), var_ent = var(shannon_entropy, na.rm = T),.groups = 'drop')
+dd <- shannon_df %>% group_by(host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), var_ent = var(shannon_entropy, na.rm = T),.groups = 'drop')
 
 
 fig <- ggplot(dd, aes(x=genomic_position, y = mean_ent)) + facet_wrap(~exp_line, ncol=4) +
@@ -221,7 +226,7 @@ dev.off()
 ```{r entropy change per position, results=TRUE}
 
 
-dd <- shannon_df %>% group_by(experiment,host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(abs(diff(shannon_entropy)), na.rm = T), var_ent = var(abs(diff(shannon_entropy)), na.rm = T),.groups = 'drop')
+dd <- shannon_df %>% group_by(host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(abs(diff(shannon_entropy)), na.rm = T), var_ent = var(abs(diff(shannon_entropy)), na.rm = T),.groups = 'drop')
 
 dd %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
 
@@ -353,7 +358,33 @@ dev.off()
 
 
 
+d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (polymorphic_count = sum(polymorphic, na.rm = T), .groups = 'drop')
 
+d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+# sum of entropy per sample 
+
+fig <- ggplot(d, aes(x = passage, y = polymorphic_count, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Nr. Polymorphic Site\n", color = "Virus Line", title = paste0("Polymorphism")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15))
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "polymorphic_site_per_sample.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
 
 
