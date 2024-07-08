@@ -11,13 +11,14 @@ library("tidyr")
 # take command line variables
 args <- commandArgs(trailingOnly = TRUE)
 
-if (length(args) == 0){
-    cl_line <- 13
-} else {
-    cl_line <- args[1]
-}
+#if (length(args) == 0){
+#    cl_line <- 13
+#} else {
+cl_line <- args[1]
+#}
 
 
+print(cl_line)
 
 
 
@@ -93,11 +94,12 @@ variants_sub <- variants[variants$exp_line == line,]
 for (psg in sort(unique(variants_sub$passage))){
 
     variants_sub2 <- variants_sub[variants_sub$passage == psg,]
-    variants_sub2 <- variants_sub2[variants_sub2$genomic_pos >= 454 & variants_sub2$genomic_pos <= 470,]
+    variants_sub2 <- variants_sub2[variants_sub2$genomic_pos >= 454 & variants_sub2$genomic_pos <= 9625,]
 
-    for (i in seq(454,470)){
+    for (i in seq(454,9625)){
         if (i %in% variants_sub2$genomic_pos){
-            ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
+            print(i)
+	    ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
             alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
             ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
             total_shannon <- alt_shannon + ref_shannon
@@ -105,7 +107,7 @@ for (psg in sort(unique(variants_sub$passage))){
             polymorphic <- polymorph(ss$allele_freq)
         } else {
             total_shannon <- 0
-            polymorphic <- 0
+            polymorphic <- F
         }
         
         diversity_df <- rbind(diversity_df, c(line, psg, i, polymorphic, total_shannon))

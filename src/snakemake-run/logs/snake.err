@@ -5,14 +5,17 @@ Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Tue Jun 25 13:16:17 2024]
-rule tree_inference:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta
-    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
+[Fri Jul  5 18:10:58 2024]
+rule extract_entropy:
+    input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz
+    output: /home/amovas/data/genome-evo-proj/results/tables/misc/13_shannon_entropy.tsv
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/misc/13_shannon_entropy.tsv
     resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-[Tue Jun 25 13:16:24 2024]
-Finished job 0.
-1 of 1 steps (100%) done
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule extract_entropy in file /data/amovas/genome-evo-proj/src/snakemake-run/mysnakefile.smk, line 287:
+Job 0 completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+/home/amovas/data/genome-evo-proj/results/tables/misc/13_shannon_entropy.tsv
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
