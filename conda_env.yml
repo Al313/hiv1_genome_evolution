@@ -22,6 +22,7 @@ dependencies:
   - r-ggally
   - r-ggcorrplot
   - r-ggpubr
+  - r-patchwork
   - r-hrbrthemes
   - r-dplyr
   - r-tidyr

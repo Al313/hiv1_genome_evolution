@@ -26,7 +26,8 @@ output:
 # loading libraries
 library("ggplot2")
 library("ggpubr")
-library("plotly")
+library("plotly") 
+library("patchwork")
 library("reshape2")
 library("ggvenn")
 library("hrbrthemes")
@@ -364,7 +365,7 @@ d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
 
 
 
-# sum of entropy per sample 
+# nr of polymorphic sites per sample
 
 fig <- ggplot(d, aes(x = passage, y = polymorphic_count, color = exp_line)) +
   geom_line(linewidth=2) + 
@@ -387,5 +388,44 @@ fig
 dev.off()
 
 
+
+```
+
+
+
+
+```{r combine mean ent and polymorphic site count}
+
+
+
+d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), polymorphic_count = sum(polymorphic, na.rm = T), .groups = 'drop')
+
+d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+# mean entropy and nr of polymorphic sites per sample
+
+figs <- ggplot(d, aes(x = passage, color = exp_line)) +
+  geom_line(aes(y = mean_ent), linewidth=2) + 
+  geom_line(aes(y = polymorphic_count/30000), linewidth=2, linetype = "dashed") +
+  facet_wrap(~exp_line, ncol = 2) +
+  scale_y_continuous(name = "Mean Entropy \n",
+    sec.axis = sec_axis(~.*30000, name="Nr. Polymorphic Site \n")) +
+  labs(x="\nTransfer", color = "Virus Line", title = paste0("Polymorphism")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "mean_entropy_and_polymorphic_site_per_sample.pdf"), height = 14, width = 14)
+figs
+dev.off()
 
 ```
