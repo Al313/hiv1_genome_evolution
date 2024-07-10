@@ -7,25 +7,43 @@ library(magrittr)
 library(ggplot2)
 
 
-## qpcr results
-data <- read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/qpcr.xls")
-data <- data[!is.na(data$`Sample Name`),]
 
-data$lines <- substring(data$SampleID, 8,9)
-data$passage <- sapply(strsplit(data$SampleID, "p"), "[", 2)
+# qpcr expiii
 
-data$Qunatity_per_2 <- data$`Quantity Mean` * 0.14 # to measure the copy number count of HIV-1 genomic RNA in 2
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+
+
+
+
+data <- read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/SummaryMasterfile_qPCR_Titers.xlsx", sheet = 1, skip = 1)
+
+
+data %<>% filter(exp_line %in% 13:16)
+
+# correct for the switched experimental lines
+data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
+data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
+
+data$exp_line[data$exp_line == "A"] <- "16"
+data$exp_line[data$exp_line == "B"] <- "15"
+
+
+
+
+# data[data$transferred_quantity_EXP_III <= 1000000,]
+
 
 
 data$passage <- as.numeric(data$passage)
-data$lines <- factor(data$lines, levels = c("13", "14", "15", "16"))
+data$exp_line <- factor(data$exp_line, levels = c("13", "14", "15", "16", "17", "18", "19", "20"))
 
-titration_fig <- data %>% ggplot(aes(x = passage, y = log10(Qunatity_per_2), color = lines)) +
+
+titration_fig <- data %>% ggplot(aes(x = passage, y = log10(transferred_quantity_EXP_III), color = exp_line)) +
                 geom_line() +
                 geom_point() +
                 labs(title = "qPCR") +
                 #ylim(c(1000000,40000000)) +
-                scale_color_manual(values = c('red', 'blue', 'green', 'black')) +
+                scale_color_manual(values = line_col_palette) +
                 theme_bw() +
                 theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
                 axis.title.x = element_text(size = 25),
@@ -33,7 +51,59 @@ titration_fig <- data %>% ggplot(aes(x = passage, y = log10(Qunatity_per_2), col
                 axis.text = element_text(size = 15))
 
 
-png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/png/titration_qpcr.png")
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/png/titration_qpcr_expiii.png", height = 960, width = 960)
+titration_fig
+dev.off()
+
+# qpcr expiii & expiv
+
+
+
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff", "#66ff66", "#009900", "#00cc99", "#558000")
+
+
+
+
+data <- read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/SummaryMasterfile_qPCR_Titers.xlsx", sheet = 1, skip = 1)
+
+
+data %<>% filter(exp_line %in% 13:20)
+
+# correct for the switched experimental lines
+data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
+data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
+
+data$exp_line[data$exp_line == "A"] <- "16"
+data$exp_line[data$exp_line == "B"] <- "15"
+
+
+data$exp_line[data$exp_line == 18 & data$passage > 350] <- "A"
+data$exp_line[data$exp_line == 19 & data$passage > 350] <- "B"
+
+data$exp_line[data$exp_line == "A"] <- "19"
+data$exp_line[data$exp_line == "B"] <- "18"
+
+
+
+
+data$passage <- as.numeric(data$passage)
+data$exp_line <- factor(data$exp_line, levels = c("13", "14", "15", "16", "17", "18", "19", "20"))
+
+
+titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
+                geom_line() +
+                geom_point() +
+                labs(title = "qPCR") +
+                #ylim(c(1000000,40000000)) +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/png/titration_qpcr_expiii_iv.png", height = 960, width = 960)
 titration_fig
 dev.off()
 

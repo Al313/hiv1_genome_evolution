@@ -1,0 +1,140 @@
+---
+title:  
+    "Titration of EXPIII"
+date: 
+    "June 10th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+
+# load libraries
+library(readxl)
+library(stringr)
+library(magrittr)
+library(ggplot2)
+```
+
+```{r read-in qpcr data}
+
+
+
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+
+data <- read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/SummaryMasterfile_qPCR_Titers.xlsx", sheet = 1, skip = 1)
+
+
+data %<>% filter(exp_line %in% 13:16)
+
+# correct for the switched experimental lines
+data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
+data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
+
+data$exp_line[data$exp_line == "A"] <- "16"
+data$exp_line[data$exp_line == "B"] <- "15"
+
+
+
+data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) # update exp line labels
+
+```
+
+
+```{r plot qpcr result}
+
+
+
+data$passage <- as.numeric(data$passage)
+data$exp_line <- factor(data$exp_line, levels = line_labels)
+
+
+titration_fig <- data %>% ggplot(aes(x = passage, y = log10(transferred_quantity_EXP_III), color = exp_line)) +
+                geom_line() +
+                geom_point() +
+                labs(title = "qPCR", y = "log10(transferred_RNA_copy_nr)") +
+                #ylim(c(1000000,40000000)) +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "titration_qpcr_expiii.pdf"), height = 14, width = 14)
+titration_fig
+dev.off()
+
+```
+
+
+```{r read-in tcid data}
+
+
+
+
+data <- as.data.frame(read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/tcid50.xlsx"))
+
+
+data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
+data$passage[is.na(data$passage)] <- 0
+data$lines <- substring(data$Sample_ID, 8,9)
+data$lines[data$lines == ""] <- "ancestral"
+data %<>% mutate(lines = case_when(lines==13 ~ "MT-2_1", lines==14 ~ "MT-2_2", lines==15 ~ "MT-4_1", lines==16 ~ "MT-4_2")) # update exp line labels
+
+
+data_sub <- data[data$Source_abv %in% c("2022_rfc_i","2022_rfc_ii", "2018_christine","2024_christine"),]
+data_sub <- data_sub[data_sub$passage != "NL4_3",]
+
+data_sub$passage <- as.numeric(data_sub$passage)
+data_sub$lines <- factor(data_sub$lines, levels = line_labels)
+data_sub$Source_abv <- factor(data_sub$Source_abv, levels = c("2024_christine","2018_christine","2022_rfc_i","2022_rfc_ii"))
+
+data_sub %<>% filter(Sample_ID != "NL4_3")
+
+
+moi__fig <- data_sub %>% ggplot(aes(x = passage, y = log10(MOI), color = lines)) +
+                geom_line(aes(linetype=Source_abv)) +
+                geom_point() +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi") +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "moi.pdf"), height = 14, width = 14)
+moi__fig
+dev.off()
+
+
+```
