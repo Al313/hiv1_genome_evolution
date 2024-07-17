@@ -1,0 +1,341 @@
+---
+title:  
+    "variant freq. dynamics of EXPIII"
+date: 
+    "July 15th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("ggplot2")
+library("plotly")
+library("gganimate")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("purrr")
+library("magrittr")
+library("hrbrthemes")
+
+
+```
+
+
+```{r functions and operators}
+`%notin%` <- Negate(`%in%`)
+```
+
+
+
+```{r read-in the data}
+
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+
+# correct for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+
+# only keep the EXPIII data
+exp <- "EXPIII"
+variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+
+
+# facors
+
+host_factor <- c("MT2", "MT4")
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+translational_impacts <- c("U", "S", "N")
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+# format the dataframe
+variants_ann_expiii <- variants_ann_expiii %>%
+                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
+                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
+                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
+                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+                            mutate(passage = as.factor(passage),
+                            exp_line = factor(exp_line, levels = exp_line_factor),
+                            host_line = factor(host_line, levels = host_factor),
+                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
+
+# remove duplicate records for the same variants
+variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
+
+
+# last passage 
+
+end_passage <- 560
+
+
+# Visual settings
+
+line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+breaks_step <- 50
+line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+
+```
+
+
+
+
+
+```{r set paramters}
+
+# set parameters
+category <- "Fixed"
+
+if (category == "Sporadic"){
+    min_threshold <- 0.01
+    max_threshold <- 0.05
+} else if (category == "Minority"){
+    min_threshold <- 0.05
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+} else if (category == "All"){
+    min_threshold <- 0.01
+    max_threshold <- 1.01
+}
+
+```
+
+
+```{r anime, results=TRUE}
+
+
+variants_expiii_subset <- variants_expiii %>%   filter(allele_freq >= 0.01) %>%
+                                                mutate(passage = as.numeric(as.character(passage)))
+
+
+
+gg_fig <- ggplot(variants_expiii_subset, aes(x=allele_freq)) + 
+    geom_histogram(aes(y=..count..),      # Histogram with density instead of count on y-axis
+                binwidth=.01,
+                colour="black", fill="white") +
+    geom_density(aes(y = ..count.. * .01), alpha=.3, fill="#FF6666") +
+    facet_wrap(~exp_line, ncol = 2) +
+    transition_states(passage, transition_length = 1, state_length = 1, wrap = TRUE) + # to create animation 
+    labs(title = "Allele Freq. Distribution \n(Passage : {closest_state})", x = "Allele Freq.", y = "Count") +
+    theme_bw() +
+    theme(
+    plot.title = element_text(size = 25, hjust = 0.5),
+    axis.title = element_text(size = 20),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    strip.text.x = element_text(size = 25),
+    legend.title = element_text(size=15),
+    legend.text = element_text(size = 10),
+    plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+anim_save(gg_fig, file = paste0(fig_dir, "allele-freq-accumulation3.gif"))
+
+
+
+```
+
+
+
+```{r draw af of once fixed mutations, results=TRUE}
+
+
+
+variants_expiii_subset <- variants_expiii %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
+
+
+
+fixed_muts <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$allele_freq >= 0.99])
+
+tot_fixed_4lines <- length(fixed_muts)
+
+
+
+fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info_line)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Passage") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 25, hjust = 0.5),
+    axis.title = element_text(size = 20),
+    axis.text.x = element_text(size = 10, angle = 90),
+    axis.text.y = element_text(size = 10),
+    strip.text.x = element_text(size = 25),
+    legend.position="none")
+
+fig
+
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "frequency_dynamics_sporadic_mutations.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == 560])[table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == 560]) == 4]
+# 1446_T_G  566_G_A  678_G_A 7854_A_G 
+case <- "566_G_A"
+
+variants_expiii$tracking_group <- "No"
+variants_expiii$tracking_group[variants_expiii$mut_info == case] <- "Yes"
+
+fixed_muts <- unique(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99])
+
+
+fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = tracking_group, alpha = tracking_group)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_alpha_manual(values = c(0.1,1)) +
+    labs(title = case, y = "Frequency \n", x = "\n Passage") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 25, hjust = 0.5),
+    axis.title = element_text(size = 20),
+    axis.text.x = element_text(size = 10, angle = 90),
+    axis.text.y = element_text(size = 10),
+    strip.text.x = element_text(size = 25),
+    legend.position="none")
+
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "frequency_dynamics_",case, ".pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+```{r}
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+df <- data.frame()
+
+for (exp_line in line_labels){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.05])))
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+    }
+}
+head(df)
+# set column names and right data types
+df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
+        mutate_at(4:6, as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+
+# average time to fixation for fixated mutations based on how many times they are repeated
+
+fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == 560])
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+
+
+
+df$Occurrence <- NA
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["1"]])] <- "One"
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["2"]])] <- "Two"
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["3"]])] <- "Three"
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["4"]])] <- "Four"
+df <- df[!is.na(df$Occurrence),]
+df$Occurrence <- factor(df$Occurrence, levels = c("One", "Two", "Three", "Four"))
+
+
+comparisons <- list(
+  c("Four", "Two"),
+  c("Four", "One"),
+  c("Three", "Two"),
+  c("Three", "One")
+)
+
+# Create the plot
+fig <- ggplot(df, aes(x = time_to_fixation, fill = Occurrence)) + 
+    geom_density(color = "black", alpha = 0.7) +
+    # scale_fill_manual(values = c("Group 1" = "#E69F00", "Group 2" = "#56B4E9", "Group 3" = "#7CE335", "Group 4" = "#F3567C")) +
+    labs(fill = "Occurrence", x= "Time to Fixation", y = "Density", title = "Fixation Dynamics Based on Variant Recurrence\n") + # Label for the legend
+    theme_minimal() + # Optional: use a minimal theme
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15)) 
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "fixation-based-on-recurrence.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+mean(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["1"]])])
+
+
+t.test(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["3"]])],df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["2"]])])
+
+
+```

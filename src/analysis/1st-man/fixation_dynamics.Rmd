@@ -148,7 +148,7 @@ for (exp_line in line_labels){
     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
     fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
     for (mut in fixed_muts){
-    appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.05])))
+        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.05])))
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
         translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
         df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))

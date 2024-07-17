@@ -117,7 +117,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r text numbers}
 
 # set parameters
-category <- "Fixed"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -196,6 +196,48 @@ dev.off()
 
 ```
 
+
+```{r visualization1: Accumulation plot}
+
+
+
+df <- data.frame()
+variants_expiii_subset <- variants_expiii %>% mutate(passage = as.numeric(as.character(passage)))
+
+for (exp_line in exp_line_factor){
+    for (passage in seq(10,570, 10)){
+        count <- length(unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.05 & variants_expiii_subset$passage <= passage & variants_expiii_subset$exp_line == exp_line & variants_expiii_subset$mut_type == "P"]))
+        df <- rbind(df, c(exp_line, passage, count))
+    }
+}
+
+df %<>% set_colnames(c("exp_line", "passage", "count")) %>%
+            mutate_at(2:3, as.numeric)
+
+# visualize 
+
+fig <- df %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0("Number of unique point mutations with VF>=0.05"))+
+        scale_x_continuous(breaks = seq(0,570,50)) +
+        scale_y_continuous(limits = c(0,max(df$count)+20),breaks = seq(0,max(df$count)+20,50)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_unique_recorded.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
 
 
 ```{r visualization1: Unique mutation appearance plot}
