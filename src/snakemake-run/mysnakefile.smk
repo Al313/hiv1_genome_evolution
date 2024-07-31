@@ -126,7 +126,7 @@ rule consensus_line_swap:
    output:
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full2.fasta"
    shell:
-       "cat {input} | sed -E 's/>15(MT4EXPIIIVP[4,5])/>a\\1/g' | sed -E 's/>16(MT4EXPIIIVP[4,5])/>b\\1/g' | sed -E 's/>a(MT4EXPIIIVP[4,5])/>16\\1/g' | sed -E 's/>b(MT4EXPIIIVP[4,5])/>15\\1/g' > {output} && rm {input}"
+       "cat {input} | grep -A 1 -E '>(13|14|15|16).*' | sed -E 's/>15(MT4EXPIIIVP[4,5])/>a\\1/g' | sed -E 's/>16(MT4EXPIIIVP[4,5])/>b\\1/g' | sed -E 's/>a(MT4EXPIIIVP[4,5])/>16\\1/g' | sed -E 's/>b(MT4EXPIIIVP[4,5])/>15\\1/g' > {output} && rm {input}"
 
 
 
