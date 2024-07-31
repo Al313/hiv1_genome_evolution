@@ -17,6 +17,7 @@ rule all:
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz",
        "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree",
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree",
        expand("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/{experiment}_{line}_multiqc_report.html", zip, experiment=EXP, line=LINES),
        expand("/home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/{experiment}/{line}/{sample}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
        expand("/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted_stats/qualimapReport.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
@@ -100,7 +101,7 @@ rule samtools_index:
 
 ####
 
-rule get_consensus_full:
+rule get_consensus:
     input:
         "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/{experiment}/{line}/{sample}_sorted.bam"
     output:
@@ -110,7 +111,7 @@ rule get_consensus_full:
     shell:
         "samtools consensus --mode simple -f fasta {input} --show-del yes --show-ins no -aa --call-fract 0.5 -o {output.tmp1} && seqtk seq {output.tmp1} > {output.tmp2} && sed -n 2p {output.tmp2} | cut -c790-2085 > {output.final_cons} && sed -i '1i>{wildcards.sample}' {output.final_cons}"
 
-rule collect_consensus_full:
+rule collect_consensus:
     input:
         expand("/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/{experiment}/{line}/{sample}.fasta", zip, experiment=EXP, line=LINES, sample=SAMPLES)
     output:
@@ -138,7 +139,21 @@ rule consensus_50th_interval:
    shell:
        "cat {input} | grep -A 1 -E '>(13|14|15|16).*VP(50|100|150|200|250|300|350|400|450|500|550|570)[^0-9+\-]' | grep -v -- '^--$' > {output}"
 
-rule consensus_additions:
+
+rule consensus_additions_all:
+    input:
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full2.fasta"
+    output:
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full3.fasta"
+    shell:
+       "cat {input} > {output} && \
+        sed -n 1p /home/amovas/data/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta >> {output} && \
+        sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta | cut -c790-2085 >> {output} && \
+        sed -n 1p /home/amovas/data/genome-evo-proj/data/reference/hxb2/hxb2_seq_ncbi.fasta | cut -d ' ' -f1 >> {output} && \
+        sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/hxb2/hxb2_seq_ncbi.fasta | cut -c790-2085 >> {output}"
+
+
+rule consensus_additions_50th:
     input:
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full.fasta"
     output:
@@ -151,7 +166,15 @@ rule consensus_additions:
         sed -n 2p /home/amovas/data/genome-evo-proj/data/reference/hxb2/hxb2_seq_ncbi.fasta | cut -c790-2085 >> {output}"
 
 
-rule msa:
+rule msa_all:
+   input:
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full3.fasta"
+   output:
+       "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full_msa.fasta"
+   shell:
+       "muscle -super5 {input} -output {output}"
+
+rule msa_50th:
    input:
        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full2.fasta"
    output:
@@ -160,7 +183,18 @@ rule msa:
        "muscle -align {input} -output {output}"
 
 
-rule msa_post_processing:
+rule msa_post_processing_all:
+    input:
+        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/all_consensus_full_msa.fasta"
+    output:
+        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta"
+    shell:
+       "sed -i -e 's/*/-/g' {input} && cat {input} | sed -E 's/([0-9]{{2}})MT[0-9]EXPIIIVP([0-9]{{2,3}}).*_L001?/\\1:\\2/g' | sed -E 's/([0-9]{{2}})MT[0-9]EXPIVVP([0-9]{{2,3}}).*_L001?/\\1:\\2/g' > {output} && \
+        sed -i -e 's/13:/MT-2_1:/g' {output} && sed -i -e 's/14:/MT-2_2:/g' {output} && sed -i -e 's/15:/MT-4_1:/g' {output} && sed -i -e 's/16:/MT-4_2:/g' {output}"
+
+
+
+rule msa_post_processing_50th:
     input:
         "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full_msa.fasta"
     output:
@@ -170,7 +204,16 @@ rule msa_post_processing:
         sed -i -e 's/13:/MT-2_1:/g' {output} && sed -i -e 's/14:/MT-2_2:/g' {output} && sed -i -e 's/15:/MT-4_1:/g' {output} && sed -i -e 's/16:/MT-4_2:/g' {output}"
 
 
-rule tree_inference:
+rule tree_inference_all:
+    input:
+        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta"
+    output:
+        "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree"
+    shell:
+        "iqtree -s {input} -m MFP -B 1000 -redo"
+
+
+rule tree_inference_50th:
     input:
         "/home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta"
     output:
