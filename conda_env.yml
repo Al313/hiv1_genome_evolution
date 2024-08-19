@@ -66,3 +66,5 @@ dependencies:
   - r-readxl
   - trimmomatic # for read qc
   - r-rstatix
+  - r-fitdistrplus
+  - r-ggmuller
