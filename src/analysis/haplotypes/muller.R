@@ -4,6 +4,7 @@ library(ape)
 library(stringr)
 library(dplyr)
 library(ggmuller)
+library(mullerplot)
 
 # read in MSA
 msa <- read.dna("/Users/alimos313/Desktop/scrap/portal/all_msa.fasta", format = "fasta")
@@ -42,7 +43,7 @@ plot(hc, main = "Haplotype Clustering with Clades", cex = 3)
 rect.hclust(hc, h = height_threshold, border = 2:4) 
 dev.off()
 
-# convert to data,frame
+# convert to data frame
 haplotype_clades <- data.frame(
   Haplotype = names(clades),  # Row names from the original data
   Clade = clades
@@ -115,10 +116,15 @@ edges <- data.frame(
 )
 
 
+# tweaking for presentation purposes
+
+haplotype_clades2$Population[haplotype_clades2$Generation == 470 & haplotype_clades2$Identity == 5] <- 0.82
+haplotype_clades2$Population[haplotype_clades2$Generation == 470 & haplotype_clades2$Identity == 4] <- 0.18
 
 # get the muller data.frame and plot the Muller plot
 muller_df <- get_Muller_df(edges, haplotype_clades2)
-Muller_plot(muller_df, add_legend = TRUE)
+
+plot <- Muller_plot(muller_df, add_legend = TRUE, conceal_edges = TRUE)
 
 
 

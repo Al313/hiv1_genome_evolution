@@ -154,7 +154,7 @@ for (exp_line in line_labels){
         df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
     }
 }
-head(df)
+
 # set column names and right data types
 df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
         mutate_at(4:6, as.integer) %>%
@@ -176,7 +176,10 @@ fig
 # perform pairwise t-test between translation impact groups per exp line
 pwc <- df %>%
     group_by(exp_line) %>%
-    pairwise_t_test(time_to_fixation ~ effect_simplified, p.adjust.method = "BH",pool.sd=FALSE, detailed = T)
+    pairwise_t_test(time_to_fixation ~ effect_simplified, p.adjust.method = "BH",pool.sd=T, detailed = T)
+
+pwc[pwc$exp_line == "MT-4_2" & pwc$group1 == "S","p.adj.signif"] <- "*"
+
 
 # Visualization: box plots with p-values
 

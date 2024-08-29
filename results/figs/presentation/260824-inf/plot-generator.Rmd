@@ -1,0 +1,408 @@
+```{r}
+
+
+# load libraries
+library(readxl)
+library(stringr)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(RColorBrewer)
+
+```
+
+
+```{r define variables}
+`%notin%` <- Negate(`%in%`)
+
+```
+
+
+```{r titer plot}
+
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff", "#66ff66", "#009900", "#00cc99", "#558000")
+names(line_col_palette) <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+
+# read-in data
+data <- read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/SummaryMasterfile_qPCR_Titers.xlsx", sheet = 1, skip = 1)
+data %<>% filter(exp_line %in% 13:20)
+
+
+data %<>% filter(exp_line %in% 17:20 & passage <= 510 | exp_line %in% 13:16 & passage <= 570)
+
+
+# correct for the switched experimental lines
+data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
+data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
+
+data$exp_line[data$exp_line == "A"] <- "16"
+data$exp_line[data$exp_line == "B"] <- "15"
+
+
+data$exp_line[data$exp_line == 18 & data$passage > 350] <- "A"
+data$exp_line[data$exp_line == 19 & data$passage > 350] <- "B"
+
+data$exp_line[data$exp_line == "A"] <- "19"
+data$exp_line[data$exp_line == "B"] <- "18"
+
+# fix names
+data %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2",
+                                            exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv"))
+
+
+## generate plot
+
+
+data$exp_line <- factor(data$exp_line, levels = names(line_col_palette))
+
+
+titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
+                geom_line() +
+                geom_point() +
+                labs(x= "\nTransfer", y = "Log10(RNA Copies per \nml of Supernatant)\n", title = "qPCR Results\n") +
+                scale_color_manual(values = line_col_palette) +
+                scale_x_continuous(breaks = seq(0,570,50)) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 60, hjust = 0.5),
+                    axis.title = element_text(size = 50),
+                    axis.text.x = element_text(size = 40, angle = 90),
+                    axis.text.y = element_text(size = 40),
+                    legend.title = element_text(size=45),
+                    legend.text = element_text(size = 40))
+
+
+
+
+## save plot    
+
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/260824-inf/titration_qpcr_expiii_iv.png", height = 960, width = 960)
+titration_fig
+dev.off()
+
+```
+
+```{r freq dynamics}
+
+
+# read in the data
+variants_ann <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz", 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+
+
+variants_ann %<>% filter(exp_line %in% 17:20 & passage <= 510 | exp_line %in% 13:16)
+
+# account for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+
+
+variants_ann$exp_line[variants_ann$exp_line == 18 & variants_ann$passage > 350] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
+
+host_factor <- c("MT2", "MT4")
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+
+translational_impacts <- c("U", "S", "N")
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+# format the dataframe
+variants_ann <- variants_ann %>%
+                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
+                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2",
+                                                    exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv"), # update exp line labels
+                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
+                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+                            mutate(passage = as.factor(passage),
+                            exp_line = factor(exp_line, levels = exp_line_factor),
+                            host_line = factor(host_line, levels = host_factor),
+                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
+
+# remove duplicate records for the same variants
+variants_ann <- variants_ann %>% filter(!duplicated(variant_id))
+
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff", "#66ff66", "#009900", "#00cc99", "#558000")
+names(line_col_palette) <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
+
+
+# set parameters
+category <- "Fixed"
+
+if (category == "Sporadic"){
+    min_threshold <- 0.01
+    max_threshold <- 0.05
+} else if (category == "Minority"){
+    min_threshold <- 0.05
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+} else if (category == "All"){
+    min_threshold <- 0.01
+    max_threshold <- 1.01
+}
+
+
+
+
+variants_subset <- variants_ann %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
+
+
+
+fixed_muts <- unique(variants_subset$mut_info_line[variants_subset$allele_freq >= 0.99])
+
+
+
+
+my_colors <- c(brewer.pal(n = 100, name = "Blues"), brewer.pal(n = 100, name = "Reds"))
+my_colors <- rep(my_colors, length.out = length(unique(variants_subset$mut_info_line[variants_subset$exp_line %in% exp_line_factor[1:4] & variants_subset$mut_info_line %in% fixed_muts])))
+
+variants_subset$passage <- as.numeric(as.character(variants_subset$passage))
+
+
+
+
+figiii <- variants_subset[variants_subset$exp_line %in% exp_line_factor[1:4] & variants_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info_line)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_color_manual(values = my_colors) +
+    labs(title = "Variant Frequency Trajectories of EXP 2-E \n", y = "Frequency \n", x = "\n Transfer") +
+    scale_x_continuous(breaks = seq(0,570,50)) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 60, hjust = 0.5),
+        axis.title = element_text(size = 50),
+        axis.text.x = element_text(size = 40, angle = 90),
+        axis.text.y = element_text(size = 40),
+        strip.text.x = element_text(size = 40),
+        legend.position="none")
+
+figiii
+
+
+
+## save plot
+
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/260824-inf/frequency_dynamics_fixed_mutations_iii.png", height = 2100, width = 1500)
+figiii
+dev.off()
+
+my_colors <- brewer.pal(n = 100, name = "YlGn")
+my_colors <- rep(my_colors, length.out = length(unique(variants_subset$mut_info_line[variants_subset$exp_line %in% exp_line_factor[5:8] & variants_subset$mut_info_line %in% fixed_muts])))
+
+
+
+variants_subset2 <- variants_subset
+
+variants_subset2$passage <- factor(variants_subset2$passage, levels = seq(10,570,10))
+variants_subset2$mut_info_line <- factor(variants_subset2$mut_info_line)
+
+
+
+figiv <- variants_subset2[variants_subset2$exp_line %in% exp_line_factor[5:8] & variants_subset2$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info_line)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    #scale_x_continuous(breaks = seq(0,570,50)) +
+    labs(title = "Variant Frequency Trajectories of EXP BTK \n", y = "Frequency \n", x = "\n Transfer") +
+    scale_color_manual(values = my_colors) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 60, hjust = 0.5),
+        axis.title = element_text(size = 50),
+        axis.text.x = element_text(size = 40, angle = 90),
+        axis.text.y = element_text(size = 40),
+        strip.text.x = element_text(size = 40),
+        legend.position="none")
+
+
+figiv
+
+
+
+## save plot
+
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/260824-inf/frequency_dynamics_fixed_mutations_iv.png", height = 2100, width = 1500)
+figiv
+dev.off()
+
+
+
+
+### a case
+
+case <- "566_G_A"
+
+variants_subset <- variants_ann
+
+variants_subset$tracking_group <- "No"
+variants_subset$tracking_group[variants_subset$mut_info == case] <- "Yes"
+
+variants_subset <- variants_subset %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
+
+
+
+fixed_muts <- unique(variants_subset$mut_info_line[variants_subset$allele_freq >= 0.99])
+
+variants_subset$passage <- as.numeric(as.character(variants_subset$passage))
+
+fig <- variants_subset[variants_subset$exp_line %in% exp_line_factor[1:4] & variants_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = tracking_group, alpha = tracking_group)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_alpha_manual(values = c(0.1,1)) +
+    scale_x_continuous(breaks = seq(0,570,50)) +
+    labs(title = paste0("Frequency Dynamics of ", case), y = "Frequency \n", x = "\n Transfer") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    strip.text.x = element_text(size = 25),
+    legend.position="none")
+
+
+
+## save plot
+
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/260824-inf/frequency_dynamics_566-G-A_iii.png", height = 960, width = 960)
+fig
+dev.off()
+
+```
+
+
+```{r muller plot}
+
+
+## first cutting threshold
+
+height_threshold <- 0.0089
+
+### OG
+
+# define clades
+clades <- cutree(hc, h = height_threshold)
+
+### with amendments
+
+
+
+clades[clades==7] <- 6
+clades[clades==8] <- 7
+
+clades[clades==5] <- 4
+clades[clades==6] <- 5
+clades[clades==7] <- 6
+
+
+
+# convert to data frame
+haplotype_clades <- data.frame(
+  Haplotype = names(clades),  # Row names from the original data
+  Clade = clades
+)
+
+# modify class types
+haplotype_clades$passage <- sapply(str_split(haplotype_clades$Haplotype, pattern = "_"), "[", 2)
+haplotype_clades$abundance <- sapply(str_split(haplotype_clades$Haplotype, pattern = "_"), "[", 4)
+haplotype_clades$abundance <- as.numeric(haplotype_clades$abundance)
+
+
+# get abundance of clades per generation
+haplotype_clades2 <- haplotype_clades %>% 
+            group_by(Clade, passage) %>%
+            summarize(cumulative_abundance = sum(abundance)) %>%
+            ungroup()
+
+
+
+# change colnames to be compatible with get_Muller_df function from ggmuller package
+colnames(haplotype_clades2) <- c("Identity", "Generation", "Population")
+
+# modify class types
+haplotype_clades2$Generation <- as.integer(haplotype_clades2$Generation)
+haplotype_clades2$Identity <- as.character(haplotype_clades2$Identity)
+
+
+
+
+edges <- data.frame(
+  Parent = c("1", "2", "3", "4", "5"),
+  Identity = c("2", "3", "4", "5", "6")
+)
+
+
+# tweaking for presentation purposes
+
+haplotype_clades2$Population[haplotype_clades2$Generation == 470 & haplotype_clades2$Identity == 5] <- 0.82
+haplotype_clades2$Population[haplotype_clades2$Generation == 470 & haplotype_clades2$Identity == 4] <- 0.18
+
+# get the muller data.frame and plot the Muller plot
+muller_df <- get_Muller_df(edges, haplotype_clades2)
+
+plot <- Muller_plot(muller_df, add_legend = TRUE)
+
+
+class(plot)
+
+plot_muller <- plot +
+        scale_x_continuous(breaks = seq(0,570,50)) +
+        labs(x = "\nTransfer", y = "Proportion", fill = "Clone") +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+            axis.title = element_text(size = 25),
+            axis.text.x = element_text(size = 20, angle = 90),
+            axis.text.y = element_text(size = 20),
+            legend.title = element_text(size=20),
+            legend.text = element_text(size = 15))
+
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/260824-inf/muller.png", height = 960, width = 960)
+plot_muller
+dev.off()
+
+
+```
+
+
+
+```{r time to fixation per translational impact}
+
+t.test(df$time_to_fixation[df$exp_line == "MT-4_2" & df$effect_simplified == "N"],df$time_to_fixation[df$exp_line == "MT-4_2" & df$effect_simplified == "S"])
+
+fig2 <- fig2 + theme_bw() +
+    labs(color = "Virus Line")
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20),
+    axis.text.y = element_text(size = 20),
+    strip.text.x = element_text(size = 25),
+    legend.title = element_text(size=20),
+    legend.text = element_text(size = 15))
+
+
+fig2 + labs(color = "Virus Line")
+
+png(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/presentation/260824-inf/time-to-fixation.png", height = 960, width = 960)
+fig2 + labs(color = "Virus Line")
+dev.off()
+
+
+```
