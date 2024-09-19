@@ -37,6 +37,9 @@ library("stringr")
 library("magrittr")
 library("rstatix")
 
+#functions
+
+`%notin%` <- Negate(`%in%`)
 
 ```
 

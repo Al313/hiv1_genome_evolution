@@ -203,3 +203,75 @@ pgamma(2000/10, shape = 1.126612817, rate = 0.005348949)
 
 
 ```
+
+
+
+
+
+```{r simulation of time to fixation based on Kimura's calculations (chatGPT suggestion)}
+
+
+set.seed(123)  # for reproducibility
+
+# Function to simulate time to fixation
+simulate_fixation_time <- function(Ne) {
+  # Initialize variables
+  allele_freq <- 1 / (2 * Ne)  # Initial frequency of the neutral mutation (1 copy in the population)
+  generation <- 0
+  
+  # Run simulation until fixation (allele frequency = 1)
+  while (allele_freq < 1) {
+    # Simulate genetic drift in a Wright-Fisher model
+    num_copies <- rbinom(1, 2 * Ne, allele_freq)  # Randomly choose new number of copies
+    allele_freq <- num_copies / (2 * Ne)  # Update allele frequency
+    generation <- generation + 1
+    if (allele_freq ==0) {
+        allele_freq <- 1 / (2 * Ne)
+        generation <- 0
+    }
+  } 
+  
+  return(generation)
+}
+
+# Parameters
+Ne <- 1000  # Effective population size (you can change this)
+num_simulations <- 1000  # Number of simulations to average over
+
+# Run the simulations
+fixation_times <- replicate(num_simulations, simulate_fixation_time(Ne))
+
+# Average time to fixation
+average_fixation_time <- mean(fixation_times)
+theoretical_fixation_time <- 4 * Ne  # Kimura's prediction
+
+# Display results
+cat("Simulated average time to fixation:", average_fixation_time, "generations\n")
+cat("Theoretical time to fixation:", theoretical_fixation_time, "generations\n")
+
+# Plot histogram of fixation times
+hist(fixation_times, breaks = 30, col = "lightblue", main = "Distribution of Time to Fixation",
+     xlab = "Generations to Fixation", border = "black")
+
+library(fitdistrplus)
+
+
+fit_normal <- fitdist(fixation_times, "norm")
+
+# Fit a gamma distribution
+fit_pois <- fitdist(fixation_times, "pois")
+
+# Fit an exponential distribution
+fit_gamma <- fitdist(fixation_times/10, "gamma")
+
+# Summary of fits
+summary(fit_normal)
+summary(fit_pois)
+summary(fit_gamma)
+
+library(goftest)
+ks.test(fixation_times, "pgamma", 0.9351768, 1)
+
+
+
+```
