@@ -157,6 +157,8 @@ Let's first take a look at the accumulation of synonymous and nonsynonymous muta
 
 plt_type <- "plotly"
 
+experiment <- "EXPIII"
+
 for (experiment in unique(variants$exp)){
 
     counts <- variants %>%
@@ -192,10 +194,10 @@ for (experiment in unique(variants$exp)){
 
     # save pngs
 
-    pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/jeffrey-barrick/syn_vs_nonsyn_", experiment, ".pdf")
-    , width = 21, height = 21)
-    print(fig)
-    dev.off()
+    # pdf(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/jeffrey-barrick/syn_vs_nonsyn_", experiment, ".pdf")
+    # , width = 21, height = 21)
+    # print(fig)
+    # dev.off()
 }
 
 ```
@@ -210,7 +212,7 @@ and subsequently normalize all these counts base on that.
 ```{r number of all possible mutations + percentage of synonymous ones, results=T}
 
 # read in ancestral reference sequence 
-fastaFile <- readDNAStringSet("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/reference/plasmid/hiv_plasmid_ref_genome.fasta")
+fastaFile <- readDNAStringSet("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta")
 seq_name = names(fastaFile)
 sequence = paste(fastaFile)
 

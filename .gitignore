@@ -25,4 +25,4 @@ results/tables/2-p/all_annotated_variants.tsv
 src/r-processing-scripts/phylogenetics/manuals/
 
 
-src/analysis/mut_sig/MutationalPatterns/
+src/analysis/mut-sig/MutationalPatterns/

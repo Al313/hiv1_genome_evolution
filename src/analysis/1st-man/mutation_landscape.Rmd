@@ -118,7 +118,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r set parameters}
 
 # set parameters
-category <- "Minority"
+category <- "Majority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -151,8 +151,7 @@ if (category == "Sporadic"){
 variants_expiii_sub <-  variants_expiii %>% 
                             mutate(passage = as.numeric(as.character(passage))) %>%
                             #filter(passage == 570) %>%
-                            mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type)) %>%
-                            filter(mut_type_sub == "G>A")
+                            mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type))
 
 nrow(variants_expiii_sub)
 
@@ -486,6 +485,266 @@ dev.off()
 
 
 ```
+
+
+
+```{r}
+
+# Q. Are certain mutation types more likely to be selected for and become majority/fixed in the population?
+
+mut_sub_type_fac <- c("A>C", "A>G","A>T","C>A","C>G","C>T","G>A","G>C","G>T","T>A","T>C","T>G")
+
+length(mut_sub_type_fac)
+# count number majority/fixed mutations
+
+
+
+
+min_threshold <- 0.5
+max_threshold <- 1.01
+
+mut_sub_count <-  variants_expiii %>% 
+                            mutate(passage = as.numeric(as.character(passage))) %>%
+                            filter(mut_type == "P",
+                                allele_freq >= min_threshold & allele_freq <= max_threshold) %>%
+                            mutate(mut_type_sub = paste0(ref_allele,">",alt_allele)) %>%
+                            mutate(mut_type_sub = factor(mut_type_sub, levels = mut_sub_type_fac)) %>%
+                            group_by(passage, exp_line, mut_type_sub, .drop = FALSE) %>%
+                            summarize(count = n()) %>%
+                            filter(passage == 560)
+
+head(mut_sub_count)
+
+
+
+# count number of unique minority
+
+
+min_threshold <- 0.05
+max_threshold <- 0.5
+
+mut_sub_count_min <-  variants_expiii %>% 
+                            mutate(passage = as.numeric(as.character(passage))) %>%
+                            filter(mut_type == "P",
+                                allele_freq >= min_threshold & allele_freq <= max_threshold) %>%
+                            mutate(mut_type_sub = paste0(ref_allele,">",alt_allele)) %>%
+                            mutate(mut_type_sub = factor(mut_type_sub, levels = mut_sub_type_fac)) %>%
+                            select(genomic_pos, passage, exp_line, mut_type_sub) %>%
+                            distinct() %>%
+                            select(exp_line, mut_type_sub) %>%
+                            group_by(exp_line, mut_type_sub, .drop = FALSE) %>%
+                            summarize(count = n())
+
+str(mut_sub_count_min)
+
+mut_sub_count_min[mut_sub_count_min$exp_line == "MT-2_1",]
+
+
+line <- "MT-2_2"
+
+for (i in mut_sub_type_fac){
+    x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_type_sub == i],
+                    sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_type_sub == i]), nrow = 2, byrow = TRUE)
+    pval <- fisher.test(x, alternative = "two.sided")$p.val
+    print(ifelse(pval <= 0.05, paste0(i, ": ", pval), NA))
+}
+
+
+
+
+# Q. how about for 3 nucleotide context
+
+
+
+# Q. how about for codon usage?
+
+
+
+min_threshold <- 0.5
+max_threshold <- 1.01
+
+mut_sub_count <-  variants_expiii %>% 
+                            mutate(passage = as.numeric(as.character(passage))) %>%
+                            filter(mut_type == "P",
+                                allele_freq >= min_threshold & allele_freq <= max_threshold) %>%
+                            mutate(mut_context_96 = ifelse(substr(mut_context, 2, 2) %in% c("C", "T"), context_formatter(alt_allele, mut_context), context_formatter(reverse_complement(alt_allele),reverse_complement(mut_context)))) %>%
+                            mutate(mut_context_96 = factor(mut_context_96, levels = context_fac)) %>%
+                            group_by(passage, exp_line, mut_context_96, .drop = FALSE) %>%
+                            summarize(count = n()) %>%
+                            filter(passage == 560)
+
+
+
+
+# count number of unique minority
+
+
+min_threshold <- 0.05
+max_threshold <- 0.5
+
+mut_sub_count_min <-  variants_expiii %>% 
+                            mutate(passage = as.numeric(as.character(passage))) %>%
+                            filter(mut_type == "P",
+                                allele_freq >= min_threshold & allele_freq <= max_threshold) %>%
+                            mutate(mut_context_96 = ifelse(substr(mut_context, 2, 2) %in% c("C", "T"), context_formatter(alt_allele, mut_context), context_formatter(reverse_complement(alt_allele),reverse_complement(mut_context)))) %>%
+                            mutate(mut_context_96 = factor(mut_context_96, levels = context_fac)) %>%
+                            select(genomic_pos, passage, exp_line, mut_context_96) %>%
+                            distinct() %>%
+                            select(exp_line, mut_context_96) %>%
+                            group_by(exp_line, mut_context_96, .drop = FALSE) %>%
+                            summarize(count = n())
+
+
+
+line <- "MT-2_2"
+
+length(context_fac)
+
+for (i in context_fac){
+    
+    x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_context_96 == i],
+                    sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
+    
+    pval <- fisher.test(x, alternative = "two.sided")$p.val
+
+    if (pval <= 0.1){
+        print(i)
+        print(pval)
+    }
+}
+
+i <- "C[A>T]T"
+
+ 
+    x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == "MT-2_1"]), mut_sub_count_min$count[mut_sub_count_min$exp_line == "MT-2_1" & mut_sub_count_min$mut_context_96 == i],
+                    sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == "MT-2_1"]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == "MT-2_1" & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
+    
+    pval <- fisher.test(x, alternative = "two.sided")$p.val
+
+    if (pval <= 0.1){
+        print(i)
+        print(pval)
+    }
+
+
+
+
+
+```
+
+
+```{r}
+
+# Q. how about for codon usage?
+
+# limit to 
+
+
+
+head(variants_expiii[variants_expiii$effect_simplified == "S",])
+
+as.numeric(sapply(str_split(variants_expiii$loc_in_cds[variants_expiii$effect_simplified == "S"], pattern = "/"), "[[", 1)) %% 3
+
+# Let's first determine the codons
+
+min_threshold <- 0.5
+max_threshold <- 1.01
+
+
+ss <- variants_expiii %>% 
+    filter(mut_type == "P", effect_simplified == "S") %>%
+    filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+    filter(passage == end_passage) %>%
+    # filter((genomic_pos >= 790 & genomic_pos <= 2084) | (genomic_pos >= 2293 & genomic_pos <= 5041)) %>%
+    mutate(pos_in_codon = as.numeric(str_split(loc_in_cds, pattern = "/")[[1]][1]) %% 3) %>%
+    mutate(ref_codon = ifelse(pos_in_codon == 0, mut_3_context, NA)) %>%
+    mutate(ref_codon = ifelse(pos_in_codon == 1, mut_5_context, ref_codon)) %>%
+    mutate(ref_codon = ifelse(pos_in_codon == 2, mut_context, ref_codon)) %>%
+    mutate(alt_codon = ifelse(pos_in_codon == 0, paste0(substr(mut_3_context, 1,2), alt_allele), NA)) %>%
+    mutate(alt_codon = ifelse(pos_in_codon == 1, paste0(alt_allele, substr(mut_5_context, 2,3)), alt_codon)) %>%
+    mutate(alt_codon = ifelse(pos_in_codon == 2, paste0(substr(mut_3_context, 2,2), alt_allele, substr(mut_5_context, 2,2)), alt_codon))
+
+
+
+
+
+
+min_threshold <- 0.05
+max_threshold <- 0.5
+
+
+ss2 <- variants_expiii %>% 
+    filter(mut_type == "P", effect_simplified == "S") %>%
+    filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+    select(genomic_pos, ref_allele, alt_allele, exp_line, loc_in_cds, mut_context, mut_3_context, mut_5_context) %>%
+    distinct() %>%
+    # filter((genomic_pos >= 790 & genomic_pos <= 2084) | (genomic_pos >= 2293 & genomic_pos <= 5041)) %>%
+    mutate(pos_in_codon = as.numeric(str_split(loc_in_cds, pattern = "/")[[1]][1]) %% 3) %>%
+    mutate(ref_codon = ifelse(pos_in_codon == 0, mut_3_context, NA)) %>%
+    mutate(ref_codon = ifelse(pos_in_codon == 1, mut_5_context, ref_codon)) %>%
+    mutate(ref_codon = ifelse(pos_in_codon == 2, mut_context, ref_codon)) %>%
+    mutate(alt_codon = ifelse(pos_in_codon == 0, paste0(substr(mut_3_context, 1,2), alt_allele), NA)) %>%
+    mutate(alt_codon = ifelse(pos_in_codon == 1, paste0(alt_allele, substr(mut_5_context, 2,3)), alt_codon)) %>%
+    mutate(alt_codon = ifelse(pos_in_codon == 2, paste0(substr(mut_3_context, 2,2), alt_allele, substr(mut_5_context, 2,2)), alt_codon))
+
+
+
+line <- "MT-4_2"
+sss <- ss[ss$exp_line == line,]
+sss2 <- ss2[ss2$exp_line == line,]
+
+sss <- ss
+sss2 <- ss2
+codon <- "CTC>CTA"
+
+codon_usage_odss <- data.frame()
+
+for (codon in names(table(paste(sss2$ref_codon, sss2$alt_codon, sep = ">")))){
+    
+
+    a <- sum(table(paste(sss$ref_codon, sss$alt_codon, sep = ">")))
+    b <- as.numeric(table(paste(sss$ref_codon, sss$alt_codon, sep = ">"))[codon])
+    b <- ifelse(is.na(b), 0, b)
+
+    c <- sum(table(paste(sss2$ref_codon, sss2$alt_codon, sep = ">")))
+    d <- as.numeric(table(paste(sss2$ref_codon, sss2$alt_codon, sep = ">"))[codon])
+
+    x <- matrix(c(c,d,a,b), ncol = 2, byrow = T)
+
+    fisher_test_res <- fisher.test(x, alternative = "two.sided")
+
+    codon_usage_odss <- rbind(codon_usage_odss, c(codon, round(as.numeric(fisher_test_res$estimate), digits = 3), round(as.numeric(fisher_test_res$p.val), digits = 3)))
+    if (fisher_test_res$p.value <= 0.05){
+        print(codon)
+        print(fisher_test_res)
+    }
+}
+
+colnames(codon_usage_odss) <- c("codon", "odds", "p_val")
+
+codon_usage_odss <- codon_usage_odss[order(codon_usage_odss$odds),]
+
+codon_usage_odss$odds <- as.numeric(codon_usage_odss$odds)
+codon_usage_odss$p_val <- as.numeric(codon_usage_odss$p_val)
+codon_usage_odss$significant <- ifelse(codon_usage_odss$p_val <= 0.05, TRUE, FALSE)
+
+fig <- codon_usage_odss[codon_usage_odss$odds != 0,] %>% ggplot(aes(x = reorder(codon, -odds), y = log2(odds), color = significant)) +
+        geom_bar(stat = "identity") +
+        geom_text(data = subset(codon_usage_odss, significant == TRUE), aes(label = codon), hjust = -0.5)+
+        theme(axis.text.x = element_text(angle = 90))
+
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "codon_selection_bias.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+
 
 
 
