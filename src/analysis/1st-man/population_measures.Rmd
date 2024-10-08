@@ -29,20 +29,42 @@ library(readxl)
 library(stringr)
 library(magrittr)
 library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+# define functions
+
+`%notin%` <- Negate(`%in%`)
+
 ```
 
 ```{r read-in qpcr data}
 
 
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
+up_until_psg <- 500
 
 line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
 line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 
-data <- read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/SummaryMasterfile_qPCR_Titers.xlsx", sheet = 1, skip = 1)
+data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
 
 
-data %<>% filter(exp_line %in% 13:16)
+data %<>% 
+        filter(exp_line %in% 13:16,
+        passage <= up_until_psg) 
 
 # correct for the switched experimental lines
 data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
@@ -51,9 +73,26 @@ data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
 data$exp_line[data$exp_line == "A"] <- "16"
 data$exp_line[data$exp_line == "B"] <- "15"
 
+table(data$exp_line, useNA = "always")
+
+
+# remove duplicates
+data <- data[!(data$exp_line == 16 & data$passage == 340 & data$cDNA_Date == "1) 09.06.2021"),]
+data <- data[!(data$exp_line == 16 & data$passage == 360 & data$cDNA_Date == "3) 09.06.2021"),]
+
+data <- data[!(data$exp_line == 15 & data$passage == 370 & data$cDNA_Date == "4) 09.06.2021"),]
+data <- data[!(data$exp_line == 15 & data$passage == 380 & data$cDNA_Date == "5) 09.06.2021"),]
+data <- data[!(data$exp_line == 15 & data$passage == 390 & data$cDNA_Date == "6) 09.06.2021"),]
+
 
 
 data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) # update exp line labels
+
+
+# needs repeat?
+# data$transferred_quantity_EXP_III[data$exp_line == "MT-2_2" & data$passage == 430]
+
+
 
 ```
 
@@ -66,17 +105,40 @@ data$passage <- as.numeric(data$passage)
 data$exp_line <- factor(data$exp_line, levels = line_labels)
 
 
-titration_fig <- data %>% ggplot(aes(x = passage, y = log10(transferred_quantity_EXP_III), color = exp_line)) +
+# fit linear models for each group and extract p-values
+model_A <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[1], ])
+model_B <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[2], ])
+model_C <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[3], ])
+model_D <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+# make the ggplot object
+
+titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
+                facet_wrap(~exp_line) +
                 geom_line() +
                 geom_point() +
-                labs(title = "qPCR", y = "log10(transferred_RNA_copy_nr)") +
+                geom_smooth(method = "lm", se = FALSE) +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n") +
                 #ylim(c(1000000,40000000)) +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
                 theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
                 axis.title.x = element_text(size = 25),
                 axis.title.y = element_text(size = 25),
-                axis.text = element_text(size = 15))
+                axis.text = element_text(size = 15, color = "black"))
 
 
 # save figure
@@ -89,33 +151,65 @@ dev.off()
 
 ```
 
-
-```{r read-in tcid data}
-
+```{r}
 
 
+# The qPCR levels for none of the cell lines is statistically difference from one another
 
-data <- as.data.frame(read_excel("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/titration/tcid50.xlsx"))
+pairwise.t.test(data$mean_quantity_per_ml_cell_culture_supernatant, data$exp_line, p.adjust.method = "none")
+
+
+
+```
+
+
+
+
+```{r}
+
+# tcid data to plot MOIs
+
+
+data <- as.data.frame(read_excel(paste0(wd, "data/titration/tcid50.xlsx")))
+
 
 
 data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
 data$passage[is.na(data$passage)] <- 0
 data$lines <- substring(data$Sample_ID, 8,9)
 data$lines[data$lines == ""] <- "ancestral"
-data %<>% mutate(lines = case_when(lines==13 ~ "MT-2_1", lines==14 ~ "MT-2_2", lines==15 ~ "MT-4_1", lines==16 ~ "MT-4_2")) # update exp line labels
+
+# correct for the switched experimental lines
+data$lines[data$lines == 15 & data$passage > 360] <- "A"
+data$lines[data$lines == 16 & data$passage > 360] <- "B"
+
+data$lines[data$lines == "A"] <- "16"
+data$lines[data$lines == "B"] <- "15"
+
+
+data %<>% mutate(exp_line = case_when(lines==13 ~ "MT-2_1", lines==14 ~ "MT-2_2", lines==15 ~ "MT-4_1", lines==16 ~ "MT-4_2")) # update exp line labels
+
 
 
 data_sub <- data[data$Source_abv %in% c("2022_rfc_i","2022_rfc_ii", "2018_christine","2024_christine"),]
 data_sub <- data_sub[data_sub$passage != "NL4_3",]
 
 data_sub$passage <- as.numeric(data_sub$passage)
-data_sub$lines <- factor(data_sub$lines, levels = line_labels)
+data_sub$lines <- factor(data_sub$exp_line, levels = line_labels)
 data_sub$Source_abv <- factor(data_sub$Source_abv, levels = c("2024_christine","2018_christine","2022_rfc_i","2022_rfc_ii"))
 
 data_sub %<>% filter(Sample_ID != "NL4_3")
 
 
-moi__fig <- data_sub %>% ggplot(aes(x = passage, y = log10(MOI), color = lines)) +
+result <- data_sub %>%
+  group_by(exp_line, passage) %>%
+  summarise(value = ifelse(n() > 1, mean(MOI), unique(MOI)), .groups = 'drop')
+
+
+
+
+moi__fig <- data_sub %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+                facet_wrap(~ exp_line) +
                 geom_line(aes(linetype=Source_abv)) +
                 geom_point() +
                 #ylim(c(1000000,40000000)) +
@@ -135,6 +229,432 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "moi.pdf"), height = 14, width = 14)
 moi__fig
 dev.off()
+
+```
+
+
+
+```{r }
+
+# produce the MOI figure by taking the average of values for dates where there are more than one data point available.
+
+
+logarithmic_mean <- function(values) {
+  # Check if there are at least two values
+  if (length(values) == 1) {
+    return(values)
+  }
+  
+  # Check if all values are positive
+  if (any((as.numeric(table(values)) >= 2))) {
+    return(values[1])
+  }
+  
+  # Calculate the logarithmic mean
+  n <- length(values)
+  log_mean <- mean(sapply(1:(n-1), function(i) {
+    a <- values[i]
+    b <- values[i+1]
+    (b - a) / (log(b) - log(a))
+  }))
+  
+  return(log_mean)
+}
+
+
+result <- data_sub %>%
+    group_by(exp_line, passage) %>%
+    summarise(MOI = ifelse(n() > 1, logarithmic_mean(MOI), unique(MOI)), .groups = 'drop') %>%
+    filter(passage %notin% c(10,30,50,70, 90))
+
+
+
+# fit linear models for each group and extract p-values
+model_A <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[1], ])
+model_B <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[2], ])
+model_C <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[3], ])
+model_D <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+
+
+moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line() +
+                geom_point() +
+                geom_smooth(method = "lm", se = FALSE) +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi") +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
+moi__fig
+dev.off()
+
+```
+
+```{r in text measures}
+
+# The MOI levels for none of the cell lines is statistically difference from one another
+
+pairwise.t.test(data$MOI, data$exp_line, p.adjust.method = "none")
+
+
+
+# define a function to calculate the CI
+confidence_interval <- function(data, conf.level = 0.95) {
+    n <- length(data)
+    mean_value <- mean(data)
+    sd_value <- sd(data)
+    
+    # Calculate standard error
+    se <- sd_value / sqrt(n)
+    
+    # Calculate margin of error
+    error_margin <- qt(1 - (1 - conf.level) / 2, df = n - 1) * se
+    
+    # Calculate confidence interval
+    ci_lower <- mean_value - error_margin
+    ci_upper <- mean_value + error_margin
+    
+    return(c(lower = ci_lower, upper = ci_upper))
+}
+
+mean(result$MOI)
+confidence_interval(result$MOI)
+
+median(result$MOI)
+quantile(result$MOI, probs = c(0.25,0.5,0.75))
+IQR(result$MOI)
+
+
+```
+
+
+```{r }
+
+# produce the MOI figure by not considering the 2024 results
+
+result <- data_sub %>%
+    filter(Source_abv != "2024_christine") %>%
+    # filter(passage %notin% c(10)) %>%
+    group_by(exp_line, passage) %>%
+    summarise(MOI = ifelse(n() > 1, logarithmic_mean(MOI), unique(MOI)), .groups = 'drop')
+
+
+result[result$lines == "MT-2_1" & result$passage == 300,]
+
+# fit linear models for each group and extract p-values
+model_A <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[1], ])
+model_B <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[2], ])
+model_C <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[3], ])
+model_D <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+
+
+moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line() +
+                geom_point() +
+                geom_smooth(method = "lm", se = FALSE) +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi") +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
+moi__fig
+dev.off()
+
+
+```
+
+
+
+```{r in text measures}
+
+# The MOI levels for none of the cell lines is statistically difference from one another
+
+pairwise.t.test(data$MOI, data$exp_line, p.adjust.method = "none")
+
+
+
+# define a function to calculate the CI
+confidence_interval <- function(data, conf.level = 0.95) {
+    n <- length(data)
+    mean_value <- mean(data)
+    sd_value <- sd(data)
+    
+    # Calculate standard error
+    se <- sd_value / sqrt(n)
+    
+    # Calculate margin of error
+    error_margin <- qt(1 - (1 - conf.level) / 2, df = n - 1) * se
+    
+    # Calculate confidence interval
+    ci_lower <- mean_value - error_margin
+    ci_upper <- mean_value + error_margin
+    
+    return(c(lower = ci_lower, upper = ci_upper))
+}
+
+mean(result$MOI)
+confidence_interval(result$MOI)
+
+median(result$MOI)
+quantile(result$MOI, probs = c(0.25,0.5,0.75))
+IQR(result$MOI)
+
+
+```
+
+
+
+
+
+```{r}
+
+
+# are tcid50 values different on the other line?
+
+result <- data_sub %>%
+    filter(Source_abv != "2018_christine") %>%
+    mutate(moi_on_mt2 = `TCID50/ml_MT2`*0.7*2/(1000*400000), moi_on_mt4 = `TCID50/ml_MT4`*0.7*2/(1000*400000)) %>%
+    select(Source_abv,passage,exp_line,moi_on_mt2,moi_on_mt4) %>%
+    pivot_longer(
+        cols = starts_with("moi_on"),   # Specify columns to pivot
+        names_to = "host",            # Name of the new column that will contain the old column names
+        values_to = "moi"                  # Name of the new column that will contain the values
+    ) %>%
+    group_by(exp_line, passage, host) %>%
+    summarise(value = ifelse(n() > 1, mean(moi), unique(moi)), .groups = 'drop')
+
+# fit linear models for each group and extract p-values
+test_A <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[1]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[1]], paired = TRUE)
+test_B <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[2]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[2]], paired = TRUE)
+test_C <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[3]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[3]], paired = TRUE)
+test_D <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[4]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[4]], paired = TRUE)
+
+
+# extract the p-values
+p_value_A <- test_A$p.value
+p_value_B <- test_B$p.value
+p_value_C <- test_C$p.value
+p_value_D <- test_D$p.value
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+
+
+moi__fig <- result %>% ggplot(aes(x = passage, y = log10(value), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line(aes(linetype=host)) +
+                geom_point() +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi") +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "moi_cleaned_on_respective_hosts.pdf"), height = 14, width = 14)
+moi__fig
+dev.off()
+
+
+
+
+
+```
+
+
+
+
+
+
+## Effective population size
+
+```{r}
+
+## estimating the effective population size (Variance Effective Size) by this formula: Ne ≈ p(1−p)/Var(Δp)
+## if there are more than one generation between the time points: 1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))
+
+df <- data.frame()
+
+# exp_line <- "MT-4_1"
+# pres_psg <- 130
+# trans_effect <- "S"
+
+for (exp_line in line_labels){
+    
+    print(exp_line)
+    
+    for (trans_effect in c("U", "S", "N", "ALL")) {
+        if (trans_effect == "ALL"){
+            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+        } else {
+            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect,]
+        }
+        for (pres_psg in seq(20,570,10)){
+            print(pres_psg)
+            prev_psg <- pres_psg - 10
+            
+            pres_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$allele_freq >= 0.01])
+            prev_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$allele_freq >= 0.01])
+            union_muts <- union(pres_muts, prev_muts)
+            intersect_muts <- intersect(pres_muts, prev_muts)
+            
+            delta_afs <- c()
+            for (mut in union_muts){
+                if (mut %in% pres_muts){
+                    pres_mut_af <- variants_expiii_sub$allele_freq[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$mut_info == mut]
+                } else {pre_mut_af <- 0}
+                if (mut %in% prev_muts){
+                    prev_mut_af <- variants_expiii_sub$allele_freq[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$mut_info == mut]
+                } else {prev_mut_af <- 0}
+                
+                delta_af <- pres_mut_af - prev_mut_af
+                delta_afs <- append(delta_afs, delta_af)
+            }
+            
+            af_pres <- sum(variants_expiii_sub$allele_freq[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$allele_freq >= 0.01])
+            af_prev <- sum(variants_expiii_sub$allele_freq[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$allele_freq >= 0.01])
+            af_ave <- af_pres/length(pres_muts)
+            
+            Ne <- tryCatch({1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))}, error = function(e){NA})
+            
+            df <- rbind(df, c(exp_line, trans_effect, pres_psg, length(union_muts), length(intersect_muts), af_ave, tryCatch({var(delta_afs)}, error = function(e){NA}), Ne))
+        }
+    }
+    
+}
+
+
+
+df %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "intersect_count", "average_allele_freq", "var_freq_change", "Ne")) %>%
+        mutate(
+            psg = as.numeric(psg),
+            var_freq_change = as.numeric(var_freq_change),
+            union_count = as.integer(union_count),
+            intersect_count = as.integer(intersect_count),
+            Ne = as.numeric(Ne))
+
+
+
+# save data on disk
+
+# save(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size.RData")
+
+
+
+load("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size.RData")
+
+
+
+
+# plot Ne
+fig <- df[df$effect_simplified == "S",] %>% ggplot(aes(x = psg, y = log2(Ne))) +
+        facet_wrap(~ exp_line) +
+        geom_line() +
+        geom_smooth(method = "loess", se = FALSE) +
+        labs(x= "\n Transfer", y = "Log2(Ne) \n", title = "Variance Effective Population Size \n") + # Label for the legend
+        theme_minimal() + # Optional: use a minimal theme
+        theme(
+            plot.title = element_text(size = 30, hjust = 0.5),
+            strip.text = element_text(size = 25),
+            axis.title = element_text(size = 25),
+            axis.text.x = element_text(size = 20, angle = 90),
+            axis.text.y = element_text(size = 20),
+            legend.title = element_text(size=20),
+            legend.text = element_text(size = 15)) 
+
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "variance_ne.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+# ave Ne per line
+
+df[df$effect_simplified == "S",] %>% group_by(exp_line) %>%
+        summarise(mean = mean(Ne))
+
+
+# plot variance in allele freq change
+df[df$effect_simplified != "ALL",] %>% ggplot(aes(x = psg, y = log2(var_freq_change), color = effect_simplified)) +
+        facet_wrap(~ exp_line) +
+        geom_line() +
+        geom_smooth(method = "loess", se = FALSE)
+
+# plot proportion of mutation retention
+df[df$effect_simplified != "ALL",] %>% ggplot(aes(x = psg, y = intersect_count/union_count, color = effect_simplified)) +
+        facet_wrap(~ exp_line) +
+        geom_line() +
+        geom_smooth(method = "loess", se = FALSE)
+
+
+df[df$psg == 130 & df$effect_simplified == "S",]
+
 
 
 ```

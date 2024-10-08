@@ -74,7 +74,7 @@ variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
 # facors
 
 host_factor <- c("MT2", "MT4")
-c <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 translational_impacts <- c("U", "S", "N")
 gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
@@ -168,7 +168,7 @@ df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance"
 
 ```{r visualization1: time-to-fixation}
 # density of time_to_fixation distributions
-fig <- df %>% ggplot(aes(x = time_to_fixation, color = exp_line, lty = effect_simplified)) +
+fig <- df %>% ggplot(aes(x = time_to_fixation, color = exp_line)) +
                     facet_wrap(~exp_line, ncol = 2) +
                     geom_density() +
                     scale_color_manual(labels = line_labels, values = line_palette)
@@ -201,6 +201,8 @@ fig2 <- ggboxplot(df, x = "effect_simplified", y = "time_to_fixation", color = "
     stat_pvalue_manual(pwc, hide.ns = TRUE) 
 
 
+fig2
+
 # perform pairwise t-test between exp line groups per translation impact
 pwc <- df %>%
     group_by(effect_simplified) %>%
@@ -217,6 +219,7 @@ fig3 <- ggboxplot(df, x = "exp_line", y = "time_to_fixation", color = "exp_line"
     scale_y_continuous(breaks = seq(0,max(df$time_to_fixation)+step,step)) +
     stat_pvalue_manual(pwc, hide.ns = TRUE) 
 
+fig3
 
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
@@ -278,6 +281,7 @@ fig <- ggplot(df_summary, aes(x = effect_simplified, y = n, fill = bin)) +
         legend.title = element_text(size=20),
         legend.text = element_text(size = 15))
 
+fig
 
 
 ```
@@ -316,9 +320,6 @@ pdf(file = paste0(fig_dir, "time_to_fixation_case.pdf"), height = 14, width = 14
 fig
 dev.off()
 
-head(df)
-mean(df$time_to_fixation[str_detect(df$mut_info, pattern = "7854_A_G")])
-
 
 ```
 
@@ -356,7 +357,7 @@ line <- "MT-2_2"
 lm(df_summary$Mean[df_summary$effect_simplified == "U" & df_summary$exp_line == line] ~ df_summary$appearance[df_summary$effect_simplified == "U" & df_summary$exp_line == line])
 
 # visualize time to fixation summary
-fig <- df_summary[df_summary$effect_simplified == "N",] %>% ggplot(aes(x = appearance, y = Mean, group = exp_line, color = exp_line)) +
+fig <- df_summary[df_summary$effect_simplified == "S",] %>% ggplot(aes(x = appearance, y = Mean, group = exp_line, color = exp_line)) +
     geom_line() +
     geom_point(aes(size = n)) +
     facet_wrap(~exp_line, ncol = 1) +

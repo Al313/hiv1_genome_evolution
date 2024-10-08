@@ -1,0 +1,136 @@
+
+```{r}
+
+# Parameters
+population_size <- 100  # Population size (number of diploid individuals)
+generations <- 10  # Number of generations to simulate
+initial_allele_freq <- 0.5  # Initial allele frequency of one allele (e.g., A)
+num_alleles <- 2  # Since it's a diploid organism, each individual has 2 alleles
+
+# Initialize a vector to store allele frequencies over generations
+allele_freq <- numeric(generations + 1)
+allele_freq[1] <- initial_allele_freq  # Set the initial allele frequency
+
+# Function to simulate one generation of genetic drift
+simulate_generation <- function(current_freq, pop_size, num_alleles) {
+  # Calculate the number of copies of the allele in the population (2*pop_size alleles)
+  num_alleles_A <- rbinom(1, 2 * pop_size, current_freq)
+  
+  # Calculate new allele frequency
+  new_freq <- num_alleles_A / (2 * pop_size)
+  
+  return(new_freq)
+}
+
+# Simulate genetic drift over multiple generations
+for (gen in 2:(generations + 1)) {
+  allele_freq[gen] <- simulate_generation(allele_freq[gen - 1], population_size, num_alleles)
+}
+
+# Plot the results
+plot(0:generations, allele_freq, type = "b", xlab = "Generation", ylab = "Allele Frequency",
+     main = "Genetic Drift in a Diploid HIV-1 Population",
+     col = "blue", pch = 16)
+abline(h = 0, col = "red", lty = 2)
+abline(h = 1, col = "red", lty = 2)
+
+```
+
+```{r}
+
+
+options(scipen = 999)
+
+set.seed(123)  # for reproducibility
+
+
+# Function to simulate allele frequency change in neutral populations
+simulate_af_change <- function(N, n_gen_per_transfer, no_transfer) {
+  # Initialize variables
+  generation_threshold <- n_gen_per_transfer*no_transfer
+  r0 <- (2000)^(1/n_gen_per_transfer)
+  allele_freq <- runif(1, min = 0, max = 1)  # Initial frequency of the neutral mutation (1 copy in the population)
+  allele_freq_init <- allele_freq
+  generation <- 0
+  N_init <- N
+  
+  # Run simulation until fixation (allele frequency = 1)
+  while (generation < generation_threshold) {
+    # Simulate genetic drift in a Wright-Fisher model
+    num_copies <- rbinom(1, 2 * N, allele_freq)  # Randomly choose new number of copies
+    allele_freq <- num_copies / (2 * N)  # Update allele frequency
+    generation <- generation + 1
+    if (generation%%n_gen_per_transfer==0){
+        N_transfer <- N_init*(r0^n_gen_per_transfer)
+        num_copies_transfer <- round(allele_freq*2*N_transfer)
+        alleles <- sample(c(rep(1, num_copies_transfer), rep(0, 2*N_transfer-num_copies_transfer)), 2*round(0.0005*N_transfer))
+        N <- round(length(alleles)/2)
+        allele_freq <- sum(alleles == 1)/(N*2)
+    } else {
+        N <- round(N_init*r0^(generation%%n_gen_per_transfer))
+    }
+  } 
+  
+  return(c(allele_freq_init, allele_freq))
+}
+
+
+get_nev <- function(af_ave, delta_af, generation_threshold){
+        return(1/(2*(1-(1-(var(delta_af)/(af_ave*(1-af_ave))))^(1/2*generation_threshold)))
+    )
+}
+
+
+ne_gen <- function(N, n_gen_per_transfer, no_transfer){
+    
+    # for 100 loci
+    p <- replicate(100, simulate_af_change(N, n_gen_per_transfer, no_transfer))
+
+    pp <- as.data.frame(t(p))
+
+    colnames(pp) <- c("init", "fin")
+
+    af_ave <- sum(pp$init)/nrow(pp)
+
+    delta_af <- pp$fin - pp$init
+    generation_threshold <- n_gen_per_transfer*no_transfer
+
+    Ne <- get_nev(af_ave, delta_af, generation_threshold)
+
+    return(Ne)
+}
+
+
+# run simulations
+
+library(parallel)
+num_cores <- detectCores() - 1
+
+
+
+N <- 1000
+n_gen_per_transfer <- 2
+no_transfer <- 10
+
+
+# for 100 iterations
+result2 <- mclapply(1:100, function(i) {
+  # Example code that would run in parallel
+  print(paste("Iteration:", i))
+  ne_gen(N, n_gen_per_transfer, no_transfer) # Generating a random number as an example task
+}, mc.cores = num_cores)
+
+
+jjx <- as.numeric(resultx)
+
+j <- replicate(100, ne_gen(N, n_gen_per_transfer, no_transfer))
+
+
+
+plot(density(10*jj2))
+
+plot(density(10*jj3))
+
+
+
+```
