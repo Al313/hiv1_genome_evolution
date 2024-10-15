@@ -2,115 +2,85 @@ Building DAG of jobs...
 Using shell: /usr/bin/bash
 Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
-Select jobs to execute...
-Building DAG of jobs...
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
+Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Tue Oct 15 13:07:27 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/15
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_15_multiqc_report.html
+[Tue Oct 15 15:36:45 2024]
+rule extract_annotation:
+    input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_15_multiqc_report.html
-    wildcards: experiment=iii, line=15
-    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz
+    resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
 
-[Tue Oct 15 13:07:27 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/16
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_16_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_16_multiqc_report.html
-    wildcards: experiment=iii, line=16
-    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+   *****       ***   vcfR   ***       *****
+   This is vcfR 1.14.0 
+     browseVignettes('vcfR') # Documentation
+     citation('vcfR') # Citation
+   *****       *****      *****       *****
 
+Warning message:
+package ‘vcfR’ was built under R version 4.2.3 
 
-  /// MultiQC 🔍 | v1.21
+Attaching package: ‘dplyr’
 
-|           multiqc | MultiQC Version v1.25.1 now available!
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/16
-Building DAG of jobs...
-Building DAG of jobs...
-Using shell: /usr/bin/bash
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
-Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
-Select jobs to execute...
-Select jobs to execute...
+The following objects are masked from ‘package:stats’:
 
+    filter, lag
 
-[Tue Oct 15 13:07:33 2024]
-[Tue Oct 15 13:07:33 2024]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/14
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_14_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_14_multiqc_report.html
-    wildcards: experiment=iii, line=14
-    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/13
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_13_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_13_multiqc_report.html
-    wildcards: experiment=iii, line=13
-    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+The following objects are masked from ‘package:base’:
 
+    intersect, setdiff, setequal, union
 
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 248/248  
+Warning message:
+package ‘dplyr’ was built under R version 4.2.3 
+Warning message:
+package ‘stringr’ was built under R version 4.2.3 
+Loading required package: BiocGenerics
 
-  /// MultiQC 🔍 | v1.21
+Attaching package: ‘BiocGenerics’
 
-|           multiqc | MultiQC Version v1.25.1 now available!
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/15
-|            fastqc | Found 124 reports
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
+The following objects are masked from ‘package:stats’:
 
-  /// MultiQC 🔍 | v1.21
+    IQR, mad, sd, var, xtabs
 
+The following objects are masked from ‘package:base’:
 
-  /// MultiQC 🔍 | v1.21
+    anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+    colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+    get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+    Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which.max, which.min
 
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC Version v1.25.1 now available!
-|           multiqc | MultiQC Version v1.25.1 now available!
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/13
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/14
-[Tue Oct 15 13:07:39 2024]
-Finished job 0.
-1 of 1 steps (100%) done
-|            fastqc | Found 126 reports
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | MultiQC complete
-[Tue Oct 15 13:07:45 2024]
-Finished job 0.
-1 of 1 steps (100%) done
-|            fastqc | Found 126 reports
-|            fastqc | Found 126 reports
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-[Tue Oct 15 13:07:50 2024]
-[Tue Oct 15 13:07:50 2024]
-Finished job 0.
-1 of 1 steps (100%) done
+Loading required package: S4Vectors
+Loading required package: stats4
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:base’:
+
+    expand.grid, I, unname
+
+Loading required package: IRanges
+Loading required package: XVector
+Loading required package: GenomeInfoDb
+
+Attaching package: ‘Biostrings’
+
+The following object is masked from ‘package:base’:
+
+    strsplit
+
+Warning messages:
+1: package ‘Biostrings’ was built under R version 4.2.3 
+2: package ‘S4Vectors’ was built under R version 4.2.3 
+3: package ‘IRanges’ was built under R version 4.2.3 
+4: package ‘XVector’ was built under R version 4.2.3 
+5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
+Warning message:
+package ‘stringr’ was built under R version 4.2.3 
+[Tue Oct 15 16:31:22 2024]
 Finished job 0.
 1 of 1 steps (100%) done
