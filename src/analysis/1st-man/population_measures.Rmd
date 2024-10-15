@@ -364,7 +364,6 @@ result <- data_sub %>%
     summarise(MOI = ifelse(n() > 1, logarithmic_mean(MOI), unique(MOI)), .groups = 'drop')
 
 
-result[result$lines == "MT-2_1" & result$passage == 300,]
 
 # fit linear models for each group and extract p-values
 model_A <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[1], ])
@@ -497,7 +496,7 @@ moi__fig <- result %>% ggplot(aes(x = passage, y = log10(value), color = exp_lin
                 geom_line(aes(linetype=host)) +
                 geom_point() +
                 #ylim(c(1000000,40000000)) +
-                labs(title = "moi") +
+                labs(title = "moi on different lines") +
                 geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
                 hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
                 scale_color_manual(values = line_col_palette) +

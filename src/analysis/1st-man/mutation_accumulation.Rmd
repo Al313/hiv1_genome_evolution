@@ -117,7 +117,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r text numbers}
 
 # set parameters
-category <- "Fixed"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -135,7 +135,7 @@ if (category == "Sporadic"){
 
 # get numbers for in-text reporting
 variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & allele_freq < max_threshold & mut_type != "P") #& mut_type == "P"
+                                filter(allele_freq >= min_threshold & allele_freq < max_threshold & mut_type == "P") #& mut_type == "P"
 head(variants_expiii)
 table(variants_expiii$host_line)
 
@@ -148,6 +148,86 @@ e <- length(intersect(unique(variants_expiii_subset$mut_info[variants_expiii_sub
 
 ```
 
+```{r}
+
+# plot number of unique positions that have been mutated (minority) 
+
+
+variants_expiii_subset <- variants_expiii %>%
+                                filter(allele_freq >= min_threshold & allele_freq < max_threshold)
+
+# get the number 
+bb <- length(unique(variants_expiii_subset$genomic_pos))
+
+# prepare dataset
+variants_expiii_subset2 <- variants_expiii_subset
+variants_expiii_subset2$exp_line <- "All"
+
+variants_expiii_subset_pooled <- rbind(variants_expiii_subset, variants_expiii_subset2)
+variants_expiii_subset_pooled$passage <- as.integer(as.character(variants_expiii_subset_pooled$passage))
+
+
+counts <- data.frame()
+for (psg in seq(10,570,10)){
+    d <- variants_expiii_subset_pooled[variants_expiii_subset_pooled$passage <= psg,]
+    dd <- d %>% select(genomic_pos, exp_line) %>% distinct() %>% group_by(exp_line) %>% summarise(count = n())
+    dd$passage <- psg
+    counts <- rbind(counts, dd)
+}
+
+
+fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        labs(x="\nTransfer", y= "Position Count\n", color = "Virus Line", title = paste0("Cumulative Number of Uniquely Mutated Positions (", category,")"))+
+        scale_x_continuous(breaks = seq(0,570,50)) +
+        scale_y_continuous(limits = c(0,max(counts$count)+20),breaks = seq(0,max(counts$count)+20,200)) +
+        scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+
+## simulation of random sampling
+
+# ss <- seq(1,200)
+
+# i <- 0
+# pp <- c()
+# ll <- c()
+# while (i <= 100){
+#     i <- i +1
+#     p <- sample(ss,5)
+
+#     pp <- unique(append(pp,p))
+
+#     l <- length(pp)
+
+#     ll <- append(ll, l)
+# }
+
+# plot(ll, type="o", col="blue", xlab="Iterations", ylab="Number of Unique Elements", 
+#      main="Growth of Unique Samples Over Iterations")
+
+
+# dff <- data.frame(x = seq(1:101), y = ll)
+
+# dff %>% ggplot(aes(x = x, y = y)) +
+#     geom_line()
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_cumulative_mutated_pos.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
 
 ```{r visualization1: Accumulation plot}
 
@@ -247,7 +327,7 @@ dev.off()
 # prepare data for visualization
 variants_expiii_subset <- variants_expiii %>%
             filter(allele_freq >= min_threshold & allele_freq < max_threshold)
-str(variants_expiii_subset)
+
 
 
 for (line in line_labels){
@@ -258,6 +338,10 @@ for (line in line_labels){
 }
 
 variants_expiii_subset$appearance <- factor(variants_expiii_subset$appearance, levels = seq(10,570,10))
+
+variants_expiii_subset2 <- variants_expiii_subset
+variants_expiii_subset2$exp_line <- "All"
+variants_expiii_subset <- rbind(variants_expiii_subset, variants_expiii_subset2)
 
 # prepare data for visualization
 counts <- variants_expiii_subset %>%
@@ -282,7 +366,7 @@ fig <- counts %>%  ggplot(aes(x=appearance, y = mut_count, color = exp_line)) +
         labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0("Appearance of Unique ", category, " Mutations"))+
         scale_x_continuous(breaks = seq(0,570,50)) +
         scale_y_continuous(limits = c(0,max(counts$mut_count)+step),breaks = seq(0,max(counts$mut_count)+step,step)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
+        scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
         theme_bw() +
         theme(plot.title = element_text(size = 30, hjust = 0.5),
         axis.title = element_text(size = 25),
