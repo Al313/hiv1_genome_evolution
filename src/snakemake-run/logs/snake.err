@@ -4,15 +4,113 @@ Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
 Select jobs to execute...
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
+Select jobs to execute...
 
-[Wed Jul 31 12:48:23 2024]
-rule tree_inference_50th:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta
-    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
+[Tue Oct 15 13:07:27 2024]
+rule collect_sequencing_quality:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/15
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_15_multiqc_report.html
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_15_multiqc_report.html
+    wildcards: experiment=iii, line=15
     resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-[Wed Jul 31 12:48:30 2024]
+
+[Tue Oct 15 13:07:27 2024]
+rule collect_sequencing_quality:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/16
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_16_multiqc_report.html
+    jobid: 0
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_16_multiqc_report.html
+    wildcards: experiment=iii, line=16
+    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+
+
+  /// MultiQC 🔍 | v1.21
+
+|           multiqc | MultiQC Version v1.25.1 now available!
+|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/16
+Building DAG of jobs...
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Rules claiming more threads will be scaled down.
+Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
+Provided resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954
+Select jobs to execute...
+Select jobs to execute...
+
+
+[Tue Oct 15 13:07:33 2024]
+[Tue Oct 15 13:07:33 2024]
+rule collect_sequencing_quality:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/14
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_14_multiqc_report.html
+    jobid: 0
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_14_multiqc_report.html
+    wildcards: experiment=iii, line=14
+    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+rule collect_sequencing_quality:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/13
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_13_multiqc_report.html
+    jobid: 0
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_13_multiqc_report.html
+    wildcards: experiment=iii, line=13
+    resources: mem_mb=10000, mem_mib=9537, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+
+
+|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 248/248  
+
+  /// MultiQC 🔍 | v1.21
+
+|           multiqc | MultiQC Version v1.25.1 now available!
+|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/15
+|            fastqc | Found 124 reports
+|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
+|           multiqc | Report      : multiqc/multiqc_report.html
+|           multiqc | Data        : multiqc/multiqc_data
+
+  /// MultiQC 🔍 | v1.21
+
+
+  /// MultiQC 🔍 | v1.21
+
+|           multiqc | MultiQC complete
+|           multiqc | MultiQC Version v1.25.1 now available!
+|           multiqc | MultiQC Version v1.25.1 now available!
+|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/13
+|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/14
+[Tue Oct 15 13:07:39 2024]
+Finished job 0.
+1 of 1 steps (100%) done
+|            fastqc | Found 126 reports
+|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
+|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 252/252  
+|           multiqc | Report      : multiqc/multiqc_report.html
+|           multiqc | Data        : multiqc/multiqc_data
+|           multiqc | MultiQC complete
+[Tue Oct 15 13:07:45 2024]
+Finished job 0.
+1 of 1 steps (100%) done
+|            fastqc | Found 126 reports
+|            fastqc | Found 126 reports
+|           multiqc | Report      : multiqc/multiqc_report.html
+|           multiqc | Data        : multiqc/multiqc_data
+|           multiqc | Report      : multiqc/multiqc_report.html
+|           multiqc | Data        : multiqc/multiqc_data
+|           multiqc | MultiQC complete
+|           multiqc | MultiQC complete
+[Tue Oct 15 13:07:50 2024]
+[Tue Oct 15 13:07:50 2024]
+Finished job 0.
+1 of 1 steps (100%) done
 Finished job 0.
 1 of 1 steps (100%) done
