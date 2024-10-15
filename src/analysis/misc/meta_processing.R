@@ -6,19 +6,19 @@ library(dplyr)
 library(stringr)
 
 # set variables to process relevant metadata
-arrival_date <- "03062024"
-ngs_sample_list_version <- "448"
+arrival_date <- "14102024"
+ngs_sample_list_version <- "461"
 
 # read in the relevant metadata
-ngs_sample_list_new <- read.csv(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/incoming-raw-data/", arrival_date, "/NGS_samples_list_all_runs_NGS_R1R2_v", ngs_sample_list_version, "_030624.csv"), sep = ",", header = T, stringsAsFactors = F)
+ngs_sample_list_new <- read.csv(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/incoming-raw-data/", arrival_date, "/NGS_samples_list_all_runs_NGS_R1R2_v", ngs_sample_list_version, "_141024.csv"), sep = ";", header = T, stringsAsFactors = F)
 ngs_sample_list_new[is.na(ngs_sample_list_new)] <- "NA"
-tail(ngs_sample_list_new, n = 10)
+tail(ngs_sample_list_new$forward_name, n = 10)
 
 
 # filter for relevant samples
 
 # this gives all the samples sequenced in that sequencing batch; i.e., both newly sequenced samples and repeats
-ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = "VPIII_17_20_p520_570"),]
+ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = "VPIII13_16_p580_630"),]
 
 # to get only newly sequenced samples
 # ngs_sample_list_new <- ngs_sample_list_new[ngs_sample_list_new$Set %in% paste("VP III ", seq(520,570,by=10), sep = ""),]
@@ -109,10 +109,13 @@ ngs_sample_list_old <- ngs_sample_list_old[ngs_sample_list_old$virus_line_no != 
 ngs_sample_list_old <- ngs_sample_list_old[ngs_sample_list_old$virus_line_no != 19 | ngs_sample_list_old$transfer_no != 280,]
 
 
+### for 14102024
 
+ngs_sample_list_old <- ngs_sample_list_old[ngs_sample_list_old$virus_line_no != 14 | ngs_sample_list_old$transfer_no != 570,]
+ngs_sample_list_old <- ngs_sample_list_old[ngs_sample_list_old$virus_line_no != 15 | ngs_sample_list_old$transfer_no != 500,]
 
-
-
+nrow(ngs_sample_list_updated)
+ngs_sample_list_updated <- rbind(ngs_sample_list_old, ngs_sample_list_new)
 
 
 # prepare the dataframe for saving
@@ -126,8 +129,10 @@ ngs_sample_list_updated <-  ngs_sample_list_updated[with(ngs_sample_list_updated
 
 # move the previous version of the metadata to the archived folder
 
+version <- "v2"
+
 file.rename(from = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv",
-          to   = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/archived/NGS_samples_list_processed_v1.csv")
+          to   = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/archived/NGS_samples_list_processed_",version,".csv"))
 
 
 

@@ -67,7 +67,7 @@ quals_gathered$average_depth <- log10(quals_gathered$average_depth)
 coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,group=full_sample_name))+
     geom_line(linetype="dashed", color="blue", linewidth=1.2) +
     geom_point(color="red", size=3) +
-    geom_text(data=subset(quals_gathered, cover_all == "False" & average_depth <= log10(200)),
+    geom_text(data=subset(quals_gathered, cover_all == "False" & average_depth <= log10(600)),
     aes(x=amplicon,y=average_depth,label=full_sample_name),size = 6) +
     labs(title = "Coverage Check!\n", x = "\nAmplicons", y = "Average Sequencing Depth (log10)\n") +
     scale_x_discrete(labels = c("Amp-A (5utr)", "Amp_A","Amp_B","Amp_C","Amp_D","Amp_E", "Amp-E (3utr)")) +
