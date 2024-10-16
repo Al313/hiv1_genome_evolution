@@ -1,18 +1,1118 @@
-[1] "Remote HPC Connection!"
-Scanning file to determine attributes.
-File attributes:
-  meta lines: 12
-  header_line: 13
-  variant count: 2634906
-  column count: 9
-Meta line 12 read in.
-All meta lines processed.
-gt matrix initialized.
-Character matrix gt created.
-  Character matrix gt rows: 2634906
-  Character matrix gt cols: 9
-  skip: 0
-  nrows: 2634906
-  row_num: 0
-Processed variant 1000Processed variant 2000Processed variant 3000Processed variant 4000Processed variant 5000Processed variant 6000Processed variant 7000Processed variant 8000Processed variant 9000Processed variant 10000Processed variant 11000Processed variant 12000Processed variant 13000Processed variant 14000Processed variant 15000Processed variant 16000Processed variant 17000Processed variant 18000Processed variant 19000Processed variant 20000Processed variant 21000Processed variant 22000Processed variant 23000Processed variant 24000Processed variant 25000Processed variant 26000Processed variant 27000Processed variant 28000Processed variant 29000Processed variant 30000Processed variant 31000Processed variant 32000Processed variant 33000Processed variant 34000Processed variant 35000Processed variant 36000Processed variant 37000Processed variant 38000Processed variant 39000Processed variant 40000Processed variant 41000Processed variant 42000Processed variant 43000Processed variant 44000Processed variant 45000Processed variant 46000Processed variant 47000Processed variant 48000Processed variant 49000Processed variant 50000Processed variant 51000Processed variant 52000Processed variant 53000Processed variant 54000Processed variant 55000Processed variant 56000Processed variant 57000Processed variant 58000Processed variant 59000Processed variant 60000Processed variant 61000Processed variant 62000Processed variant 63000Processed variant 64000Processed variant 65000Processed variant 66000Processed variant 67000Processed variant 68000Processed variant 69000Processed variant 70000Processed variant 71000Processed variant 72000Processed variant 73000Processed variant 74000Processed variant 75000Processed variant 76000Processed variant 77000Processed variant 78000Processed variant 79000Processed variant 80000Processed variant 81000Processed variant 82000Processed variant 83000Processed variant 84000Processed variant 85000Processed variant 86000Processed variant 87000Processed variant 88000Processed variant 89000Processed variant 90000Processed variant 91000Processed variant 92000Processed variant 93000Processed variant 94000Processed variant 95000Processed variant 96000Processed variant 97000Processed variant 98000Processed variant 99000Processed variant 100000Processed variant 101000Processed variant 102000Processed variant 103000Processed variant 104000Processed variant 105000Processed variant 106000Processed variant 107000Processed variant 108000Processed variant 109000Processed variant 110000Processed variant 111000Processed variant 112000Processed variant 113000Processed variant 114000Processed variant 115000Processed variant 116000Processed variant 117000Processed variant 118000Processed variant 119000Processed variant 120000Processed variant 121000Processed variant 122000Processed variant 123000Processed variant 124000Processed variant 125000Processed variant 126000Processed variant 127000Processed variant 128000Processed variant 129000Processed variant 130000Processed variant 131000Processed variant 132000Processed variant 133000Processed variant 134000Processed variant 135000Processed variant 136000Processed variant 137000Processed variant 138000Processed variant 139000Processed variant 140000Processed variant 141000Processed variant 142000Processed variant 143000Processed variant 144000Processed variant 145000Processed variant 146000Processed variant 147000Processed variant 148000Processed variant 149000Processed variant 150000Processed variant 151000Processed variant 152000Processed variant 153000Processed variant 154000Processed variant 155000Processed variant 156000Processed variant 157000Processed variant 158000Processed variant 159000Processed variant 160000Processed variant 161000Processed variant 162000Processed variant 163000Processed variant 164000Processed variant 165000Processed variant 166000Processed variant 167000Processed variant 168000Processed variant 169000Processed variant 170000Processed variant 171000Processed variant 172000Processed variant 173000Processed variant 174000Processed variant 175000Processed variant 176000Processed variant 177000Processed variant 178000Processed variant 179000Processed variant 180000Processed variant 181000Processed variant 182000Processed variant 183000Processed variant 184000Processed variant 185000Processed variant 186000Processed variant 187000Processed variant 188000Processed variant 189000Processed variant 190000Processed variant 191000Processed variant 192000Processed variant 193000Processed variant 194000Processed variant 195000Processed variant 196000Processed variant 197000Processed variant 198000Processed variant 199000Processed variant 200000Processed variant 201000Processed variant 202000Processed variant 203000Processed variant 204000Processed variant 205000Processed variant 206000Processed variant 207000Processed variant 208000Processed variant 209000Processed variant 210000Processed variant 211000Processed variant 212000Processed variant 213000Processed variant 214000Processed variant 215000Processed variant 216000Processed variant 217000Processed variant 218000Processed variant 219000Processed variant 220000Processed variant 221000Processed variant 222000Processed variant 223000Processed variant 224000Processed variant 225000Processed variant 226000Processed variant 227000Processed variant 228000Processed variant 229000Processed variant 230000Processed variant 231000Processed variant 232000Processed variant 233000Processed variant 234000Processed variant 235000Processed variant 236000Processed variant 237000Processed variant 238000Processed variant 239000Processed variant 240000Processed variant 241000Processed variant 242000Processed variant 243000Processed variant 244000Processed variant 245000Processed variant 246000Processed variant 247000Processed variant 248000Processed variant 249000Processed variant 250000Processed variant 251000Processed variant 252000Processed variant 253000Processed variant 254000Processed variant 255000Processed variant 256000Processed variant 257000Processed variant 258000Processed variant 259000Processed variant 260000Processed variant 261000Processed variant 262000Processed variant 263000Processed variant 264000Processed variant 265000Processed variant 266000Processed variant 267000Processed variant 268000Processed variant 269000Processed variant 270000Processed variant 271000Processed variant 272000Processed variant 273000Processed variant 274000Processed variant 275000Processed variant 276000Processed variant 277000Processed variant 278000Processed variant 279000Processed variant 280000Processed variant 281000Processed variant 282000Processed variant 283000Processed variant 284000Processed variant 285000Processed variant 286000Processed variant 287000Processed variant 288000Processed variant 289000Processed variant 290000Processed variant 291000Processed variant 292000Processed variant 293000Processed variant 294000Processed variant 295000Processed variant 296000Processed variant 297000Processed variant 298000Processed variant 299000Processed variant 300000Processed variant 301000Processed variant 302000Processed variant 303000Processed variant 304000Processed variant 305000Processed variant 306000Processed variant 307000Processed variant 308000Processed variant 309000Processed variant 310000Processed variant 311000Processed variant 312000Processed variant 313000Processed variant 314000Processed variant 315000Processed variant 316000Processed variant 317000Processed variant 318000Processed variant 319000Processed variant 320000Processed variant 321000Processed variant 322000Processed variant 323000Processed variant 324000Processed variant 325000Processed variant 326000Processed variant 327000Processed variant 328000Processed variant 329000Processed variant 330000Processed variant 331000Processed variant 332000Processed variant 333000Processed variant 334000Processed variant 335000Processed variant 336000Processed variant 337000Processed variant 338000Processed variant 339000Processed variant 340000Processed variant 341000Processed variant 342000Processed variant 343000Processed variant 344000Processed variant 345000Processed variant 346000Processed variant 347000Processed variant 348000Processed variant 349000Processed variant 350000Processed variant 351000Processed variant 352000Processed variant 353000Processed variant 354000Processed variant 355000Processed variant 356000Processed variant 357000Processed variant 358000Processed variant 359000Processed variant 360000Processed variant 361000Processed variant 362000Processed variant 363000Processed variant 364000Processed variant 365000Processed variant 366000Processed variant 367000Processed variant 368000Processed variant 369000Processed variant 370000Processed variant 371000Processed variant 372000Processed variant 373000Processed variant 374000Processed variant 375000Processed variant 376000Processed variant 377000Processed variant 378000Processed variant 379000Processed variant 380000Processed variant 381000Processed variant 382000Processed variant 383000Processed variant 384000Processed variant 385000Processed variant 386000Processed variant 387000Processed variant 388000Processed variant 389000Processed variant 390000Processed variant 391000Processed variant 392000Processed variant 393000Processed variant 394000Processed variant 395000Processed variant 396000Processed variant 397000Processed variant 398000Processed variant 399000Processed variant 400000Processed variant 401000Processed variant 402000Processed variant 403000Processed variant 404000Processed variant 405000Processed variant 406000Processed variant 407000Processed variant 408000Processed variant 409000Processed variant 410000Processed variant 411000Processed variant 412000Processed variant 413000Processed variant 414000Processed variant 415000Processed variant 416000Processed variant 417000Processed variant 418000Processed variant 419000Processed variant 420000Processed variant 421000Processed variant 422000Processed variant 423000Processed variant 424000Processed variant 425000Processed variant 426000Processed variant 427000Processed variant 428000Processed variant 429000Processed variant 430000Processed variant 431000Processed variant 432000Processed variant 433000Processed variant 434000Processed variant 435000Processed variant 436000Processed variant 437000Processed variant 438000Processed variant 439000Processed variant 440000Processed variant 441000Processed variant 442000Processed variant 443000Processed variant 444000Processed variant 445000Processed variant 446000Processed variant 447000Processed variant 448000Processed variant 449000Processed variant 450000Processed variant 451000Processed variant 452000Processed variant 453000Processed variant 454000Processed variant 455000Processed variant 456000Processed variant 457000Processed variant 458000Processed variant 459000Processed variant 460000Processed variant 461000Processed variant 462000Processed variant 463000Processed variant 464000Processed variant 465000Processed variant 466000Processed variant 467000Processed variant 468000Processed variant 469000Processed variant 470000Processed variant 471000Processed variant 472000Processed variant 473000Processed variant 474000Processed variant 475000Processed variant 476000Processed variant 477000Processed variant 478000Processed variant 479000Processed variant 480000Processed variant 481000Processed variant 482000Processed variant 483000Processed variant 484000Processed variant 485000Processed variant 486000Processed variant 487000Processed variant 488000Processed variant 489000Processed variant 490000Processed variant 491000Processed variant 492000Processed variant 493000Processed variant 494000Processed variant 495000Processed variant 496000Processed variant 497000Processed variant 498000Processed variant 499000Processed variant 500000Processed variant 501000Processed variant 502000Processed variant 503000Processed variant 504000Processed variant 505000Processed variant 506000Processed variant 507000Processed variant 508000Processed variant 509000Processed variant 510000Processed variant 511000Processed variant 512000Processed variant 513000Processed variant 514000Processed variant 515000Processed variant 516000Processed variant 517000Processed variant 518000Processed variant 519000Processed variant 520000Processed variant 521000Processed variant 522000Processed variant 523000Processed variant 524000Processed variant 525000Processed variant 526000Processed variant 527000Processed variant 528000Processed variant 529000Processed variant 530000Processed variant 531000Processed variant 532000Processed variant 533000Processed variant 534000Processed variant 535000Processed variant 536000Processed variant 537000Processed variant 538000Processed variant 539000Processed variant 540000Processed variant 541000Processed variant 542000Processed variant 543000Processed variant 544000Processed variant 545000Processed variant 546000Processed variant 547000Processed variant 548000Processed variant 549000Processed variant 550000Processed variant 551000Processed variant 552000Processed variant 553000Processed variant 554000Processed variant 555000Processed variant 556000Processed variant 557000Processed variant 558000Processed variant 559000Processed variant 560000Processed variant 561000Processed variant 562000Processed variant 563000Processed variant 564000Processed variant 565000Processed variant 566000Processed variant 567000Processed variant 568000Processed variant 569000Processed variant 570000Processed variant 571000Processed variant 572000Processed variant 573000Processed variant 574000Processed variant 575000Processed variant 576000Processed variant 577000Processed variant 578000Processed variant 579000Processed variant 580000Processed variant 581000Processed variant 582000Processed variant 583000Processed variant 584000Processed variant 585000Processed variant 586000Processed variant 587000Processed variant 588000Processed variant 589000Processed variant 590000Processed variant 591000Processed variant 592000Processed variant 593000Processed variant 594000Processed variant 595000Processed variant 596000Processed variant 597000Processed variant 598000Processed variant 599000Processed variant 600000Processed variant 601000Processed variant 602000Processed variant 603000Processed variant 604000Processed variant 605000Processed variant 606000Processed variant 607000Processed variant 608000Processed variant 609000Processed variant 610000Processed variant 611000Processed variant 612000Processed variant 613000Processed variant 614000Processed variant 615000Processed variant 616000Processed variant 617000Processed variant 618000Processed variant 619000Processed variant 620000Processed variant 621000Processed variant 622000Processed variant 623000Processed variant 624000Processed variant 625000Processed variant 626000Processed variant 627000Processed variant 628000Processed variant 629000Processed variant 630000Processed variant 631000Processed variant 632000Processed variant 633000Processed variant 634000Processed variant 635000Processed variant 636000Processed variant 637000Processed variant 638000Processed variant 639000Processed variant 640000Processed variant 641000Processed variant 642000Processed variant 643000Processed variant 644000Processed variant 645000Processed variant 646000Processed variant 647000Processed variant 648000Processed variant 649000Processed variant 650000Processed variant 651000Processed variant 652000Processed variant 653000Processed variant 654000Processed variant 655000Processed variant 656000Processed variant 657000Processed variant 658000Processed variant 659000Processed variant 660000Processed variant 661000Processed variant 662000Processed variant 663000Processed variant 664000Processed variant 665000Processed variant 666000Processed variant 667000Processed variant 668000Processed variant 669000Processed variant 670000Processed variant 671000Processed variant 672000Processed variant 673000Processed variant 674000Processed variant 675000Processed variant 676000Processed variant 677000Processed variant 678000Processed variant 679000Processed variant 680000Processed variant 681000Processed variant 682000Processed variant 683000Processed variant 684000Processed variant 685000Processed variant 686000Processed variant 687000Processed variant 688000Processed variant 689000Processed variant 690000Processed variant 691000Processed variant 692000Processed variant 693000Processed variant 694000Processed variant 695000Processed variant 696000Processed variant 697000Processed variant 698000Processed variant 699000Processed variant 700000Processed variant 701000Processed variant 702000Processed variant 703000Processed variant 704000Processed variant 705000Processed variant 706000Processed variant 707000Processed variant 708000Processed variant 709000Processed variant 710000Processed variant 711000Processed variant 712000Processed variant 713000Processed variant 714000Processed variant 715000Processed variant 716000Processed variant 717000Processed variant 718000Processed variant 719000Processed variant 720000Processed variant 721000Processed variant 722000Processed variant 723000Processed variant 724000Processed variant 725000Processed variant 726000Processed variant 727000Processed variant 728000Processed variant 729000Processed variant 730000Processed variant 731000Processed variant 732000Processed variant 733000Processed variant 734000Processed variant 735000Processed variant 736000Processed variant 737000Processed variant 738000Processed variant 739000Processed variant 740000Processed variant 741000Processed variant 742000Processed variant 743000Processed variant 744000Processed variant 745000Processed variant 746000Processed variant 747000Processed variant 748000Processed variant 749000Processed variant 750000Processed variant 751000Processed variant 752000Processed variant 753000Processed variant 754000Processed variant 755000Processed variant 756000Processed variant 757000Processed variant 758000Processed variant 759000Processed variant 760000Processed variant 761000Processed variant 762000Processed variant 763000Processed variant 764000Processed variant 765000Processed variant 766000Processed variant 767000Processed variant 768000Processed variant 769000Processed variant 770000Processed variant 771000Processed variant 772000Processed variant 773000Processed variant 774000Processed variant 775000Processed variant 776000Processed variant 777000Processed variant 778000Processed variant 779000Processed variant 780000Processed variant 781000Processed variant 782000Processed variant 783000Processed variant 784000Processed variant 785000Processed variant 786000Processed variant 787000Processed variant 788000Processed variant 789000Processed variant 790000Processed variant 791000Processed variant 792000Processed variant 793000Processed variant 794000Processed variant 795000Processed variant 796000Processed variant 797000Processed variant 798000Processed variant 799000Processed variant 800000Processed variant 801000Processed variant 802000Processed variant 803000Processed variant 804000Processed variant 805000Processed variant 806000Processed variant 807000Processed variant 808000Processed variant 809000Processed variant 810000Processed variant 811000Processed variant 812000Processed variant 813000Processed variant 814000Processed variant 815000Processed variant 816000Processed variant 817000Processed variant 818000Processed variant 819000Processed variant 820000Processed variant 821000Processed variant 822000Processed variant 823000Processed variant 824000Processed variant 825000Processed variant 826000Processed variant 827000Processed variant 828000Processed variant 829000Processed variant 830000Processed variant 831000Processed variant 832000Processed variant 833000Processed variant 834000Processed variant 835000Processed variant 836000Processed variant 837000Processed variant 838000Processed variant 839000Processed variant 840000Processed variant 841000Processed variant 842000Processed variant 843000Processed variant 844000Processed variant 845000Processed variant 846000Processed variant 847000Processed variant 848000Processed variant 849000Processed variant 850000Processed variant 851000Processed variant 852000Processed variant 853000Processed variant 854000Processed variant 855000Processed variant 856000Processed variant 857000Processed variant 858000Processed variant 859000Processed variant 860000Processed variant 861000Processed variant 862000Processed variant 863000Processed variant 864000Processed variant 865000Processed variant 866000Processed variant 867000Processed variant 868000Processed variant 869000Processed variant 870000Processed variant 871000Processed variant 872000Processed variant 873000Processed variant 874000Processed variant 875000Processed variant 876000Processed variant 877000Processed variant 878000Processed variant 879000Processed variant 880000Processed variant 881000Processed variant 882000Processed variant 883000Processed variant 884000Processed variant 885000Processed variant 886000Processed variant 887000Processed variant 888000Processed variant 889000Processed variant 890000Processed variant 891000Processed variant 892000Processed variant 893000Processed variant 894000Processed variant 895000Processed variant 896000Processed variant 897000Processed variant 898000Processed variant 899000Processed variant 900000Processed variant 901000Processed variant 902000Processed variant 903000Processed variant 904000Processed variant 905000Processed variant 906000Processed variant 907000Processed variant 908000Processed variant 909000Processed variant 910000Processed variant 911000Processed variant 912000Processed variant 913000Processed variant 914000Processed variant 915000Processed variant 916000Processed variant 917000Processed variant 918000Processed variant 919000Processed variant 920000Processed variant 921000Processed variant 922000Processed variant 923000Processed variant 924000Processed variant 925000Processed variant 926000Processed variant 927000Processed variant 928000Processed variant 929000Processed variant 930000Processed variant 931000Processed variant 932000Processed variant 933000Processed variant 934000Processed variant 935000Processed variant 936000Processed variant 937000Processed variant 938000Processed variant 939000Processed variant 940000Processed variant 941000Processed variant 942000Processed variant 943000Processed variant 944000Processed variant 945000Processed variant 946000Processed variant 947000Processed variant 948000Processed variant 949000Processed variant 950000Processed variant 951000Processed variant 952000Processed variant 953000Processed variant 954000Processed variant 955000Processed variant 956000Processed variant 957000Processed variant 958000Processed variant 959000Processed variant 960000Processed variant 961000Processed variant 962000Processed variant 963000Processed variant 964000Processed variant 965000Processed variant 966000Processed variant 967000Processed variant 968000Processed variant 969000Processed variant 970000Processed variant 971000Processed variant 972000Processed variant 973000Processed variant 974000Processed variant 975000Processed variant 976000Processed variant 977000Processed variant 978000Processed variant 979000Processed variant 980000Processed variant 981000Processed variant 982000Processed variant 983000Processed variant 984000Processed variant 985000Processed variant 986000Processed variant 987000Processed variant 988000Processed variant 989000Processed variant 990000Processed variant 991000Processed variant 992000Processed variant 993000Processed variant 994000Processed variant 995000Processed variant 996000Processed variant 997000Processed variant 998000Processed variant 999000Processed variant 1000000Processed variant 1001000Processed variant 1002000Processed variant 1003000Processed variant 1004000Processed variant 1005000Processed variant 1006000Processed variant 1007000Processed variant 1008000Processed variant 1009000Processed variant 1010000Processed variant 1011000Processed variant 1012000Processed variant 1013000Processed variant 1014000Processed variant 1015000Processed variant 1016000Processed variant 1017000Processed variant 1018000Processed variant 1019000Processed variant 1020000Processed variant 1021000Processed variant 1022000Processed variant 1023000Processed variant 1024000Processed variant 1025000Processed variant 1026000Processed variant 1027000Processed variant 1028000Processed variant 1029000Processed variant 1030000Processed variant 1031000Processed variant 1032000Processed variant 1033000Processed variant 1034000Processed variant 1035000Processed variant 1036000Processed variant 1037000Processed variant 1038000Processed variant 1039000Processed variant 1040000Processed variant 1041000Processed variant 1042000Processed variant 1043000Processed variant 1044000Processed variant 1045000Processed variant 1046000Processed variant 1047000Processed variant 1048000Processed variant 1049000Processed variant 1050000Processed variant 1051000Processed variant 1052000Processed variant 1053000Processed variant 1054000Processed variant 1055000Processed variant 1056000Processed variant 1057000Processed variant 1058000Processed variant 1059000Processed variant 1060000Processed variant 1061000Processed variant 1062000Processed variant 1063000Processed variant 1064000Processed variant 1065000Processed variant 1066000Processed variant 1067000Processed variant 1068000Processed variant 1069000Processed variant 1070000Processed variant 1071000Processed variant 1072000Processed variant 1073000Processed variant 1074000Processed variant 1075000Processed variant 1076000Processed variant 1077000Processed variant 1078000Processed variant 1079000Processed variant 1080000Processed variant 1081000Processed variant 1082000Processed variant 1083000Processed variant 1084000Processed variant 1085000Processed variant 1086000Processed variant 1087000Processed variant 1088000Processed variant 1089000Processed variant 1090000Processed variant 1091000Processed variant 1092000Processed variant 1093000Processed variant 1094000Processed variant 1095000Processed variant 1096000Processed variant 1097000Processed variant 1098000Processed variant 1099000Processed variant 1100000Processed variant 1101000Processed variant 1102000Processed variant 1103000Processed variant 1104000Processed variant 1105000Processed variant 1106000Processed variant 1107000Processed variant 1108000Processed variant 1109000Processed variant 1110000Processed variant 1111000Processed variant 1112000Processed variant 1113000Processed variant 1114000Processed variant 1115000Processed variant 1116000Processed variant 1117000Processed variant 1118000Processed variant 1119000Processed variant 1120000Processed variant 1121000Processed variant 1122000Processed variant 1123000Processed variant 1124000Processed variant 1125000Processed variant 1126000Processed variant 1127000Processed variant 1128000Processed variant 1129000Processed variant 1130000Processed variant 1131000Processed variant 1132000Processed variant 1133000Processed variant 1134000Processed variant 1135000Processed variant 1136000Processed variant 1137000Processed variant 1138000Processed variant 1139000Processed variant 1140000Processed variant 1141000Processed variant 1142000Processed variant 1143000Processed variant 1144000Processed variant 1145000Processed variant 1146000Processed variant 1147000Processed variant 1148000Processed variant 1149000Processed variant 1150000Processed variant 1151000Processed variant 1152000Processed variant 1153000Processed variant 1154000Processed variant 1155000Processed variant 1156000Processed variant 1157000Processed variant 1158000Processed variant 1159000Processed variant 1160000Processed variant 1161000Processed variant 1162000Processed variant 1163000Processed variant 1164000Processed variant 1165000Processed variant 1166000Processed variant 1167000Processed variant 1168000Processed variant 1169000Processed variant 1170000Processed variant 1171000Processed variant 1172000Processed variant 1173000Processed variant 1174000Processed variant 1175000Processed variant 1176000Processed variant 1177000Processed variant 1178000Processed variant 1179000Processed variant 1180000Processed variant 1181000Processed variant 1182000Processed variant 1183000Processed variant 1184000Processed variant 1185000Processed variant 1186000Processed variant 1187000Processed variant 1188000Processed variant 1189000Processed variant 1190000Processed variant 1191000Processed variant 1192000Processed variant 1193000Processed variant 1194000Processed variant 1195000Processed variant 1196000Processed variant 1197000Processed variant 1198000Processed variant 1199000Processed variant 1200000Processed variant 1201000Processed variant 1202000Processed variant 1203000Processed variant 1204000Processed variant 1205000Processed variant 1206000Processed variant 1207000Processed variant 1208000Processed variant 1209000Processed variant 1210000Processed variant 1211000Processed variant 1212000Processed variant 1213000Processed variant 1214000Processed variant 1215000Processed variant 1216000Processed variant 1217000Processed variant 1218000Processed variant 1219000Processed variant 1220000Processed variant 1221000Processed variant 1222000Processed variant 1223000Processed variant 1224000Processed variant 1225000Processed variant 1226000Processed variant 1227000Processed variant 1228000Processed variant 1229000Processed variant 1230000Processed variant 1231000Processed variant 1232000Processed variant 1233000Processed variant 1234000Processed variant 1235000Processed variant 1236000Processed variant 1237000Processed variant 1238000Processed variant 1239000Processed variant 1240000Processed variant 1241000Processed variant 1242000Processed variant 1243000Processed variant 1244000Processed variant 1245000Processed variant 1246000Processed variant 1247000Processed variant 1248000Processed variant 1249000Processed variant 1250000Processed variant 1251000Processed variant 1252000Processed variant 1253000Processed variant 1254000Processed variant 1255000Processed variant 1256000Processed variant 1257000Processed variant 1258000Processed variant 1259000Processed variant 1260000Processed variant 1261000Processed variant 1262000Processed variant 1263000Processed variant 1264000Processed variant 1265000Processed variant 1266000Processed variant 1267000Processed variant 1268000Processed variant 1269000Processed variant 1270000Processed variant 1271000Processed variant 1272000Processed variant 1273000Processed variant 1274000Processed variant 1275000Processed variant 1276000Processed variant 1277000Processed variant 1278000Processed variant 1279000Processed variant 1280000Processed variant 1281000Processed variant 1282000Processed variant 1283000Processed variant 1284000Processed variant 1285000Processed variant 1286000Processed variant 1287000Processed variant 1288000Processed variant 1289000Processed variant 1290000Processed variant 1291000Processed variant 1292000Processed variant 1293000Processed variant 1294000Processed variant 1295000Processed variant 1296000Processed variant 1297000Processed variant 1298000Processed variant 1299000Processed variant 1300000Processed variant 1301000Processed variant 1302000Processed variant 1303000Processed variant 1304000Processed variant 1305000Processed variant 1306000Processed variant 1307000Processed variant 1308000Processed variant 1309000Processed variant 1310000Processed variant 1311000Processed variant 1312000Processed variant 1313000Processed variant 1314000Processed variant 1315000Processed variant 1316000Processed variant 1317000Processed variant 1318000Processed variant 1319000Processed variant 1320000Processed variant 1321000Processed variant 1322000Processed variant 1323000Processed variant 1324000Processed variant 1325000Processed variant 1326000Processed variant 1327000Processed variant 1328000Processed variant 1329000Processed variant 1330000Processed variant 1331000Processed variant 1332000Processed variant 1333000Processed variant 1334000Processed variant 1335000Processed variant 1336000Processed variant 1337000Processed variant 1338000Processed variant 1339000Processed variant 1340000Processed variant 1341000Processed variant 1342000Processed variant 1343000Processed variant 1344000Processed variant 1345000Processed variant 1346000Processed variant 1347000Processed variant 1348000Processed variant 1349000Processed variant 1350000Processed variant 1351000Processed variant 1352000Processed variant 1353000Processed variant 1354000Processed variant 1355000Processed variant 1356000Processed variant 1357000Processed variant 1358000Processed variant 1359000Processed variant 1360000Processed variant 1361000Processed variant 1362000Processed variant 1363000Processed variant 1364000Processed variant 1365000Processed variant 1366000Processed variant 1367000Processed variant 1368000Processed variant 1369000Processed variant 1370000Processed variant 1371000Processed variant 1372000Processed variant 1373000Processed variant 1374000Processed variant 1375000Processed variant 1376000Processed variant 1377000Processed variant 1378000Processed variant 1379000Processed variant 1380000Processed variant 1381000Processed variant 1382000Processed variant 1383000Processed variant 1384000Processed variant 1385000Processed variant 1386000Processed variant 1387000Processed variant 1388000Processed variant 1389000Processed variant 1390000Processed variant 1391000Processed variant 1392000Processed variant 1393000Processed variant 1394000Processed variant 1395000Processed variant 1396000Processed variant 1397000Processed variant 1398000Processed variant 1399000Processed variant 1400000Processed variant 1401000Processed variant 1402000Processed variant 1403000Processed variant 1404000Processed variant 1405000Processed variant 1406000Processed variant 1407000Processed variant 1408000Processed variant 1409000Processed variant 1410000Processed variant 1411000Processed variant 1412000Processed variant 1413000Processed variant 1414000Processed variant 1415000Processed variant 1416000Processed variant 1417000Processed variant 1418000Processed variant 1419000Processed variant 1420000Processed variant 1421000Processed variant 1422000Processed variant 1423000Processed variant 1424000Processed variant 1425000Processed variant 1426000Processed variant 1427000Processed variant 1428000Processed variant 1429000Processed variant 1430000Processed variant 1431000Processed variant 1432000Processed variant 1433000Processed variant 1434000Processed variant 1435000Processed variant 1436000Processed variant 1437000Processed variant 1438000Processed variant 1439000Processed variant 1440000Processed variant 1441000Processed variant 1442000Processed variant 1443000Processed variant 1444000Processed variant 1445000Processed variant 1446000Processed variant 1447000Processed variant 1448000Processed variant 1449000Processed variant 1450000Processed variant 1451000Processed variant 1452000Processed variant 1453000Processed variant 1454000Processed variant 1455000Processed variant 1456000Processed variant 1457000Processed variant 1458000Processed variant 1459000Processed variant 1460000Processed variant 1461000Processed variant 1462000Processed variant 1463000Processed variant 1464000Processed variant 1465000Processed variant 1466000Processed variant 1467000Processed variant 1468000Processed variant 1469000Processed variant 1470000Processed variant 1471000Processed variant 1472000Processed variant 1473000Processed variant 1474000Processed variant 1475000Processed variant 1476000Processed variant 1477000Processed variant 1478000Processed variant 1479000Processed variant 1480000Processed variant 1481000Processed variant 1482000Processed variant 1483000Processed variant 1484000Processed variant 1485000Processed variant 1486000Processed variant 1487000Processed variant 1488000Processed variant 1489000Processed variant 1490000Processed variant 1491000Processed variant 1492000Processed variant 1493000Processed variant 1494000Processed variant 1495000Processed variant 1496000Processed variant 1497000Processed variant 1498000Processed variant 1499000Processed variant 1500000Processed variant 1501000Processed variant 1502000Processed variant 1503000Processed variant 1504000Processed variant 1505000Processed variant 1506000Processed variant 1507000Processed variant 1508000Processed variant 1509000Processed variant 1510000Processed variant 1511000Processed variant 1512000Processed variant 1513000Processed variant 1514000Processed variant 1515000Processed variant 1516000Processed variant 1517000Processed variant 1518000Processed variant 1519000Processed variant 1520000Processed variant 1521000Processed variant 1522000Processed variant 1523000Processed variant 1524000Processed variant 1525000Processed variant 1526000Processed variant 1527000Processed variant 1528000Processed variant 1529000Processed variant 1530000Processed variant 1531000Processed variant 1532000Processed variant 1533000Processed variant 1534000Processed variant 1535000Processed variant 1536000Processed variant 1537000Processed variant 1538000Processed variant 1539000Processed variant 1540000Processed variant 1541000Processed variant 1542000Processed variant 1543000Processed variant 1544000Processed variant 1545000Processed variant 1546000Processed variant 1547000Processed variant 1548000Processed variant 1549000Processed variant 1550000Processed variant 1551000Processed variant 1552000Processed variant 1553000Processed variant 1554000Processed variant 1555000Processed variant 1556000Processed variant 1557000Processed variant 1558000Processed variant 1559000Processed variant 1560000Processed variant 1561000Processed variant 1562000Processed variant 1563000Processed variant 1564000Processed variant 1565000Processed variant 1566000Processed variant 1567000Processed variant 1568000Processed variant 1569000Processed variant 1570000Processed variant 1571000Processed variant 1572000Processed variant 1573000Processed variant 1574000Processed variant 1575000Processed variant 1576000Processed variant 1577000Processed variant 1578000Processed variant 1579000Processed variant 1580000Processed variant 1581000Processed variant 1582000Processed variant 1583000Processed variant 1584000Processed variant 1585000Processed variant 1586000Processed variant 1587000Processed variant 1588000Processed variant 1589000Processed variant 1590000Processed variant 1591000Processed variant 1592000Processed variant 1593000Processed variant 1594000Processed variant 1595000Processed variant 1596000Processed variant 1597000Processed variant 1598000Processed variant 1599000Processed variant 1600000Processed variant 1601000Processed variant 1602000Processed variant 1603000Processed variant 1604000Processed variant 1605000Processed variant 1606000Processed variant 1607000Processed variant 1608000Processed variant 1609000Processed variant 1610000Processed variant 1611000Processed variant 1612000Processed variant 1613000Processed variant 1614000Processed variant 1615000Processed variant 1616000Processed variant 1617000Processed variant 1618000Processed variant 1619000Processed variant 1620000Processed variant 1621000Processed variant 1622000Processed variant 1623000Processed variant 1624000Processed variant 1625000Processed variant 1626000Processed variant 1627000Processed variant 1628000Processed variant 1629000Processed variant 1630000Processed variant 1631000Processed variant 1632000Processed variant 1633000Processed variant 1634000Processed variant 1635000Processed variant 1636000Processed variant 1637000Processed variant 1638000Processed variant 1639000Processed variant 1640000Processed variant 1641000Processed variant 1642000Processed variant 1643000Processed variant 1644000Processed variant 1645000Processed variant 1646000Processed variant 1647000Processed variant 1648000Processed variant 1649000Processed variant 1650000Processed variant 1651000Processed variant 1652000Processed variant 1653000Processed variant 1654000Processed variant 1655000Processed variant 1656000Processed variant 1657000Processed variant 1658000Processed variant 1659000Processed variant 1660000Processed variant 1661000Processed variant 1662000Processed variant 1663000Processed variant 1664000Processed variant 1665000Processed variant 1666000Processed variant 1667000Processed variant 1668000Processed variant 1669000Processed variant 1670000Processed variant 1671000Processed variant 1672000Processed variant 1673000Processed variant 1674000Processed variant 1675000Processed variant 1676000Processed variant 1677000Processed variant 1678000Processed variant 1679000Processed variant 1680000Processed variant 1681000Processed variant 1682000Processed variant 1683000Processed variant 1684000Processed variant 1685000Processed variant 1686000Processed variant 1687000Processed variant 1688000Processed variant 1689000Processed variant 1690000Processed variant 1691000Processed variant 1692000Processed variant 1693000Processed variant 1694000Processed variant 1695000Processed variant 1696000Processed variant 1697000Processed variant 1698000Processed variant 1699000Processed variant 1700000Processed variant 1701000Processed variant 1702000Processed variant 1703000Processed variant 1704000Processed variant 1705000Processed variant 1706000Processed variant 1707000Processed variant 1708000Processed variant 1709000Processed variant 1710000Processed variant 1711000Processed variant 1712000Processed variant 1713000Processed variant 1714000Processed variant 1715000Processed variant 1716000Processed variant 1717000Processed variant 1718000Processed variant 1719000Processed variant 1720000Processed variant 1721000Processed variant 1722000Processed variant 1723000Processed variant 1724000Processed variant 1725000Processed variant 1726000Processed variant 1727000Processed variant 1728000Processed variant 1729000Processed variant 1730000Processed variant 1731000Processed variant 1732000Processed variant 1733000Processed variant 1734000Processed variant 1735000Processed variant 1736000Processed variant 1737000Processed variant 1738000Processed variant 1739000Processed variant 1740000Processed variant 1741000Processed variant 1742000Processed variant 1743000Processed variant 1744000Processed variant 1745000Processed variant 1746000Processed variant 1747000Processed variant 1748000Processed variant 1749000Processed variant 1750000Processed variant 1751000Processed variant 1752000Processed variant 1753000Processed variant 1754000Processed variant 1755000Processed variant 1756000Processed variant 1757000Processed variant 1758000Processed variant 1759000Processed variant 1760000Processed variant 1761000Processed variant 1762000Processed variant 1763000Processed variant 1764000Processed variant 1765000Processed variant 1766000Processed variant 1767000Processed variant 1768000Processed variant 1769000Processed variant 1770000Processed variant 1771000Processed variant 1772000Processed variant 1773000Processed variant 1774000Processed variant 1775000Processed variant 1776000Processed variant 1777000Processed variant 1778000Processed variant 1779000Processed variant 1780000Processed variant 1781000Processed variant 1782000Processed variant 1783000Processed variant 1784000Processed variant 1785000Processed variant 1786000Processed variant 1787000Processed variant 1788000Processed variant 1789000Processed variant 1790000Processed variant 1791000Processed variant 1792000Processed variant 1793000Processed variant 1794000Processed variant 1795000Processed variant 1796000Processed variant 1797000Processed variant 1798000Processed variant 1799000Processed variant 1800000Processed variant 1801000Processed variant 1802000Processed variant 1803000Processed variant 1804000Processed variant 1805000Processed variant 1806000Processed variant 1807000Processed variant 1808000Processed variant 1809000Processed variant 1810000Processed variant 1811000Processed variant 1812000Processed variant 1813000Processed variant 1814000Processed variant 1815000Processed variant 1816000Processed variant 1817000Processed variant 1818000Processed variant 1819000Processed variant 1820000Processed variant 1821000Processed variant 1822000Processed variant 1823000Processed variant 1824000Processed variant 1825000Processed variant 1826000Processed variant 1827000Processed variant 1828000Processed variant 1829000Processed variant 1830000Processed variant 1831000Processed variant 1832000Processed variant 1833000Processed variant 1834000Processed variant 1835000Processed variant 1836000Processed variant 1837000Processed variant 1838000Processed variant 1839000Processed variant 1840000Processed variant 1841000Processed variant 1842000Processed variant 1843000Processed variant 1844000Processed variant 1845000Processed variant 1846000Processed variant 1847000Processed variant 1848000Processed variant 1849000Processed variant 1850000Processed variant 1851000Processed variant 1852000Processed variant 1853000Processed variant 1854000Processed variant 1855000Processed variant 1856000Processed variant 1857000Processed variant 1858000Processed variant 1859000Processed variant 1860000Processed variant 1861000Processed variant 1862000Processed variant 1863000Processed variant 1864000Processed variant 1865000Processed variant 1866000Processed variant 1867000Processed variant 1868000Processed variant 1869000Processed variant 1870000Processed variant 1871000Processed variant 1872000Processed variant 1873000Processed variant 1874000Processed variant 1875000Processed variant 1876000Processed variant 1877000Processed variant 1878000Processed variant 1879000Processed variant 1880000Processed variant 1881000Processed variant 1882000Processed variant 1883000Processed variant 1884000Processed variant 1885000Processed variant 1886000Processed variant 1887000Processed variant 1888000Processed variant 1889000Processed variant 1890000Processed variant 1891000Processed variant 1892000Processed variant 1893000Processed variant 1894000Processed variant 1895000Processed variant 1896000Processed variant 1897000Processed variant 1898000Processed variant 1899000Processed variant 1900000Processed variant 1901000Processed variant 1902000Processed variant 1903000Processed variant 1904000Processed variant 1905000Processed variant 1906000Processed variant 1907000Processed variant 1908000Processed variant 1909000Processed variant 1910000Processed variant 1911000Processed variant 1912000Processed variant 1913000Processed variant 1914000Processed variant 1915000Processed variant 1916000Processed variant 1917000Processed variant 1918000Processed variant 1919000Processed variant 1920000Processed variant 1921000Processed variant 1922000Processed variant 1923000Processed variant 1924000Processed variant 1925000Processed variant 1926000Processed variant 1927000Processed variant 1928000Processed variant 1929000Processed variant 1930000Processed variant 1931000Processed variant 1932000Processed variant 1933000Processed variant 1934000Processed variant 1935000Processed variant 1936000Processed variant 1937000Processed variant 1938000Processed variant 1939000Processed variant 1940000Processed variant 1941000Processed variant 1942000Processed variant 1943000Processed variant 1944000Processed variant 1945000Processed variant 1946000Processed variant 1947000Processed variant 1948000Processed variant 1949000Processed variant 1950000Processed variant 1951000Processed variant 1952000Processed variant 1953000Processed variant 1954000Processed variant 1955000Processed variant 1956000Processed variant 1957000Processed variant 1958000Processed variant 1959000Processed variant 1960000Processed variant 1961000Processed variant 1962000Processed variant 1963000Processed variant 1964000Processed variant 1965000Processed variant 1966000Processed variant 1967000Processed variant 1968000Processed variant 1969000Processed variant 1970000Processed variant 1971000Processed variant 1972000Processed variant 1973000Processed variant 1974000Processed variant 1975000Processed variant 1976000Processed variant 1977000Processed variant 1978000Processed variant 1979000Processed variant 1980000Processed variant 1981000Processed variant 1982000Processed variant 1983000Processed variant 1984000Processed variant 1985000Processed variant 1986000Processed variant 1987000Processed variant 1988000Processed variant 1989000Processed variant 1990000Processed variant 1991000Processed variant 1992000Processed variant 1993000Processed variant 1994000Processed variant 1995000Processed variant 1996000Processed variant 1997000Processed variant 1998000Processed variant 1999000Processed variant 2000000Processed variant 2001000Processed variant 2002000Processed variant 2003000Processed variant 2004000Processed variant 2005000Processed variant 2006000Processed variant 2007000Processed variant 2008000Processed variant 2009000Processed variant 2010000Processed variant 2011000Processed variant 2012000Processed variant 2013000Processed variant 2014000Processed variant 2015000Processed variant 2016000Processed variant 2017000Processed variant 2018000Processed variant 2019000Processed variant 2020000Processed variant 2021000Processed variant 2022000Processed variant 2023000Processed variant 2024000Processed variant 2025000Processed variant 2026000Processed variant 2027000Processed variant 2028000Processed variant 2029000Processed variant 2030000Processed variant 2031000Processed variant 2032000Processed variant 2033000Processed variant 2034000Processed variant 2035000Processed variant 2036000Processed variant 2037000Processed variant 2038000Processed variant 2039000Processed variant 2040000Processed variant 2041000Processed variant 2042000Processed variant 2043000Processed variant 2044000Processed variant 2045000Processed variant 2046000Processed variant 2047000Processed variant 2048000Processed variant 2049000Processed variant 2050000Processed variant 2051000Processed variant 2052000Processed variant 2053000Processed variant 2054000Processed variant 2055000Processed variant 2056000Processed variant 2057000Processed variant 2058000Processed variant 2059000Processed variant 2060000Processed variant 2061000Processed variant 2062000Processed variant 2063000Processed variant 2064000Processed variant 2065000Processed variant 2066000Processed variant 2067000Processed variant 2068000Processed variant 2069000Processed variant 2070000Processed variant 2071000Processed variant 2072000Processed variant 2073000Processed variant 2074000Processed variant 2075000Processed variant 2076000Processed variant 2077000Processed variant 2078000Processed variant 2079000Processed variant 2080000Processed variant 2081000Processed variant 2082000Processed variant 2083000Processed variant 2084000Processed variant 2085000Processed variant 2086000Processed variant 2087000Processed variant 2088000Processed variant 2089000Processed variant 2090000Processed variant 2091000Processed variant 2092000Processed variant 2093000Processed variant 2094000Processed variant 2095000Processed variant 2096000Processed variant 2097000Processed variant 2098000Processed variant 2099000Processed variant 2100000Processed variant 2101000Processed variant 2102000Processed variant 2103000Processed variant 2104000Processed variant 2105000Processed variant 2106000Processed variant 2107000Processed variant 2108000Processed variant 2109000Processed variant 2110000Processed variant 2111000Processed variant 2112000Processed variant 2113000Processed variant 2114000Processed variant 2115000Processed variant 2116000Processed variant 2117000Processed variant 2118000Processed variant 2119000Processed variant 2120000Processed variant 2121000Processed variant 2122000Processed variant 2123000Processed variant 2124000Processed variant 2125000Processed variant 2126000Processed variant 2127000Processed variant 2128000Processed variant 2129000Processed variant 2130000Processed variant 2131000Processed variant 2132000Processed variant 2133000Processed variant 2134000Processed variant 2135000Processed variant 2136000Processed variant 2137000Processed variant 2138000Processed variant 2139000Processed variant 2140000Processed variant 2141000Processed variant 2142000Processed variant 2143000Processed variant 2144000Processed variant 2145000Processed variant 2146000Processed variant 2147000Processed variant 2148000Processed variant 2149000Processed variant 2150000Processed variant 2151000Processed variant 2152000Processed variant 2153000Processed variant 2154000Processed variant 2155000Processed variant 2156000Processed variant 2157000Processed variant 2158000Processed variant 2159000Processed variant 2160000Processed variant 2161000Processed variant 2162000Processed variant 2163000Processed variant 2164000Processed variant 2165000Processed variant 2166000Processed variant 2167000Processed variant 2168000Processed variant 2169000Processed variant 2170000Processed variant 2171000Processed variant 2172000Processed variant 2173000Processed variant 2174000Processed variant 2175000Processed variant 2176000Processed variant 2177000Processed variant 2178000Processed variant 2179000Processed variant 2180000Processed variant 2181000Processed variant 2182000Processed variant 2183000Processed variant 2184000Processed variant 2185000Processed variant 2186000Processed variant 2187000Processed variant 2188000Processed variant 2189000Processed variant 2190000Processed variant 2191000Processed variant 2192000Processed variant 2193000Processed variant 2194000Processed variant 2195000Processed variant 2196000Processed variant 2197000Processed variant 2198000Processed variant 2199000Processed variant 2200000Processed variant 2201000Processed variant 2202000Processed variant 2203000Processed variant 2204000Processed variant 2205000Processed variant 2206000Processed variant 2207000Processed variant 2208000Processed variant 2209000Processed variant 2210000Processed variant 2211000Processed variant 2212000Processed variant 2213000Processed variant 2214000Processed variant 2215000Processed variant 2216000Processed variant 2217000Processed variant 2218000Processed variant 2219000Processed variant 2220000Processed variant 2221000Processed variant 2222000Processed variant 2223000Processed variant 2224000Processed variant 2225000Processed variant 2226000Processed variant 2227000Processed variant 2228000Processed variant 2229000Processed variant 2230000Processed variant 2231000Processed variant 2232000Processed variant 2233000Processed variant 2234000Processed variant 2235000Processed variant 2236000Processed variant 2237000Processed variant 2238000Processed variant 2239000Processed variant 2240000Processed variant 2241000Processed variant 2242000Processed variant 2243000Processed variant 2244000Processed variant 2245000Processed variant 2246000Processed variant 2247000Processed variant 2248000Processed variant 2249000Processed variant 2250000Processed variant 2251000Processed variant 2252000Processed variant 2253000Processed variant 2254000Processed variant 2255000Processed variant 2256000Processed variant 2257000Processed variant 2258000Processed variant 2259000Processed variant 2260000Processed variant 2261000Processed variant 2262000Processed variant 2263000Processed variant 2264000Processed variant 2265000Processed variant 2266000Processed variant 2267000Processed variant 2268000Processed variant 2269000Processed variant 2270000Processed variant 2271000Processed variant 2272000Processed variant 2273000Processed variant 2274000Processed variant 2275000Processed variant 2276000Processed variant 2277000Processed variant 2278000Processed variant 2279000Processed variant 2280000Processed variant 2281000Processed variant 2282000Processed variant 2283000Processed variant 2284000Processed variant 2285000Processed variant 2286000Processed variant 2287000Processed variant 2288000Processed variant 2289000Processed variant 2290000Processed variant 2291000Processed variant 2292000Processed variant 2293000Processed variant 2294000Processed variant 2295000Processed variant 2296000Processed variant 2297000Processed variant 2298000Processed variant 2299000Processed variant 2300000Processed variant 2301000Processed variant 2302000Processed variant 2303000Processed variant 2304000Processed variant 2305000Processed variant 2306000Processed variant 2307000Processed variant 2308000Processed variant 2309000Processed variant 2310000Processed variant 2311000Processed variant 2312000Processed variant 2313000Processed variant 2314000Processed variant 2315000Processed variant 2316000Processed variant 2317000Processed variant 2318000Processed variant 2319000Processed variant 2320000Processed variant 2321000Processed variant 2322000Processed variant 2323000Processed variant 2324000Processed variant 2325000Processed variant 2326000Processed variant 2327000Processed variant 2328000Processed variant 2329000Processed variant 2330000Processed variant 2331000Processed variant 2332000Processed variant 2333000Processed variant 2334000Processed variant 2335000Processed variant 2336000Processed variant 2337000Processed variant 2338000Processed variant 2339000Processed variant 2340000Processed variant 2341000Processed variant 2342000Processed variant 2343000Processed variant 2344000Processed variant 2345000Processed variant 2346000Processed variant 2347000Processed variant 2348000Processed variant 2349000Processed variant 2350000Processed variant 2351000Processed variant 2352000Processed variant 2353000Processed variant 2354000Processed variant 2355000Processed variant 2356000Processed variant 2357000Processed variant 2358000Processed variant 2359000Processed variant 2360000Processed variant 2361000Processed variant 2362000Processed variant 2363000Processed variant 2364000Processed variant 2365000Processed variant 2366000Processed variant 2367000Processed variant 2368000Processed variant 2369000Processed variant 2370000Processed variant 2371000Processed variant 2372000Processed variant 2373000Processed variant 2374000Processed variant 2375000Processed variant 2376000Processed variant 2377000Processed variant 2378000Processed variant 2379000Processed variant 2380000Processed variant 2381000Processed variant 2382000Processed variant 2383000Processed variant 2384000Processed variant 2385000Processed variant 2386000Processed variant 2387000Processed variant 2388000Processed variant 2389000Processed variant 2390000Processed variant 2391000Processed variant 2392000Processed variant 2393000Processed variant 2394000Processed variant 2395000Processed variant 2396000Processed variant 2397000Processed variant 2398000Processed variant 2399000Processed variant 2400000Processed variant 2401000Processed variant 2402000Processed variant 2403000Processed variant 2404000Processed variant 2405000Processed variant 2406000Processed variant 2407000Processed variant 2408000Processed variant 2409000Processed variant 2410000Processed variant 2411000Processed variant 2412000Processed variant 2413000Processed variant 2414000Processed variant 2415000Processed variant 2416000Processed variant 2417000Processed variant 2418000Processed variant 2419000Processed variant 2420000Processed variant 2421000Processed variant 2422000Processed variant 2423000Processed variant 2424000Processed variant 2425000Processed variant 2426000Processed variant 2427000Processed variant 2428000Processed variant 2429000Processed variant 2430000Processed variant 2431000Processed variant 2432000Processed variant 2433000Processed variant 2434000Processed variant 2435000Processed variant 2436000Processed variant 2437000Processed variant 2438000Processed variant 2439000Processed variant 2440000Processed variant 2441000Processed variant 2442000Processed variant 2443000Processed variant 2444000Processed variant 2445000Processed variant 2446000Processed variant 2447000Processed variant 2448000Processed variant 2449000Processed variant 2450000Processed variant 2451000Processed variant 2452000Processed variant 2453000Processed variant 2454000Processed variant 2455000Processed variant 2456000Processed variant 2457000Processed variant 2458000Processed variant 2459000Processed variant 2460000Processed variant 2461000Processed variant 2462000Processed variant 2463000Processed variant 2464000Processed variant 2465000Processed variant 2466000Processed variant 2467000Processed variant 2468000Processed variant 2469000Processed variant 2470000Processed variant 2471000Processed variant 2472000Processed variant 2473000Processed variant 2474000Processed variant 2475000Processed variant 2476000Processed variant 2477000Processed variant 2478000Processed variant 2479000Processed variant 2480000Processed variant 2481000Processed variant 2482000Processed variant 2483000Processed variant 2484000Processed variant 2485000Processed variant 2486000Processed variant 2487000Processed variant 2488000Processed variant 2489000Processed variant 2490000Processed variant 2491000Processed variant 2492000Processed variant 2493000Processed variant 2494000Processed variant 2495000Processed variant 2496000Processed variant 2497000Processed variant 2498000Processed variant 2499000Processed variant 2500000Processed variant 2501000Processed variant 2502000Processed variant 2503000Processed variant 2504000Processed variant 2505000Processed variant 2506000Processed variant 2507000Processed variant 2508000Processed variant 2509000Processed variant 2510000Processed variant 2511000Processed variant 2512000Processed variant 2513000Processed variant 2514000Processed variant 2515000Processed variant 2516000Processed variant 2517000Processed variant 2518000Processed variant 2519000Processed variant 2520000Processed variant 2521000Processed variant 2522000Processed variant 2523000Processed variant 2524000Processed variant 2525000Processed variant 2526000Processed variant 2527000Processed variant 2528000Processed variant 2529000Processed variant 2530000Processed variant 2531000Processed variant 2532000Processed variant 2533000Processed variant 2534000Processed variant 2535000Processed variant 2536000Processed variant 2537000Processed variant 2538000Processed variant 2539000Processed variant 2540000Processed variant 2541000Processed variant 2542000Processed variant 2543000Processed variant 2544000Processed variant 2545000Processed variant 2546000Processed variant 2547000Processed variant 2548000Processed variant 2549000Processed variant 2550000Processed variant 2551000Processed variant 2552000Processed variant 2553000Processed variant 2554000Processed variant 2555000Processed variant 2556000Processed variant 2557000Processed variant 2558000Processed variant 2559000Processed variant 2560000Processed variant 2561000Processed variant 2562000Processed variant 2563000Processed variant 2564000Processed variant 2565000Processed variant 2566000Processed variant 2567000Processed variant 2568000Processed variant 2569000Processed variant 2570000Processed variant 2571000Processed variant 2572000Processed variant 2573000Processed variant 2574000Processed variant 2575000Processed variant 2576000Processed variant 2577000Processed variant 2578000Processed variant 2579000Processed variant 2580000Processed variant 2581000Processed variant 2582000Processed variant 2583000Processed variant 2584000Processed variant 2585000Processed variant 2586000Processed variant 2587000Processed variant 2588000Processed variant 2589000Processed variant 2590000Processed variant 2591000Processed variant 2592000Processed variant 2593000Processed variant 2594000Processed variant 2595000Processed variant 2596000Processed variant 2597000Processed variant 2598000Processed variant 2599000Processed variant 2600000Processed variant 2601000Processed variant 2602000Processed variant 2603000Processed variant 2604000Processed variant 2605000Processed variant 2606000Processed variant 2607000Processed variant 2608000Processed variant 2609000Processed variant 2610000Processed variant 2611000Processed variant 2612000Processed variant 2613000Processed variant 2614000Processed variant 2615000Processed variant 2616000Processed variant 2617000Processed variant 2618000Processed variant 2619000Processed variant 2620000Processed variant 2621000Processed variant 2622000Processed variant 2623000Processed variant 2624000Processed variant 2625000Processed variant 2626000Processed variant 2627000Processed variant 2628000Processed variant 2629000Processed variant 2630000Processed variant 2631000Processed variant 2632000Processed variant 2633000Processed variant 2634000Processed variant: 2634906
-All variants processed
+IQ-TREE multicore version 2.3.4 COVID-edition for Linux x86 64-bit built Jun  5 2024
+Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung, Olga Chernomor,
+Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
+
+Host:    u20-cva0000-128 (AVX2, FMA3, 122 GB RAM)
+Command: iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta -m MFP -B 1000 -redo
+Seed:    86356 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Wed Oct 16 00:56:42 2024
+Kernel:  AVX+FMA - 1 threads (1 CPU cores detected)
+
+Reading alignment file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta ... Fasta format detected
+Reading fasta file: done in 0.00677074 secs using 96.81% CPU
+Alignment most likely contains DNA/RNA sequences
+Alignment has 251 sequences with 1296 columns, 110 distinct patterns
+89 parsimony-informative, 33 singleton sites, 1174 constant sites
+WARNING: Some sequence names are changed as follows:
+MT-2_2:530 -> MT-2_2_530
+MT-4_1:200 -> MT-4_1_200
+MT-4_1:70 -> MT-4_1_70
+MT-4_2:40 -> MT-4_2_40
+MT-4_1:150 -> MT-4_1_150
+MT-4_2:570 -> MT-4_2_570
+MT-4_2:430 -> MT-4_2_430
+MT-4_1:360 -> MT-4_1_360
+MT-4_1:90 -> MT-4_1_90
+MT-4_2:520 -> MT-4_2_520
+MT-4_1:180 -> MT-4_1_180
+MT-4_2:420 -> MT-4_2_420
+MT-4_1:10 -> MT-4_1_10
+MT-4_1:110 -> MT-4_1_110
+MT-4_2:540 -> MT-4_2_540
+MT-4_2:410 -> MT-4_2_410
+MT-4_2:400 -> MT-4_2_400
+MT-4_1:330 -> MT-4_1_330
+MT-4_1:390 -> MT-4_1_390
+MT-4_1:340 -> MT-4_1_340
+MT-4_1:100 -> MT-4_1_100
+MT-4_2:510 -> MT-4_2_510
+MT-4_1:170 -> MT-4_1_170
+MT-4_1:190 -> MT-4_1_190
+MT-4_2:560 -> MT-4_2_560
+MT-4_1:300 -> MT-4_1_300
+MT-4_1:630 -> MT-4_1_630
+MT-4_1:350 -> MT-4_1_350
+MT-4_2:480 -> MT-4_2_480
+MT-4_2:550 -> MT-4_2_550
+MT-4_1:310 -> MT-4_1_310
+MT-4_1:320 -> MT-4_1_320
+MT-4_1:290 -> MT-4_1_290
+MT-4_1:610 -> MT-4_1_610
+MT-4_2:530 -> MT-4_2_530
+MT-4_2:590 -> MT-4_2_590
+MT-4_2:360 -> MT-4_2_360
+MT-4_1:560 -> MT-4_1_560
+MT-4_2:320 -> MT-4_2_320
+MT-4_2:390 -> MT-4_2_390
+MT-4_2:190 -> MT-4_2_190
+MT-4_1:520 -> MT-4_1_520
+MT-4_2:160 -> MT-4_2_160
+MT-4_1:50 -> MT-4_1_50
+MT-4_2:120 -> MT-4_2_120
+MT-4_2:300 -> MT-4_2_300
+MT-4_2:170 -> MT-4_2_170
+MT-4_2:610 -> MT-4_2_610
+MT-4_2:110 -> MT-4_2_110
+MT-4_2:250 -> MT-4_2_250
+MT-4_2:230 -> MT-4_2_230
+MT-4_2:180 -> MT-4_2_180
+MT-4_2:630 -> MT-4_2_630
+MT-4_1:450 -> MT-4_1_450
+MT-4_1:590 -> MT-4_1_590
+MT-4_2:100 -> MT-4_2_100
+MT-4_2:210 -> MT-4_2_210
+MT-4_2:200 -> MT-4_2_200
+MT-4_2:260 -> MT-4_2_260
+MT-4_2:80 -> MT-4_2_80
+MT-4_2:150 -> MT-4_2_150
+MT-4_1:550 -> MT-4_1_550
+MT-4_2:220 -> MT-4_2_220
+MT-4_1:570 -> MT-4_1_570
+MT-2_2:100 -> MT-2_2_100
+MT-2_2:610 -> MT-2_2_610
+MT-2_2:450 -> MT-2_2_450
+MT-2_2:370 -> MT-2_2_370
+MT-2_2:260 -> MT-2_2_260
+MT-2_2:470 -> MT-2_2_470
+MT-2_2:630 -> MT-2_2_630
+MT-2_2:580 -> MT-2_2_580
+MT-2_2:510 -> MT-2_2_510
+MT-2_2:110 -> MT-2_2_110
+MT-2_2:330 -> MT-2_2_330
+MT-2_2:170 -> MT-2_2_170
+MT-2_2:310 -> MT-2_2_310
+MT-2_2:240 -> MT-2_2_240
+MT-2_2:320 -> MT-2_2_320
+MT-2_2:350 -> MT-2_2_350
+MT-2_2:550 -> MT-2_2_550
+MT-2_2:420 -> MT-2_2_420
+MT-2_2:210 -> MT-2_2_210
+MT-2_2:30 -> MT-2_2_30
+MT-2_2:140 -> MT-2_2_140
+MT-2_2:500 -> MT-2_2_500
+MT-2_2:230 -> MT-2_2_230
+MT-2_2:540 -> MT-2_2_540
+MT-2_2:360 -> MT-2_2_360
+MT-2_2:480 -> MT-2_2_480
+MT-2_2:290 -> MT-2_2_290
+MT-2_2:280 -> MT-2_2_280
+MT-2_2:520 -> MT-2_2_520
+MT-2_2:190 -> MT-2_2_190
+MT-2_2:570 -> MT-2_2_570
+MT-2_2:460 -> MT-2_2_460
+MT-2_2:380 -> MT-2_2_380
+MT-2_2:20 -> MT-2_2_20
+MT-2_2:220 -> MT-2_2_220
+MT-2_2:560 -> MT-2_2_560
+MT-2_2:490 -> MT-2_2_490
+MT-2_2:390 -> MT-2_2_390
+MT-2_2:250 -> MT-2_2_250
+MT-2_1:340 -> MT-2_1_340
+MT-2_1:500 -> MT-2_1_500
+MT-2_1:30 -> MT-2_1_30
+MT-2_1:110 -> MT-2_1_110
+MT-2_1:170 -> MT-2_1_170
+MT-2_1:440 -> MT-2_1_440
+MT-2_1:610 -> MT-2_1_610
+MT-2_1:90 -> MT-2_1_90
+MT-2_1:400 -> MT-2_1_400
+MT-2_1:590 -> MT-2_1_590
+MT-2_1:310 -> MT-2_1_310
+MT-2_1:630 -> MT-2_1_630
+MT-2_1:250 -> MT-2_1_250
+MT-2_1:140 -> MT-2_1_140
+MT-2_1:390 -> MT-2_1_390
+MT-2_1:460 -> MT-2_1_460
+MT-2_1:190 -> MT-2_1_190
+MT-2_1:380 -> MT-2_1_380
+MT-2_1:550 -> MT-2_1_550
+MT-2_1:280 -> MT-2_1_280
+MT-2_1:230 -> MT-2_1_230
+MT-2_1:360 -> MT-2_1_360
+MT-2_1:40 -> MT-2_1_40
+MT-2_1:580 -> MT-2_1_580
+MT-2_1:560 -> MT-2_1_560
+MT-2_1:150 -> MT-2_1_150
+MT-2_1:300 -> MT-2_1_300
+MT-2_1:240 -> MT-2_1_240
+MT-2_1:160 -> MT-2_1_160
+MT-2_1:330 -> MT-2_1_330
+MT-2_1:600 -> MT-2_1_600
+MT-2_1:320 -> MT-2_1_320
+MT-2_1:200 -> MT-2_1_200
+MT-2_1:50 -> MT-2_1_50
+MT-2_1:620 -> MT-2_1_620
+MT-2_1:430 -> MT-2_1_430
+MT-2_1:570 -> MT-2_1_570
+MT-2_1:210 -> MT-2_1_210
+MT-2_1:220 -> MT-2_1_220
+MT-2_1:180 -> MT-2_1_180
+MT-4_1:230 -> MT-4_1_230
+MT-4_1:260 -> MT-4_1_260
+MT-4_1:240 -> MT-4_1_240
+MT-4_1:210 -> MT-4_1_210
+MT-4_1:220 -> MT-4_1_220
+MT-4_1:250 -> MT-4_1_250
+MT-4_1:280 -> MT-4_1_280
+MT-4_1:80 -> MT-4_1_80
+MT-4_2:60 -> MT-4_2_60
+MT-4_2:70 -> MT-4_2_70
+MT-4_1:60 -> MT-4_1_60
+MT-4_1:30 -> MT-4_1_30
+MT-4_2:50 -> MT-4_2_50
+MT-4_1:140 -> MT-4_1_140
+MT-4_1:160 -> MT-4_1_160
+MT-4_1:130 -> MT-4_1_130
+MT-4_2:580 -> MT-4_2_580
+MT-4_1:600 -> MT-4_1_600
+MT-4_2:450 -> MT-4_2_450
+MT-4_2:470 -> MT-4_2_470
+MT-4_2:440 -> MT-4_2_440
+MT-4_2:460 -> MT-4_2_460
+MT-4_1:20 -> MT-4_1_20
+MT-4_1:40 -> MT-4_1_40
+MT-4_2:10 -> MT-4_2_10
+MT-4_2:30 -> MT-4_2_30
+MT-4_2:20 -> MT-4_2_20
+MT-2_2:10 -> MT-2_2_10
+MT-4_1:120 -> MT-4_1_120
+MT-4_1:380 -> MT-4_1_380
+MT-4_1:370 -> MT-4_1_370
+MT-4_2:380 -> MT-4_2_380
+MT-4_2:370 -> MT-4_2_370
+MT-4_2:490 -> MT-4_2_490
+MT-4_2:500 -> MT-4_2_500
+MT-4_1:270 -> MT-4_1_270
+MT-4_2:350 -> MT-4_2_350
+MT-4_1:410 -> MT-4_1_410
+MT-4_1:400 -> MT-4_1_400
+MT-4_1:490 -> MT-4_1_490
+MT-4_1:500 -> MT-4_1_500
+MT-4_1:510 -> MT-4_1_510
+MT-4_1:530 -> MT-4_1_530
+MT-4_1:480 -> MT-4_1_480
+MT-4_2:140 -> MT-4_2_140
+MT-4_2:130 -> MT-4_2_130
+MT-4_2:270 -> MT-4_2_270
+MT-4_2:330 -> MT-4_2_330
+MT-4_2:310 -> MT-4_2_310
+MT-4_2:290 -> MT-4_2_290
+MT-4_2:280 -> MT-4_2_280
+MT-4_2:340 -> MT-4_2_340
+MT-4_2:600 -> MT-4_2_600
+MT-4_2:240 -> MT-4_2_240
+MT-4_1:470 -> MT-4_1_470
+MT-4_1:460 -> MT-4_1_460
+MT-4_1:440 -> MT-4_1_440
+MT-4_1:420 -> MT-4_1_420
+MT-4_1:430 -> MT-4_1_430
+MT-4_1:540 -> MT-4_1_540
+MT-4_1:580 -> MT-4_1_580
+MT-4_2:90 -> MT-4_2_90
+MT-2_2:40 -> MT-2_2_40
+MT-2_2:50 -> MT-2_2_50
+MT-2_2:80 -> MT-2_2_80
+MT-2_2:60 -> MT-2_2_60
+MT-2_2:70 -> MT-2_2_70
+MT-2_2:90 -> MT-2_2_90
+MT-2_2:440 -> MT-2_2_440
+MT-2_2:270 -> MT-2_2_270
+MT-2_2:590 -> MT-2_2_590
+MT-2_2:600 -> MT-2_2_600
+MT-2_2:120 -> MT-2_2_120
+MT-2_2:130 -> MT-2_2_130
+MT-2_2:340 -> MT-2_2_340
+MT-2_2:150 -> MT-2_2_150
+MT-2_2:180 -> MT-2_2_180
+MT-2_2:160 -> MT-2_2_160
+MT-2_2:300 -> MT-2_2_300
+MT-2_2:430 -> MT-2_2_430
+MT-2_2:410 -> MT-2_2_410
+MT-2_2:400 -> MT-2_2_400
+MT-2_2:200 -> MT-2_2_200
+MT-2_1:510 -> MT-2_1_510
+MT-2_1:520 -> MT-2_1_520
+MT-2_1:530 -> MT-2_1_530
+MT-2_1:490 -> MT-2_1_490
+MT-2_1:20 -> MT-2_1_20
+MT-2_1:10 -> MT-2_1_10
+MT-2_1:130 -> MT-2_1_130
+MT-2_1:120 -> MT-2_1_120
+MT-2_1:450 -> MT-2_1_450
+MT-2_1:100 -> MT-2_1_100
+MT-2_1:80 -> MT-2_1_80
+MT-2_1:70 -> MT-2_1_70
+MT-2_1:410 -> MT-2_1_410
+MT-2_1:420 -> MT-2_1_420
+MT-2_1:290 -> MT-2_1_290
+MT-2_1:270 -> MT-2_1_270
+MT-2_1:260 -> MT-2_1_260
+MT-2_1:480 -> MT-2_1_480
+MT-2_1:540 -> MT-2_1_540
+MT-2_1:470 -> MT-2_1_470
+MT-2_1:350 -> MT-2_1_350
+MT-2_1:370 -> MT-2_1_370
+MT-2_1:60 -> MT-2_1_60
+
+                                  Gap/Ambiguity  Composition  p-value
+Analyzing sequences: done in 8.62931e-05 secs
+   1  MT-2_2_530                          0.00%    passed     98.69%
+   2  MT-4_1_200                          0.00%    passed     99.95%
+   3  MT-4_1_70                           0.00%    passed     99.32%
+   4  MT-4_2_40                           0.00%    passed     98.87%
+   5  MT-4_1_150                          0.00%    passed     99.80%
+   6  MT-4_2_570                          0.00%    passed     99.45%
+   7  MT-4_2_430                          0.00%    passed     99.99%
+   8  MT-4_1_360                          0.00%    passed     99.88%
+   9  MT-4_1_90                           0.00%    passed     99.60%
+  10  MT-4_2_520                          0.08%    passed     99.97%
+  11  MT-4_1_180                          0.00%    passed     99.97%
+  12  MT-4_2_420                          0.00%    passed     99.99%
+  13  MT-4_1_10                           0.00%    passed     98.20%
+  14  MT-4_1_110                          0.00%    passed     99.99%
+  15  MT-4_2_540                          0.00%    passed     99.95%
+  16  MT-4_2_410                          0.08%    passed     99.99%
+  17  MT-4_2_400                          0.08%    passed     99.99%
+  18  MT-4_1_330                          0.00%    passed     99.70%
+  19  MT-4_1_390                          0.08%    passed     99.99%
+  20  MT-4_1_340                          0.00%    passed     99.84%
+  21  MT-4_1_100                          0.00%    passed     99.93%
+  22  MT-4_2_510                          0.00%    passed     99.95%
+  23  MT-4_1_170                          0.00%    passed     99.90%
+  24  MT-4_1_190                          0.00%    passed     99.98%
+  25  MT-4_2_560                          0.00%    passed     99.80%
+  26  MT-4_1_300                          0.00%    passed     99.85%
+  27  MT-4_1_630                          0.00%    passed     98.51%
+  28  MT-4_1_350                          0.00%    passed     99.85%
+  29  MT-4_2_480                          0.00%    passed    100.00%
+  30  MT-4_2_550                          0.00%    passed     99.71%
+  31  MT-4_1_310                          0.00%    passed     99.70%
+  32  MT-4_1_320                          0.00%    passed     99.84%
+  33  MT-4_1_290                          0.00%    passed     99.98%
+  34  MT-4_1_610                          0.00%    passed     99.06%
+  35  MT-4_2_530                          0.00%    passed    100.00%
+  36  MT-4_2_590                          0.00%    passed     99.02%
+  37  MT-4_2_360                          0.08%    passed     99.96%
+  38  MT-4_1_560                          0.00%    passed     99.39%
+  39  MT-4_2_320                          0.08%    passed     99.84%
+  40  MT-4_2_390                          0.00%    passed     99.88%
+  41  MT-4_2_190                          0.00%    passed     99.93%
+  42  MT-4_1_520                          0.00%    passed     99.67%
+  43  MT-4_2_160                          0.00%    passed     99.94%
+  44  MT-4_1_50                           0.00%    passed     98.87%
+  45  MT-4_2_120                          0.00%    passed     99.99%
+  46  MT-4_2_300                          0.00%    passed     99.81%
+  47  MT-4_2_170                          0.00%    passed     99.93%
+  48  MT-4_2_610                          0.08%    passed     99.58%
+  49  MT-4_2_110                          0.00%    passed     99.94%
+  50  MT-4_2_250                          0.00%    passed     99.84%
+  51  MT-4_2_230                          0.08%    passed     99.76%
+  52  MT-4_2_180                          0.00%    passed     99.99%
+  53  MT-4_2_630                          0.00%    passed     99.36%
+  54  MT-4_1_450                          0.00%    passed     99.84%
+  55  MT-4_1_590                          0.08%    passed     99.61%
+  56  MT-4_2_100                          0.00%    passed     99.79%
+  57  MT-4_2_210                          0.00%    passed     99.85%
+  58  MT-4_2_200                          0.00%    passed     99.94%
+  59  MT-4_2_260                          0.00%    passed     99.88%
+  60  MT-4_2_80                           0.00%    passed     99.60%
+  61  MT-4_2_150                          0.08%    passed     99.99%
+  62  MT-4_1_550                          0.08%    passed     99.58%
+  63  MT-4_2_220                          0.00%    passed     99.81%
+  64  MT-4_1_570                          0.08%    passed     99.58%
+  65  MT-2_2_100                          0.00%    passed     97.61%
+  66  MT-2_2_610                          0.00%    passed     98.18%
+  67  MT-2_2_450                          0.00%    passed     99.95%
+  68  MT-2_2_370                          0.00%    passed     99.97%
+  69  MT-2_2_260                          0.00%    passed     99.05%
+  70  MT-2_2_470                          0.00%    passed     99.65%
+  71  MT-2_2_630                          0.00%    passed     98.92%
+  72  MT-2_2_580                          0.00%    passed     99.42%
+  73  MT-2_2_510                          0.00%    passed     99.52%
+  74  MT-2_2_110                          0.00%    passed     98.29%
+  75  MT-2_2_330                          0.00%    passed     99.71%
+  76  MT-2_2_170                          0.00%    passed     99.05%
+  77  MT-2_2_310                          0.00%    passed     99.84%
+  78  MT-2_2_240                          0.00%    passed     99.59%
+  79  MT-2_2_320                          0.00%    passed     99.60%
+  80  MT-2_2_350                          0.00%    passed     99.90%
+  81  MT-2_2_550                          0.08%    passed     99.13%
+  82  MT-2_2_420                          0.00%    passed     99.96%
+  83  MT-2_2_210                          0.00%    passed     99.70%
+  84  MT-2_2_30                           0.00%    passed     96.69%
+  85  MT-2_2_140                          0.00%    passed     98.76%
+  86  MT-2_2_500                          0.08%    passed     98.93%
+  87  MT-2_2_230                          0.00%    passed     99.35%
+  88  MT-2_2_540                          0.00%    passed     98.44%
+  89  MT-2_2_360                          0.00%    passed     99.97%
+  90  MT-2_2_480                          0.00%    passed     99.77%
+  91  MT-2_2_290                          0.08%    passed     99.99%
+  92  MT-2_2_280                          0.00%    passed     99.71%
+  93  MT-2_2_520                          0.00%    passed     99.26%
+  94  MT-2_2_190                          0.00%    passed     99.20%
+  95  MT-2_2_570                          0.00%    passed     99.42%
+  96  MT-2_2_460                          0.00%    passed     99.85%
+  97  MT-2_2_380                          0.00%    passed     99.96%
+  98  MT-2_2_20                           0.00%    passed     97.57%
+  99  MT-2_2_220                          0.00%    passed     99.59%
+ 100  MT-2_2_560                          0.00%    passed     99.09%
+ 101  MT-2_2_490                          0.08%    passed     99.65%
+ 102  MT-2_2_390                          0.00%    passed     99.91%
+ 103  MT-2_2_250                          0.00%    passed     99.70%
+ 104  MT-2_1_340                          0.00%    passed     99.71%
+ 105  MT-2_1_500                          0.00%    passed     96.49%
+ 106  MT-2_1_30                           0.00%    passed     97.51%
+ 107  MT-2_1_110                          0.00%    passed     98.20%
+ 108  MT-2_1_170                          0.00%    passed     99.24%
+ 109  MT-2_1_440                          0.00%    passed     96.49%
+ 110  MT-2_1_610                          0.69%    passed     92.21%
+ 111  MT-2_1_90                           0.00%    passed     98.54%
+ 112  MT-2_1_400                          0.00%    passed     97.61%
+ 113  MT-2_1_590                          0.69%    passed     94.38%
+ 114  MT-2_1_310                          0.00%    passed     99.89%
+ 115  MT-2_1_630                          0.69%    passed     92.21%
+ 116  MT-2_1_250                          0.00%    passed     99.74%
+ 117  MT-2_1_140                          0.00%    passed     97.65%
+ 118  MT-2_1_390                          0.08%    passed     98.71%
+ 119  MT-2_1_460                          0.00%    passed     97.61%
+ 120  MT-2_1_190                          0.00%    passed     99.26%
+ 121  MT-2_1_380                          0.00%    passed     99.06%
+ 122  MT-2_1_550                          0.00%    passed     95.06%
+ 123  MT-2_1_280                          0.00%    passed     99.93%
+ 124  MT-2_1_230                          0.00%    passed     99.80%
+ 125  MT-2_1_360                          0.00%    passed     99.38%
+ 126  MT-2_1_40                           0.00%    passed     98.36%
+ 127  MT-2_1_580                          0.69%    passed     93.45%
+ 128  MT-2_1_560                          0.69%    passed     95.07%
+ 129  MT-2_1_150                          0.00%    passed     98.20%
+ 130  MT-2_1_300                          0.08%    passed     99.58%
+ 131  MT-2_1_240                          0.00%    passed     99.93%
+ 132  MT-2_1_160                          0.00%    passed     98.54%
+ 133  MT-2_1_330                          0.00%    passed     99.38%
+ 134  MT-2_1_600                          0.69%    passed     92.14%
+ 135  MT-2_1_320                          0.00%    passed     99.71%
+ 136  MT-2_1_200                          0.00%    passed     99.24%
+ 137  MT-2_1_50                           0.00%    passed     99.33%
+ 138  MT-2_1_620                          0.69%    passed     90.12%
+ 139  MT-2_1_430                          0.00%    passed     97.61%
+ 140  MT-2_1_570                          0.69%    passed     96.38%
+ 141  MT-2_1_210                          0.00%    passed     99.77%
+ 142  MT-2_1_220                          0.00%    passed     99.61%
+ 143  MT-2_1_180                          0.00%    passed     99.63%
+ 144  K03455.1                            0.00%    passed     94.80%
+ 145  MT-4_1_230                          0.00%    passed     99.95%
+ 146  MT-4_1_260                          0.00%    passed     99.95%
+ 147  MT-4_1_240                          0.00%    passed     99.95%
+ 148  MT-4_1_210                          0.00%    passed     99.95%
+ 149  MT-4_1_220                          0.00%    passed     99.95%
+ 150  MT-4_1_250                          0.00%    passed     99.95%
+ 151  MT-4_1_280                          0.00%    passed     99.95%
+ 152  MT-4_1_80                           0.00%    passed     99.32%
+ 153  MT-4_2_60                           0.00%    passed     99.32%
+ 154  MT-4_2_70                           0.00%    passed     99.32%
+ 155  MT-4_1_60                           0.00%    passed     98.87%
+ 156  MT-4_1_30                           0.00%    passed     98.87%
+ 157  MT-4_2_50                           0.00%    passed     98.87%
+ 158  MT-4_1_140                          0.00%    passed     99.80%
+ 159  MT-4_1_160                          0.00%    passed     99.80%
+ 160  MT-4_1_130                          0.00%    passed     99.80%
+ 161  MT-4_2_580                          0.00%    passed     99.45%
+ 162  MT-4_1_600                          0.00%    passed     99.45%
+ 163  MT-4_2_450                          0.00%    passed     99.99%
+ 164  MT-4_2_470                          0.00%    passed     99.99%
+ 165  MT-4_2_440                          0.00%    passed     99.99%
+ 166  MT-4_2_460                          0.00%    passed     99.99%
+ 167  MT-4_1_20                           0.00%    passed     98.20%
+ 168  MT-4_1_40                           0.00%    passed     98.20%
+ 169  MT-4_2_10                           0.00%    passed     98.20%
+ 170  MT-4_2_30                           0.00%    passed     98.20%
+ 171  MT-4_2_20                           0.00%    passed     98.20%
+ 172  MT-2_2_10                           0.00%    passed     98.20%
+ 173  NL43_ann_wk0virusPassRef_plasmid    0.00%    passed     98.20%
+ 174  MT-4_1_120                          0.00%    passed     99.99%
+ 175  MT-4_1_380                          0.08%    passed     99.99%
+ 176  MT-4_1_370                          0.08%    passed     99.99%
+ 177  MT-4_2_380                          0.00%    passed     99.85%
+ 178  MT-4_2_370                          0.00%    passed     99.85%
+ 179  MT-4_2_490                          0.00%    passed    100.00%
+ 180  MT-4_2_500                          0.00%    passed    100.00%
+ 181  MT-4_1_270                          0.00%    passed     99.98%
+ 182  MT-4_2_350                          0.08%    passed     99.84%
+ 183  MT-4_1_410                          0.00%    passed     99.88%
+ 184  MT-4_1_400                          0.00%    passed     99.88%
+ 185  MT-4_1_490                          0.00%    passed     99.67%
+ 186  MT-4_1_500                          0.00%    passed     99.67%
+ 187  MT-4_1_510                          0.00%    passed     99.67%
+ 188  MT-4_1_530                          0.00%    passed     99.67%
+ 189  MT-4_1_480                          0.00%    passed     99.67%
+ 190  MT-4_2_140                          0.00%    passed     99.94%
+ 191  MT-4_2_130                          0.00%    passed     99.94%
+ 192  MT-4_2_270                          0.00%    passed     99.81%
+ 193  MT-4_2_330                          0.00%    passed     99.81%
+ 194  MT-4_2_310                          0.00%    passed     99.81%
+ 195  MT-4_2_290                          0.00%    passed     99.81%
+ 196  MT-4_2_280                          0.00%    passed     99.81%
+ 197  MT-4_2_340                          0.00%    passed     99.81%
+ 198  MT-4_2_600                          0.08%    passed     99.58%
+ 199  MT-4_2_240                          0.00%    passed     99.84%
+ 200  MT-4_1_470                          0.00%    passed     99.84%
+ 201  MT-4_1_460                          0.00%    passed     99.84%
+ 202  MT-4_1_440                          0.00%    passed     99.84%
+ 203  MT-4_1_420                          0.00%    passed     99.84%
+ 204  MT-4_1_430                          0.00%    passed     99.84%
+ 205  MT-4_1_540                          0.08%    passed     99.61%
+ 206  MT-4_1_580                          0.08%    passed     99.61%
+ 207  MT-4_2_90                           0.00%    passed     99.79%
+ 208  MT-2_2_40                           0.00%    passed     97.61%
+ 209  MT-2_2_50                           0.00%    passed     97.61%
+ 210  MT-2_2_80                           0.00%    passed     97.61%
+ 211  MT-2_2_60                           0.00%    passed     97.61%
+ 212  MT-2_2_70                           0.00%    passed     97.61%
+ 213  MT-2_2_90                           0.00%    passed     97.61%
+ 214  MT-2_2_440                          0.00%    passed     99.95%
+ 215  MT-2_2_270                          0.00%    passed     99.05%
+ 216  MT-2_2_590                          0.00%    passed     99.42%
+ 217  MT-2_2_600                          0.00%    passed     99.42%
+ 218  MT-2_2_120                          0.00%    passed     98.29%
+ 219  MT-2_2_130                          0.00%    passed     98.29%
+ 220  MT-2_2_340                          0.00%    passed     99.71%
+ 221  MT-2_2_150                          0.00%    passed     99.05%
+ 222  MT-2_2_180                          0.00%    passed     99.05%
+ 223  MT-2_2_160                          0.00%    passed     99.05%
+ 224  MT-2_2_300                          0.00%    passed     99.84%
+ 225  MT-2_2_430                          0.00%    passed     99.96%
+ 226  MT-2_2_410                          0.00%    passed     99.96%
+ 227  MT-2_2_400                          0.00%    passed     99.96%
+ 228  MT-2_2_200                          0.00%    passed     99.70%
+ 229  MT-2_1_510                          0.00%    passed     96.49%
+ 230  MT-2_1_520                          0.00%    passed     96.49%
+ 231  MT-2_1_530                          0.00%    passed     96.49%
+ 232  MT-2_1_490                          0.00%    passed     96.49%
+ 233  MT-2_1_20                           0.00%    passed     97.51%
+ 234  MT-2_1_10                           0.00%    passed     97.51%
+ 235  MT-2_1_130                          0.00%    passed     98.20%
+ 236  MT-2_1_120                          0.00%    passed     98.20%
+ 237  MT-2_1_450                          0.00%    passed     96.49%
+ 238  MT-2_1_100                          0.00%    passed     98.54%
+ 239  MT-2_1_80                           0.00%    passed     98.54%
+ 240  MT-2_1_70                           0.00%    passed     98.54%
+ 241  MT-2_1_410                          0.00%    passed     97.61%
+ 242  MT-2_1_420                          0.00%    passed     97.61%
+ 243  MT-2_1_290                          0.00%    passed     99.89%
+ 244  MT-2_1_270                          0.00%    passed     99.74%
+ 245  MT-2_1_260                          0.00%    passed     99.74%
+ 246  MT-2_1_480                          0.00%    passed     97.61%
+ 247  MT-2_1_540                          0.00%    passed     97.61%
+ 248  MT-2_1_470                          0.00%    passed     97.61%
+ 249  MT-2_1_350                          0.00%    passed     99.06%
+ 250  MT-2_1_370                          0.00%    passed     99.06%
+ 251  MT-2_1_60                           0.00%    passed     99.33%
+****  TOTAL                               0.03%  0 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: MT-4_1_230 is identical to MT-4_1_200 but kept for subsequent analysis
+NOTE: MT-4_1_80 is identical to MT-4_1_70 but kept for subsequent analysis
+NOTE: MT-4_1_60 is identical to MT-4_2_40 but kept for subsequent analysis
+NOTE: MT-4_1_140 is identical to MT-4_1_150 but kept for subsequent analysis
+NOTE: MT-4_2_580 is identical to MT-4_2_570 but kept for subsequent analysis
+NOTE: MT-4_2_450 is identical to MT-4_2_430 but kept for subsequent analysis
+NOTE: MT-4_1_20 is identical to MT-4_1_10 but kept for subsequent analysis
+NOTE: MT-4_1_120 is identical to MT-4_1_110 but kept for subsequent analysis
+NOTE: MT-4_1_380 is identical to MT-4_1_390 but kept for subsequent analysis
+NOTE: MT-4_2_380 is identical to MT-4_1_350 but kept for subsequent analysis
+NOTE: MT-4_2_490 is identical to MT-4_2_480 but kept for subsequent analysis
+NOTE: MT-4_1_270 is identical to MT-4_1_290 but kept for subsequent analysis
+NOTE: MT-4_2_350 is identical to MT-4_2_320 but kept for subsequent analysis
+NOTE: MT-4_1_410 is identical to MT-4_2_390 but kept for subsequent analysis
+NOTE: MT-4_1_490 is identical to MT-4_1_520 but kept for subsequent analysis
+NOTE: MT-4_2_140 is identical to MT-4_2_160 but kept for subsequent analysis
+NOTE: MT-4_2_270 is identical to MT-4_2_300 but kept for subsequent analysis
+NOTE: MT-4_2_600 is identical to MT-4_2_610 but kept for subsequent analysis
+NOTE: MT-4_2_240 is identical to MT-4_2_250 but kept for subsequent analysis
+NOTE: MT-4_1_470 is identical to MT-4_1_450 but kept for subsequent analysis
+NOTE: MT-4_1_540 is identical to MT-4_1_590 but kept for subsequent analysis
+NOTE: MT-4_2_90 is identical to MT-4_2_100 but kept for subsequent analysis
+NOTE: MT-2_2_40 is identical to MT-2_2_100 but kept for subsequent analysis
+NOTE: MT-2_2_440 is identical to MT-2_2_450 but kept for subsequent analysis
+NOTE: MT-2_2_270 is identical to MT-2_2_260 but kept for subsequent analysis
+NOTE: MT-2_2_590 is identical to MT-2_2_580 but kept for subsequent analysis
+NOTE: MT-2_2_120 is identical to MT-2_2_110 but kept for subsequent analysis
+NOTE: MT-2_2_340 is identical to MT-2_2_330 but kept for subsequent analysis
+NOTE: MT-2_2_150 is identical to MT-2_2_170 but kept for subsequent analysis
+NOTE: MT-2_2_300 is identical to MT-2_2_310 but kept for subsequent analysis
+NOTE: MT-2_2_430 is identical to MT-2_2_420 but kept for subsequent analysis
+NOTE: MT-2_2_200 is identical to MT-2_2_210 but kept for subsequent analysis
+NOTE: MT-2_1_510 is identical to MT-2_1_500 but kept for subsequent analysis
+NOTE: MT-2_1_20 is identical to MT-2_1_30 but kept for subsequent analysis
+NOTE: MT-2_1_130 is identical to MT-2_1_110 but kept for subsequent analysis
+NOTE: MT-2_1_450 is identical to MT-2_1_440 but kept for subsequent analysis
+NOTE: MT-2_1_100 is identical to MT-2_1_90 but kept for subsequent analysis
+NOTE: MT-2_1_410 is identical to MT-2_1_400 but kept for subsequent analysis
+NOTE: MT-2_1_290 is identical to MT-2_1_310 but kept for subsequent analysis
+NOTE: MT-2_1_270 is identical to MT-2_1_250 but kept for subsequent analysis
+NOTE: MT-2_1_480 is identical to MT-2_1_460 but kept for subsequent analysis
+NOTE: MT-2_1_350 is identical to MT-2_1_380 but kept for subsequent analysis
+NOTE: MT-2_1_60 is identical to MT-2_1_50 but kept for subsequent analysis
+NOTE: 64 identical sequences (see below) will be ignored for subsequent analysis
+NOTE: MT-4_1_260 (identical to MT-4_1_200) is ignored but added at the end
+NOTE: MT-4_1_240 (identical to MT-4_1_200) is ignored but added at the end
+NOTE: MT-4_1_210 (identical to MT-4_1_200) is ignored but added at the end
+NOTE: MT-4_1_220 (identical to MT-4_1_200) is ignored but added at the end
+NOTE: MT-4_1_250 (identical to MT-4_1_200) is ignored but added at the end
+NOTE: MT-4_1_280 (identical to MT-4_1_200) is ignored but added at the end
+NOTE: MT-4_2_60 (identical to MT-4_1_70) is ignored but added at the end
+NOTE: MT-4_2_70 (identical to MT-4_1_70) is ignored but added at the end
+NOTE: MT-4_1_30 (identical to MT-4_2_40) is ignored but added at the end
+NOTE: MT-4_2_50 (identical to MT-4_2_40) is ignored but added at the end
+NOTE: MT-4_1_160 (identical to MT-4_1_150) is ignored but added at the end
+NOTE: MT-4_1_130 (identical to MT-4_1_150) is ignored but added at the end
+NOTE: MT-4_1_600 (identical to MT-4_2_570) is ignored but added at the end
+NOTE: MT-4_2_470 (identical to MT-4_2_430) is ignored but added at the end
+NOTE: MT-4_2_440 (identical to MT-4_2_430) is ignored but added at the end
+NOTE: MT-4_2_460 (identical to MT-4_2_430) is ignored but added at the end
+NOTE: MT-4_1_40 (identical to MT-4_1_10) is ignored but added at the end
+NOTE: MT-4_2_10 (identical to MT-4_1_10) is ignored but added at the end
+NOTE: MT-4_2_30 (identical to MT-4_1_10) is ignored but added at the end
+NOTE: MT-4_2_20 (identical to MT-4_1_10) is ignored but added at the end
+NOTE: MT-2_2_10 (identical to MT-4_1_10) is ignored but added at the end
+NOTE: NL43_ann_wk0virusPassRef_plasmid (identical to MT-4_1_10) is ignored but added at the end
+NOTE: MT-4_1_370 (identical to MT-4_1_390) is ignored but added at the end
+NOTE: MT-4_2_370 (identical to MT-4_1_350) is ignored but added at the end
+NOTE: MT-4_2_500 (identical to MT-4_2_480) is ignored but added at the end
+NOTE: MT-4_1_400 (identical to MT-4_2_390) is ignored but added at the end
+IQ-TREE multicore version 2.3.4 COVID-edition for Linux x86 64-bit built Jun  5 2024
+NOTE: MT-4_1_510 (identical to MT-4_1_520) is ignored but added at the end
+r,
+Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
+
+OTE: MT-4_1_480 (identical to MT-4_1_520) is ignored but added at the end
+NOTE: MT-4_2_130 (identical to MT-4_2_160) is ignored but added at the end
+Command: iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta -m MFP -B 1000 -redo
+Seed:    239309 (Using SPRNG - Scalable Parallel Random Number Generator)
+
+Time:    Wed Oct 16 00:56:44 2024
+Kernel:  AVX+FMA - 1 threads (1 CPU cores detected)
+NOTE: MT-4_2_280 (identical to MT-4_2_300) is ignored but added at the end
+NOTE: MT-4_2_340 (identical to MT-4_2_300) is ignored but added at the end
+a/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta ... Fasta format detected
+Reading fasta file: done in 0.00137316 secs
+s ignored but added at the end
+NOTE: MT-4_1_440 (identical to MT-4_1_450) is ignored but added at the end
+Alignment has 50 sequences with 1296 columns, 92 distinct patterns
+the end
+77 parsimony-informative, 33 singleton sites, 1186 constant sites
+ the end
+WARNING: Some sequence names are changed as follows:
+MT-4_1:400 -> MT-4_1_400
+MT-4_1:150 -> MT-4_1_150
+MT-2_1:300 -> MT-2_1_300
+MT-2_1:200 -> MT-2_1_200
+MT-4_1:500 -> MT-4_1_500
+MT-4_1:350 -> MT-4_1_350
+MT-2_2:250 -> MT-2_2_250
+MT-2_1:450 -> MT-2_1_450
+MT-4_1:100 -> MT-4_1_100
+MT-2_1:50 -> MT-2_1_50
+MT-4_1:550 -> MT-4_1_550
+MT-2_2:150 -> MT-2_2_150
+MT-4_2:200 -> MT-4_2_200
+MT-2_1:570 -> MT-2_1_570
+MT-2_1:400 -> MT-2_1_400
+MT-4_1:200 -> MT-4_1_200
+MT-4_1:300 -> MT-4_1_300
+MT-4_2:300 -> MT-4_2_300
+MT-2_1:100 -> MT-2_1_100
+MT-4_2:50 -> MT-4_2_50
+MT-2_1:250 -> MT-2_1_250
+MT-2_2:350 -> MT-2_2_350
+MT-2_2:300 -> MT-2_2_300
+MT-2_2:100 -> MT-2_2_100
+MT-2_1:350 -> MT-2_1_350
+MT-2_1:150 -> MT-2_1_150
+MT-4_1:450 -> MT-4_1_450
+MT-4_2:550 -> MT-4_2_550
+MT-4_2:570 -> MT-4_2_570
+MT-2_2:50 -> MT-2_2_50
+MT-2_2:570 -> MT-2_2_570
+MT-2_2:500 -> MT-2_2_500
+MT-4_1:50 -> MT-4_1_50
+MT-2_2:550 -> MT-2_2_550
+MT-4_2:450 -> MT-4_2_450
+MT-2_1:550 -> MT-2_1_550
+MT-4_2:350 -> MT-4_2_350
+MT-4_2:500 -> MT-4_2_500
+MT-4_1:570 -> MT-4_1_570
+MT-2_2:200 -> MT-2_2_200
+MT-4_1:250 -> MT-4_1_250
+MT-2_2:400 -> MT-2_2_400
+MT-2_1:500 -> MT-2_1_500
+MT-4_2:250 -> MT-4_2_250
+MT-2_2:450 -> MT-2_2_450
+MT-4_2:100 -> MT-4_2_100
+MT-4_2:400 -> MT-4_2_400
+MT-4_2:150 -> MT-4_2_150
+
+                                  Gap/Ambiguity  Composition  p-value
+end
+Analyzing sequences: done in 2.20235e-05 secs
+gnored but added at the end
+   1  MT-4_1_400                          0.00%    passed     99.89%
+ end
+   2  MT-4_1_150                          0.00%    passed     99.81%
+ end
+   3  MT-2_1_300                          0.08%    passed     99.60%
+ end
+   4  MT-2_1_200                          0.00%    passed     99.27%
+e end
+   5  MT-4_1_500                          0.00%    passed     99.68%
+e end
+   6  NL43_ann_wk0virusPassRef_plasmid    0.00%    passed     98.22%
+e end
+NOTE: MT-2_2_160 (identical to MT-2_2_170) is ignored but added at the end
+   8  MT-2_2_250                          0.00%    passed     99.68%
+e end
+NOTE: MT-2_2_400 (identical to MT-2_2_420) is ignored but added at the end
+NOTE: MT-2_1_520 (identical to MT-2_1_500) is ignored but added at the end
+  11  MT-2_1_50                           0.00%    passed     99.35%
+e end
+  12  MT-4_1_550                          0.08%    passed     99.60%
+e end
+  13  MT-2_2_150                          0.00%    passed     99.02%
+end
+  14  MT-4_2_200                          0.00%    passed     99.95%
+e end
+  15  MT-2_1_570                          0.69%    passed     96.34%
+end
+  16  MT-2_1_400                          0.00%    passed     97.58%
+end
+  17  MT-4_1_200                          0.00%    passed     99.95%
+e end
+  18  MT-4_1_300                          0.00%    passed     99.85%
+e end
+  19  MT-4_2_300                          0.00%    passed     99.83%
+e end
+  20  MT-2_1_100                          0.00%    passed     98.57%
+e end
+NOTE: MT-2_1_370 (identical to MT-2_1_380) is ignored but added at the end
+  22  MT-2_1_250                          0.00%    passed     99.76%
+  23  MT-2_2_350                          0.00%    passed     99.91%
+Alignment was printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.uniqueseq.phy
+
+ 25  MT-2_2_100                          0.00%    passed     97.61%
+  26  MT-2_1_350                          0.00%    passed     99.04%
+/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.uniqueseq.phy
+  27  MT-2_1_150                          0.00%    passed     98.22%
+
+ 28  MT-4_1_450                          0.00%    passed     99.84%
+  29  MT-4_2_550                          0.00%    passed     99.70%
+  30  MT-4_2_570                          0.00%    passed     99.45%
+
+ 31  MT-2_2_50                           0.00%    passed     97.61%
+  32  MT-2_2_570                          0.00%    passed     99.39%
+  33  MT-2_2_500                          0.08%    passed     98.86%
+)... 0.013 seconds
+  34  MT-4_1_50                           0.00%    passed     98.88%
+  35  MT-2_2_550                          0.08%    passed     99.08%
+  36  MT-4_2_450                          0.00%    passed     99.98%
+  37  MT-2_1_550                          0.00%    passed     94.98%
+  38  MT-4_2_350                          0.08%    passed     99.86%
+  39  MT-4_2_500                          0.00%    passed    100.00%
+  40  MT-4_1_570                          0.08%    passed     99.60%
+  41  MT-2_2_200                          0.00%    passed     99.68%
+  42  MT-4_1_250                          0.00%    passed     99.95%
+  43  K03455.1                            0.00%    passed     94.91%
+  44  MT-2_2_400                          0.00%    passed     99.96%
+  45  MT-2_1_500                          0.00%    passed     96.43%
+  46  MT-4_2_250                          0.00%    passed     99.85%
+  47  MT-2_2_450                          0.00%    passed     99.95%
+  48  MT-4_2_100                          0.00%    passed     99.77%
+  49  MT-4_2_400                          0.08%    passed     99.99%
+  50  MT-4_2_150                          0.08%    passed     99.99%
+****  TOTAL                               0.03%  0 sequences failed composition chi2 test (p-value<5%; df=3)
+NOTE: MT-4_1_250 is identical to MT-4_1_200 but kept for subsequent analysis
+NOTE: MT-2_2_50 is identical to MT-2_2_100 but kept for subsequent analysis
+
+
+Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.010 seconds
+Perform fast likelihood tree search using GTR+I+G model...
+Estimate model parameters (epsilon = 5.000)
+Perform nearest neighbor interchange...
+Estimate model parameters (epsilon = 1.000)
+1. Initial log-likelihood: -2777.356
+Perform nearest neighbor interchange...
+Optimal log-likelihood: -2777.135
+Rate parameters:  A-C: 1.17405  A-G: 5.36253  A-T: 0.14944  C-G: 0.25493  C-T: 5.28789  G-T: 1.00000
+Base frequencies:  A: 0.387  C: 0.181  G: 0.241  T: 0.191
+Proportion of invariable sites: 0.460
+Gamma shape alpha: 0.163
+Parameters optimization took 1 rounds (0.046 sec)
+Time for fast ML tree search: 0.135 seconds
+
+NOTE: ModelFinder requires 1 MB RAM!
+Estimate model parameters (epsilon = 1.000)
+sample size: 1296) ...
+ No. Model         -LnL         df  AIC          AICc         BIC
+  1  GTR+F         2837.295     105 5884.590     5903.296     6427.129
+  2  GTR+F+I       2777.647     106 5767.295     5786.373     6315.001
+Rate parameters:  A-C: 1.50576  A-G: 7.62369  A-T: 0.40642  C-G: 0.27009  C-T: 7.90239  G-T: 1.00000
+Base frequencies:  A: 0.388  C: 0.181  G: 0.240  T: 0.191
+Proportion of invariable sites: 0.462
+Gamma shape alpha: 0.097
+Parameters optimization took 1 rounds (0.062 sec)
+  3  GTR+F+G4      2783.944     106 5779.888     5798.966     6327.594
+
+  4  GTR+F+I+G4    2777.133     107 5768.265     5787.720     6321.138
+ModelFinder will test up to 484 DNA models (sample size: 1296) ...
+ No. Model         -LnL         df  AIC          AICc         BIC
+  1  GTR+F         3376.887     379 7511.773     7826.227     9470.081
+  2  GTR+F+I       3244.629     380 7249.259     7565.718     9212.733
+  5  GTR+F+R2      2776.438     107 5766.876     5786.330     6319.749
+  3  GTR+F+G4      3264.402     380 7288.804     7605.263     9252.278
+  6  GTR+F+R3      2776.420     109 5770.839     5791.059     6334.047
+ 14  GTR+F+I+R2    2776.915     108 5769.829     5789.664     6327.869
+ 15  GTR+F+I+R3    2776.778     110 5773.556     5794.163     6341.930
+ 24  SYM+I         2851.111     103 5908.223     5926.196     6440.428
+ 26  SYM+I+G4      2850.475     104 5908.949     5927.287     6446.321
+ 27  SYM+R2        2848.457     104 5904.913     5923.251     6442.285
+ 46  TVM+F+I       2777.647     105 5765.294     5784.000     6307.833
+ 48  TVM+F+I+G4    2777.135     106 5766.270     5785.348     6313.976
+  5  GTR+F+R2      3244.280     381 7250.560     7569.033     9219.202
+ 49  TVM+F+R2      2776.437     106 5764.874     5783.953     6312.580
+ 68  TVMe+I        2854.006     102 5912.012     5929.624     6439.049
+ 70  TVMe+I+G4     2853.513     103 5913.026     5930.999     6445.231
+ 71  TVMe+R2       2851.706     103 5909.413     5927.386     6441.618
+ 90  TIM3+F+I      2783.684     104 5775.368     5793.706     6312.740
+  6  GTR+F+R3      3243.333     383 7252.666     7575.192     9231.641
+ 93  TIM3+F+R2     2782.413     105 5774.827     5793.533     6317.366
+112  TIM3e+I       2857.579     101 5917.158     5934.414     6439.029
+114  TIM3e+I+G4    2856.977     102 5917.954     5935.567     6444.992
+ 14  GTR+F+I+R2    3242.804     382 7249.608     7570.103     9223.416
+115  TIM3e+R2      2855.180     102 5914.359     5931.972     6441.397
+134  TIM2+F+I      2784.570     104 5777.140     5795.478     6314.512
+136  TIM2+F+I+G4   2784.084     105 5778.167     5796.873     6320.706
+ 15  GTR+F+I+R3    3242.840     384 7253.681     7578.247     9237.823
+ 24  SYM+I         3318.702     377 7391.403     7701.874     9339.377
+137  TIM2+F+R2     2783.336     105 5776.672     5795.378     6319.211
+156  TIM2e+I       2857.994     101 5917.988     5935.244     6439.858
+158  TIM2e+I+G4    2857.399     102 5918.799     5936.411     6445.836
+ 26  SYM+I+G4      3318.402     378 7392.804     7705.262     9345.944
+159  TIM2e+R2      2855.333     102 5914.667     5932.279     6441.705
+178  TIM+F+I       2777.838     104 5763.677     5782.014     6301.048
+180  TIM+F+I+G4    2777.331     105 5764.662     5783.367     6307.201
+181  TIM+F+R2      2776.639     105 5763.278     5781.984     6305.817
+200  TIMe+I        2851.703     101 5905.406     5922.662     6427.277
+202  TIMe+I+G4     2851.090     102 5906.180     5923.793     6433.218
+203  TIMe+R2       2849.330     102 5902.661     5920.274     6429.699
+222  TPM3u+F+I     2783.684     103 5773.368     5791.341     6305.573
+224  TPM3u+F+I+G4  2783.169     104 5774.339     5792.676     6311.711
+ 48  TVM+F+I+G4    3244.362     380 7248.724     7565.183     9212.198
+225  TPM3u+F+R2    2782.417     104 5772.834     5791.172     6310.206
+244  TPM3+I        2860.362     100 5920.723     5937.627     6437.427
+246  TPM3+I+G4     2859.915     101 5921.830     5939.087     6443.701
+247  TPM3+R2       2858.318     101 5918.637     5935.893     6440.507
+266  TPM2u+F+I     2784.572     103 5775.144     5793.117     6307.349
+268  TPM2u+F+I+G4  2784.086     104 5776.171     5794.509     6313.543
+ 49  TVM+F+R2      3244.328     380 7248.657     7565.116     9212.131
+ 68  TVMe+I        3322.406     376 7396.812     7705.304     9339.618
+269  TPM2u+F+R2    2783.331     104 5774.662     5793.000     6312.034
+ 70  TVMe+I+G4     3322.341     377 7398.683     7709.153     9346.656
+288  TPM2+I        2860.784     100 5921.569     5938.472     6438.272
+290  TPM2+I+G4     2860.362     101 5922.723     5939.980     6444.594
+291  TPM2+R2       2858.641     101 5919.282     5936.539     6441.153
+310  K3Pu+F+I      2777.838     103 5761.676     5779.650     6293.881
+312  K3Pu+F+I+G4   2777.333     104 5762.666     5781.004     6300.038
+313  K3Pu+F+R2     2776.640     104 5761.280     5779.618     6298.652
+332  K3P+I         2854.504     100 5909.007     5925.911     6425.711
+334  K3P+I+G4      2854.036     101 5910.072     5927.328     6431.942
+ 71  TVMe+R2       3320.269     377 7394.537     7705.008     9342.511
+ 90  TIM3+F+I      3249.529     378 7255.059     7567.517     9208.199
+ 92  TIM3+F+I+G4   3249.190     379 7256.380     7570.834     9214.687
+335  K3P+R2        2852.481     101 5906.961     5924.218     6428.832
+354  TN+F+I        2784.577     103 5775.155     5793.128     6307.360
+356  TN+F+I+G4     2784.091     104 5776.182     5794.520     6313.554
+357  TN+F+R2       2783.354     104 5774.708     5793.046     6312.080
+376  TNe+I         2858.421     100 5916.842     5933.746     6433.546
+378  TNe+I+G4      2857.842     101 5917.684     5934.941     6439.555
+ 93  TIM3+F+R2     3249.234     379 7256.468     7570.922     9214.775
+379  TNe+R2        2856.056     101 5914.112     5931.369     6435.983
+398  HKY+F+I       2784.577     102 5773.155     5790.768     6300.193
+400  HKY+F+I+G4    2784.092     103 5774.183     5792.156     6306.388
+112  TIM3e+I       3325.078     375 7400.156     7706.678     9337.795
+114  TIM3e+I+G4    3324.803     376 7401.606     7710.098     9344.412
+401  HKY+F+R2      2783.357     103 5772.715     5790.688     6304.920
+420  K2P+I         2861.172     99  5920.343     5936.899     6431.880
+422  K2P+I+G4      2860.756     100 5921.512     5938.416     6438.216
+423  K2P+R2        2859.267     100 5918.533     5935.437     6435.237
+442  F81+F+I       2853.199     101 5908.398     5925.655     6430.269
+444  F81+F+I+G4    2852.764     102 5909.528     5927.140     6436.566
+445  F81+F+R2      2851.726     102 5907.451     5925.064     6434.489
+464  JC+I          2938.965     98  6073.929     6090.140     6580.299
+466  JC+I+G4       2938.516     99  6075.032     6091.587     6586.569
+134  TIM2+F+I      3249.729     378 7255.458     7567.916     9208.599
+136  TIM2+F+I+G4   3249.438     379 7256.875     7571.330     9215.183
+467  JC+R2         2937.100     99  6072.200     6088.755     6583.737
+Akaike Information Criterion:           K3Pu+F+R2
+Corrected Akaike Information Criterion: K3Pu+F+R2
+Bayesian Information Criterion:         K3Pu+F+I
+Best-fit model: K3Pu+F+I chosen according to BIC
+
+All model information printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.model.gz
+CPU time for ModelFinder: 3.895 seconds (0h:0m:3s)
+Wall-clock time for ModelFinder: 4.488 seconds (0h:0m:4s)
+Generating 1000 samples for ultrafast bootstrap (seed: 239309)...
+
+NOTE: 0 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -2777.838
+Optimal log-likelihood: -2777.838
+Rate parameters:  A-C: 1.00000  A-G: 4.87342  A-T: 0.17064  C-G: 0.17064  C-T: 4.87342  G-T: 1.00000
+Base frequencies:  A: 0.387  C: 0.181  G: 0.241  T: 0.191
+Proportion of invariable sites: 0.845
+Parameters optimization took 1 rounds (0.031 sec)
+Wrote distance file to... 
+Computing ML distances based on estimated model parameters...
+Calculating distance matrix: done in 0.00332166 secs using 98.75% CPU
+Computing ML distances took 0.014499 sec (of wall-clock time) 0.003411 sec (of CPU time)
+Setting up auxiliary I and S matrices: done in 0.000113094 secs using 99.03% CPU
+Computing RapidNJ tree took 0.006477 sec (of wall-clock time) 0.000458 sec (of CPU time)
+Log-likelihood of RapidNJ tree: -2782.979
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 137  TIM2+F+R2     3249.361     379 7256.721     7571.176     9215.029
+156  TIM2e+I       3323.664     375 7397.329     7703.850     9334.968
+0.145 second
+158  TIM2e+I+G4    3323.411     376 7398.821     7707.313     9341.628
+Computing log-likelihood of 98 initial trees ... 0.096 seconds
+Current best score: -2777.838
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -2777.838
+BETTER TREE FOUND at iteration 2: -2777.833
+BETTER TREE FOUND at iteration 4: -2777.833
+Iteration 10 / LogL: -2777.834 / Time: 0h:0m:5s
+Iteration 20 / LogL: -2777.834 / Time: 0h:0m:5s
+ 7704.568     9338.882
+178  TIM+F+I       3245.300     378 7246.599     7559.057     9199.739
+Current best tree score: -2777.833 / CPU time: 0.636
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+180  TIM+F+I+G4    3244.987     379 7247.975     7562.429     9206.282
+Iteration 30 / LogL: -2777.859 / Time: 0h:0m:5s (0h:0m:2s left)
+181  TIM+F+R2      3245.004     379 7248.008     7562.462     9206.316
+200  TIMe+I        3320.818     375 7391.635     7698.157     9329.274
+Iteration 40 / LogL: -2777.867 / Time: 0h:0m:5s (0h:0m:2s left)
+35.838
+Iteration 50 / LogL: -2777.867 / Time: 0h:0m:6s (0h:0m:1s left)
+Log-likelihood cutoff on original alignment: -2798.593
+203  TIMe+R2       3319.426     376 7390.852     7699.344     9333.658
+222  TPM3u+F+I     3249.563     377 7253.125     7563.596     9201.099
+224  TPM3u+F+I+G4  3249.200     378 7254.400     7566.858     9207.540
+Iteration 60 / LogL: -2777.864 / Time: 0h:0m:6s (0h:0m:1s left)
+225  TPM3u+F+R2    3249.285     378 7254.570     7567.028     9207.710
+244  TPM3+I        3328.618     374 7405.236     7709.796     9337.708
+246  TPM3+I+G4     3328.556     375 7407.112     7713.634     9344.751
+Iteration 70 / LogL: -2777.850 / Time: 0h:0m:6s (0h:0m:1s left)
+Iteration 80 / LogL: -2777.866 / Time: 0h:0m:7s (0h:0m:0s left)
+247  TPM3+R2       3327.024     375 7404.048     7710.570     9341.687
+266  TPM2u+F+I     3249.754     377 7253.508     7563.979     9201.482
+268  TPM2u+F+I+G4  3249.453     378 7254.905     7567.363     9208.046
+Iteration 90 / LogL: -2783.017 / Time: 0h:0m:7s (0h:0m:0s left)
+269  TPM2u+F+R2    3249.403     378 7254.807     7567.265     9207.947
+288  TPM2+I        3327.313     374 7402.627     7707.187     9335.099
+Iteration 100 / LogL: -2777.859 / Time: 0h:0m:7s (0h:0m:0s left)
+290  TPM2+I+G4     3327.310     375 7404.620     7711.142     9342.259
+Log-likelihood cutoff on original alignment: -2800.647
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.998
+TREE SEARCH COMPLETED AFTER 105 ITERATIONS / Time: 0h:0m:7s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -2777.833
+Optimal log-likelihood: -2777.833
+Rate parameters:  A-C: 1.00000  A-G: 4.87262  A-T: 0.16925  C-G: 0.16925  C-T: 4.87262  G-T: 1.00000
+Base frequencies:  A: 0.387  C: 0.181  G: 0.241  T: 0.191
+Proportion of invariable sites: 0.845
+Parameters optimization took 1 rounds (0.030 sec)
+BEST SCORE FOUND : -2777.833
+Creating bootstrap support values...
+291  TPM2+R2       3325.369     375 7400.737     7707.259     9338.377
+310  K3Pu+F+I      3245.333     377 7244.665     7555.136     9192.638
+312  K3Pu+F+I+G4   3245.004     378 7246.008     7558.466     9199.149
+Split supports printed to NEXUS file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex
+Total tree length: 0.129
+
+Total number of iterations: 105
+CPU time used for tree search: 2.850 sec (0h:0m:2s)
+Wall-clock time used for tree search: 3.177 sec (0h:0m:3s)
+Total CPU time used: 6.857 sec (0h:0m:6s)
+Total wall-clock time used: 8.052 sec (0h:0m:8s)
+
+Computing bootstrap consensus tree...
+Reading input file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex...
+50 taxa and 260 splits.
+Consensus tree written to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
+Reading input trees file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
+Log-likelihood of consensus tree: -2777.919
+
+Analysis results written to: 
+  IQ-TREE report:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
+  Maximum-likelihood tree:       /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.treefile
+  Likelihood distances:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.mldist
+
+Ultrafast bootstrap approximation results written to:
+  Split support values:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.splits.nex
+  Consensus tree:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.contree
+  Screen log file:               /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.log
+
+Date and Time: Wed Oct 16 00:56:52 2024
+313  K3Pu+F+R2     3245.063     378 7246.125     7558.583     9199.265
+332  K3P+I         3324.377     374 7396.753     7701.313     9329.225
+334  K3P+I+G4      3324.279     375 7398.558     7705.079     9336.197
+335  K3P+R2        3322.590     375 7395.179     7701.701     9332.819
+354  TN+F+I        3250.389     377 7254.778     7565.248     9202.751
+356  TN+F+I+G4     3250.068     378 7256.135     7568.593     9209.276
+357  TN+F+R2       3250.132     378 7256.265     7568.723     9209.405
+376  TNe+I         3325.852     374 7399.704     7704.264     9332.176
+378  TNe+I+G4      3325.592     375 7401.183     7707.705     9338.822
+379  TNe+R2        3324.618     375 7399.235     7705.757     9336.874
+398  HKY+F+I       3250.425     376 7252.851     7561.342     9195.657
+400  HKY+F+I+G4    3250.086     377 7254.172     7564.642     9202.145
+401  HKY+F+R2      3250.181     377 7254.361     7564.832     9202.334
+420  K2P+I         3329.372     373 7404.745     7707.352     9332.050
+422  K2P+I+G4      3329.326     374 7406.652     7711.213     9339.125
+423  K2P+R2        3327.849     374 7403.698     7708.259     9336.170
+442  F81+F+I       3352.625     375 7455.250     7761.772     9392.889
+444  F81+F+I+G4    3352.438     376 7456.876     7765.368     9399.682
+445  F81+F+R2      3351.441     376 7454.882     7763.374     9397.688
+464  JC+I          3443.320     372 7630.641     7931.304     9552.779
+466  JC+I+G4       3443.274     373 7632.549     7935.156     9559.854
+467  JC+R2         3442.064     373 7630.128     7932.735     9557.433
+Akaike Information Criterion:           K3Pu+F+I
+Corrected Akaike Information Criterion: K3Pu+F+I
+Bayesian Information Criterion:         K3Pu+F+I
+Best-fit model: K3Pu+F+I chosen according to BIC
+
+All model information printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.model.gz
+CPU time for ModelFinder: 10.537 seconds (0h:0m:10s)
+Wall-clock time for ModelFinder: 11.176 seconds (0h:0m:11s)
+Generating 1000 samples for ultrafast bootstrap (seed: 86356)...
+
+NOTE: 1 MB RAM (0 GB) is required!
+Estimate model parameters (epsilon = 0.100)
+1. Initial log-likelihood: -3245.333
+Optimal log-likelihood: -3245.330
+Rate parameters:  A-C: 1.00000  A-G: 6.06962  A-T: 0.27926  C-G: 0.27926  C-T: 6.06962  G-T: 1.00000
+Base frequencies:  A: 0.388  C: 0.181  G: 0.240  T: 0.191
+Proportion of invariable sites: 0.866
+Parameters optimization took 1 rounds (0.037 sec)
+Wrote distance file to... 
+Computing ML distances based on estimated model parameters...
+Calculating distance matrix: done in 0.0449614 secs using 99.96% CPU
+Computing ML distances took 0.056705 sec (of wall-clock time) 0.045174 sec (of CPU time)
+Setting up auxiliary I and S matrices: done in 0.000929055 secs using 99.99% CPU
+Computing RapidNJ tree took 0.022931 sec (of wall-clock time) 0.013659 sec (of CPU time)
+Log-likelihood of RapidNJ tree: -3284.459
+--------------------------------------------------------------------
+|             INITIALIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Generating 98 parsimony trees... 0.901 second
+Computing log-likelihood of 98 initial trees ... 0.411 seconds
+Current best score: -3243.809
+
+Do NNI search on 20 best initial trees
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 1: -3241.129
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 5: -3237.354
+Iteration 10 / LogL: -3241.428 / Time: 0h:0m:15s
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 16: -3234.861
+Iteration 20 / LogL: -3245.576 / Time: 0h:0m:18s
+Finish initializing candidate tree set (20)
+Current best tree score: -3234.861 / CPU time: 6.815
+Number of iterations: 20
+--------------------------------------------------------------------
+|               OPTIMIZING CANDIDATE TREE SET                      |
+--------------------------------------------------------------------
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 25: -3233.886
+Iteration 30 / LogL: -3245.876 / Time: 0h:0m:21s (0h:0m:32s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 31: -3232.955
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 37: -3232.289
+Iteration 40 / LogL: -3240.926 / Time: 0h:0m:24s (0h:0m:32s left)
+Estimate model parameters (epsilon = 0.100)
+BETTER TREE FOUND at iteration 49: -3231.397
+Iteration 50 / LogL: -3233.664 / Time: 0h:0m:27s (0h:0m:32s left)
+Log-likelihood cutoff on original alignment: -3263.802
+Iteration 60 / LogL: -3232.789 / Time: 0h:0m:30s (0h:0m:29s left)
+Iteration 70 / LogL: -3232.196 / Time: 0h:0m:33s (0h:0m:25s left)
+Iteration 80 / LogL: -3232.602 / Time: 0h:0m:36s (0h:0m:22s left)
+Iteration 90 / LogL: -3236.600 / Time: 0h:0m:39s (0h:0m:18s left)
+Iteration 100 / LogL: -3254.024 / Time: 0h:0m:42s (0h:0m:15s left)
+Log-likelihood cutoff on original alignment: -3262.756
+NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.996
+Iteration 110 / LogL: -3239.961 / Time: 0h:0m:45s (0h:0m:28s left)
+Iteration 120 / LogL: -3231.448 / Time: 0h:0m:48s (0h:0m:25s left)
+Iteration 130 / LogL: -3237.831 / Time: 0h:0m:51s (0h:0m:21s left)
+Iteration 140 / LogL: -3231.991 / Time: 0h:0m:54s (0h:0m:18s left)
+Iteration 150 / LogL: -3231.439 / Time: 0h:0m:57s (0h:0m:15s left)
+Log-likelihood cutoff on original alignment: -3261.844
+TREE SEARCH COMPLETED AFTER 150 ITERATIONS / Time: 0h:0m:58s
+
+--------------------------------------------------------------------
+|                    FINALIZING TREE SEARCH                        |
+--------------------------------------------------------------------
+Performs final model parameters optimization
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -3231.397
+Optimal log-likelihood: -3231.397
+Rate parameters:  A-C: 1.00000  A-G: 6.63549  A-T: 0.25871  C-G: 0.25871  C-T: 6.63549  G-T: 1.00000
+Base frequencies:  A: 0.388  C: 0.181  G: 0.240  T: 0.191
+Proportion of invariable sites: 0.865
+Parameters optimization took 1 rounds (0.007 sec)
+BEST SCORE FOUND : -3231.397
+Creating bootstrap support values...
+Split supports printed to NEXUS file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.splits.nex
+Total tree length: 0.173
+
+Total number of iterations: 150
+CPU time used for tree search: 45.450 sec (0h:0m:45s)
+Wall-clock time used for tree search: 46.554 sec (0h:0m:46s)
+Total CPU time used: 56.512 sec (0h:0m:56s)
+Total wall-clock time used: 58.418 sec (0h:0m:58s)
+
+Computing bootstrap consensus tree...
+Reading input file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.splits.nex...
+187 taxa and 1241 splits.
+Consensus tree written to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.contree
+Reading input trees file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.contree
+Log-likelihood of consensus tree: -3232.747
+
+Analysis results written to: 
+  IQ-TREE report:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
+  Maximum-likelihood tree:       /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.treefile
+  Likelihood distances:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.mldist
+
+Ultrafast bootstrap approximation results written to:
+  Split support values:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.splits.nex
+  Consensus tree:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.contree
+  Screen log file:               /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.log
+
+Date and Time: Wed Oct 16 00:57:43 2024
