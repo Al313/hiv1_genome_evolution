@@ -65,10 +65,13 @@ variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] 
 variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
+# determine what data to be included
 
-# only keep the EXPIII data
 exp <- "EXPIII"
-variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
 
 
 # facors
@@ -95,10 +98,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
-
-# last passage 
-
-end_passage <- 560
 
 
 # Visual settings
@@ -135,12 +134,22 @@ if (category == "Sporadic"){
 
 # get numbers for in-text reporting
 variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & allele_freq < max_threshold & mut_type == "P") #& mut_type == "P"
-head(variants_expiii)
-table(variants_expiii$host_line)
+                                filter(allele_freq >= min_threshold & allele_freq < max_threshold) #& mut_type == "P"
+
 
 a <- nrow(variants_expiii_subset)
+bb <- length(unique(paste0(variants_expiii_subset$exp_line,variants_expiii_subset$mut_info)))
 b <- length(unique(variants_expiii_subset$mut_info))
+variants_expiii_subset_mt2 <- variants_expiii_subset[variants_expiii_subset$host_line == "MT2",]
+variants_expiii_subset_mt4 <- variants_expiii_subset[variants_expiii_subset$host_line == "MT4",]
+bb_mt2 <- length(unique(paste0(variants_expiii_subset_mt2$exp_line,variants_expiii_subset_mt2$mut_info)))
+bb_mt4 <- length(unique(paste0(variants_expiii_subset_mt4$exp_line,variants_expiii_subset_mt4$mut_info)))
+bb_mt2/bb_mt4
+b_mt2 <- length(unique(variants_expiii_subset_mt2$mut_info))
+b_mt4 <- length(unique(variants_expiii_subset_mt4$mut_info))
+b_mt2/b_mt4
+
+
 c <- length(setdiff(unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT4"]),unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT2"])))
 d <- length(setdiff(unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT2"]),unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT4"])))
 e <- length(intersect(unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT2"]),unique(variants_expiii_subset$mut_info[variants_expiii_subset$host_line == "MT4"])))
@@ -168,7 +177,7 @@ variants_expiii_subset_pooled$passage <- as.integer(as.character(variants_expiii
 
 
 counts <- data.frame()
-for (psg in seq(10,570,10)){
+for (psg in seq(10,end_psg,10)){
     d <- variants_expiii_subset_pooled[variants_expiii_subset_pooled$passage <= psg,]
     dd <- d %>% select(genomic_pos, exp_line) %>% distinct() %>% group_by(exp_line) %>% summarise(count = n())
     dd$passage <- psg
@@ -179,7 +188,7 @@ for (psg in seq(10,570,10)){
 fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         geom_line(linewidth=2) +
         labs(x="\nTransfer", y= "Position Count\n", color = "Virus Line", title = paste0("Cumulative Number of Uniquely Mutated Positions (", category,")"))+
-        scale_x_continuous(breaks = seq(0,570,50)) +
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$count)+20),breaks = seq(0,max(counts$count)+20,200)) +
         scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
         theme_bw() +
@@ -191,33 +200,6 @@ fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         legend.text = element_text(size = 15))
 
 
-## simulation of random sampling
-
-# ss <- seq(1,200)
-
-# i <- 0
-# pp <- c()
-# ll <- c()
-# while (i <= 100){
-#     i <- i +1
-#     p <- sample(ss,5)
-
-#     pp <- unique(append(pp,p))
-
-#     l <- length(pp)
-
-#     ll <- append(ll, l)
-# }
-
-# plot(ll, type="o", col="blue", xlab="Iterations", ylab="Number of Unique Elements", 
-#      main="Growth of Unique Samples Over Iterations")
-
-
-# dff <- data.frame(x = seq(1:101), y = ll)
-
-# dff %>% ggplot(aes(x = x, y = y)) +
-#     geom_line()
-
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
@@ -226,6 +208,62 @@ pdf(file = paste0(fig_dir, category, "_cumulative_mutated_pos.pdf"), height = 14
 fig
 dev.off()
 
+
+```
+
+
+```{r random sampling from pool of possible mutations modelling per host}
+
+counts_sub <- counts[str_detect(counts$exp_line, pattern = "All"),]
+
+counts_sub %<>% group_by(passage) %>%
+        summarize(average = mean(count))
+
+
+# Fit a negative exponential model
+model_exp <- nls(average ~ L * (1 - exp(-K * passage)),
+                data = counts_sub,
+                start = list(L = 5000, K = 0.01),
+                control = nls.control(maxiter = 1000))
+
+summary(model_exp)
+
+df <- data.frame(passage = seq(10,2000,10))
+
+df_prediction <- data.frame(passage = seq(10,2000,10))
+df_prediction$predicted_mt_2 <- predict(model_exp, newdata = df)
+df_prediction$predicted_mt_4 <- predict(model_exp, newdata = df)
+df_prediction$predicted_all <- predict(model_exp, newdata = df)
+?rep
+counts_addon <- data.frame(exp_line = rep(levels(counts$exp_line), each = 150), count = NA, passage = rep(seq(510,2000,10), 5))
+counts <- rbind(counts, counts_addon)
+View(counts)
+
+
+fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        geom_line(data = df_prediction, aes(y = predicted_mt_2), color = "grey", size = 2, linetype = "dashed") +
+        geom_line(data = df_prediction, aes(y = predicted_mt_4), color = "grey", size = 2, linetype = "dashed") +
+        geom_line(data = df_prediction, aes(y = predicted_all), color = "grey", size = 2, linetype = "dashed") +
+        labs(x="\nTransfer", y= "Position Count\n", color = "Virus Line", title = paste0("Modelling of Uniquely Mutated Positions (", category,")"))+
+        scale_x_continuous(breaks = seq(0,2000,100)) +
+        scale_y_continuous(limits = c(0,max(counts$count+1000, na.rm=T)+20),breaks = seq(0,max(counts$count+1000, na.rm=T)+20,200)) +
+        scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_cumulative_mutated_pos_models.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
 ```
 
@@ -277,7 +315,7 @@ dev.off()
 ```
 
 
-```{r visualization1: Accumulation plot}
+```{r visualization1: cumulative plot of unique mutations}
 
 
 
@@ -285,7 +323,7 @@ df <- data.frame()
 variants_expiii_subset <- variants_expiii %>% mutate(passage = as.numeric(as.character(passage)))
 
 for (exp_line in exp_line_factor){
-    for (passage in seq(10,570, 10)){
+    for (passage in seq(10,end_psg, 10)){
         count <- length(unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.05 & variants_expiii_subset$passage <= passage & variants_expiii_subset$exp_line == exp_line & variants_expiii_subset$mut_type == "P"]))
         df <- rbind(df, c(exp_line, passage, count))
     }
@@ -298,8 +336,8 @@ df %<>% set_colnames(c("exp_line", "passage", "count")) %>%
 
 fig <- df %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         geom_line(linewidth=2) +
-        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0("Number of unique point mutations with VF>=0.05"))+
-        scale_x_continuous(breaks = seq(0,570,50)) +
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0("Number of unique point mutations (",category,")"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(df$count)+20),breaks = seq(0,max(df$count)+20,50)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
         theme_bw() +
@@ -309,6 +347,7 @@ fig <- df %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         axis.text.y = element_text(size = 20),
         legend.title = element_text(size=20),
         legend.text = element_text(size = 15))
+
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
@@ -337,7 +376,7 @@ for (line in line_labels){
     }
 }
 
-variants_expiii_subset$appearance <- factor(variants_expiii_subset$appearance, levels = seq(10,570,10))
+variants_expiii_subset$appearance <- factor(variants_expiii_subset$appearance, levels = seq(10,end_psg,10))
 
 variants_expiii_subset2 <- variants_expiii_subset
 variants_expiii_subset2$exp_line <- "All"
@@ -364,7 +403,7 @@ step <- c(5,10,20,50,100)[low - 1]
 fig <- counts %>%  ggplot(aes(x=appearance, y = mut_count, color = exp_line)) +
         geom_line(linewidth=2) +
         labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0("Appearance of Unique ", category, " Mutations"))+
-        scale_x_continuous(breaks = seq(0,570,50)) +
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$mut_count)+step),breaks = seq(0,max(counts$mut_count)+step,step)) +
         scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
         theme_bw() +
@@ -452,8 +491,9 @@ counts <- variants_ann_expiii%>%
 
 fig <- counts %>%  ggplot(aes(x=passage, y = nr_majority, color = exp_line, linetype = effect_simplified)) +
         geom_line(linewidth=1) +
-        labs(x="\nTransfer", y= "Normalized Mutation Count\n", color = "Translational Impact", title = paste0(category, " Mutation Accumulation Based on Translational Effect"))+
-        scale_x_continuous(breaks = seq(0,570,50)) +
+        labs(x="\nTransfer", y= "Mutation Count\n",  color = "Virus Lines", linetype = "Translational Impact",
+        title = paste0(category, " Mutation Accumulation Based on Translational Effect"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$nr_majority)+10),breaks = seq(0,max(counts$nr_majority)+10,10)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
         theme_bw() +
@@ -469,7 +509,7 @@ fig <- counts %>%  ggplot(aes(x=passage, y = nr_majority, color = exp_line, line
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir,"mut_accumulation_translational_impact.pdf"), height = 21, width = 21)
+pdf(file = paste0(fig_dir,category, "_accumulation_translational_impact.pdf"), height = 21, width = 21)
 fig
 dev.off()
 
@@ -486,22 +526,23 @@ counts <- variants_ann_expiii %>%
             mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
             mutate(effect_simplified2 = ifelse(effect_simplified %in% c("S","N"), "S/N", "U")) %>%
             group_by(exp_line, passage, effect_simplified2) %>%
-            summarise(nr_majority = n()) %>%
+            summarise(count = n()) %>%
             mutate_at(4, as.numeric) %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
             mutate_at(c(1,3), as.factor) %>%
-            mutate(nr_majority_density = ifelse(effect_simplified2 == "S/N", nr_majority*100/(9407-790),nr_majority*100/(9626-9076+789-454)))
+            mutate(density = ifelse(effect_simplified2 == "S/N", count*100/(9407-790),count*100/(9626-9076+789-454)))
 
 
 # visualize using plotly
 
 
 
-fig <- counts %>%  ggplot(aes(x=passage, y = nr_majority_density, color = exp_line, linetype = effect_simplified2)) +
+fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
         geom_line(linewidth=1) +
-        labs(x="\nTransfer", y= "Normalized Mutation Count\n", color = "Translational Impact", title = paste0("Normalized ",category, " Mutation Accumulation Based on Translational Effect"))+
-        scale_x_continuous(breaks = seq(0,570,50)) +
-        scale_y_continuous(limits = c(0,max(counts$nr_majority_density)+1),breaks = seq(0,max(counts$nr_majority_density)+1,1)) +
+        labs(x="\nTransfer", y= "Normalized Mutation Count\n", color = "Virus Lines", linetype = "Translational Impact",
+        title = paste0("Normalized ",category, " Mutation Accumulation Based on Translational Effect"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
+        scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
         theme_bw() +
         theme(plot.title = element_text(size = 30, hjust = 0.5),
@@ -515,7 +556,7 @@ fig <- counts %>%  ggplot(aes(x=passage, y = nr_majority_density, color = exp_li
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir,"mut_accumulation_translational_impact_u_vs_ns.pdf"), height = 21, width = 21)
+pdf(file = paste0(fig_dir,category, "_mut_accumulation_translational_impact_u_vs_ns.pdf"), height = 21, width = 21)
 fig
 dev.off()
 

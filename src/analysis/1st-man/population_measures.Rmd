@@ -53,7 +53,6 @@ if (file.exists("/home/amovas/")){
 }
 
 
-up_until_psg <- 500
 
 line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
 line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
@@ -61,10 +60,12 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
 
+# determine what data to be included
+end_psg <- 500
 
 data %<>% 
         filter(exp_line %in% 13:16,
-        passage <= up_until_psg) 
+        passage <= end_psg) 
 
 # correct for the switched experimental lines
 data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
@@ -383,16 +384,15 @@ p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B,
 
 
 
-
 moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
                 facet_wrap(~ exp_line) +
                 geom_line() +
                 geom_point() +
-                geom_smooth(method = "lm", se = FALSE) +
-                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
-                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                geom_smooth(method = "loess", se = FALSE) +
+                #geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                #hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
                 #ylim(c(1000000,40000000)) +
-                labs(title = "moi") +
+                labs(title = "MOI", x = "Tranfer", y = "Log10(MOI)") +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
                 theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
@@ -534,6 +534,7 @@ dev.off()
 ## if there are more than one generation between the time points: 1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))
 
 df <- data.frame()
+
 
 # exp_line <- "MT-4_1"
 # pres_psg <- 130

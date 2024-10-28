@@ -103,7 +103,7 @@ shape$Nt <- shape$Nt + 454
 plot(freq_df_all$freq, shape$med_55_nt)
 
 
-# compare with shape data
+# compare with bp data
 # align coordinates
 shannon_df$i <- shannon_df$i+454
 

@@ -69,7 +69,10 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
 # only keep the EXPIII data
 exp <- "EXPIII"
-variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
 
 
 # facors
@@ -97,10 +100,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
 
-# last passage 
-
-end_passage <- 560
-
 
 # Visual settings
 
@@ -118,7 +117,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r set parameters}
 
 # set parameters
-category <- "Majority"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -197,6 +196,34 @@ dev.off()
 
 ```
 
+
+```{r pca}
+
+# add subtype info
+variants_expiii_sub <-  variants_expiii %>% 
+                            mutate(passage = as.numeric(as.character(passage))) %>%
+                            #filter(passage == 500) %>%
+                            mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type)) %>%
+                            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+                            select(exp_line, mut_info, mut_type_sub) %>%
+                            distinct()
+
+
+
+q <- as.matrix(table(variants_expiii_sub$exp_line, variants_expiii_sub$mut_type_sub))
+
+p <- q/rowSums(q)
+
+
+pca_result <- prcomp(q, scale = T)
+
+summary(pca_result)
+
+plot(pca_result, type = "l")
+
+biplot(pca_result)
+```
+
 ```{r pie chart}
 
 
@@ -204,13 +231,13 @@ dev.off()
 # add subtype info
 variants_expiii_sub <-  variants_expiii %>% 
                             mutate(passage = as.numeric(as.character(passage))) %>%
-                            #filter(passage == 570) %>%
+                            #filter(passage < ) %>%
                             mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type))
 
-h_line <- "MT2"
+host <- "MT2"
 color_pal <- c(rev(brewer.pal(n=12,"Paired")), "#ea0094", "#ae49bcab")
 # prepare data for visualization
-mut_profile_unique <- variants_expiii_sub %>% filter(allele_freq >= min_threshold & allele_freq < max_threshold & host_line == h_line) %>%
+mut_profile_unique <- variants_expiii_sub %>% filter(allele_freq >= min_threshold & allele_freq < max_threshold & host_line == host) %>%
                             select(mut_info, mut_type_sub) %>%
                             distinct() %>%
                             group_by(mut_type_sub) %>%
@@ -235,30 +262,29 @@ m <- list(
 )
 
 fig <- plot_ly()
+category <- "Minority"
 
-fig <- fig %>% add_pie(data = mut_profile_unique, labels = ~mut_type_sub, values = ~count, sort = FALSE, textfont = list(size = 30),
-                    marker = list(colors = color_pal)) %>% layout(margin = m, title = paste0("Proportion of Unique ", category, " Mutations in ", h_line))
+fig <- fig %>% add_pie(data = mut_profile_unique, labels = ~mut_type_sub, values = ~count, sort = FALSE, textfont = list(size = 25),
+                    marker = list(colors = color_pal)) %>% layout(margin = m, title = paste0("Proportion of Unique ", category, " Mutations in ", host, "\n"))
 
 
-fig
+
 
 
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-htmlwidgets::saveWidget(fig, file = paste0(fig_dir, "pie_", h_line,"_unique.html"))
+htmlwidgets::saveWidget(fig, file = paste0(fig_dir, "pie_", host,"_unique_", category, ".html"))
 
 
 
-mut_profile_unique <- rbind(mut_profile_unique, c("I", 1))
-#mut_profile_unique$mut_type_sub <- factor(mut_profile_unique$mut_type_sub, levels = c("A>C", "A>G", "A>T", "C>A", "C>G", "C>T", "G>A", "G>C", "G>T", "T>A", "T>C", "T>G", "D", "I"))
 
 
-h_line <- "MT4"
-color_pal <- c(rev(brewer.pal(n=12,"Paired")), "#ea0094", "#ae49bcab")
+host <- "MT4"
+#color_pal <- c(rev(brewer.pal(n=12,"Paired")), "#ea0094", "#ae49bcab")
 # prepare data for visualization
-mut_profile_unique <- variants_expiii_sub %>% filter(allele_freq >= min_threshold & allele_freq < max_threshold & host_line == h_line) %>%
+mut_profile_unique <- variants_expiii_sub %>% filter(allele_freq >= min_threshold & allele_freq < max_threshold & host_line == host) %>%
                             select(mut_info, mut_type_sub) %>%
                             distinct() %>%
                             group_by(mut_type_sub) %>%
@@ -270,7 +296,7 @@ mut_profile_unique$mut_type_sub <- factor(mut_profile_unique$mut_type_sub, level
 mut_profile_unique <- mut_profile_unique[order(as.numeric(mut_profile_unique$count), decreasing = TRUE),]
 
 
-color_pal <- color_pal[match(level_for_later, mut_profile_unique$mut_type_sub)]
+color_pal <- color_pal[match(mut_profile_unique$mut_type_sub, level_for_later)]
 
 
 m <- list(
@@ -283,17 +309,17 @@ m <- list(
 
 fig <- plot_ly()
 
-fig <- fig %>% add_pie(data = mut_profile_unique, labels = ~mut_type_sub, values = ~count, sort = FALSE, textfont = list(size = 30),
-                    marker = list(colors = color_pal)) %>% layout(margin = m, title = paste0("Proportion of Unique ", category, " Mutations in ", h_line))
+fig <- fig %>% add_pie(data = mut_profile_unique, labels = ~mut_type_sub, values = ~count, sort = FALSE, textfont = list(size = 25),
+                    marker = list(colors = color_pal)) %>% layout(margin = m, title = paste0("Proportion of Unique ", category, " Mutations in ", host))
 
 
-fig
+
 
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-htmlwidgets::saveWidget(fig, file = paste0(fig_dir, "pie_", h_line,"_unique.html"))
+htmlwidgets::saveWidget(fig, file = paste0(fig_dir, "pie_", host,"_unique_", category, ".html"))
 
 
 ```
@@ -408,12 +434,12 @@ dev.off()
 ```{r min mutation spectrum, results=TRUE}
 
 
-passages <- seq(10,570, 10)
+passages <- seq(10,end_psg, 10)
 diff_df <- data.frame()
 
 
 
-for (i in 1:56){
+for (i in 1:(end_psg/10-1)){
     for (exp_line in exp_line_factor){
         prev_in <- passages[i]
         pres_in <- passages[i+1]
@@ -431,6 +457,7 @@ for (i in 1:56){
     
 }
 
+
 diff_df_sub <-  diff_df %>% mutate(mut_type_sub = ifelse(mut_type == "P", paste0(ref_allele,">",alt_allele), mut_type))
 
 
@@ -442,8 +469,6 @@ counts <- diff_df_sub %>%
             mutate(pct =  100 *count/sum(count)) %>%
             ungroup() %>%
             mutate_at(2:3, as.factor)
-
-
 
 
 color_pal <- c(rev(brewer.pal(n=12,"Paired")), "#ea0094", "#ae49bcab")
@@ -478,7 +503,7 @@ fig
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "mut_spectra_barplot", category,".pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, "mut_spectra_barplot_", category,".pdf"), height = 14, width = 14)
 fig
 dev.off()
 
@@ -486,6 +511,60 @@ dev.off()
 
 ```
 
+
+```{r tests for homogeneity and host effect}
+
+
+
+
+## mixed-effect model
+library(lme4)
+
+counts <- diff_df_sub %>%
+            group_by(exp_line, passage, mut_type_sub) %>%
+            count() %>%
+            dplyr::rename(count=n) %>%
+            group_by(exp_line,passage) %>%
+            mutate(pct =  count/sum(count), total = sum(count)) %>%
+            ungroup() %>%
+            mutate_at(2:3, as.factor)
+
+head(counts)
+
+counts <- counts %>%
+  mutate(Successes = pct * total,
+        Failures = total - Successes)
+
+
+counts %<>% mutate(host = ifelse(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"),
+    exp_line = factor(exp_line, levels = line_labels[c(2,3,4,1)]))
+
+
+
+# Chi-Square Test for Homogeneity
+# Sample contingency table with counts of mutation types across time points
+contingency_table <- table(diff_df_sub$mut_type_sub[diff_df_sub$exp_line == "MT-2_2"], diff_df_sub$passage[diff_df_sub$exp_line == "MT-2_2"])
+
+# Perform the Chi-Square Test
+chisq_test <- chisq.test(contingency_table)
+print(chisq_test)
+
+head(counts)
+str(counts)
+counts$exp_line <- as.character(counts$exp_line)
+# Fit the multinomial logistic regression
+multinom_model <- multinom(mut_type_sub ~ host, weights = count, data = counts)
+
+# Likelihood ratio test to check if 'environment' has a significant effect
+# Fit a reduced model (without 'environment')
+multinom_model_reduced <- multinom(mut_type_sub ~ 1, weights = count, data = counts)
+
+# Perform the likelihood ratio test
+lrt_result <- anova(multinom_model_reduced, multinom_model)
+print(lrt_result)
+
+
+```
 
 
 ```{r}
@@ -540,20 +619,58 @@ str(mut_sub_count_min)
 mut_sub_count_min[mut_sub_count_min$exp_line == "MT-2_1",]
 
 
-line <- "MT-2_2"
 
-for (i in mut_sub_type_fac){
-    x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_type_sub == i],
-                    sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_type_sub == i]), nrow = 2, byrow = TRUE)
-    pval <- fisher.test(x, alternative = "two.sided")$p.val
-    print(ifelse(pval <= 0.05, paste0(i, ": ", pval), NA))
+
+for (line in line_labels){
+    print(line)
+    for (i in mut_sub_type_fac){
+        x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_type_sub == i],
+                        sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_type_sub == i]), nrow = 2, byrow = TRUE)
+        pval <- fisher.test(x, alternative = "two.sided")$p.val
+        print(ifelse(pval <= 0.05, paste0(i, ": ", pval), ""))
+    }
+
 }
-
-
 
 
 # Q. how about for 3 nucleotide context
 
+# define a function to format the context
+context_formatter <- function(alt_allele, three_n_context) {
+    return(paste0(substr(three_n_context,1,1), "[", substr(three_n_context,2,2), ">", alt_allele, "]", substr(three_n_context,3,3)))
+}
+
+
+
+reverse_complement <- function(sequences) {
+
+    # Define the complement base pairs
+    complement <- c(A = "T", T = "A", C = "G", G = "C")
+
+    # Function to reverse complement a single sequence
+    reverse_complement_single <- function(sequence) {
+        sequence_split <- unlist(strsplit(sequence, ""))
+        complement_sequence <- complement[sequence_split]
+        reverse_complement_sequence <- rev(complement_sequence)
+        return(paste(reverse_complement_sequence, collapse = ""))
+    }
+
+    # Apply the reverse_complement_single function to each sequence in the vector
+    return(as.character(sapply(sequences, reverse_complement_single)))
+}
+
+context_fac <- c()
+for (alt in c("A","C", "G", "T")){
+    for (pos1 in c("A","C", "G", "T")){
+        for (pos2 in c("C", "T")){
+            for (pos3 in c("A","C", "G", "T")){
+                if (alt != pos2){
+                    context_fac <- append(context_fac,context_formatter(alt, paste0(pos1,pos2,pos3)))
+                }
+            }
+        }
+    }
+}
 
 
 # Q. how about for codon usage?
@@ -596,36 +713,30 @@ mut_sub_count_min <-  variants_expiii %>%
 
 
 
-line <- "MT-2_2"
 
-length(context_fac)
+i <- "C[C>A]C"
+line <- "MT-4_1"
 
-for (i in context_fac){
-    
-    x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_context_96 == i],
-                    sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
-    
-    pval <- fisher.test(x, alternative = "two.sided")$p.val
+sig <- c()
+for (line in line_labels){
+    print(line)
+    for (i in context_fac){
+        
+        x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_context_96 == i],
+                        sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
+        
+        pval <- fisher.test(x, alternative = "two.sided")$p.val
 
-    if (pval <= 0.1){
-        print(i)
-        print(pval)
+        if (pval <= 0.05){
+            sig <- append(sig,i)
+            print(i)
+            print(pval)
+        }
     }
+
 }
 
-i <- "C[A>T]T"
-
- 
-    x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == "MT-2_1"]), mut_sub_count_min$count[mut_sub_count_min$exp_line == "MT-2_1" & mut_sub_count_min$mut_context_96 == i],
-                    sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == "MT-2_1"]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == "MT-2_1" & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
-    
-    pval <- fisher.test(x, alternative = "two.sided")$p.val
-
-    if (pval <= 0.1){
-        print(i)
-        print(pval)
-    }
-
+table(sig)
 
 
 
@@ -689,13 +800,13 @@ ss2 <- variants_expiii %>%
 
 
 
-line <- "MT-4_2"
+line <- "MT-4_1"
 sss <- ss[ss$exp_line == line,]
 sss2 <- ss2[ss2$exp_line == line,]
 
 sss <- ss
 sss2 <- ss2
-codon <- "CTC>CTA"
+codon <- "TCC>TCT"
 
 codon_usage_odss <- data.frame()
 

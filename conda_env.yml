@@ -69,3 +69,4 @@ dependencies:
   - r-fitdistrplus
   - r-ggmuller
   - r-brms # for doing Bayesian inference in R
+  - r-glmmtmb # mixed-effect Multinomial Logistic Regression models

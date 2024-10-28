@@ -68,9 +68,13 @@ variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
 
-# only keep the EXPIII data
+# determine what data to be included
+
 exp <- "EXPIII"
-variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
 
 
 # facors
@@ -96,11 +100,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-# last passage 
-
-end_passage <- 560
 
 
 # Visual settings
@@ -129,7 +128,8 @@ for (line in lines){
 # set the correct viral line names and  add host info
 
 shannon_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
-                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"))
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) %>%
+                filter(passage <= end_psg)
 
 ```
 
@@ -171,7 +171,7 @@ dev.off()
 
 fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line)) +
   geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Mean\n", color = "Virus Line", title = paste0("Mean of Entropy per Sample")) +
+  labs(x="\nTransfer", y= "Mean Entropy\n", color = "Virus Line", title = paste0("Mean of Entropy per Sample")) +
   scale_color_manual(values = line_col_palette) +
   theme_bw() +
         theme(plot.title = element_text(size = 20, hjust = 0.5),
@@ -200,8 +200,9 @@ dev.off()
 dd <- shannon_df %>% group_by(host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), var_ent = var(shannon_entropy, na.rm = T),.groups = 'drop')
 
 
-fig <- ggplot(dd, aes(x=genomic_position, y = mean_ent)) + facet_wrap(~exp_line, ncol=4) +
-    geom_point() +
+
+fig <- ggplot(dd[dd$mean_ent !=0,], aes(x=exp_line, y = mean_ent)) +
+    geom_boxplot() +
     labs(x="\nPosition", y= "Entropy Mean \n", title = paste0("Mean of Entropy per Genomic Position")) +
     theme_bw() +
         theme(plot.title = element_text(size = 20, hjust = 0.5),
@@ -222,6 +223,12 @@ dev.off()
 
 ```
 
+```{r}
+
+t.test(dd$mean_ent[dd$exp_line == "MT-4_2"], dd$mean_ent[dd$exp_line == "MT-4_1"], paired = T)
+t.test(dd$mean_ent[dd$exp_line == "MT-2_2"], dd$mean_ent[dd$exp_line == "MT-2_1"], paired = T)
+
+```
 
 
 ```{r entropy change per position, results=TRUE}
@@ -306,11 +313,13 @@ dev.off()
 
 ```{r}
 
-cor_coefs <- data.frame()
 
+
+
+cor_coefs <- data.frame()
 for (i in levels(dd$exp_line)){
   for (j in levels(dd$exp_line)[levels(dd$exp_line) != i]){
-    cor_res <- cor.test(dd$mean_ent[dd$exp_line == i], dd$mean_ent[dd$exp_line == j], method = 'spearman', exact = FALSE)
+    cor_res <- cor.test(dd$var_ent[dd$exp_line == i], dd$var_ent[dd$exp_line == j], method = 'spearman', exact = FALSE)
     cor_coefs <- rbind(cor_coefs, c(i , j, cor_res$estimate))
     print(paste0("Spearman's Rho between ", i, " and ", j, " is ", cor_res$estimate, " and p.value is ", cor_res$p.value))
   }
@@ -326,13 +335,13 @@ cor_coefs <- as.data.frame(cor_coefs) %>%
 
 
 
-fig <- ggplot(data = as.data.frame(cor_coefs), aes(x=line1, y=line2, fill=100*Rho)) + 
+fig <- ggplot(data = as.data.frame(cor_coefs), aes(x=line1, y=line2, fill=Rho)) + 
         geom_tile() +
         geom_text(aes(line1, line2, label = Rho), color = "black", size = 4) +
-        labs(title = paste0("Spearman's Rho Coorelation Coefficient for Positional Entropy")) +
-        scale_fill_gradient2(low = "white", high = "red", 
-        midpoint = 1, limit = c(0,100), space = "Lab", 
-        name="Shared %") +
+        labs(title = "Correlation for Variance of Change of Positional Entropy") +
+        scale_fill_gradient2(low = "blue", high = "red", 
+        midpoint = 0, limit = c(-1,1), space = "Lab", 
+        name="Spearman's Rho") +
         theme(
         axis.title = element_blank(),
         plot.title = element_text(size = 20, hjust = 0.5)
@@ -344,7 +353,7 @@ fig
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "shannon_per_position_spearman_correlation.pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, "shannon_per_position_correlation_coefficient.pdf"), height = 14, width = 14)
 fig
 dev.off()
 

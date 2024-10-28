@@ -71,7 +71,10 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
 # only keep the EXPIII data
 exp <- "EXPIII"
-variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
 
 
 # facors
@@ -117,9 +120,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
 
-# last passage 
-
-end_passage <- 560
 
 
 # Visual settings
@@ -137,7 +137,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r set parameters}
 
 # set parameters
-category <- "Majority"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -163,7 +163,7 @@ if (category == "Sporadic"){
 
 ```{r number of mutations per genomic feature}
 
-end_passage <- 560
+
 
 variants_ann_expiii$feature[variants_ann_expiii$feature == "envelope"] <- "env"
 variants_ann_expiii$feature[variants_ann_expiii$genomic_pos >= 9076 & variants_ann_expiii$genomic_pos <= 9407] <- "nef_3UTR"
@@ -172,7 +172,9 @@ variants_ann_expiii$feature[variants_ann_expiii$genomic_pos >= 8787 & variants_a
 
 counts <- variants_ann_expiii %>% 
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            filter(passage == end_passage) %>%
+            #filter(passage == end_psg) %>%
+            select(exp_line, mut_info, feature, effect_simplified) %>%
+            distinct() %>%
             group_by(exp_line, feature, effect_simplified) %>%
             summarise(count = n()) %>%
             mutate_at(c(1,2,3), as.factor) %>%
@@ -187,7 +189,7 @@ fig <- ggplot(counts) +
             position = "stack",
             stat = "identity") +
     scale_fill_manual(labels = line_labels, values = line_palette) +
-    labs(x = "Genomic Features", y = "Normalized Count", fill = "Line", title = paste0(category, " Mutation Distribution at #", end_passage,"\n"))+
+    labs(x = "Genomic Features", y = "Normalized Count", fill = "Line", title = paste0(category, " Mutation Distribution \n"))+
     facet_grid(~ feature, switch = "x") +
     theme_bw()+
     theme(strip.placement = "outside",
@@ -215,6 +217,33 @@ dev.off()
 
 ```
 
+```{r}
+
+head(counts)
+library(tibble)
+
+counts %<>% mutate(fef = paste(feature, effect_simplified, sep = "_")) %>%
+        ungroup() %>%
+        select(exp_line, normalized_count, fef) %>%
+        pivot_wider(names_from = fef, values_from = normalized_count) %>%
+        column_to_rownames(var = "exp_line")
+
+counts_mx <- as.matrix(counts)
+
+counts_mx[is.na(counts_mx)] <- 0
+
+counts_mx_p <- counts_mx/rowSums(counts_mx)
+
+pca_result <- prcomp(counts_mx_p, scale = T)
+
+summary(pca_result)
+
+plot(pca_result, type = "l")
+
+biplot(pca_result)
+
+```
+
 ```{r number of mutations per genomic feature over time}
 
 
@@ -222,7 +251,7 @@ dev.off()
 # prepare data for visualization
 counts <- variants_ann_expiii %>% 
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            filter(passage %in% c(100,200,300,400, 560)) %>%
+            filter(passage %in% seq(100,end_psg,100)) %>%
             group_by(exp_line, passage, feature, effect_simplified) %>%
             summarise(count = n()) %>%
             mutate_at(1:4, as.factor) %>%
