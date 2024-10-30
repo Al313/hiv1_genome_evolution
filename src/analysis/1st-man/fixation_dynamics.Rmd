@@ -68,7 +68,10 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
 # only keep the EXPIII data
 exp <- "EXPIII"
-variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
 
 
 # facors
@@ -96,10 +99,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
-
-# last passage 
-
-end_passage <- 560
 
 
 # Visualization settings
@@ -177,12 +176,15 @@ fig
 
 
 
-# perform pairwise t-test between translation impact groups per exp line
+# perform pairwise wilcox-test between translation impact groups per exp line
+
 pwc <- df %>%
     group_by(exp_line) %>%
-    pairwise_t_test(time_to_fixation ~ effect_simplified, p.adjust.method = "BH",pool.sd=T, detailed = T)
-
-
+    pairwise_wilcox_test(
+        time_to_fixation ~ effect_simplified,
+        p.adjust.method = "none",
+        detailed = TRUE
+    )
 
 # Visualization: box plots with p-values
 
@@ -192,32 +194,34 @@ step <- c(5,10,20,50,100)[low - 1]
 #Add x position
 pwc <- pwc %>% add_xy_position(x = "effect_simplified", step.increase = 1)
 # assign new y.positions 
-pwc$y.position <- sample(seq(580,700,10), replace = F, size = 12)
+pwc$y.position <- sample(seq(500,700,10), replace = F, size = 12)
 # make the plot
 fig2 <- ggboxplot(df, x = "effect_simplified", y = "time_to_fixation", color = "exp_line") +
     facet_wrap(~exp_line, ncol = 2) +
+    labs(x = "Translational Impact", y = "Time to Fixation", color = "Virus Line")+
     scale_color_manual(labels = line_labels, values = line_palette) +
     scale_y_continuous(breaks = seq(0,max(df$time_to_fixation)+step,step)) +
-    stat_pvalue_manual(pwc, hide.ns = TRUE) 
+    stat_pvalue_manual(pwc, hide.ns = TRUE, label = "p.adj") 
 
 
 fig2
 
-# perform pairwise t-test between exp line groups per translation impact
+# perform pairwise wilcox-test between exp line groups per translation impact
 pwc <- df %>%
     group_by(effect_simplified) %>%
-    pairwise_t_test(time_to_fixation ~ exp_line, p.adjust.method = "BH",pool.sd=FALSE, detailed = T)
+    pairwise_wilcox_test(time_to_fixation ~ exp_line, p.adjust.method = "BH",pool.sd=FALSE, detailed = T)
 
 #Add x position
 pwc <- pwc %>% add_xy_position(x = "exp_line", step.increase = 1)
 # assign new y.positions 
-pwc$y.position <- sample(seq(580,750,10), replace = F, size = 18)
+pwc$y.position <- sample(seq(500,750,10), replace = F, size = 18)
 # make the plot
 fig3 <- ggboxplot(df, x = "exp_line", y = "time_to_fixation", color = "exp_line") +
     facet_wrap(~effect_simplified, ncol = 3) +
+    labs(x = "Virus Line", y = "Time to Fixation", color = "Virus Line")+
     scale_color_manual(labels = line_labels, values = line_palette) +
     scale_y_continuous(breaks = seq(0,max(df$time_to_fixation)+step,step)) +
-    stat_pvalue_manual(pwc, hide.ns = TRUE) 
+    stat_pvalue_manual(pwc, hide.ns = TRUE, label = "p.adj") 
 
 fig3
 
@@ -239,7 +243,7 @@ dev.off()
 
 # get inline variables
 a <- min(df$time_to_fixation)
-b <- nrow(df[df$time_to_fixation==20,])
+b <- nrow(df[df$time_to_fixation==10,])
 
 
 ```
@@ -258,20 +262,20 @@ fig <- df %>% ggplot(aes(x = appearance, y = time_to_fixation, color = exp_line,
 fig
 
 
-bins <- seq(0,500, 100)
+bins <- seq(0,400, 100)
 
 df_summary <- df[df$time_to_fixation <= 100,] %>%
         mutate(bin = cut(appearance, breaks = bins, right = FALSE)) %>%
         group_by(exp_line,effect_simplified) %>%
         count(bin, .drop = FALSE)
 
-
+df_summary <- df_summary[!is.na(df_summary$bin),]
 
 fig <- ggplot(df_summary, aes(x = effect_simplified, y = n, fill = bin)) +
   facet_wrap(~exp_line, ncol = 2) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_color_manual(labels = line_labels, values = line_palette) +
-  labs(title = "Customized Grouped Bar Plot", x = "Category", y = "Nr. of Fixed Mutations \n with TF below 100", fill = "Appearnace Bin") +
+  labs(title = "Frequency of Rapidly Fixating Mutations over Time", x = "Translational Impact", y = "Nr. of Fixed Mutations \n with Time to Fixation below 100", fill = "Appearnace Bin") +
   theme_bw() +
   theme(plot.title = element_text(size = 30, hjust = 0.5),
         axis.title = element_text(size = 20),
@@ -283,6 +287,13 @@ fig <- ggplot(df_summary, aes(x = effect_simplified, y = n, fill = bin)) +
 
 fig
 
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "Rapidly_Fixating_Mutations_over_Time.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
 ```
 
@@ -322,6 +333,11 @@ dev.off()
 
 
 ```
+
+
+
+
+
 
 
 ```{r}

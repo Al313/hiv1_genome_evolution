@@ -69,8 +69,10 @@ variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
 
 # only keep the EXPIII data
 exp <- "EXPIII"
-variants_ann_expiii <- variants_ann[variants_ann$exp_line %in% 13:16,]
+end_psg <- 500
 
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
 
 # facors
 
@@ -97,9 +99,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
 
-# last passage 
-
-end_passage <- 560
 
 
 # Visual settings
@@ -139,11 +138,10 @@ if (category == "Sporadic"){
 
 ```{r venn diagram}
 
-end_passage <- 560
 
 end_fixed <- 
         variants_expiii %>%
-        filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_passage) %>%
+        filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_psg) %>%
         select(c(exp_line,mut_info)) %>%
         distinct()
 
@@ -162,7 +160,7 @@ muts_list <- lapply(split(muts, names(muts)), unname)
 
 # visualization
 fig <- ggvenn(muts_list) +
-        labs(title = paste0(category, " Mutations at passage #", end_passage))+
+        labs(title = paste0(category, " Mutations at passage #", end_psg))+
         theme(plot.title = element_text(size = 20, hjust = 0.5),
         plot.margin = unit(c(1,1,1,1), "cm"))
 
@@ -201,12 +199,12 @@ for (line1 in exp_line_factor){
         exp_all <- data.frame()
         for (base in c("A", "C", "G", "T")){
             variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$ref_allele == base,]
-            a <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage <= end_passage-100]))
-            aa <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage <= end_passage-100]))
-            b <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_passage]))
-            bb <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage == end_passage]))
+            a <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage <= end_psg-100]))
+            aa <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage <= end_psg-100]))
+            b <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_psg]))
+            bb <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage == end_psg]))
             
-            c <- length(intersect(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage <= end_passage-100],variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage <= end_passage-100]))
+            c <- length(intersect(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage <= end_psg-100],variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.01 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage <= end_psg-100]))
             
 
             i <- 0
@@ -222,8 +220,8 @@ for (line1 in exp_line_factor){
         }
         
         exp_shared <- colSums(exp_all)
-        obs_all <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1,line2) & variants_expiii_sub$passage == end_passage]))
-        obs_shared <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage == end_passage],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage == end_passage]))
+        obs_all <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1,line2) & variants_expiii_sub$passage == end_psg]))
+        obs_shared <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage == end_psg],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage == end_psg]))
         
         # Calculate mean and standard deviation
         mean_data <- mean(exp_shared)
@@ -249,7 +247,7 @@ df %<>% set_colnames(c("Var1", "Var2", "total_unique", "shared", "%shared", "exp
 
 # uniqueness of majority mutations observed at the end of experiment
 end_fixed <- variants_expiii_sub %>%
-                        filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_passage) %>%
+                        filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_psg) %>%
                         select(c(exp_line,mut_info)) %>%
                         distinct()
 
@@ -307,7 +305,7 @@ melted_cormat$`expected_%shared`[melted_cormat$val == 100] <- 100
 fig <- ggplot(data = as.data.frame(melted_cormat), aes(x=Var1, y=Var2, fill=value)) + 
         geom_tile(color = "white") +
         geom_text(aes(Var1, Var2, label = paste0(value, "(", `expected_%shared`,")")), color = "black", size = 13) +
-        labs(title = paste0("Fixed ", names(effect)[1], " Mutation Parallelism at Passage #", end_passage)) +
+        labs(title = paste0("Fixed ", names(effect)[1], " Mutation Parallelism at Passage #", end_psg)) +
         scale_fill_gradient2(low = "white", high = "red", 
         midpoint = 1, limit = c(0,100), space = "Lab", 
         name="Shared %") +

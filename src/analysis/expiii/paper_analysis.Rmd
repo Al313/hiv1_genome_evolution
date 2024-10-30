@@ -306,6 +306,7 @@ datatable(gene_summary, filter = "bottom", caption = "Gene-level summary of Posi
 
 gene_summary %<>% mutate_at(2:ncol(gene_summary), as.numeric)
 
+# write.table(gene_summary, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/gene_summary_table.tsv", sep = "\t", quote = F)
 
 
 datatable(as.data.frame(colMeans(gene_summary[,c(4,6)])), filter = "bottom", caption = "Genome-level summary of Positional Synonymity", colnames = "Mean")

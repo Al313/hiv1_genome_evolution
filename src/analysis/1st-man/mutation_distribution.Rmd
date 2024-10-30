@@ -137,7 +137,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r set parameters}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01

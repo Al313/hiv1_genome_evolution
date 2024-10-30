@@ -116,7 +116,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r text numbers}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -137,9 +137,16 @@ variants_expiii_subset <- variants_expiii %>%
                                 filter(allele_freq >= min_threshold & allele_freq < max_threshold) #& mut_type == "P"
 
 
-a <- nrow(variants_expiii_subset)
+
+# in-text numbers
 bb <- length(unique(paste0(variants_expiii_subset$exp_line,variants_expiii_subset$mut_info)))
 b <- length(unique(variants_expiii_subset$mut_info))
+
+# numbers per trasnaltional impact groups
+variants_expiii_subset_unique <- variants_expiii_subset %>% select(mut_info, effect_simplified) %>% distinct()
+prop.table(table(variants_expiii_subset_unique$effect_simplified))
+
+
 variants_expiii_subset_mt2 <- variants_expiii_subset[variants_expiii_subset$host_line == "MT2",]
 variants_expiii_subset_mt4 <- variants_expiii_subset[variants_expiii_subset$host_line == "MT4",]
 bb_mt2 <- length(unique(paste0(variants_expiii_subset_mt2$exp_line,variants_expiii_subset_mt2$mut_info)))
@@ -469,21 +476,21 @@ dev.off()
 
 
 
-```{r}
+```{r accumulation per translational impact}
 
 
 
 # prepare data for visualization
 counts <- variants_ann_expiii%>% 
-              filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-              mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-              mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-              group_by(exp_line, passage, effect_simplified) %>%
-              summarise(nr_majority = n()) %>%
-              mutate_at(4, as.numeric) %>%
+            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+            group_by(exp_line, passage, effect_simplified) %>%
+            summarise(nr_majority = n()) %>%
+            mutate_at(4, as.numeric) %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
-              mutate_at(c(1,3), as.factor)
-              
+            mutate_at(c(1,3), as.factor)
+            
 # visualize using plotly
 
 
@@ -516,7 +523,7 @@ dev.off()
 ```
 
 
-```{r}
+```{r accumulation per translational impact normalized for length}
 
 
 # prepare data for visualization
@@ -561,3 +568,103 @@ fig
 dev.off()
 
 ```
+
+
+```{r fixed mutation further analysis}
+
+counts[counts$passage == 500,]
+(230/2)/500
+(111/2)/500
+
+# linear regression
+
+
+head(counts)
+
+counts2 <- counts %>% select(passage,mut_count,host_line) %>% group_by(passage,host_line) %>% summarize(ave_count = mean(mut_count))
+
+lm_mt2 <- lm(ave_count ~ passage, data = counts2[counts2$host_line == "MT2",])
+summary(lm_mt2)
+lm_mt2_200 <- lm(ave_count ~ passage, data = counts2[counts2$passage <= 200 & counts2$host_line == "MT2",])
+summary(lm_mt2_200)
+lm_mt2_500 <- lm(ave_count ~ passage, data = counts2[counts2$passage > 200 & counts2$host_line == "MT2",])
+summary(lm_mt2_500)
+(0.977 + 0.9891)/2
+lm_mt4 <- lm(ave_count ~ passage, data = counts2[counts2$host_line == "MT4",])
+summary(lm_mt4)
+lm_mt4_200 <- lm(ave_count ~ passage, data = counts2[counts2$passage <= 200 & counts2$host_line == "MT4",])
+summary(lm_mt4_200)
+lm_mt4_500 <- lm(ave_count ~ passage, data = counts2[counts2$passage > 200 & counts2$host_line == "MT4",])
+summary(lm_mt4_500)
+
+
+#### 
+
+df_lm_mt4 <- data.frame(passage = as.numeric(seq(10,500,10)))
+df_lm_mt4$predicted <- predict(lm_mt4, newdata = df_lm_mt4)
+
+
+#### 
+
+df_lm_mt2 <- data.frame(passage = as.numeric(seq(10,500,10)))
+df_lm_mt2$predicted <- predict(lm_mt2, newdata = df_lm_mt2)
+
+
+
+#### 
+df_lm_mt2_200_1 <- data.frame(passage = as.numeric(seq(10,200,10)))
+df_lm_mt2_200_1$predicted <- predict(lm_mt2_200, newdata = df_lm_mt2_200_1)
+df_lm_mt2_200_1$line_type <- "solid"
+
+df_lm_mt2_200_2 <- data.frame(passage = as.numeric(seq(210,500,10)))
+df_lm_mt2_200_2$predicted <- predict(lm_mt2_200, newdata = df_lm_mt2_200_2)
+df_lm_mt2_200_2$line_type <- "dashed"
+
+df_lm_mt2_200 <- rbind(df_lm_mt2_200_1,df_lm_mt2_200_2)
+df_lm_mt2_200 %<>% mutate(line_type = factor(line_type, levels = c("solid", "dashed")))
+str(df_lm_mt2_200)
+
+#### 
+df_lm_mt2_500_1 <- data.frame(passage = as.numeric(seq(10,200,10)))
+df_lm_mt2_500_1$predicted <- predict(lm_mt2_500, newdata = df_lm_mt2_500_1)
+df_lm_mt2_500_1$line_type <- "dashed"
+
+df_lm_mt2_500_2 <- data.frame(passage = as.numeric(seq(210,500,10)))
+df_lm_mt2_500_2$predicted <- predict(lm_mt2_500, newdata = df_lm_mt2_500_2)
+df_lm_mt2_500_2$line_type <- "solid"
+
+df_lm_mt2_500 <- rbind(df_lm_mt2_500_1,df_lm_mt2_500_2)
+df_lm_mt2_500 %<>% mutate(line_type = factor(line_type, levels = c("solid", "dashed")))
+str(df_lm_mt2_500)
+
+df_lm_mt2_500 <- data.frame(passage = as.numeric(seq(210,500,10)))
+df_lm_mt2_500$predicted <- predict(lm_mt2_500, new_data = seq(210,500,10))
+
+
+fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2)+
+        geom_line(data = df_lm_mt2_200, aes(x = passage, y = predicted, linetype = line_type), color = "#ad1594c2", size = 2)+
+        geom_line(data = df_lm_mt2_500, aes(x = passage, y = predicted, linetype = line_type), color = "#ad1594c2", size = 2)+
+        scale_linetype(guide = "none")+
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation _ Linear Regression"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
+        scale_y_continuous(limits = c(0,max(counts$mut_count)+20),breaks = seq(0,max(counts$mut_count)+20,50)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_accumulation_regression.pdf"), height = 14, width = 14)
+fig
+dev.off()
+```
+
