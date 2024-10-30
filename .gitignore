@@ -16,6 +16,8 @@ data/processed-data/coverage-assessment
 data/processed-data/consensus/pipeline-outputs/full/iii
 data/processed-data/consensus/pipeline-outputs/full/iv
 
+data/processed-data/consensus/pipeline-outputs/gag/iii
+data/processed-data/consensus/pipeline-outputs/gag/iv
 
 src/snakemake-run/.snakemake/
 results/tables/3-p/all_variants.ann.vcf

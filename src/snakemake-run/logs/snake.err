@@ -5,7 +5,7 @@ Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Wed Oct 16 00:56:41 2024]
+[Wed Oct 30 13:33:20 2024]
 rule tree_inference_all:
     input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta
     output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
@@ -13,24 +13,6 @@ rule tree_inference_all:
     reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
     resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-Building DAG of jobs...
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954
-Select jobs to execute...
-
-[Wed Oct 16 00:56:44 2024]
-rule tree_inference_50th:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta
-    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/50th_consensus_full_msa2.fasta.iqtree
-    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-
-[Wed Oct 16 00:56:52 2024]
-Finished job 0.
-1 of 1 steps (100%) done
-[Wed Oct 16 00:57:43 2024]
+[Wed Oct 30 13:38:05 2024]
 Finished job 0.
 1 of 1 steps (100%) done

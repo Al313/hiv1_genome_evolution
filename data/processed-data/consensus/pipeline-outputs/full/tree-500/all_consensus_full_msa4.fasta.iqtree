@@ -1,0 +1,986 @@
+IQ-TREE 2.3.4 COVID-edition built Jun  5 2024
+
+Input file name: all_consensus_full_msa4.fasta
+Type of analysis: ModelFinder + tree reconstruction + ultrafast bootstrap (1000 replicates)
+Random seed number: 796830
+
+REFERENCES
+----------
+
+To cite IQ-TREE please use:
+
+Bui Quang Minh, Heiko A. Schmidt, Olga Chernomor, Dominik Schrempf,
+Michael D. Woodhams, Arndt von Haeseler, and Robert Lanfear (2020)
+IQ-TREE 2: New models and efficient methods for phylogenetic inference
+in the genomic era. Mol. Biol. Evol., in press.
+https://doi.org/10.1093/molbev/msaa015
+
+To cite ModelFinder please use: 
+
+Subha Kalyaanamoorthy, Bui Quang Minh, Thomas KF Wong, Arndt von Haeseler,
+and Lars S Jermiin (2017) ModelFinder: Fast model selection for
+accurate phylogenetic estimates. Nature Methods, 14:587–589.
+https://doi.org/10.1038/nmeth.4285
+
+Since you used ultrafast bootstrap (UFBoot) please also cite: 
+
+Diep Thi Hoang, Olga Chernomor, Arndt von Haeseler, Bui Quang Minh,
+and Le Sy Vinh (2018) UFBoot2: Improving the ultrafast bootstrap
+approximation. Mol. Biol. Evol., 35:518–522.
+https://doi.org/10.1093/molbev/msx281
+
+SEQUENCE ALIGNMENT
+------------------
+
+Input data: 202 sequences with 9182 nucleotide sites
+Number of constant sites: 8311 (= 90.514% of all sites)
+Number of invariant (constant or ambiguous constant) sites: 8311 (= 90.514% of all sites)
+Number of parsimony informative sites: 613
+Number of distinct site patterns: 859
+
+ModelFinder
+-----------
+
+Best-fit model according to BIC: TVM+F+I+R2
+
+List of models sorted by BIC scores: 
+
+Model                  LogL         AIC      w-AIC        AICc     w-AICc         BIC      w-BIC
+TVM+F+I+R2       -25393.288   51596.577 +    0.488   51634.049 +    0.518   54482.202 +     0.94
+K3Pu+F+I+R2      -25405.963   51617.925 - 1.13e-05   51655.021 - 1.45e-05   54489.300 -    0.027
+GTR+F+I+R2       -25392.415   51596.830 +     0.43   51634.492 +    0.416   54489.580 -   0.0235
+TPM2u+F+I+R2     -25407.200   51620.400 - 3.27e-06   51657.496 -  4.2e-06   54491.775 -  0.00784
+TIM+F+I+R2       -25404.614   51617.228 -  1.6e-05   51654.512 - 1.87e-05   54495.729 -  0.00109
+TIM2+F+I+R2      -25406.302   51620.604 - 2.96e-06   51657.888 - 3.45e-06   54499.104 - 0.000201
+HKY+F+I+R2       -25416.971   51637.942 - 5.08e-10   51674.850 - 7.16e-10   54502.193 - 4.29e-05
+GTR+F+I+R3       -25392.064   51600.127 +   0.0826   51638.169 +   0.0661   54507.127 - 3.64e-06
+TN+F+I+R2        -25415.588   51637.177 - 7.45e-10   51674.272 - 9.56e-10   54508.552 - 1.78e-06
+TPM3u+F+I+R2     -25416.826   51639.652 - 2.16e-10   51676.747 - 2.77e-10   54511.027 - 5.18e-07
+TIM3+F+I+R2      -25415.491   51638.983 - 3.02e-10   51676.266 - 3.53e-10   54517.483 - 2.05e-08
+GTR+F+I+G4       -25422.620   51655.239 - 8.91e-14   51692.712 - 9.47e-14   54540.864 - 1.72e-13
+GTR+F+R2         -25426.689   51663.378 - 1.52e-15   51700.851 - 1.62e-15   54549.003 - 2.93e-15
+GTR+F+R3         -25426.097   51666.194 - 3.72e-16   51704.046 - 3.27e-16   54566.070 - 5.78e-19
+GTR+F+I          -25508.801   51825.602 - 9.03e-51   51862.886 - 1.06e-50   54704.102 - 6.14e-49
+SYM+I+R2         -25739.234   52284.468 - 2.06e-150   52321.563 - 2.65e-150   55155.843 - 4.94e-147
+TIM2e+I+R2       -25754.189   52310.377 - 4.88e-156   52347.097 - 7.56e-156   55167.502 - 1.45e-149
+GTR+F+G4         -25743.421   52294.841 - 1.15e-152   52332.125 - 1.35e-152   55173.342 - 7.84e-151
+TIMe+I+R2        -25771.960   52345.919 - 9.34e-164   52382.639 - 1.45e-163   55203.044 - 2.78e-157
+TVMe+I+R2        -25772.983   52349.965 - 1.24e-164   52386.873 - 1.74e-164   55214.215 - 1.04e-159
+TNe+I+R2         -25782.660   52365.320 - 5.72e-168   52401.853 - 9.73e-168   55215.320 - 6.01e-160
+TIM3e+I+R2       -25782.120   52366.239 - 3.61e-168   52402.960 - 5.6e-168   55223.364 - 1.08e-161
+TPM2+I+R2        -25788.152   52376.304 - 2.36e-170   52412.838 - 4.01e-170   55226.304 - 2.47e-162
+K3P+I+R2         -25808.334   52416.669 - 4.05e-179   52453.202 - 6.88e-179   55266.669 - 4.25e-171
+K2P+I+R2         -25819.149   52436.298 - 2.21e-183   52472.645 - 4.13e-183   55279.173 - 8.19e-174
+TPM3+I+R2        -25818.611   52437.222 - 1.39e-183   52473.755 - 2.37e-183   55287.222 - 1.46e-175
+F81+F+I+R2       -26138.911   53079.822 - 3.95e-323   53116.542 - 5.93e-323   55936.947 - 1.2e-316
+JC+I+R2          -26628.569   54053.139 -        0   54089.300 -        0   56888.889 -        0
+GTR+F            -26881.050   54568.100 -        0   54605.195 -        0   57439.475 -        0
+
+AIC, w-AIC   : Akaike information criterion scores and weights.
+AICc, w-AICc : Corrected AIC scores and weights.
+BIC, w-BIC   : Bayesian information criterion scores and weights.
+
+Plus signs denote the 95% confidence sets.
+Minus signs denote significant exclusion.
+
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: TVM+F+I+R2
+
+Rate parameter R:
+
+  A-C: 1.5721
+  A-G: 7.6280
+  A-T: 0.9624
+  C-G: 0.4352
+  C-T: 7.6280
+  G-T: 1.0000
+
+State frequencies: (empirical counts from alignment)
+
+  pi(A) = 0.3628
+  pi(C) = 0.1773
+  pi(G) = 0.2377
+  pi(T) = 0.2222
+
+Rate matrix Q:
+
+  A   -0.9543    0.1153    0.7505   0.08849
+  C     0.236   -0.9802   0.04282    0.7014
+  G     1.145   0.03193    -1.269   0.09194
+  T    0.1445    0.5595   0.09839   -0.8024
+
+Model of rate heterogeneity: Invar+FreeRate with 2 categories
+Proportion of invariable sites: 0.839
+Site proportion and rates:  (0.1409,3.969) (0.0201,21.94)
+
+ Category  Relative_rate  Proportion
+  0         0              0.839
+  1         3.969          0.1409
+  2         21.94          0.0201
+
+MAXIMUM LIKELIHOOD TREE
+-----------------------
+
+Log-likelihood of the tree: -25374.4854 (s.e. 474.3215)
+Unconstrained log-likelihood (without tree): -22282.6062
+Number of free parameters (#branches + #model parameters): 405
+Akaike information criterion (AIC) score: 51558.9709
+Corrected Akaike information criterion (AICc) score: 51596.4435
+Bayesian information criterion (BIC) score: 54444.5960
+
+Total tree length (sum of branch lengths): 0.1970
+Sum of internal branch lengths: 0.1189 (60.3386% of tree length)
+
+WARNING: 21 near-zero internal branches (<0.0001) should be treated with caution
+         Such branches are denoted by '**' in the figure below
+
+NOTE: Tree is UNROOTED although outgroup taxon 'MT-4_1_490' is drawn at root
+Numbers in parentheses are  ultrafast bootstrap support (%)
+
++**MT-4_1_490
+|
+|              +--MT-4_1_430
+|           +--| (46)
+|           |  |                                                                                                                                                                                                                                   +--MT-2_2_340
+|           |  |                                                                                                                                                                                                                                +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                                +--MT-2_2_450
+|           |  |                                                                                                                                                                                                                                |  |                             +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                             |  |     +--MT-2_2_470
+|           |  |                                                                                                                                                                                                                                |  |                             |  |  +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                             |  |  |  |     +--MT-2_2_500
+|           |  |                                                                                                                                                                                                                                |  |                             |  |  |  |  +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                             |  |  |  |  |  +--MT-2_2_490
+|           |  |                                                                                                                                                                                                                                |  |                             |  |  |  +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                             |  |  |     +--MT-2_2_480
+|           |  |                                                                                                                                                                                                                                |  |                             |  +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                             |     +**MT-2_2_460
+|           |  |                                                                                                                                                                                                                                |  |                          +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                          |  +--MT-2_2_440
+|           |  |                                                                                                                                                                                                                                |  |                       +--| (94)
+|           |  |                                                                                                                                                                                                                                |  |                       |  +--MT-2_2_430
+|           |  |                                                                                                                                                                                                                                |  |                    +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                    |  +--MT-2_2_420
+|           |  |                                                                                                                                                                                                                                |  |                 +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |                 |  +--MT-2_2_410
+|           |  |                                                                                                                                                                                                                                |  |              +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |              |  +--MT-2_2_400
+|           |  |                                                                                                                                                                                                                                |  |           +--| (99)
+|           |  |                                                                                                                                                                                                                                |  |           |  +--MT-2_2_390
+|           |  |                                                                                                                                                                                                                                |  |        +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |        |  +--MT-2_2_380
+|           |  |                                                                                                                                                                                                                                |  |     +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |     |  +--MT-2_2_370
+|           |  |                                                                                                                                                                                                                                |  |  +--| (100)
+|           |  |                                                                                                                                                                                                                                |  |  |  +--MT-2_2_360
+|           |  |                                                                                                                                                                                                                                |  +--| (100)
+|           |  |                                                                                                                                                                                                                                |     +--MT-2_2_350
+|           |  |                                                                                                                                                                                                                             +--| (100)
+|           |  |                                                                                                                                                                                                                             |  +--MT-2_2_330
+|           |  |                                                                                                                                                                                                                          +--| (100)
+|           |  |                                                                                                                                                                                                                          |  +--MT-2_2_320
+|           |  |                                                                                                                                                                                                                       +--| (100)
+|           |  |                                                                                                                                                                                                                       |  +--MT-2_2_310
+|           |  |                                                                                                                                                                                                                    +--| (100)
+|           |  |                                                                                                                                                                                                                    |  +--MT-2_2_300
+|           |  |                                                                                                                                                                                                                 +--| (100)
+|           |  |                                                                                                                                                                                                                 |  +--MT-2_2_290
+|           |  |                                                                                                                                                                                                              +--| (100)
+|           |  |                                                                                                                                                                                                              |  +--MT-2_2_280
+|           |  |                                                                                                                                                                                                           +--| (64)
+|           |  |                                                                                                                                                                                                           |  +**MT-2_2_260
+|           |  |                                                                                                                                                                                                        +--| (100)
+|           |  |                                                                                                                                                                                                        |  +--MT-2_2_270
+|           |  |                                                                                                                                                                                                     +--| (95)
+|           |  |                                                                                                                                                                                                     |  +--MT-2_2_250
+|           |  |                                                                                                                                                                                                  +--| (100)
+|           |  |                                                                                                                                                                                                  |  +**MT-2_2_240
+|           |  |                                                                                                                                                                                               +--| (100)
+|           |  |                                                                                                                                                                                               |  +--MT-2_2_230
+|           |  |                                                                                                                                                                                            +--| (100)
+|           |  |                                                                                                                                                                                            |  +**MT-2_2_220
+|           |  |                                                                                                                                                                                         +--| (96)
+|           |  |                                                                                                                                                                                         |  +--MT-2_2_210
+|           |  |                                                                                                                                                                                      +--| (100)
+|           |  |                                                                                                                                                                                      |  +--MT-2_2_200
+|           |  |                                                                                                                                                                                   +--| (100)
+|           |  |                                                                                                                                                                                   |  +--MT-2_2_190
+|           |  |                                                                                                                                                                                +--| (100)
+|           |  |                                                                                                                                                                                |  +**MT-2_2_180
+|           |  |                                                                                                                                                                             +--| (100)
+|           |  |                                                                                                                                                                             |  +**MT-2_2_170
+|           |  |                                                                                                                                                                          +--| (100)
+|           |  |                                                                                                                                                                          |  +**MT-2_2_160
+|           |  |                                                                                                                                                                       +--| (100)
+|           |  |                                                                                                                                                                       |  +--MT-2_2_150
+|           |  |                                                                                                                                                                    +--| (100)
+|           |  |                                                                                                                                                                    |  +--MT-2_2_140
+|           |  |                                                                                                                                                                 +--| (100)
+|           |  |                                                                                                                                                                 |  +--MT-2_2_130
+|           |  |                                                                                                                                                              +--| (100)
+|           |  |                                                                                                                                                              |  +**MT-2_2_120
+|           |  |                                                                                                                                                           +--| (100)
+|           |  |                                                                                                                                                           |  +--MT-2_2_110
+|           |  |                                                                                                                                                        +--| (100)
+|           |  |                                                                                                                                                        |  +**MT-2_2_100
+|           |  |                                                                                                                                                     +--| (100)
+|           |  |                                                                                                                                                     |  +**MT-2_2_90
+|           |  |                                                                                                                                                  +--| (100)
+|           |  |                                                                                                                                                  |  +**MT-2_2_80
+|           |  |                                                                                                                                               +--| (100)
+|           |  |                                                                                                                                               |  +**MT-2_2_70
+|           |  |                                                                                                                                            +--| (100)
+|           |  |                                                                                                                                            |  +**MT-2_2_60
+|           |  |                                                                                                                                         +**| (100)
+|           |  |                                                                                                                                         |  +**MT-2_2_50
+|           |  |                                                                                                                                      +--| (100)
+|           |  |                                                                                                                                      |  +**MT-2_2_40
+|           |  |                                                                                                                                   +--| (100)
+|           |  |                                                                                                                                   |  +**MT-2_2_30
+|           |  |                                                                                                                                +**| (99)
+|           |  |                                                                                                                                |  +**MT-2_2_20
+|           |  |                                                                                                                             +**| (71)
+|           |  |                                                                                                                             |  |        +**MT-4_1_10
+|           |  |                                                                                                                             |  |     +**| (77)
+|           |  |                                                                                                                             |  |     |  +**MT-4_1_20
+|           |  |                                                                                                                             |  |  +**| (72)
+|           |  |                                                                                                                             |  |  |  |                                                                                         +--MT-2_1_340
+|           |  |                                                                                                                             |  |  |  |                                                                                      +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                            +--MT-2_1_500
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                         +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                         |  +--MT-2_1_490
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                      +--| (97)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                      |  |  +--MT-2_1_480
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                      |  +--| (99)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                      |     +--MT-2_1_470
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                   +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                   |  +--MT-2_1_460
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                                |  +--MT-2_1_450
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                             +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                             |  +--MT-2_1_440
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                          +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                          |  +--MT-2_1_430
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                       +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                       |  +--MT-2_1_420
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                    +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                    |  +--MT-2_1_410
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                 +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |                 |  +--MT-2_1_400
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |              +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |              |  +**MT-2_1_390
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |           +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |           |  +--MT-2_1_380
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |        +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |        |  +--MT-2_1_370
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |     +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |     |  +--MT-2_1_360
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |  +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  |  |  +--MT-2_1_350
+|           |  |                                                                                                                             |  |  |  |                                                                                      |  +--| (65)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |     |     +--MT-2_1_310
+|           |  |                                                                                                                             |  |  |  |                                                                                      |     |  +--| (89)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |     |  |  +--MT-2_1_320
+|           |  |                                                                                                                             |  |  |  |                                                                                      |     +--| (94)
+|           |  |                                                                                                                             |  |  |  |                                                                                      |        +--MT-2_1_330
+|           |  |                                                                                                                             |  |  |  |                                                                                   +--| (96)
+|           |  |                                                                                                                             |  |  |  |                                                                                   |  +--MT-2_1_300
+|           |  |                                                                                                                             |  |  |  |                                                                                +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                                |  +**MT-2_1_290
+|           |  |                                                                                                                             |  |  |  |                                                                             +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                             |  +--MT-2_1_280
+|           |  |                                                                                                                             |  |  |  |                                                                          +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                          |  +**MT-2_1_270
+|           |  |                                                                                                                             |  |  |  |                                                                       +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                       |  +--MT-2_1_260
+|           |  |                                                                                                                             |  |  |  |                                                                    +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                    |  +--MT-2_1_250
+|           |  |                                                                                                                             |  |  |  |                                                                 +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                                 |  +--MT-2_1_240
+|           |  |                                                                                                                             |  |  |  |                                                              +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                              |  +**MT-2_1_230
+|           |  |                                                                                                                             |  |  |  |                                                           +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                           |  +--MT-2_1_220
+|           |  |                                                                                                                             |  |  |  |                                                        +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                        |  +--MT-2_1_210
+|           |  |                                                                                                                             |  |  |  |                                                     +--| (77)
+|           |  |                                                                                                                             |  |  |  |                                                     |  +--MT-2_1_190
+|           |  |                                                                                                                             |  |  |  |                                                  +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                                  |  +--MT-2_1_200
+|           |  |                                                                                                                             |  |  |  |                                               +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                               |  +--MT-2_1_180
+|           |  |                                                                                                                             |  |  |  |                                            +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                            |  +**MT-2_1_170
+|           |  |                                                                                                                             |  |  |  |                                         +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                         |  +**MT-2_1_160
+|           |  |                                                                                                                             |  |  |  |                                      +--| (100)
+|           |  |                                                                                                                             |  |  |  |                                      |  +--MT-2_1_150
+|           |  |                                                                                                                             |  |  |  |                                   +--| (96)
+|           |  |                                                                                                                             |  |  |  |                                   |  +**MT-2_1_140
+|           |  |                                                                                                                             |  |  |  |                                +--| (96)
+|           |  |                                                                                                                             |  |  |  |                                |  +**MT-2_1_130
+|           |  |                                                                                                                             |  |  |  |                             +--| (97)
+|           |  |                                                                                                                             |  |  |  |                             |  +--MT-2_1_120
+|           |  |                                                                                                                             |  |  |  |                          +--| (100)
+|           |  |                                                                                                                             |  |  |  |                          |  +--MT-2_1_110
+|           |  |                                                                                                                             |  |  |  |                       +--| (100)
+|           |  |                                                                                                                             |  |  |  |                       |  +**MT-2_1_100
+|           |  |                                                                                                                             |  |  |  |                    +--| (100)
+|           |  |                                                                                                                             |  |  |  |                    |  +**MT-2_1_90
+|           |  |                                                                                                                             |  |  |  |                 +--| (100)
+|           |  |                                                                                                                             |  |  |  |                 |  +--MT-2_1_80
+|           |  |                                                                                                                             |  |  |  |              +--| (100)
+|           |  |                                                                                                                             |  |  |  |              |  +**MT-2_1_70
+|           |  |                                                                                                                             |  |  |  |           +--| (100)
+|           |  |                                                                                                                             |  |  |  |           |  |  +**MT-2_1_50
+|           |  |                                                                                                                             |  |  |  |           |  +**| (66)
+|           |  |                                                                                                                             |  |  |  |           |     +**MT-2_1_60
+|           |  |                                                                                                                             |  |  |  |        +--| (100)
+|           |  |                                                                                                                             |  |  |  |        |  +**MT-2_1_40
+|           |  |                                                                                                                             |  |  |  |     +**| (97)
+|           |  |                                                                                                                             |  |  |  |     |  +**MT-2_1_30
+|           |  |                                                                                                                             |  |  |  |  +**| (95)
+|           |  |                                                                                                                             |  |  |  |  |  +**MT-2_1_20
+|           |  |                                                                                                                             |  |  |  +--| (100)
+|           |  |                                                                                                                             |  |  |     +**MT-2_1_10
+|           |  |                                                                                                                             |  +**| (24)
+|           |  |                                                                                                                             |     +-------------------------K03455.1
+|           |  |                                                                                                                          +**| (69)
+|           |  |                                                                                                                          |  |  +--MT-4_1_30
+|           |  |                                                                                                                          |  +**| (57)
+|           |  |                                                                                                                          |     +**MT-4_2_20
+|           |  |                                                                                                                       +**| (80)
+|           |  |                                                                                                                       |  +**MT-4_2_30
+|           |  |                                                                                                                    +**| (65)
+|           |  |                                                                                                                    |  +**MT-4_1_40
+|           |  |                                                                                                                 +--| (82)
+|           |  |                                                                                                                 |  |                                                                                                                 +--MT-4_2_430
+|           |  |                                                                                                                 |  |                                                                                                              +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                              |  |     +**MT-4_2_450
+|           |  |                                                                                                                 |  |                                                                                                              |  |  +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |     +**MT-4_2_470
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |  +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |  |  |  +**MT-4_2_480
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |  |  +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |  |     |  +**MT-4_2_490
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |  |     +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  |  |        +--MT-4_2_500
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |  +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                              |  |  |     +**MT-4_2_460
+|           |  |                                                                                                                 |  |                                                                                                              |  +--| (97)
+|           |  |                                                                                                                 |  |                                                                                                              |     +**MT-4_2_440
+|           |  |                                                                                                                 |  |                                                                                                           +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                           |  +**MT-4_2_420
+|           |  |                                                                                                                 |  |                                                                                                        +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                        |  +**MT-4_2_410
+|           |  |                                                                                                                 |  |                                                                                                     +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                     |  +**MT-4_2_400
+|           |  |                                                                                                                 |  |                                                                                                  +--| (100)
+|           |  |                                                                                                                 |  |                                                                                                  |  +**MT-4_2_390
+|           |  |                                                                                                                 |  |                                                                                               +--| (91)
+|           |  |                                                                                                                 |  |                                                                                               |  +**MT-4_2_380
+|           |  |                                                                                                                 |  |                                                                                            +--| (94)
+|           |  |                                                                                                                 |  |                                                                                            |  +--MT-4_2_370
+|           |  |                                                                                                                 |  |                                                                                         +--| (100)
+|           |  |                                                                                                                 |  |                                                                                         |  +**MT-4_2_360
+|           |  |                                                                                                                 |  |                                                                                      +--| (100)
+|           |  |                                                                                                                 |  |                                                                                      |  +**MT-4_2_350
+|           |  |                                                                                                                 |  |                                                                                   +**| (97)
+|           |  |                                                                                                                 |  |                                                                                   |  +**MT-4_2_340
+|           |  |                                                                                                                 |  |                                                                                +--| (100)
+|           |  |                                                                                                                 |  |                                                                                |  +**MT-4_2_330
+|           |  |                                                                                                                 |  |                                                                             +**| (83)
+|           |  |                                                                                                                 |  |                                                                             |  +**MT-4_2_300
+|           |  |                                                                                                                 |  |                                                                          +--| (78)
+|           |  |                                                                                                                 |  |                                                                          |  |  +**MT-4_2_320
+|           |  |                                                                                                                 |  |                                                                          |  +--| (100)
+|           |  |                                                                                                                 |  |                                                                          |     +**MT-4_2_310
+|           |  |                                                                                                                 |  |                                                                       +--| (100)
+|           |  |                                                                                                                 |  |                                                                       |  +**MT-4_2_290
+|           |  |                                                                                                                 |  |                                                                    +**| (74)
+|           |  |                                                                                                                 |  |                                                                    |  +**MT-4_2_280
+|           |  |                                                                                                                 |  |                                                                 +--| (100)
+|           |  |                                                                                                                 |  |                                                                 |  +**MT-4_2_270
+|           |  |                                                                                                                 |  |                                                              +--| (100)
+|           |  |                                                                                                                 |  |                                                              |  +**MT-4_2_260
+|           |  |                                                                                                                 |  |                                                           +--| (99)
+|           |  |                                                                                                                 |  |                                                           |  +**MT-4_2_250
+|           |  |                                                                                                                 |  |                                                        +--| (100)
+|           |  |                                                                                                                 |  |                                                        |  +**MT-4_2_240
+|           |  |                                                                                                                 |  |                                                     +--| (100)
+|           |  |                                                                                                                 |  |                                                     |  +**MT-4_2_230
+|           |  |                                                                                                                 |  |                                                  +--| (98)
+|           |  |                                                                                                                 |  |                                                  |  +**MT-4_2_220
+|           |  |                                                                                                                 |  |                                               +--| (100)
+|           |  |                                                                                                                 |  |                                               |  +**MT-4_2_210
+|           |  |                                                                                                                 |  |                                            +--| (100)
+|           |  |                                                                                                                 |  |                                            |  +--MT-4_2_200
+|           |  |                                                                                                                 |  |                                         +--| (98)
+|           |  |                                                                                                                 |  |                                         |  +**MT-4_2_190
+|           |  |                                                                                                                 |  |                                      +--| (98)
+|           |  |                                                                                                                 |  |                                      |  +**MT-4_2_180
+|           |  |                                                                                                                 |  |                                   +--| (99)
+|           |  |                                                                                                                 |  |                                   |  +**MT-4_2_170
+|           |  |                                                                                                                 |  |                                +--| (100)
+|           |  |                                                                                                                 |  |                                |  +--MT-4_2_160
+|           |  |                                                                                                                 |  |                             +--| (100)
+|           |  |                                                                                                                 |  |                             |  +**MT-4_2_150
+|           |  |                                                                                                                 |  |                          +--| (100)
+|           |  |                                                                                                                 |  |                          |  +**MT-4_2_140
+|           |  |                                                                                                                 |  |                       +--| (100)
+|           |  |                                                                                                                 |  |                       |  +**MT-4_2_130
+|           |  |                                                                                                                 |  |                    +--| (100)
+|           |  |                                                                                                                 |  |                    |  +**MT-4_2_120
+|           |  |                                                                                                                 |  |                 +--| (100)
+|           |  |                                                                                                                 |  |                 |  +**MT-4_2_110
+|           |  |                                                                                                                 |  |              +--| (100)
+|           |  |                                                                                                                 |  |              |  +**MT-4_2_100
+|           |  |                                                                                                                 |  |           +--| (100)
+|           |  |                                                                                                                 |  |           |  +**MT-4_2_90
+|           |  |                                                                                                                 |  |        +--| (100)
+|           |  |                                                                                                                 |  |        |  +**MT-4_2_80
+|           |  |                                                                                                                 |  |     +--| (97)
+|           |  |                                                                                                                 |  |     |  +**MT-4_2_70
+|           |  |                                                                                                                 |  |  +--| (85)
+|           |  |                                                                                                                 |  |  |  +**MT-4_2_60
+|           |  |                                                                                                                 |  +**| (56)
+|           |  |                                                                                                                 |     +**MT-4_1_50
+|           |  |                                                                                                              +**| (62)
+|           |  |                                                                                                              |  +**MT-4_2_40
+|           |  |                                                                                                           +**| (67)
+|           |  |                                                                                                           |  +**MT-4_1_60
+|           |  |                                                                                                        +--| (99)
+|           |  |                                                                                                        |  +**MT-4_2_50
+|           |  |                                                                                                     +--| (85)
+|           |  |                                                                                                     |  +**MT-4_1_70
+|           |  |                                                                                                  +--| (100)
+|           |  |                                                                                                  |  +**MT-4_1_80
+|           |  |                                                                                               +--| (100)
+|           |  |                                                                                               |  +**MT-4_1_90
+|           |  |                                                                                            +--| (100)
+|           |  |                                                                                            |  +**MT-4_1_100
+|           |  |                                                                                         +--| (100)
+|           |  |                                                                                         |  +**MT-4_1_110
+|           |  |                                                                                      +--| (100)
+|           |  |                                                                                      |  +**MT-4_1_120
+|           |  |                                                                                   +--| (100)
+|           |  |                                                                                   |  +**MT-4_1_130
+|           |  |                                                                                +--| (100)
+|           |  |                                                                                |  +**MT-4_1_140
+|           |  |                                                                             +--| (100)
+|           |  |                                                                             |  +**MT-4_1_150
+|           |  |                                                                          +--| (100)
+|           |  |                                                                          |  +**MT-4_1_160
+|           |  |                                                                       +--| (100)
+|           |  |                                                                       |  +**MT-4_1_170
+|           |  |                                                                    +--| (100)
+|           |  |                                                                    |  +**MT-4_1_180
+|           |  |                                                                 +--| (100)
+|           |  |                                                                 |  +**MT-4_1_190
+|           |  |                                                              +**| (74)
+|           |  |                                                              |  +**MT-4_1_200
+|           |  |                                                           +--| (95)
+|           |  |                                                           |  +--MT-4_1_210
+|           |  |                                                        +--| (100)
+|           |  |                                                        |  +--MT-4_1_220
+|           |  |                                                     +--| (100)
+|           |  |                                                     |  +**MT-4_1_230
+|           |  |                                                  +--| (100)
+|           |  |                                                  |  +--MT-4_1_240
+|           |  |                                               +--| (100)
+|           |  |                                               |  +**MT-4_1_250
+|           |  |                                            +--| (100)
+|           |  |                                            |  +**MT-4_1_260
+|           |  |                                         +--| (100)
+|           |  |                                         |  +--MT-4_1_270
+|           |  |                                      +--| (99)
+|           |  |                                      |  +**MT-4_1_280
+|           |  |                                   +--| (100)
+|           |  |                                   |  +--MT-4_1_290
+|           |  |                                +--| (100)
+|           |  |                                |  +--MT-4_1_300
+|           |  |                             +--| (75)
+|           |  |                             |  +--MT-4_1_310
+|           |  |                          +--| (99)
+|           |  |                          |  +--MT-4_1_320
+|           |  |                       +--| (75)
+|           |  |                       |  +--MT-4_1_330
+|           |  |                    +--| (91)
+|           |  |                    |  +--MT-4_1_340
+|           |  |                 +--| (67)
+|           |  |                 |  +--MT-4_1_350
+|           |  |              +--| (100)
+|           |  |              |  +--MT-4_1_360
+|           |  |           +--| (98)
+|           |  |           |  +--MT-4_1_380
+|           |  |        +--| (98)
+|           |  |        |  +--MT-4_1_370
+|           |  |     +--| (93)
+|           |  |     |  +--MT-4_1_390
+|           |  |  +--| (100)
+|           |  |  |  +--MT-4_1_400
+|           |  +--| (96)
+|           |     +--MT-4_1_410
+|        +--| (34)
+|        |  |     +**MT-4_1_450
+|        |  |  +--| (48)
+|        |  |  |  +--MT-4_1_460
+|        |  +--| (47)
+|        |     +**MT-4_1_440
+|     +--| (99)
+|     |  +--MT-4_1_420
+|  +--| (99)
+|  |  +--MT-4_1_470
++**| (46)
+|  +--MT-4_1_500
+|
++**MT-4_1_480
+
+Tree in newick format:
+
+(MT-4_1_490:0.0000010009,(((((MT-4_1_430:0.0001274792,((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((MT-2_2_340:0.0006736257,(((((((((((MT-2_2_450:0.0003368664,((MT-2_2_470:0.0009996587,((MT-2_2_500:0.0014155823,MT-2_2_490:0.0003489999)100:0.0007951790,MT-2_2_480:0.0005045386)100:0.0015472479)100:0.0008859467,MT-2_2_460:0.0000024420)100:0.0015495418)100:0.0013815170,MT-2_2_440:0.0003438331)100:0.0012169515,MT-2_2_430:0.0003219065)94:0.0007795510,MT-2_2_420:0.0011352225)100:0.0012947569,MT-2_2_410:0.0001881365)100:0.0008566251,MT-2_2_400:0.0001288730)100:0.0010691929,MT-2_2_390:0.0006148571)99:0.0005162450,MT-2_2_380:0.0002370940)100:0.0008795103,MT-2_2_370:0.0002059140)100:0.0014438251,MT-2_2_360:0.0004723272)100:0.0010765353,MT-2_2_350:0.0004917970)100:0.0013298898)100:0.0006347061,MT-2_2_330:0.0001112522)100:0.0008732769,MT-2_2_320:0.0012741239)100:0.0006291816,MT-2_2_310:0.0007134078)100:0.0014882111,MT-2_2_300:0.0001153482)100:0.0011505598,MT-2_2_290:0.0005261855)100:0.0014795621,MT-2_2_280:0.0005372780)100:0.0010919402,MT-2_2_260:0.0000022032)64:0.0003241502,MT-2_2_270:0.0006505101)100:0.0009893753,MT-2_2_250:0.0007602926)95:0.0004304993,MT-2_2_240:0.0000024192)100:0.0017425860,MT-2_2_230:0.0002076739)100:0.0013059112,MT-2_2_220:0.0001066086)100:0.0008050223,MT-2_2_210:0.0001588806)96:0.0003583140,MT-2_2_200:0.0004075993)100:0.0006294725,MT-2_2_190:0.0004216729)100:0.0017336282,MT-2_2_180:0.0000020320)100:0.0005308499,MT-2_2_170:0.0000010009)100:0.0005301810,MT-2_2_160:0.0000021324)100:0.0005184290,MT-2_2_150:0.0003315648)100:0.0004321960,MT-2_2_140:0.0001172980)100:0.0007386317,MT-2_2_130:0.0003173519)100:0.0010240614,MT-2_2_120:0.0001061822)100:0.0007497058,MT-2_2_110:0.0001416607)100:0.0004244180,MT-2_2_100:0.0000665411)100:0.0002493009,MT-2_2_90:0.0001048304)100:0.0002105631,MT-2_2_80:0.0000021596)100:0.0006337583,MT-2_2_70:0.0001038061)100:0.0004222827,MT-2_2_60:0.0000021364)100:0.0004208769,MT-2_2_50:0.0000024456)100:0.0001045217,MT-2_2_40:0.0000024271)100:0.0004198293,MT-2_2_30:0.0000021937)100:0.0003141991,MT-2_2_20:0.0000024983)99:0.0001050039,(((MT-4_1_10:0.0000010009,MT-4_1_20:0.0000010009)77:0.0000010009,((((((((((((((((((((((((((((((MT-2_1_340:0.0006842816,(((((((((((((((MT-2_1_500:0.0006183092,MT-2_1_490:0.0008000269)100:0.0015634168,(MT-2_1_480:0.0006479566,MT-2_1_470:0.0005826048)99:0.0006298287)97:0.0005788925,MT-2_1_460:0.0002716154)100:0.0011623053,MT-2_1_450:0.0025435050)100:0.0009183916,MT-2_1_440:0.0006193175)100:0.0008431659,MT-2_1_430:0.0010528635)100:0.0006946643,MT-2_1_420:0.0002761245)100:0.0005432756,MT-2_1_410:0.0001142564)100:0.0006949430,MT-2_1_400:0.0008953372)100:0.0004917193,MT-2_1_390:0.0000021921)100:0.0003798571,MT-2_1_380:0.0006620820)100:0.0003296564,MT-2_1_370:0.0002187770)100:0.0003864104,MT-2_1_360:0.0001670265)100:0.0007049421,MT-2_1_350:0.0003546485)100:0.0011378596,((MT-2_1_310:0.0012691065,MT-2_1_320:0.0005897827)89:0.0006526470,MT-2_1_330:0.0002414087)94:0.0009847009)65:0.0001276669)100:0.0015143912,MT-2_1_300:0.0006517860)96:0.0007700003,MT-2_1_290:0.0000023768)100:0.0028409299,MT-2_1_280:0.0002030031)100:0.0011857382,MT-2_1_270:0.0000028391)100:0.0005331073,MT-2_1_260:0.0002130841)100:0.0016055069,MT-2_1_250:0.0003251611)100:0.0005413702,MT-2_1_240:0.0003278410)100:0.0008391359,MT-2_1_230:0.0000010009)100:0.0004662982,MT-2_1_220:0.0001238384)100:0.0011101554,MT-2_1_210:0.0005338002)100:0.0006051122,MT-2_1_190:0.0003935438)77:0.0002961383,MT-2_1_200:0.0001587591)100:0.0010116930,MT-2_1_180:0.0002110407)100:0.0004261870,MT-2_1_170:0.0001014535)100:0.0008492900,MT-2_1_160:0.0000010009)100:0.0009614822,MT-2_1_150:0.0003112296)100:0.0009594383,MT-2_1_140:0.0000010009)96:0.0005265316,MT-2_1_130:0.0000010009)96:0.0007217362,MT-2_1_120:0.0004428591)97:0.0005312051,MT-2_1_110:0.0002314920)100:0.0008879696,MT-2_1_100:0.0001047048)100:0.0006803278,MT-2_1_90:0.0000026338)100:0.0006320292,MT-2_1_80:0.0002079421)100:0.0005326618,MT-2_1_70:0.0001003013)100:0.0006353129,(MT-2_1_50:0.0001046187,MT-2_1_60:0.0000010009)66:0.0000022112)100:0.0005250111,MT-2_1_40:0.0000024899)100:0.0004196994,MT-2_1_30:0.0000025983)97:0.0001045123,MT-2_1_20:0.0000024285)95:0.0001050021,MT-2_1_10:0.0001044208)100:0.0003147071)72:0.0001038221,K03455.1:0.0295960227)24:0.0000029237)71:0.0001048622,(MT-4_1_30:0.0002088090,MT-4_2_20:0.0000010009)57:0.0001040631)69:0.0000026189,MT-4_2_30:0.0000010009)80:0.0001047407,MT-4_1_40:0.0000026097)65:0.0000026007,((((((((((((((((((((((((((((((((((((((MT-4_2_430:0.0001281143,((MT-4_2_450:0.0000021175,((MT-4_2_470:0.0000026278,(MT-4_2_480:0.0000010009,(MT-4_2_490:0.0001083572,MT-4_2_500:0.0006572584)100:0.0002156620)100:0.0005414493)100:0.0003234235,MT-4_2_460:0.0001083964)100:0.0003232937)100:0.0002359443,MT-4_2_440:0.0000879807)97:0.0003232917)100:0.0009692496,MT-4_2_420:0.0001014241)100:0.0008584504,MT-4_2_410:0.0000021874)100:0.0004839113,MT-4_2_400:0.0000020239)100:0.0004660094,MT-4_2_390:0.0000024797)100:0.0003488268,MT-4_2_380:0.0000020560)91:0.0002340338,MT-4_2_370:0.0004289966)94:0.0003499651,MT-4_2_360:0.0000021638)100:0.0004627809,MT-4_2_350:0.0000024685)100:0.0004627617,MT-4_2_340:0.0000026410)97:0.0001066886,MT-4_2_330:0.0000022797)100:0.0005336634,MT-4_2_300:0.0000021570)83:0.0001072888,(MT-4_2_320:0.0000010009,MT-4_2_310:0.0000010009)100:0.0002137254)78:0.0002118538,MT-4_2_290:0.0000026558)100:0.0003189699,MT-4_2_280:0.0000010009)74:0.0000010009,MT-4_2_270:0.0000010009)100:0.0005371570,MT-4_2_260:0.0000021082)100:0.0005357905,MT-4_2_250:0.0000023495)99:0.0002136134,MT-4_2_240:0.0001056790)100:0.0002562355,MT-4_2_230:0.0000021279)100:0.0003804347,MT-4_2_220:0.0000022505)98:0.0002124167,MT-4_2_210:0.0001052906)100:0.0004288219,MT-4_2_200:0.0002124529)100:0.0003197254,MT-4_2_190:0.0000010009)98:0.0003193517,MT-4_2_180:0.0001060394)98:0.0001578515,MT-4_2_170:0.0000539419)99:0.0002268839,MT-4_2_160:0.0001572781)100:0.0007363885,MT-4_2_150:0.0000022360)100:0.0003382214,MT-4_2_140:0.0000010009)100:0.0004510555,MT-4_2_130:0.0000023433)100:0.0007431314,MT-4_2_120:0.0000010009)100:0.0004208381,MT-4_2_110:0.0000010009)100:0.0003152791,MT-4_2_100:0.0000010009)100:0.0003152132,MT-4_2_90:0.0000020279)100:0.0005258034,MT-4_2_80:0.0000010009)100:0.0004201151,MT-4_2_70:0.0000010009)97:0.0002095827,MT-4_2_60:0.0000021749)85:0.0002090282,MT-4_1_50:0.0000024371)56:0.0001050614)82:0.0003136275,MT-4_2_40:0.0000020820)62:0.0001026326,MT-4_1_60:0.0000010009)67:0.0000022551,MT-4_2_50:0.0000028613)99:0.0005246010,MT-4_1_70:0.0000026531)85:0.0001124194,MT-4_1_80:0.0000024322)100:0.0007879246,MT-4_1_90:0.0000029821)100:0.0007914889,MT-4_1_100:0.0000022374)100:0.0007387600,MT-4_1_110:0.0000027367)100:0.0007456672,MT-4_1_120:0.0000010009)100:0.0006384001,MT-4_1_130:0.0000010009)100:0.0006367234,MT-4_1_140:0.0001011204)100:0.0004766547,MT-4_1_150:0.0001069497)100:0.0004784633,MT-4_1_160:0.0000010009)100:0.0005330580,MT-4_1_170:0.0000010009)100:0.0002250064,MT-4_1_180:0.0001019919)100:0.0008071451,MT-4_1_190:0.0000938496)100:0.0008076380,MT-4_1_200:0.0001071937)74:0.0000020556,MT-4_1_210:0.0001125014)95:0.0002194722,MT-4_1_220:0.0003361881)100:0.0005531559,MT-4_1_230:0.0000010009)100:0.0008605696,MT-4_1_240:0.0002341295)100:0.0002729503,MT-4_1_250:0.0000026611)100:0.0009765824,MT-4_1_260:0.0000026887)100:0.0005040556,MT-4_1_270:0.0004472404)100:0.0002478182,MT-4_1_280:0.0000010009)99:0.0002509577,MT-4_1_290:0.0002158369)100:0.0004344738,MT-4_1_300:0.0002022596)100:0.0012275669,MT-4_1_310:0.0001141142)75:0.0006078255,MT-4_1_320:0.0002415808)99:0.0011878117,MT-4_1_330:0.0004241151)75:0.0006366334,MT-4_1_340:0.0009082270)91:0.0006292186,MT-4_1_350:0.0005392561)67:0.0001508690,MT-4_1_360:0.0004740348)100:0.0007381760,MT-4_1_380:0.0008162864)98:0.0007531876,MT-4_1_370:0.0006692282)98:0.0005688433,MT-4_1_390:0.0007367222)93:0.0005642263,MT-4_1_400:0.0015123080)100:0.0007587593,MT-4_1_410:0.0013250708)96:0.0004801075)46:0.0001254140,((MT-4_1_450:0.0000021468,MT-4_1_460:0.0003410019)48:0.0008220300,MT-4_1_440:0.0000021191)47:0.0009324027)34:0.0004497689,MT-4_1_420:0.0005601679)99:0.0017336491,MT-4_1_470:0.0007461464)99:0.0007102109,MT-4_1_500:0.0008512150)46:0.0000026693,MT-4_1_480:0.0000026887);
+
+CONSENSUS TREE
+--------------
+
+Consensus tree is constructed from 1000 bootstrap trees
+Log-likelihood of consensus tree: -25376.644758
+Robinson-Foulds distance between ML tree and consensus tree: 10
+
+Branches with support >0.000000% are kept (extended consensus)
+Branch lengths are optimized by maximum likelihood on original alignment
+Numbers in parentheses are bootstrap supports (%)
+
++--MT-4_1_490
+|
+|                 +--MT-4_1_430
+|              +--| (61)
+|              |  |                                                                                                                                                                                                                                         +--MT-2_2_340
+|              |  |                                                                                                                                                                                                                                      +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                                +--MT-2_2_450
+|              |  |                                                                                                                                                                                                                                      |  |                             +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |     +--MT-2_2_470
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |  +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |  |  |     +--MT-2_2_500
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |  |  |  +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |  |  |  |  +--MT-2_2_490
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |  |  +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                             |  |  |     +--MT-2_2_480
+|              |  |                                                                                                                                                                                                                                      |  |                             |  +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                             |     +--MT-2_2_460
+|              |  |                                                                                                                                                                                                                                      |  |                          +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                          |  +--MT-2_2_440
+|              |  |                                                                                                                                                                                                                                      |  |                       +--| (94)
+|              |  |                                                                                                                                                                                                                                      |  |                       |  +--MT-2_2_430
+|              |  |                                                                                                                                                                                                                                      |  |                    +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                    |  +--MT-2_2_420
+|              |  |                                                                                                                                                                                                                                      |  |                 +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |                 |  +--MT-2_2_410
+|              |  |                                                                                                                                                                                                                                      |  |              +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |              |  +--MT-2_2_400
+|              |  |                                                                                                                                                                                                                                      |  |           +--| (99)
+|              |  |                                                                                                                                                                                                                                      |  |           |  +--MT-2_2_390
+|              |  |                                                                                                                                                                                                                                      |  |        +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |        |  +--MT-2_2_380
+|              |  |                                                                                                                                                                                                                                      |  |     +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |     |  +--MT-2_2_370
+|              |  |                                                                                                                                                                                                                                      |  |  +--| (100)
+|              |  |                                                                                                                                                                                                                                      |  |  |  +--MT-2_2_360
+|              |  |                                                                                                                                                                                                                                      |  +--| (100)
+|              |  |                                                                                                                                                                                                                                      |     +--MT-2_2_350
+|              |  |                                                                                                                                                                                                                                   +--| (100)
+|              |  |                                                                                                                                                                                                                                   |  +--MT-2_2_330
+|              |  |                                                                                                                                                                                                                                +--| (100)
+|              |  |                                                                                                                                                                                                                                |  +--MT-2_2_320
+|              |  |                                                                                                                                                                                                                             +--| (100)
+|              |  |                                                                                                                                                                                                                             |  +--MT-2_2_310
+|              |  |                                                                                                                                                                                                                          +--| (100)
+|              |  |                                                                                                                                                                                                                          |  +--MT-2_2_300
+|              |  |                                                                                                                                                                                                                       +--| (100)
+|              |  |                                                                                                                                                                                                                       |  +--MT-2_2_290
+|              |  |                                                                                                                                                                                                                    +--| (100)
+|              |  |                                                                                                                                                                                                                    |  +--MT-2_2_280
+|              |  |                                                                                                                                                                                                                 +--| (64)
+|              |  |                                                                                                                                                                                                                 |  +--MT-2_2_260
+|              |  |                                                                                                                                                                                                              +--| (100)
+|              |  |                                                                                                                                                                                                              |  +--MT-2_2_270
+|              |  |                                                                                                                                                                                                           +--| (95)
+|              |  |                                                                                                                                                                                                           |  +--MT-2_2_250
+|              |  |                                                                                                                                                                                                        +--| (100)
+|              |  |                                                                                                                                                                                                        |  +--MT-2_2_240
+|              |  |                                                                                                                                                                                                     +--| (100)
+|              |  |                                                                                                                                                                                                     |  +--MT-2_2_230
+|              |  |                                                                                                                                                                                                  +--| (100)
+|              |  |                                                                                                                                                                                                  |  +--MT-2_2_220
+|              |  |                                                                                                                                                                                               +--| (96)
+|              |  |                                                                                                                                                                                               |  +--MT-2_2_210
+|              |  |                                                                                                                                                                                            +--| (100)
+|              |  |                                                                                                                                                                                            |  +--MT-2_2_200
+|              |  |                                                                                                                                                                                         +--| (100)
+|              |  |                                                                                                                                                                                         |  +--MT-2_2_190
+|              |  |                                                                                                                                                                                      +--| (100)
+|              |  |                                                                                                                                                                                      |  +--MT-2_2_180
+|              |  |                                                                                                                                                                                   +--| (100)
+|              |  |                                                                                                                                                                                   |  +--MT-2_2_170
+|              |  |                                                                                                                                                                                +--| (100)
+|              |  |                                                                                                                                                                                |  +--MT-2_2_160
+|              |  |                                                                                                                                                                             +--| (100)
+|              |  |                                                                                                                                                                             |  +--MT-2_2_150
+|              |  |                                                                                                                                                                          +--| (100)
+|              |  |                                                                                                                                                                          |  +--MT-2_2_140
+|              |  |                                                                                                                                                                       +--| (100)
+|              |  |                                                                                                                                                                       |  +--MT-2_2_130
+|              |  |                                                                                                                                                                    +--| (100)
+|              |  |                                                                                                                                                                    |  +--MT-2_2_120
+|              |  |                                                                                                                                                                 +--| (100)
+|              |  |                                                                                                                                                                 |  +--MT-2_2_110
+|              |  |                                                                                                                                                              +--| (100)
+|              |  |                                                                                                                                                              |  +--MT-2_2_100
+|              |  |                                                                                                                                                           +--| (100)
+|              |  |                                                                                                                                                           |  +--MT-2_2_90
+|              |  |                                                                                                                                                        +--| (100)
+|              |  |                                                                                                                                                        |  +--MT-2_2_80
+|              |  |                                                                                                                                                     +--| (100)
+|              |  |                                                                                                                                                     |  +--MT-2_2_70
+|              |  |                                                                                                                                                  +--| (100)
+|              |  |                                                                                                                                                  |  +--MT-2_2_60
+|              |  |                                                                                                                                               +--| (100)
+|              |  |                                                                                                                                               |  +--MT-2_2_50
+|              |  |                                                                                                                                            +--| (100)
+|              |  |                                                                                                                                            |  +--MT-2_2_40
+|              |  |                                                                                                                                         +--| (100)
+|              |  |                                                                                                                                         |  +--MT-2_2_30
+|              |  |                                                                                                                                      +--| (99)
+|              |  |                                                                                                                                      |  +--MT-2_2_20
+|              |  |                                                                                                                                   +--| (61)
+|              |  |                                                                                                                                   |  +-------------------------K03455.1
+|              |  |                                                                                                                                +--| (71)
+|              |  |                                                                                                                                |  |              +**MT-4_1_10
+|              |  |                                                                                                                                |  |           +**|
+|              |  |                                                                                                                                |  |           |  +**NL43_ann_wk0virusPassRef_plasmid
+|              |  |                                                                                                                                |  |        +**|
+|              |  |                                                                                                                                |  |        |  +**MT-4_2_10
+|              |  |                                                                                                                                |  |     +--|
+|              |  |                                                                                                                                |  |     |  +**MT-2_2_10
+|              |  |                                                                                                                                |  |  +--| (77)
+|              |  |                                                                                                                                |  |  |  +--MT-4_1_20
+|              |  |                                                                                                                                |  +--| (72)
+|              |  |                                                                                                                                |     |                                                                                         +--MT-2_1_340
+|              |  |                                                                                                                                |     |                                                                                      +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                                            +--MT-2_1_500
+|              |  |                                                                                                                                |     |                                                                                      |  |                                         +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                                         |  +--MT-2_1_490
+|              |  |                                                                                                                                |     |                                                                                      |  |                                      +--| (97)
+|              |  |                                                                                                                                |     |                                                                                      |  |                                      |  |  +--MT-2_1_480
+|              |  |                                                                                                                                |     |                                                                                      |  |                                      |  +--| (99)
+|              |  |                                                                                                                                |     |                                                                                      |  |                                      |     +--MT-2_1_470
+|              |  |                                                                                                                                |     |                                                                                      |  |                                   +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                                   |  +--MT-2_1_460
+|              |  |                                                                                                                                |     |                                                                                      |  |                                +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                                |  +--MT-2_1_450
+|              |  |                                                                                                                                |     |                                                                                      |  |                             +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                             |  +--MT-2_1_440
+|              |  |                                                                                                                                |     |                                                                                      |  |                          +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                          |  +--MT-2_1_430
+|              |  |                                                                                                                                |     |                                                                                      |  |                       +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                       |  +--MT-2_1_420
+|              |  |                                                                                                                                |     |                                                                                      |  |                    +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                    |  +--MT-2_1_410
+|              |  |                                                                                                                                |     |                                                                                      |  |                 +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |                 |  +--MT-2_1_400
+|              |  |                                                                                                                                |     |                                                                                      |  |              +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |              |  +--MT-2_1_390
+|              |  |                                                                                                                                |     |                                                                                      |  |           +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |           |  +--MT-2_1_380
+|              |  |                                                                                                                                |     |                                                                                      |  |        +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |        |  +--MT-2_1_370
+|              |  |                                                                                                                                |     |                                                                                      |  |     +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |     |  +--MT-2_1_360
+|              |  |                                                                                                                                |     |                                                                                      |  |  +--| (100)
+|              |  |                                                                                                                                |     |                                                                                      |  |  |  +--MT-2_1_350
+|              |  |                                                                                                                                |     |                                                                                      |  +--| (65)
+|              |  |                                                                                                                                |     |                                                                                      |     |     +--MT-2_1_310
+|              |  |                                                                                                                                |     |                                                                                      |     |  +--| (89)
+|              |  |                                                                                                                                |     |                                                                                      |     |  |  +--MT-2_1_320
+|              |  |                                                                                                                                |     |                                                                                      |     +--| (94)
+|              |  |                                                                                                                                |     |                                                                                      |        +--MT-2_1_330
+|              |  |                                                                                                                                |     |                                                                                   +--| (96)
+|              |  |                                                                                                                                |     |                                                                                   |  +--MT-2_1_300
+|              |  |                                                                                                                                |     |                                                                                +--| (100)
+|              |  |                                                                                                                                |     |                                                                                |  +--MT-2_1_290
+|              |  |                                                                                                                                |     |                                                                             +--| (100)
+|              |  |                                                                                                                                |     |                                                                             |  +--MT-2_1_280
+|              |  |                                                                                                                                |     |                                                                          +--| (100)
+|              |  |                                                                                                                                |     |                                                                          |  +--MT-2_1_270
+|              |  |                                                                                                                                |     |                                                                       +--| (100)
+|              |  |                                                                                                                                |     |                                                                       |  +--MT-2_1_260
+|              |  |                                                                                                                                |     |                                                                    +--| (100)
+|              |  |                                                                                                                                |     |                                                                    |  +--MT-2_1_250
+|              |  |                                                                                                                                |     |                                                                 +--| (100)
+|              |  |                                                                                                                                |     |                                                                 |  +--MT-2_1_240
+|              |  |                                                                                                                                |     |                                                              +--| (100)
+|              |  |                                                                                                                                |     |                                                              |  +--MT-2_1_230
+|              |  |                                                                                                                                |     |                                                           +--| (100)
+|              |  |                                                                                                                                |     |                                                           |  +--MT-2_1_220
+|              |  |                                                                                                                                |     |                                                        +--| (100)
+|              |  |                                                                                                                                |     |                                                        |  +--MT-2_1_210
+|              |  |                                                                                                                                |     |                                                     +--| (77)
+|              |  |                                                                                                                                |     |                                                     |  +--MT-2_1_190
+|              |  |                                                                                                                                |     |                                                  +--| (100)
+|              |  |                                                                                                                                |     |                                                  |  +--MT-2_1_200
+|              |  |                                                                                                                                |     |                                               +--| (100)
+|              |  |                                                                                                                                |     |                                               |  +--MT-2_1_180
+|              |  |                                                                                                                                |     |                                            +--| (100)
+|              |  |                                                                                                                                |     |                                            |  +--MT-2_1_170
+|              |  |                                                                                                                                |     |                                         +--| (100)
+|              |  |                                                                                                                                |     |                                         |  +--MT-2_1_160
+|              |  |                                                                                                                                |     |                                      +--| (100)
+|              |  |                                                                                                                                |     |                                      |  +--MT-2_1_150
+|              |  |                                                                                                                                |     |                                   +--| (96)
+|              |  |                                                                                                                                |     |                                   |  +--MT-2_1_140
+|              |  |                                                                                                                                |     |                                +--| (96)
+|              |  |                                                                                                                                |     |                                |  +--MT-2_1_130
+|              |  |                                                                                                                                |     |                             +--| (97)
+|              |  |                                                                                                                                |     |                             |  +--MT-2_1_120
+|              |  |                                                                                                                                |     |                          +--| (100)
+|              |  |                                                                                                                                |     |                          |  +--MT-2_1_110
+|              |  |                                                                                                                                |     |                       +--| (100)
+|              |  |                                                                                                                                |     |                       |  +--MT-2_1_100
+|              |  |                                                                                                                                |     |                    +--| (100)
+|              |  |                                                                                                                                |     |                    |  +--MT-2_1_90
+|              |  |                                                                                                                                |     |                 +--| (100)
+|              |  |                                                                                                                                |     |                 |  +--MT-2_1_80
+|              |  |                                                                                                                                |     |              +--| (100)
+|              |  |                                                                                                                                |     |              |  +--MT-2_1_70
+|              |  |                                                                                                                                |     |           +--| (100)
+|              |  |                                                                                                                                |     |           |  |  +--MT-2_1_50
+|              |  |                                                                                                                                |     |           |  +--| (66)
+|              |  |                                                                                                                                |     |           |     +--MT-2_1_60
+|              |  |                                                                                                                                |     |        +--| (100)
+|              |  |                                                                                                                                |     |        |  +--MT-2_1_40
+|              |  |                                                                                                                                |     |     +--| (97)
+|              |  |                                                                                                                                |     |     |  +--MT-2_1_30
+|              |  |                                                                                                                                |     |  +--| (95)
+|              |  |                                                                                                                                |     |  |  +--MT-2_1_20
+|              |  |                                                                                                                                |     +--| (100)
+|              |  |                                                                                                                                |        +--MT-2_1_10
+|              |  |                                                                                                                             +--| (69)
+|              |  |                                                                                                                             |  |  +--MT-4_1_30
+|              |  |                                                                                                                             |  +--| (57)
+|              |  |                                                                                                                             |     +--MT-4_2_20
+|              |  |                                                                                                                          +--| (80)
+|              |  |                                                                                                                          |  +--MT-4_2_30
+|              |  |                                                                                                                       +--| (65)
+|              |  |                                                                                                                       |  +--MT-4_1_40
+|              |  |                                                                                                                    +--| (82)
+|              |  |                                                                                                                    |  |                                                                                                                 +--MT-4_2_430
+|              |  |                                                                                                                    |  |                                                                                                              +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                              |  |     +--MT-4_2_450
+|              |  |                                                                                                                    |  |                                                                                                              |  |  +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |     +--MT-4_2_470
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |  +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |  |  |  +--MT-4_2_480
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |  |  +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |  |     |  +--MT-4_2_490
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |  |     +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  |  |        +--MT-4_2_500
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |  +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                              |  |  |     +--MT-4_2_460
+|              |  |                                                                                                                    |  |                                                                                                              |  +--| (97)
+|              |  |                                                                                                                    |  |                                                                                                              |     +--MT-4_2_440
+|              |  |                                                                                                                    |  |                                                                                                           +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                           |  +--MT-4_2_420
+|              |  |                                                                                                                    |  |                                                                                                        +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                        |  +--MT-4_2_410
+|              |  |                                                                                                                    |  |                                                                                                     +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                     |  +--MT-4_2_400
+|              |  |                                                                                                                    |  |                                                                                                  +--| (100)
+|              |  |                                                                                                                    |  |                                                                                                  |  +--MT-4_2_390
+|              |  |                                                                                                                    |  |                                                                                               +--| (91)
+|              |  |                                                                                                                    |  |                                                                                               |  +--MT-4_2_380
+|              |  |                                                                                                                    |  |                                                                                            +--| (94)
+|              |  |                                                                                                                    |  |                                                                                            |  +--MT-4_2_370
+|              |  |                                                                                                                    |  |                                                                                         +--| (100)
+|              |  |                                                                                                                    |  |                                                                                         |  +--MT-4_2_360
+|              |  |                                                                                                                    |  |                                                                                      +--| (100)
+|              |  |                                                                                                                    |  |                                                                                      |  +--MT-4_2_350
+|              |  |                                                                                                                    |  |                                                                                   +--| (97)
+|              |  |                                                                                                                    |  |                                                                                   |  +--MT-4_2_340
+|              |  |                                                                                                                    |  |                                                                                +--| (100)
+|              |  |                                                                                                                    |  |                                                                                |  +--MT-4_2_330
+|              |  |                                                                                                                    |  |                                                                             +--| (83)
+|              |  |                                                                                                                    |  |                                                                             |  +--MT-4_2_300
+|              |  |                                                                                                                    |  |                                                                          +--| (78)
+|              |  |                                                                                                                    |  |                                                                          |  |  +--MT-4_2_320
+|              |  |                                                                                                                    |  |                                                                          |  +--| (100)
+|              |  |                                                                                                                    |  |                                                                          |     +--MT-4_2_310
+|              |  |                                                                                                                    |  |                                                                       +--| (100)
+|              |  |                                                                                                                    |  |                                                                       |  +--MT-4_2_290
+|              |  |                                                                                                                    |  |                                                                    +--| (74)
+|              |  |                                                                                                                    |  |                                                                    |  +--MT-4_2_280
+|              |  |                                                                                                                    |  |                                                                 +--| (100)
+|              |  |                                                                                                                    |  |                                                                 |  +--MT-4_2_270
+|              |  |                                                                                                                    |  |                                                              +--| (100)
+|              |  |                                                                                                                    |  |                                                              |  +--MT-4_2_260
+|              |  |                                                                                                                    |  |                                                           +--| (99)
+|              |  |                                                                                                                    |  |                                                           |  +--MT-4_2_250
+|              |  |                                                                                                                    |  |                                                        +--| (100)
+|              |  |                                                                                                                    |  |                                                        |  +--MT-4_2_240
+|              |  |                                                                                                                    |  |                                                     +--| (100)
+|              |  |                                                                                                                    |  |                                                     |  +--MT-4_2_230
+|              |  |                                                                                                                    |  |                                                  +--| (98)
+|              |  |                                                                                                                    |  |                                                  |  +--MT-4_2_220
+|              |  |                                                                                                                    |  |                                               +--| (100)
+|              |  |                                                                                                                    |  |                                               |  +--MT-4_2_210
+|              |  |                                                                                                                    |  |                                            +--| (100)
+|              |  |                                                                                                                    |  |                                            |  +--MT-4_2_200
+|              |  |                                                                                                                    |  |                                         +--| (98)
+|              |  |                                                                                                                    |  |                                         |  +--MT-4_2_190
+|              |  |                                                                                                                    |  |                                      +--| (98)
+|              |  |                                                                                                                    |  |                                      |  +--MT-4_2_180
+|              |  |                                                                                                                    |  |                                   +--| (99)
+|              |  |                                                                                                                    |  |                                   |  +--MT-4_2_170
+|              |  |                                                                                                                    |  |                                +--| (100)
+|              |  |                                                                                                                    |  |                                |  +--MT-4_2_160
+|              |  |                                                                                                                    |  |                             +--| (100)
+|              |  |                                                                                                                    |  |                             |  +--MT-4_2_150
+|              |  |                                                                                                                    |  |                          +--| (100)
+|              |  |                                                                                                                    |  |                          |  +--MT-4_2_140
+|              |  |                                                                                                                    |  |                       +--| (100)
+|              |  |                                                                                                                    |  |                       |  +--MT-4_2_130
+|              |  |                                                                                                                    |  |                    +--| (100)
+|              |  |                                                                                                                    |  |                    |  +--MT-4_2_120
+|              |  |                                                                                                                    |  |                 +--| (100)
+|              |  |                                                                                                                    |  |                 |  +--MT-4_2_110
+|              |  |                                                                                                                    |  |              +--| (100)
+|              |  |                                                                                                                    |  |              |  +--MT-4_2_100
+|              |  |                                                                                                                    |  |           +--| (100)
+|              |  |                                                                                                                    |  |           |  +--MT-4_2_90
+|              |  |                                                                                                                    |  |        +--| (100)
+|              |  |                                                                                                                    |  |        |  +--MT-4_2_80
+|              |  |                                                                                                                    |  |     +--| (97)
+|              |  |                                                                                                                    |  |     |  +--MT-4_2_70
+|              |  |                                                                                                                    |  |  +--| (85)
+|              |  |                                                                                                                    |  |  |  +--MT-4_2_60
+|              |  |                                                                                                                    |  +--| (56)
+|              |  |                                                                                                                    |     +--MT-4_1_50
+|              |  |                                                                                                                 +--| (62)
+|              |  |                                                                                                                 |  +--MT-4_2_40
+|              |  |                                                                                                              +--| (67)
+|              |  |                                                                                                              |  +--MT-4_1_60
+|              |  |                                                                                                           +--| (99)
+|              |  |                                                                                                           |  +--MT-4_2_50
+|              |  |                                                                                                        +--| (85)
+|              |  |                                                                                                        |  +--MT-4_1_70
+|              |  |                                                                                                     +--| (100)
+|              |  |                                                                                                     |  +--MT-4_1_80
+|              |  |                                                                                                  +--| (100)
+|              |  |                                                                                                  |  +--MT-4_1_90
+|              |  |                                                                                               +--| (100)
+|              |  |                                                                                               |  +--MT-4_1_100
+|              |  |                                                                                            +--| (100)
+|              |  |                                                                                            |  +--MT-4_1_110
+|              |  |                                                                                         +--| (100)
+|              |  |                                                                                         |  +--MT-4_1_120
+|              |  |                                                                                      +--| (100)
+|              |  |                                                                                      |  +--MT-4_1_130
+|              |  |                                                                                   +--| (100)
+|              |  |                                                                                   |  +--MT-4_1_140
+|              |  |                                                                                +--| (100)
+|              |  |                                                                                |  +--MT-4_1_150
+|              |  |                                                                             +--| (100)
+|              |  |                                                                             |  +--MT-4_1_160
+|              |  |                                                                          +--| (100)
+|              |  |                                                                          |  +--MT-4_1_170
+|              |  |                                                                       +--| (100)
+|              |  |                                                                       |  +--MT-4_1_180
+|              |  |                                                                    +--| (100)
+|              |  |                                                                    |  +--MT-4_1_190
+|              |  |                                                                 +--| (74)
+|              |  |                                                                 |  +--MT-4_1_200
+|              |  |                                                              +--| (95)
+|              |  |                                                              |  +--MT-4_1_210
+|              |  |                                                           +--| (100)
+|              |  |                                                           |  +--MT-4_1_220
+|              |  |                                                        +--| (100)
+|              |  |                                                        |  +--MT-4_1_230
+|              |  |                                                     +--| (100)
+|              |  |                                                     |  +--MT-4_1_240
+|              |  |                                                  +--| (100)
+|              |  |                                                  |  +--MT-4_1_250
+|              |  |                                               +--| (100)
+|              |  |                                               |  +--MT-4_1_260
+|              |  |                                            +--| (100)
+|              |  |                                            |  +--MT-4_1_270
+|              |  |                                         +--| (99)
+|              |  |                                         |  +--MT-4_1_280
+|              |  |                                      +--| (100)
+|              |  |                                      |  +--MT-4_1_290
+|              |  |                                   +--| (100)
+|              |  |                                   |  +--MT-4_1_300
+|              |  |                                +--| (75)
+|              |  |                                |  +--MT-4_1_310
+|              |  |                             +--| (99)
+|              |  |                             |  +--MT-4_1_320
+|              |  |                          +--| (75)
+|              |  |                          |  +--MT-4_1_330
+|              |  |                       +--| (91)
+|              |  |                       |  +--MT-4_1_340
+|              |  |                    +--| (67)
+|              |  |                    |  +--MT-4_1_350
+|              |  |                 +--| (100)
+|              |  |                 |  +--MT-4_1_360
+|              |  |              +--| (98)
+|              |  |              |  +--MT-4_1_380
+|              |  |           +--| (98)
+|              |  |           |  +--MT-4_1_370
+|              |  |        +--| (93)
+|              |  |        |  +--MT-4_1_390
+|              |  |     +--| (100)
+|              |  |     |  +--MT-4_1_400
+|              |  |  +--| (96)
+|              |  |  |  +--MT-4_1_410
+|              |  +--| (48)
+|              |     +--MT-4_1_420
+|           +--| (50)
+|           |  +--MT-4_1_440
+|        +--| (50)
+|        |  +--MT-4_1_450
+|     +--| (99)
+|     |  +--MT-4_1_460
+|  +--| (99)
+|  |  +--MT-4_1_470
++--| (46)
+|  +--MT-4_1_500
+|
++--MT-4_1_480
+
+
+Consensus tree in newick format: 
+
+(MT-4_1_490:0.0000026863,((((((MT-4_1_430:0.0001351734,((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((MT-2_2_340:0.0006815122,(((((((((((MT-2_2_450:0.0003420095,((MT-2_2_470:0.0010130687,((MT-2_2_500:0.0014336595,MT-2_2_490:0.0003534376)100:0.0008058256,MT-2_2_480:0.0005110400)100:0.0015672030)100:0.0008980587,MT-2_2_460:0.0000022729)100:0.0015692290)100:0.0014003168,MT-2_2_440:0.0003471704)100:0.0012332430,MT-2_2_430:0.0003244725)94:0.0007898605,MT-2_2_420:0.0011494344)100:0.0013100314,MT-2_2_410:0.0001911435)100:0.0008672900,MT-2_2_400:0.0001307335)100:0.0010833482,MT-2_2_390:0.0006226178)99:0.0005234431,MT-2_2_380:0.0002400257)100:0.0008902379,MT-2_2_370:0.0002086351)100:0.0014620198,MT-2_2_360:0.0004782791)100:0.0010901875,MT-2_2_350:0.0004973355)100:0.0013468350)100:0.0006425759,MT-2_2_330:0.0001120628)100:0.0008833624,MT-2_2_320:0.0012891752)100:0.0006385680,MT-2_2_310:0.0007213034)100:0.0015054991,MT-2_2_300:0.0001172056)100:0.0011646117,MT-2_2_290:0.0005329569)100:0.0014977812,MT-2_2_280:0.0005429992)100:0.0011053645,MT-2_2_260:0.0000020624)64:0.0003282811,MT-2_2_270:0.0006585320)100:0.0010014945,MT-2_2_250:0.0007696653)95:0.0004357956,MT-2_2_240:0.0000022729)100:0.0017639676,MT-2_2_230:0.0002105933)100:0.0013219214,MT-2_2_220:0.0001085943)100:0.0008149029,MT-2_2_210:0.0001606009)96:0.0003625363,MT-2_2_200:0.0004130713)100:0.0006367995,MT-2_2_190:0.0004259553)100:0.0017548146,MT-2_2_180:0.0000026863)100:0.0005375324,MT-2_2_170:0.0000026863)100:0.0005367927,MT-2_2_160:0.0000026863)100:0.0005240266,MT-2_2_150:0.0003356142)100:0.0004366920,MT-2_2_140:0.0001193172)100:0.0007477656,MT-2_2_130:0.0003212484)100:0.0010367964,MT-2_2_120:0.0001081602)100:0.0007572095,MT-2_2_110:0.0001452543)100:0.0004287129,MT-2_2_100:0.0000656478)100:0.0002541624,MT-2_2_90:0.0001067639)100:0.0002135706,MT-2_2_80:0.0000026863)100:0.0006419522,MT-2_2_70:0.0001057609)100:0.0004267525,MT-2_2_60:0.0000026863)100:0.0004263328,MT-2_2_50:0.0000026863)100:0.0001065008,MT-2_2_40:0.0000026863)100:0.0004252668,MT-2_2_30:0.0000026863)100:0.0003182641,MT-2_2_20:0.0000026863)99:0.0001065130,K03455.1:0.0299719463)61:0.0000026863,(((((MT-4_1_10:0.0000000000,NL43_ann_wk0virusPassRef_plasmid:0.0000000000):0.0000000000,MT-4_2_10:0.0000000000):0.0000000000,MT-2_2_10:0.0000000000):0.0000026863,MT-4_1_20:0.0000026863)77:0.0000026863,((((((((((((((((((((((((((((((MT-2_1_340:0.0006921713,(((((((((((((((MT-2_1_500:0.0006258826,MT-2_1_490:0.0008106101)100:0.0015837524,(MT-2_1_480:0.0006558589,MT-2_1_470:0.0005900694)99:0.0006377416)97:0.0005857120,MT-2_1_460:0.0002745820)100:0.0011775793,MT-2_1_450:0.0025740780)100:0.0009299038,MT-2_1_440:0.0006269808)100:0.0008539130,MT-2_1_430:0.0010655486)100:0.0007036894,MT-2_1_420:0.0002796893)100:0.0005503827,MT-2_1_410:0.0001156673)100:0.0007032015,MT-2_1_400:0.0009065398)100:0.0004982564,MT-2_1_390:0.0000026863)100:0.0003847814,MT-2_1_380:0.0006697136)100:0.0003339267,MT-2_1_370:0.0002208034)100:0.0003913079,MT-2_1_360:0.0001696832)100:0.0007142397,MT-2_1_350:0.0003587042)100:0.0011527085,((MT-2_1_310:0.0012853547,MT-2_1_320:0.0005963875)89:0.0006608349,MT-2_1_330:0.0002442694)94:0.0009963758)65:0.0001299440)100:0.0015344270,MT-2_1_300:0.0006598144)96:0.0007791147,MT-2_1_290:0.0000022755)100:0.0028759509,MT-2_1_280:0.0002055012)100:0.0012007424,MT-2_1_270:0.0000022729)100:0.0005399192,MT-2_1_260:0.0002157550)100:0.0016257985,MT-2_1_250:0.0003292774)100:0.0005483166,MT-2_1_240:0.0003320058)100:0.0008497394,MT-2_1_230:0.0000026863)100:0.0004722196,MT-2_1_220:0.0001254371)100:0.0011241628,MT-2_1_210:0.0005404020)100:0.0006128032,MT-2_1_190:0.0003984685)77:0.0002999253,MT-2_1_200:0.0001607825)100:0.0010243745,MT-2_1_180:0.0002140291)100:0.0004315795,MT-2_1_170:0.0001032172)100:0.0008599335,MT-2_1_160:0.0000026863)100:0.0009748348,MT-2_1_150:0.0003138982)100:0.0009715178,MT-2_1_140:0.0000026944)96:0.0005319654,MT-2_1_130:0.0000026863)96:0.0007308030,MT-2_1_120:0.0004484694)97:0.0005379563,MT-2_1_110:0.0002344168)100:0.0008991622,MT-2_1_100:0.0001065562)100:0.0006890302,MT-2_1_90:0.0000026863)100:0.0006401312,MT-2_1_80:0.0002108945)100:0.0005383969,MT-2_1_70:0.0001015742)100:0.0006434796,(MT-2_1_50:0.0001064879,MT-2_1_60:0.0000026863)66:0.0000026863)100:0.0005306270,MT-2_1_40:0.0000026863)100:0.0004250081,MT-2_1_30:0.0000026863)97:0.0001063826,MT-2_1_20:0.0000026863)95:0.0001068840,MT-2_1_10:0.0001059675)100:0.0003186869)72:0.0001059257)71:0.0001061609,(MT-4_1_30:0.0002114556,MT-4_2_20:0.0000026863)57:0.0001056794)69:0.0000026863,MT-4_2_30:0.0000026863)80:0.0001060437,MT-4_1_40:0.0000026863)65:0.0000026863,((((((((((((((((((((((((((((((((((((((MT-4_2_430:0.0001300256,((MT-4_2_450:0.0000026863,((MT-4_2_470:0.0000026863,(MT-4_2_480:0.0000026863,(MT-4_2_490:0.0001096181,MT-4_2_500:0.0006658516)100:0.0002177325)100:0.0005485110)100:0.0003276384,MT-4_2_460:0.0001097889)100:0.0003275104)100:0.0002390316,MT-4_2_440:0.0000883108)97:0.0003275101)100:0.0009808195,MT-4_2_420:0.0001027087)100:0.0008697778,MT-4_2_410:0.0000026863)100:0.0004902585,MT-4_2_400:0.0000026863)100:0.0004719475,MT-4_2_390:0.0000026863)100:0.0003532804,MT-4_2_380:0.0000026863)91:0.0002363309,MT-4_2_370:0.0004341050)94:0.0003549885,MT-4_2_360:0.0000026783)100:0.0004686221,MT-4_2_350:0.0000026863)100:0.0004690341,MT-4_2_340:0.0000026863)97:0.0001083171,MT-4_2_330:0.0000026863)100:0.0005410671,MT-4_2_300:0.0000026863)83:0.0001092828,(MT-4_2_320:0.0000026863,MT-4_2_310:0.0000026863)100:0.0002164982)78:0.0002149574,MT-4_2_290:0.0000026863)100:0.0003232839,MT-4_2_280:0.0000026863)74:0.0000026863,MT-4_2_270:0.0000026863)100:0.0005434800,MT-4_2_260:0.0000026863)100:0.0005425053,MT-4_2_250:0.0000026863)99:0.0002161300,MT-4_2_240:0.0001068128)100:0.0002702403,MT-4_2_230:0.0000026863)100:0.0002707863,MT-4_2_220:0.0001053158)98:0.0002151147,MT-4_2_210:0.0000026411)100:0.0005384145,MT-4_2_200:0.0002145569)100:0.0003239635,MT-4_2_190:0.0000026863)98:0.0003234311,MT-4_2_180:0.0001078460)98:0.0001624605,MT-4_2_170:0.0000516456)99:0.0002294990,MT-4_2_160:0.0001629153)100:0.0007427546,MT-4_2_150:0.0000026863)100:0.0003425961,MT-4_2_140:0.0000026863)100:0.0004568942,MT-4_2_130:0.0000026863)100:0.0007525736,MT-4_2_120:0.0000026863)100:0.0004261579,MT-4_2_110:0.0000026863)100:0.0003192623,MT-4_2_100:0.0000026863)100:0.0003191978,MT-4_2_90:0.0000026863)100:0.0005324586,MT-4_2_80:0.0000026863)100:0.0004254245,MT-4_2_70:0.0000026863)97:0.0002118182,MT-4_2_60:0.0000026863)85:0.0002115306,MT-4_1_50:0.0000026863)56:0.0001060811)82:0.0003176914,MT-4_2_40:0.0000026863)62:0.0000020907,MT-4_1_60:0.0000026863)67:0.0001040639,MT-4_2_50:0.0000026863)99:0.0005313912,MT-4_1_70:0.0000026863)85:0.0001135762,MT-4_1_80:0.0000026863)100:0.0007981368,MT-4_1_90:0.0000026863)100:0.0008017851,MT-4_1_100:0.0000026863)100:0.0007483389,MT-4_1_110:0.0000026863)100:0.0007553649,MT-4_1_120:0.0000026863)100:0.0006467073,MT-4_1_130:0.0000026863)100:0.0006449854,MT-4_1_140:0.0001015850)100:0.0004828369,MT-4_1_150:0.0001081647)100:0.0004846886,MT-4_1_160:0.0000026863)100:0.0005400134,MT-4_1_170:0.0000026863)100:0.0002286012,MT-4_1_180:0.0001027297)100:0.0008176947,MT-4_1_190:0.0000952153)100:0.0008182098,MT-4_1_200:0.0001083779)74:0.0000026863,MT-4_1_210:0.0001138875)95:0.0002222257,MT-4_1_220:0.0003406350)100:0.0005605084,MT-4_1_230:0.0000026863)100:0.0008718981,MT-4_1_240:0.0002370176)100:0.0002763184,MT-4_1_250:0.0000026863)100:0.0009883068,MT-4_1_260:0.0000026863)100:0.0005104111,MT-4_1_270:0.0004531179)100:0.0002501066,MT-4_1_280:0.0000026863)99:0.0002538841,MT-4_1_290:0.0002193972)100:0.0004399416,MT-4_1_300:0.0002047280)100:0.0012428086,MT-4_1_310:0.0001158385)75:0.0006162323,MT-4_1_320:0.0002445495)99:0.0012068885,MT-4_1_330:0.0004256460)75:0.0006442723,MT-4_1_340:0.0009236213)91:0.0006367392,MT-4_1_350:0.0005428980)67:0.0001536240,MT-4_1_360:0.0004777133)100:0.0007306221,MT-4_1_380:0.0008440382)98:0.0007655946,MT-4_1_370:0.0006578334)98:0.0005866250,MT-4_1_390:0.0007554848)93:0.0005617758,MT-4_1_400:0.0015067999)100:0.0008226615,MT-4_1_410:0.0013227558)96:0.0003900440,MT-4_1_420:0.0009694690)48:0.0002359573)61:0.0006137440,MT-4_1_440:0.0000022729)50:0.0003279634,MT-4_1_450:0.0006248863)50:0.0003538638,MT-4_1_460:0.0004561076)99:0.0010879373,MT-4_1_470:0.0012171159)99:0.0007686343,MT-4_1_500:0.0008707561)46:0.0000022729,MT-4_1_480:0.0000026944);
+
+ALISIM COMMAND
+--------------
+To simulate an alignment of the same length as the original alignment, using the tree and model parameters estimated from this analysis, you can use the following command:
+
+--alisim simulated_MSA -t all_consensus_full_msa4.fasta.treefile -m "TVM{1.57208,7.62805,0.962436,0.435227}+F{0.36281,0.177256,0.237749,0.222184}+I{0.839028}+R2{0.140876,3.96903,0.0200961,21.9376}" --length 9182
+
+To mimic the alignment used to produce this analysis, i.e. simulate an alignment of the same length as the original alignment, using the tree and model parameters estimated from this analysis *and* copying the same gap positions as the original alignment, you can use the following command:
+
+iqtree -s all_consensus_full_msa4.fasta --alisim mimicked_MSA
+
+To simulate any number of alignments in either of the two commandlines above, use the --num-alignments options, for example mimic 100 alignments you would use the command line:
+
+iqtree -s all_consensus_full_msa4.fasta --alisim mimicked_MSA --num-alignments 100
+
+For more information on using AliSim, please visit: www.iqtree.org/doc/AliSim
+
+TIME STAMP
+----------
+
+Date and time: Wed Oct 30 14:12:37 2024
+Total CPU time used: 108.169383 seconds (0h:1m:48s)
+Total wall-clock time used: 109.4311554 seconds (0h:1m:49s)
+
