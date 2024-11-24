@@ -215,13 +215,64 @@ q <- as.matrix(table(variants_expiii_sub$exp_line, variants_expiii_sub$mut_type_
 p <- q/rowSums(q)
 
 
+# Run PCA
 pca_result <- prcomp(q, scale = T)
 
-summary(pca_result)
+# Variance explained by each PC
+var_explained <- (pca_result$sdev)^2
 
+# Total variance
+total_variance <- sum(var_explained)
+
+
+# Proportion of variance explained by each PC
+proportion_variance <- var_explained / total_variance
+
+# Display results
+percentage_variance <- proportion_variance * 100
+
+plot(percentage_variance, type = "b", xlab = "Principal Component", 
+     ylab = "Percentage of Variance Explained", 
+     main = "Scree Plot", pch = 19, col = "blue")
+options(scipen = 999)
 plot(pca_result, type = "l")
 
-biplot(pca_result)
+# Bi-plot ggplot2
+
+# Get PCA scores (coordinates of observations)
+scores <- as.data.frame(pca_result$x)
+scores$labels <- row.names(scores)
+# Get PCA loadings (arrows for variables)
+loadings <- as.data.frame(pca_result$rotation)
+
+# Scale the loadings for better visualization
+loadings$scaled_x <- loadings$PC1 * max(abs(scores$PC1))
+loadings$scaled_y <- loadings$PC2 * max(abs(scores$PC2))
+
+bi_plot <- ggplot() +
+  geom_point(data = scores, aes(x = PC1, y = PC2, color = labels), size = 4) +
+  geom_segment(data = loadings, aes(x = 0, y = 0, xend = scaled_x, yend = scaled_y),
+               arrow = arrow(length = unit(0.2, "cm")), color = "red") +
+  geom_text(data = loadings, aes(x = scaled_x, y = scaled_y, label = rownames(loadings)),
+            color = "red", vjust = -0.5) +
+  labs(title = "PCA Biplot\n", x = "\nPC1(72%)", y = "PC2(22%)\n") +
+  scale_color_manual(labels = line_labels, values = line_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "mut_profile_biplot.pdf"), height = 14, width = 14)
+bi_plot
+dev.off()
+
 ```
 
 ```{r pie chart}
@@ -590,7 +641,7 @@ mut_sub_count <-  variants_expiii %>%
                             mutate(mut_type_sub = factor(mut_type_sub, levels = mut_sub_type_fac)) %>%
                             group_by(passage, exp_line, mut_type_sub, .drop = FALSE) %>%
                             summarize(count = n()) %>%
-                            filter(passage == 560)
+                            filter(passage == end_psg)
 
 head(mut_sub_count)
 
@@ -620,12 +671,13 @@ mut_sub_count_min[mut_sub_count_min$exp_line == "MT-2_1",]
 
 
 
-
+line <- "MT-2_1"
+i <- "A>C"
 for (line in line_labels){
     print(line)
     for (i in mut_sub_type_fac){
         x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_type_sub == i],
-                        sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_type_sub == i]), nrow = 2, byrow = TRUE)
+                        sum(mut_sub_count$count[mut_sub_count$passage == end_psg & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == end_psg & mut_sub_count$exp_line == line & mut_sub_count$mut_type_sub == i]), nrow = 2, byrow = TRUE)
         pval <- fisher.test(x, alternative = "two.sided")$p.val
         print(ifelse(pval <= 0.05, paste0(i, ": ", pval), ""))
     }
@@ -688,7 +740,7 @@ mut_sub_count <-  variants_expiii %>%
                             mutate(mut_context_96 = factor(mut_context_96, levels = context_fac)) %>%
                             group_by(passage, exp_line, mut_context_96, .drop = FALSE) %>%
                             summarize(count = n()) %>%
-                            filter(passage == 560)
+                            filter(passage == end_psg)
 
 
 
@@ -723,7 +775,7 @@ for (line in line_labels){
     for (i in context_fac){
         
         x <- matrix(c(sum(mut_sub_count_min$count[mut_sub_count_min$exp_line == line]), mut_sub_count_min$count[mut_sub_count_min$exp_line == line & mut_sub_count_min$mut_context_96 == i],
-                        sum(mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == 560 & mut_sub_count$exp_line == line & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
+                        sum(mut_sub_count$count[mut_sub_count$passage == end_psg & mut_sub_count$exp_line == line]), mut_sub_count$count[mut_sub_count$passage == end_psg & mut_sub_count$exp_line == line & mut_sub_count$mut_context_96 == i]), nrow = 2, byrow = TRUE)
         
         pval <- fisher.test(x, alternative = "two.sided")$p.val
 
@@ -758,14 +810,14 @@ as.numeric(sapply(str_split(variants_expiii$loc_in_cds[variants_expiii$effect_si
 
 # Let's first determine the codons
 
-min_threshold <- 0.5
+min_threshold <- 0.99
 max_threshold <- 1.01
 
 
 ss <- variants_expiii %>% 
     filter(mut_type == "P", effect_simplified == "S") %>%
     filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-    filter(passage == end_passage) %>%
+    filter(passage == end_psg) %>%
     # filter((genomic_pos >= 790 & genomic_pos <= 2084) | (genomic_pos >= 2293 & genomic_pos <= 5041)) %>%
     mutate(pos_in_codon = as.numeric(str_split(loc_in_cds, pattern = "/")[[1]][1]) %% 3) %>%
     mutate(ref_codon = ifelse(pos_in_codon == 0, mut_3_context, NA)) %>%
@@ -800,7 +852,7 @@ ss2 <- variants_expiii %>%
 
 
 
-line <- "MT-4_1"
+line <- "MT-2_2"
 sss <- ss[ss$exp_line == line,]
 sss2 <- ss2[ss2$exp_line == line,]
 
@@ -841,8 +893,15 @@ codon_usage_odss$significant <- ifelse(codon_usage_odss$p_val <= 0.05, TRUE, FAL
 
 fig <- codon_usage_odss[codon_usage_odss$odds != 0,] %>% ggplot(aes(x = reorder(codon, -odds), y = log2(odds), color = significant)) +
         geom_bar(stat = "identity") +
-        geom_text(data = subset(codon_usage_odss, significant == TRUE), aes(label = codon), hjust = -0.5)+
-        theme(axis.text.x = element_text(angle = 90))
+        labs(x="\nCodon Change", y= "Log2(Odds Ratio)\n", color = "Significance", title = "Codon Usage Bias")+
+        geom_text(data = subset(codon_usage_odss, significant == TRUE), aes(label = codon), vjust = -0.5, hjust = -0.2)+
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
 
 
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]

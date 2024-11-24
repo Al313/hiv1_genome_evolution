@@ -36,6 +36,8 @@ library("Biostrings")
 library("stringr")
 library("magrittr")
 library("rstatix")
+library("gtools")
+library("effsize")
 
 
 ```
@@ -99,8 +101,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
-
-
 # Visualization settings
 
 line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
@@ -160,6 +160,7 @@ df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance"
         mutate_at(4:6, as.integer) %>%
         mutate(exp_line = factor(exp_line, levels = exp_line_factor),
         mut_info = paste(exp_line, mut_info, sep = "_"),
+        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"),
         effect_simplified = factor(effect_simplified, levels = translational_impacts))
 
 ```
@@ -173,7 +174,6 @@ fig <- df %>% ggplot(aes(x = time_to_fixation, color = exp_line)) +
                     scale_color_manual(labels = line_labels, values = line_palette)
 
 fig
-
 
 
 # perform pairwise wilcox-test between translation impact groups per exp line
@@ -225,6 +225,35 @@ fig3 <- ggboxplot(df, x = "exp_line", y = "time_to_fixation", color = "exp_line"
 
 fig3
 
+# perform pairwise wilcox-test between host line groups per translation impact
+
+pwc <- df %>%
+    # filter(mut_info %in% shared) %>%
+    group_by(effect_simplified) %>%
+    pairwise_wilcox_test(time_to_fixation ~ host_line, p.adjust.method = "BH",pool.sd=FALSE, detailed = T)
+
+#Add x position
+pwc <- pwc %>% add_xy_position(x = "host_line", step.increase = 1)
+# assign new y.positions 
+pwc$y.position <- sample(seq(500,750,10), replace = F, size = 3)
+# make the plot
+fig4 <- ggboxplot(df, x = "host_line", y = "time_to_fixation", color = "host_line") +
+    facet_wrap(~effect_simplified, ncol = 3) +
+    labs(x = "\nVirus Line", y = "Time to Fixation\n", color = "Virus Line")+
+    scale_color_manual(labels = c("MT-2", "MT-4"), values = c("red", "blue")) +
+    scale_y_continuous(breaks = seq(0,max(df$time_to_fixation)+step,step), limit = c(0,800)) +
+    stat_pvalue_manual(pwc, hide.ns = TRUE, label = "p.adj", size = 8) +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+            axis.title = element_text(size = 45),
+            axis.text.x = element_text(size = 20, face="bold"),
+            axis.text.y = element_text(size = 30),
+            strip.text.x = element_text(size = 35),
+            legend.title = element_text(size=40),
+            legend.text = element_text(size = 35))
+
+fig4
+
+
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
@@ -238,12 +267,16 @@ dev.off()
 pdf(file = paste0(fig_dir, "time_to_fixation_significance_boxplot_per_translation_group.pdf"), height = 14, width = 14)
 fig3
 dev.off()
+pdf(file = paste0(fig_dir, "time_to_fixation_significance_boxplot_per_translation_group_host_line.pdf"), height = 14, width = 14)
+fig4
+dev.off()
+
 
 
 
 # get inline variables
 a <- min(df$time_to_fixation)
-b <- nrow(df[df$time_to_fixation==10,])
+b <- nrow(df[df$time_to_fixation==0,])
 
 
 ```
@@ -338,9 +371,7 @@ dev.off()
 
 
 
-
-
-```{r}
+```{r time-to-fixation over time}
 
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
 df <- data.frame()
@@ -400,7 +431,319 @@ dev.off()
 ```
 
 
-```{r}
+
+```{r time-to-fixation over time2}
+
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+df <- data.frame()
+
+for (exp_line in line_labels){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+    }
+}
+
+# set column names and right data types
+df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
+        mutate_at(4:6, as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+
+
+# summarize time to fixation per passage of appearance
+df_summary <- df %>% group_by(exp_line, appearance) %>%
+                    summarize(Med = median(time_to_fixation, na.rm=TRUE),
+                    n = n())
+
+# visualize time to fixation summary
+fig <- df_summary %>% ggplot(aes(x = appearance, y = Med, group = exp_line, color = exp_line)) +
+    geom_line() +
+    geom_point(aes(size = n)) +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_color_manual(labels = line_labels, values = line_palette) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    legend.title = element_text(size=20),
+    legend.text = element_text(size = 15))
+fig
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "time_to_fixation_per_passage.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+
+
+```{r fixation time based on number of recurrence}
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+df <- data.frame()
+
+for (exp_line in line_labels){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+    }
+}
+
+# set column names and right data types
+df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
+        mutate_at(4:6, as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+
+# average time to fixation for fixated mutations based on how many times they are repeated
+
+fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+
+
+
+df$Occurrence <- NA
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["1"]])] <- "One"
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["2"]])] <- "Two"
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["3"]])] <- "Three"
+df$Occurrence[df$mut_info %in% names(fix_count_table_list[["4"]])] <- "Four"
+df <- df[!is.na(df$Occurrence),]
+df$Occurrence <- factor(df$Occurrence, levels = c("One", "Two", "Three", "Four"))
+
+
+comparisons <- list(
+  c("Four", "Three"),
+  c("Four", "Two"),
+  c("Four", "One"),
+  c("Three", "Two"),
+  c("Three", "One"),
+  c("Two", "One")
+)
+
+
+
+# Create the plot
+fig <- ggplot(df, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) + 
+    geom_boxplot(color = "black", alpha = 0.7) +
+    stat_compare_means(comparisons = comparisons, method = "wilcox.test") +
+    # scale_fill_manual(values = c("Group 1" = "#E69F00", "Group 2" = "#56B4E9", "Group 3" = "#7CE335", "Group 4" = "#F3567C")) +
+    labs(fill = "Occurrence", x= "Occurrence", y = "Time to Fixation", title = "Fixation Dynamics Based on Variant Recurrence\n") + # Label for the legend
+    theme_minimal() + # Optional: use a minimal theme
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15)) 
+
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "fixation-based-on-recurrence.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+mean(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["1"]])])
+
+
+t.test(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["3"]])],df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["1"]])])
+
+
+```
+
+
+```{r max-fold-increase processing}
+
+
+# # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+# df <- data.frame()
+
+# for (exp_line in line_labels){
+#     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+#     fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+#     for (mut in fixed_muts){
+#         appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
+#         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+#         translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        
+#         psgs <- seq(appearance, fixation, by = 10)
+#         recordings <- data.frame()
+        
+#         for (i in 1:(length(psgs)-1)){
+#             prev <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == mut & variants_expiii_sub$passage == psgs[i]] # & variants_expiii_sub$allele_freq > 0.01
+#             current <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == mut & variants_expiii_sub$passage == psgs[i+1]] #  & variants_expiii_sub$allele_freq > 0.01
+#             if (length(c(prev,current)) == 2){
+#                 recordings <- rbind(recordings, c(psgs[i], psgs[i+1], current/prev))
+#             }
+#         }
+        
+#         if (nrow(recordings) != 0){
+#             df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance,as.numeric(recordings[which.max(recordings[,3]),])))
+#         } else {
+#             df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance,rep(NA,3)))
+#         }
+#     }
+# }
+
+
+
+# # set column names and right data types
+# df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation", "max_psg_lower", "max_psg_upper", "max_fold_change")) %>% 
+#         mutate_at(4:6, as.integer) %>%
+#         filter(!is.na(max_fold_change)) %>%
+#         mutate(max_psg_range = paste(max_psg_lower, max_psg_upper, sep = "_")) %>%
+#         mutate(max_psg_range = factor(max_psg_range),
+#         exp_line = factor(exp_line, levels = exp_line_factor),
+#         effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+
+
+# df %<>% mutate(max_fold_change = as.numeric(max_fold_change))
+# df %<>% mutate(max_psg_range = factor(max_psg_range, levels = mixedsort(c(levels(max_psg_range),"370_380", "380_390", "390_400","420_430", "430_440", "440_450", "450_460", "460_470", "470_480", "480_490", "490_500"))))
+
+
+
+
+
+# saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc.rds")
+# saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc_2.rds") ## appearance without the minimum threshold of 0.01
+
+```
+
+```{r max-fold-increase (Bertels)}
+
+max_fold <- readRDS(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc.rds")
+
+
+# axis text label data frame
+breaks <- seq(10,490,10)
+labels <- paste0(breaks, "_", breaks+10)
+
+
+
+fig <- max_fold %>% 
+  ggplot(aes(x = as.numeric(max_psg_lower), y = log2(max_fold_change), color = exp_line)) +
+  # facet_wrap(~exp_line) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add regression line without confidence interval
+  scale_color_manual(labels = line_labels, values = line_palette) +
+  scale_x_continuous(limits = c(0,490), breaks = breaks, labels = labels) +
+  labs(title = "Maximum Fold Increase Trend over Time \n", x = "\n Transfer", y = "Log2(Average Max. Fold Inc. in VF) \n",
+    color = "Virus Line") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text.x = element_text(size = 15, color = "black", angle = 90),
+                axis.text.y = element_text(size = 15, color = "black"))
+
+
+
+mean(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")])/mean(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
+wilcox.test(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")], max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
+cliff.delta(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")], max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "fixed_max_fold_change_occurrence_trend.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+
+```{r max-fold-increase per appearance time}
+
+# summarize time to fixation per passage of appearance
+max_fold_summary <- max_fold %>% group_by(exp_line, appearance) %>%
+                    summarize(Mean = mean(max_fold_change, na.rm=TRUE),
+                    n = n())
+
+
+# fit linear models for each group and extract p-values
+model_A <- lm(log(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[1], ])
+model_B <- lm(log(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[2], ])
+model_C <- lm(log(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[3], ])
+model_D <- lm(log(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+line <- "MT-4_2"
+model <- lm(log(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line,])
+summary(model)
+
+
+fig <- max_fold_summary %>% ggplot(aes(x = appearance, y = log(Mean), color = exp_line)) +
+    facet_wrap(~exp_line)+
+    geom_point(aes(size = n)) +
+    geom_smooth(method = "lm", se = FALSE) +
+    xlim(limits = c(0,500)) +
+    geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+    hjust = 1.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+    scale_color_manual(labels = line_labels, values = line_palette) +
+    labs(title = "Maximum Fold Increase Based on Appearance Transfer \n", x = "\n Appearance Transfer", y = "Log2(Average Max. Fold Inc. in VF) \n",
+    color = "Virus Line", size = "# Fixed Variants") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text.x = element_text(size = 15, color = "black", angle = 90),
+                axis.text.y = element_text(size = 15, color = "black"),
+                strip.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "fixed_max_fold_change_per_appearance_transfer.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+
+
+
+```{r misc}
 
 df <- data.frame()
 

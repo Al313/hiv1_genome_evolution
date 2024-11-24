@@ -147,13 +147,15 @@ d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
 
 fig <- ggplot(d, aes(x = passage, y = sum_ent, color = exp_line)) +
   geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Total Entropy\n", color = "Virus Line", title = paste0("Sum of Entropy per Sample")) +
+  labs(x="\nTransfer", y= "Total Entropy\n", color = "Virus Line", title = paste0("Sum of Entropy per Sample\n")) +
   scale_color_manual(values = line_col_palette) +
   theme_bw() +
-        theme(plot.title = element_text(size = 25, hjust = 0.5),
-        axis.title = element_text(size = 20),
-        axis.text.x = element_text(size = 15, angle = 90),
-        axis.text.y = element_text(size = 15))
+  theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    legend.title = element_text(size=20),
+    legend.text = element_text(size = 15))
 
 ggplotly(fig)
 

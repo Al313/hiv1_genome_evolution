@@ -33,6 +33,7 @@ library(dplyr)
 library(tidyr)
 
 
+
 # define functions
 
 `%notin%` <- Negate(`%in%`)
@@ -540,16 +541,23 @@ df <- data.frame()
 # pres_psg <- 130
 # trans_effect <- "S"
 
+# 8787 9408
 for (exp_line in line_labels){
     
     print(exp_line)
     
     for (trans_effect in c("U", "S", "N", "ALL")) {
         if (trans_effect == "ALL"){
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$genomic_pos >= 790 & variants_expiii$genomic_pos <= 2292,]
         } else {
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect,]
+            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect & variants_expiii$genomic_pos >= 790 & variants_expiii$genomic_pos <= 2292,]
         }
+        if (str_detect(exp_line, pattern = "MT-2")){
+            gen_nr <- 10
+        } else {
+            gen_nr <- 10
+        }
+        print(gen_nr)
         for (pres_psg in seq(20,570,10)){
             print(pres_psg)
             prev_psg <- pres_psg - 10
@@ -560,7 +568,7 @@ for (exp_line in line_labels){
             intersect_muts <- intersect(pres_muts, prev_muts)
             
             delta_afs <- c()
-            for (mut in union_muts){
+            for (mut in intersect_muts){
                 if (mut %in% pres_muts){
                     pres_mut_af <- variants_expiii_sub$allele_freq[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$mut_info == mut]
                 } else {pre_mut_af <- 0}
@@ -576,7 +584,7 @@ for (exp_line in line_labels){
             af_prev <- sum(variants_expiii_sub$allele_freq[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$allele_freq >= 0.01])
             af_ave <- af_pres/length(pres_muts)
             
-            Ne <- tryCatch({1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))}, error = function(e){NA})
+            Ne <- tryCatch({1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/gen_nr)))}, error = function(e){NA})
             
             df <- rbind(df, c(exp_line, trans_effect, pres_psg, length(union_muts), length(intersect_muts), af_ave, tryCatch({var(delta_afs)}, error = function(e){NA}), Ne))
         }
@@ -598,21 +606,24 @@ df %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "i
 
 # save data on disk
 
-# save(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size.RData")
+# save(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size_nef.RData")
 
 
 
-load("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size.RData")
+load("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size_nef.RData") # or all of genome: variance_effective_size.RData
 
 
 
 
 # plot Ne
-fig <- df[df$effect_simplified == "S",] %>% ggplot(aes(x = psg, y = log2(Ne))) +
-        facet_wrap(~ exp_line) +
+fig <- df[df$effect_simplified == "ALL",] %>% ggplot(aes(x = psg, y = log2(Ne), col = exp_line)) +
+        # facet_wrap(~ exp_line) +
         geom_line() +
+        scale_y_continuous(breaks = seq(4,15,1),limits = c(4,15))+
+        scale_x_continuous(breaks = seq(0,500,50),limits = c(0,500))+
+        scale_color_manual(values = line_col_palette) +
         geom_smooth(method = "loess", se = FALSE) +
-        labs(x= "\n Transfer", y = "Log2(Ne) \n", title = "Variance Effective Population Size \n") + # Label for the legend
+        labs(x= "\n Transfer", y = "Log2(Ne) \n", title = "Variance Effective Population Size (nef Variants) \n", color = "Virus Line") + # Label for the legend
         theme_minimal() + # Optional: use a minimal theme
         theme(
             plot.title = element_text(size = 30, hjust = 0.5),
@@ -622,6 +633,7 @@ fig <- df[df$effect_simplified == "S",] %>% ggplot(aes(x = psg, y = log2(Ne))) +
             axis.text.y = element_text(size = 20),
             legend.title = element_text(size=20),
             legend.text = element_text(size = 15)) 
+
 
 
 
@@ -636,8 +648,10 @@ dev.off()
 
 # ave Ne per line
 
-df[df$effect_simplified == "S",] %>% group_by(exp_line) %>%
-        summarise(mean = mean(Ne))
+df %>%
+    filter(effect_simplified == "ALL") %>%
+    group_by(exp_line) %>%
+    summarise(mean = mean(Ne, na.rm = T))
 
 
 # plot variance in allele freq change
@@ -657,4 +671,46 @@ df[df$psg == 130 & df$effect_simplified == "S",]
 
 
 
+```
+
+
+## Effective population size by BEAST
+
+```{r}
+
+# read-in data
+skyline_data <- data.frame()
+line_labels
+for (line in line_labels){
+    data <- read.table(file = paste0("/Applications/BEAST_2.7.6/ltee/ne-estimate/gag/",line,"/",line,"_skyline_data.txt"), sep = "\t", header = T, skip = 1)
+    data$exp_line <- line
+    skyline_data <- rbind(skyline_data, data)
+}
+
+skyline_data %<>% mutate(lower = (lower+mean)/2, upper = (upper+mean)/2)
+
+
+ne__fig <- skyline_data %>% 
+    ggplot(aes(x = time, y = mean, color = exp_line)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = lower, ymax = upper, fill = exp_line), alpha = 0.1, linetype = 0) +
+    labs(title = "Bayesian Skyline Ne Estimates \n", x= "\n Days", y= "Baysian Ne Estimate \n", color = "Virus Line") +
+    scale_color_manual(values = line_col_palette) +
+    scale_fill_manual(values = line_col_palette) +
+    guides(fill = "none") +
+    theme_bw() +
+    theme(
+        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+        axis.title.x = element_text(size = 25),
+        axis.title.y = element_text(size = 25),
+        axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "bayesina_ne_estimates.pdf"), height = 14, width = 21)
+ne__fig
+dev.off()
 ```

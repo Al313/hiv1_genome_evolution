@@ -1,0 +1,218 @@
+---
+title:  
+    "haplotype reconstruction EXPIII"
+date: 
+    "Nov 13th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+```{r}
+
+# load libraries
+library(ape)
+library(stringr)
+library(dplyr)
+library(ggmuller)
+library(ggplot2)
+library(mullerplot)
+
+```
+
+```{r}
+
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# read in MSA
+msa <- read.dna("/Users/alimos313/Desktop/scrap/portal/all_msa.fasta", format = "fasta")
+
+# calculate distance matrix
+dist_matrix <- dist.dna(msa, model = "TN93")
+
+# cluster
+hc <- hclust(dist_matrix, method = "complete")
+
+# save cluster tree
+pdf(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/pdf/haplo_clustering.pdf", width = 100, height = 100)
+plot(hc, main = "Haplotype Clustering Dendrogram", cex = 3)
+dev.off()
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "haplo_clustering.pdf"), height = 14, width = 14)
+plot(hc, main = "Haplotype Clustering Dendrogram", cex = 3)
+dev.off()
+
+```
+
+```{r}
+
+
+## first cutting threshold
+
+height_threshold <- 0.0089
+
+### OG
+
+# define clades
+clades <- cutree(hc, h = height_threshold)
+
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "haplo_clustering_with_clades.pdf"), height = 14, width = 14)
+plot(hc, main = "Haplotype Clustering with Clades", cex = 3)
+rect.hclust(hc, h = height_threshold, border = 2:4) 
+dev.off()
+
+```
+
+```{r}
+
+# convert to data frame
+haplotype_clades <- data.frame(
+  Haplotype = names(clades),  # Row names from the original data
+  Clade = clades
+)
+
+# modify class types
+haplotype_clades$passage <- sapply(str_split(haplotype_clades$Haplotype, pattern = "_"), "[", 2)
+haplotype_clades$abundance <- sapply(str_split(haplotype_clades$Haplotype, pattern = "_"), "[", 4)
+haplotype_clades$abundance <- as.numeric(haplotype_clades$abundance)
+
+
+# get abundance of clades per generation
+haplotype_clades2 <- haplotype_clades %>% 
+            group_by(Clade, passage) %>%
+            summarize(cumulative_abundance = sum(abundance)) %>%
+            ungroup()
+
+
+
+# change colnames to be compatible with get_Muller_df function from ggmuller package
+colnames(haplotype_clades2) <- c("Identity", "Generation", "Population")
+
+# modify class types
+haplotype_clades2$Generation <- as.integer(haplotype_clades2$Generation)
+haplotype_clades2$Identity <- as.character(haplotype_clades2$Identity)
+
+
+
+# define lineages and store in a compatible format
+View(haplotype_clades2)
+haplotype_clades2[haplotype_clades2$Generation == 230,]
+
+edges <- data.frame(
+  Parent = c("1", "2", "3", "3", "4", "6", "7"),
+  Identity = c("2", "3", "4", "5", "6", "7", "8")
+)
+
+
+
+# get the muller data.frame and plot the Muller plot
+muller_df <- get_Muller_df(edges, haplotype_clades2)
+fig <- 
+    Muller_plot(muller_df, add_legend = TRUE) +
+    scale_x_continuous(breaks = seq(0,500,50))
+
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "haplo_muller.pdf"), height = 14, width = 14)
+Muller_plot(muller_df, add_legend = TRUE)
+dev.off()
+
+```
+
+```{r}
+
+### with amendments
+
+clades[clades==7] <- 6
+clades[clades==8] <- 7
+
+clades[clades==5] <- 4
+clades[clades==6] <- 5
+clades[clades==7] <- 6
+
+
+# convert to data frame
+haplotype_clades <- data.frame(
+  Haplotype = names(clades),  # Row names from the original data
+  Clade = clades
+)
+
+# modify class types
+haplotype_clades$passage <- sapply(str_split(haplotype_clades$Haplotype, pattern = "_"), "[", 2)
+haplotype_clades$abundance <- sapply(str_split(haplotype_clades$Haplotype, pattern = "_"), "[", 4)
+haplotype_clades$abundance <- as.numeric(haplotype_clades$abundance)
+
+
+# get abundance of clades per generation
+haplotype_clades2 <- haplotype_clades %>% 
+            group_by(Clade, passage) %>%
+            summarize(cumulative_abundance = sum(abundance)) %>%
+            ungroup()
+
+
+
+# change colnames to be compatible with get_Muller_df function from ggmuller package
+colnames(haplotype_clades2) <- c("Identity", "Generation", "Population")
+
+# modify class types
+haplotype_clades2$Generation <- as.integer(haplotype_clades2$Generation)
+haplotype_clades2$Identity <- as.character(haplotype_clades2$Identity)
+
+
+
+edges <- data.frame(
+  Parent = c("1", "2", "3", "4", "5"),
+  Identity = c("2", "3", "4", "5", "6")
+)
+
+
+# tweaking for presentation purposes
+
+haplotype_clades2$Population[haplotype_clades2$Generation == 470 & haplotype_clades2$Identity == 5] <- 0.82
+haplotype_clades2$Population[haplotype_clades2$Generation == 470 & haplotype_clades2$Identity == 4] <- 0.18
+
+head(haplotype_clades2)
+table(haplotype_clades2$Identity)
+# get the muller data.frame and plot the Muller plot
+muller_df <- get_Muller_df(edges, haplotype_clades2)
+
+plot <- Muller_plot(muller_df, add_legend = TRUE, conceal_edges = TRUE)
+
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "haplo_muller_amended.pdf"), height = 14, width = 14)
+Muller_plot(muller_df, add_legend = TRUE)
+dev.off()
+
+
+```

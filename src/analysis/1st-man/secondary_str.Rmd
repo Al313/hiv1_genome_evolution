@@ -53,10 +53,25 @@ for (i in 1:nrow(shape)){
 
 
 plt <- shape %>% ggplot(aes(x = Nt, y = med_55_nt)) +
-    geom_line()
+    labs(title = "SHAPE Levels over Genome", y = "SHAPE score", x = "Position") +
+    geom_line() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, face="bold"),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=90),
+        legend.title = element_text(size=40),
+        legend.text = element_text(size = 35))
 
 # visually inspect the data
 plt
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shape_levels_over_genome.pdf"), height = 14, width = 14)
+plt
+dev.off()
 
 
 # read-in base-pairing probabilities
@@ -93,10 +108,27 @@ colnames(shannon_df) <- c("i", "shannon")
 
 plt <- shannon_df %>% ggplot(aes(x = i, y = shannon)) +
     geom_line() +
-    scale_x_continuous(breaks = round(seq(min(shannon_df$i), max(shannon_df$i), by = 500),1))
+    scale_x_continuous(breaks = round(seq(min(shannon_df$i), max(shannon_df$i), by = 500),1)) +
+    labs(title = "Base Pairing over Genome", y = "Shannon of Base Paring Probabilities", x = "Position") +
+    geom_line() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 10, face="bold"),
+        axis.text.y = element_text(size = 20),
+        strip.text.x = element_text(size = 35, angle=90),
+        legend.title = element_text(size=40),
+        legend.text = element_text(size = 35))
+    
 
 # visually inspect the data
 plt
+
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "base_paring_shannon_over_genome.pdf"), height = 14, width = 14)
+plt
+dev.off()
 
 
 ```

@@ -89,6 +89,7 @@ feature_factor <- c("5R","5UTR", "5LTRLS", "gag", "pol", "vif", "vpr", "tat1", "
 feature_start <- c(454,551,635,790,2085,5041,5559,5830,5969,6061,6221,8369,8369,8787,9076,9408,9529)
 feature_end <- c(550,634,789,2292,5096,5619,5849,6044,6044,6306,8785,8414,8643,9075,9407,9528,9625)
 
+
 feature_df <- data.frame(feature = feature_factor,
                             start = feature_start,
                             end = feature_end,
@@ -153,9 +154,6 @@ if (category == "Sporadic"){
     max_threshold <- 1.01
 }
 
-# functions
-
-`%notin%` <- Negate(`%in%`)
 
 
 ```
@@ -184,7 +182,7 @@ counts <- variants_ann_expiii %>%
 
 
 # make the visualization
-fig <- ggplot(counts) +
+fig <- ggplot(counts[counts$feature %notin% c("5R", "3R"),]) +
     geom_bar(aes(x = effect_simplified, y = normalized_count, fill = exp_line),
             position = "stack",
             stat = "identity") +

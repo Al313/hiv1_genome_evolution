@@ -11,11 +11,12 @@ library("tidyr")
 # take command line variables
 args <- commandArgs(trailingOnly = TRUE)
 
-#if (length(args) == 0){
-#    cl_line <- 13
-#} else {
-cl_line <- args[1]
-#}
+if (length(args) == 0){
+    cl_line <- 13
+} else {
+    cl_line <- args[1]
+}
+
 
 
 print(cl_line)
@@ -80,11 +81,16 @@ polymorph <- function(x){
     ifelse(any(x >= 0.01), T, F)
 }
 
+# define function to determine heterozygosity
+
+square <- function(x, seq_err = 0.01){
+    if(x >= seq_err) {x^2} else (0)
+}
 
 
-# create a dataframe to store Shannon entropy results
+
+# create a dataframe to store diversity results
 diversity_df <- data.frame()
-head(diversity_df)
 
 
 
@@ -94,30 +100,39 @@ variants_sub <- variants[variants$exp_line == line,]
 for (psg in sort(unique(variants_sub$passage))){
 
     variants_sub2 <- variants_sub[variants_sub$passage == psg,]
-    variants_sub2 <- variants_sub2[variants_sub2$genomic_pos >= 454 & variants_sub2$genomic_pos <= 9625,]
+    variants_sub2 <- variants_sub2[variants_sub2$genomic_pos >= 454 & variants_sub2$genomic_pos <= 9625,] 
 
-    for (i in seq(454,9625)){
+    for (i in seq(454,9625)){ 
         if (i %in% variants_sub2$genomic_pos){
             print(i)
-	    ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
+	        ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
+            # get shannon
             alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
             ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
             total_shannon <- alt_shannon + ref_shannon
-
+            # get heterozygosity
+            alt_hetero <- sum(sapply(as.numeric(ss$allele_freq), FUN = square))
+            ref_hetero <- square(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
+            heterozygosity <- 1 - ref_hetero - alt_hetero
+            # get polymorphic site
             polymorphic <- polymorph(ss$allele_freq)
         } else {
             total_shannon <- 0
+            heterozygosity <- 0
             polymorphic <- F
         }
         
-        diversity_df <- rbind(diversity_df, c(line, psg, i, polymorphic, total_shannon))
+        diversity_df <- rbind(diversity_df, c(line, psg, i, polymorphic, heterozygosity, total_shannon))
     }
 
 }
 
 
 
-colnames(diversity_df) <- c("exp_line", "passage", "genomic_position", "polymorphic", "shannon_entropy")
+
+
+
+colnames(diversity_df) <- c("exp_line", "passage", "genomic_position", "polymorphic", "heterozygosity","shannon_entropy")
 
 
 write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/", cl_line,"_shannon_entropy.tsv"), quote = F, row.names = F, sep = "\t")

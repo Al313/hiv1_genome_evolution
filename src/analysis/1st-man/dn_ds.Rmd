@@ -113,7 +113,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r text numbers}
 
 # set parameters
-category <- "Fixed"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -288,7 +288,7 @@ counts2 %<>% mutate(S = ifelse(S == 0, 1, S)) %>%
 # get the counts for minority
 # prepare data for visualization
 counts_minority <- variants_ann_expiii %>%
-            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+            filter(allele_freq >= 0.05 & allele_freq < 0.5) %>%
             select(exp_line, feature, mut_info) %>%
             distinct() %>%
             group_by(exp_line,feature, .drop = FALSE) %>%
@@ -313,16 +313,17 @@ sp_cor <- cor(counts3$dnds,counts3$mut_count, method = "spearman")
 fig <- counts3 %>% ggplot(aes(x = mut_count, y = dnds, color = feature, shape = exp_line, group = 1)) +
             geom_point(size = 5) +
             geom_smooth(method = "lm", se = T)+
-            geom_text(label = paste0("Spearman's Rho: ", round(sp_cor,2)), x= 0.1, y = 2, color = "black", size = 5) +
-            labs(x="\nNormalized Minority Mutation Count", y= "dN/dS\n",  color = "Gene", shape = "Virus Lines",
-            title = "dN/dS and Diversity")+
+            geom_text(label = paste0("Spearman's Rho: ", round(sp_cor,2)), x= 0.15, y = 2, color = "black", size = 8) +
+            labs(x="\nNormalized Mutation Count", y= "dN/dS\n",  color = "Gene", shape = "Virus Lines",
+            title = "dN/dS and Diversity\n")+
             theme_bw() +
-            theme(plot.title = element_text(size = 30, hjust = 0.5),
-            axis.title = element_text(size = 25),
-            axis.text.x = element_text(size = 20, angle = 90),
-            axis.text.y = element_text(size = 20),
-            legend.title = element_text(size=20),
-            legend.text = element_text(size = 15))
+            theme(plot.title = element_text(size = 55, hjust = 0.5),
+                axis.title = element_text(size = 45),
+                axis.text.x = element_text(size = 20, face="bold"),
+                axis.text.y = element_text(size = 30),
+                strip.text.x = element_text(size = 35, angle=90),
+                legend.title = element_text(size=40),
+                legend.text = element_text(size = 35))
 
 
 model <- lm(dnds ~ mut_count, data = counts3)

@@ -36,6 +36,7 @@ library("purrr")
 library("magrittr")
 library("hrbrthemes")
 library("RColorBrewer")
+library("ggrepel")
 
 
 ```
@@ -104,11 +105,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
 
-# last passage 
-
-end_passage <- 560
-
-
 # Visual settings
 
 line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
@@ -162,7 +158,7 @@ gg_fig <- ggplot(variants_expiii_subset, aes(x=allele_freq)) +
     geom_density(aes(y = ..count.. * .01), alpha=.3, fill="#FF6666") +
     facet_wrap(~exp_line, ncol = 2) +
     transition_states(passage, transition_length = 1, state_length = 1, wrap = TRUE) + # to create animation 
-    labs(title = "Allele Freq. Distribution \n(Passage : {closest_state})", x = "Allele Freq.", y = "Count") +
+    labs(title = "Variant Freq. Distribution \n(Transfer : {closest_state})", x = "Variant Freq.", y = "Count") +
     theme_bw() +
     theme(
     plot.title = element_text(size = 25, hjust = 0.5),
@@ -192,7 +188,8 @@ anim_save(gg_fig, file = paste0(fig_dir, "allele-freq-accumulation3.gif"))
 
 
 variants_expiii_subset <- variants_expiii %>%
-                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
 
 
 
@@ -213,15 +210,16 @@ rep(c(brewer.pal(9,"Blues"),brewer.pal(9,"BuPu"))[9], length.out = sum(table(s$e
 fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info_line)) +
     geom_line() +
     facet_wrap(~exp_line, ncol = 1) +
-    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Passage") +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Transfer") +
     scale_color_manual(values = my_col_pal) +
+    scale_x_continuous(breaks = seq(0,500, 50))+
     theme_bw() +
-    theme(plot.title = element_text(size = 25, hjust = 0.5),
-    axis.title = element_text(size = 20),
-    axis.text.x = element_text(size = 10, angle = 90),
-    axis.text.y = element_text(size = 10),
-    strip.text.x = element_text(size = 25),
-    legend.position="none")
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0),
+        legend.position="none")
 
 fig
 
@@ -238,13 +236,14 @@ dev.off()
 
 table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])[table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg]) == 4]
 # 566_G_A  678_G_A 7854_A_G 
-case <- "566_G_A"
+case <- c("566_G_A")
 
 variants_expiii$tracking_group <- "No"
-variants_expiii$tracking_group[variants_expiii$mut_info == case] <- "Yes"
+variants_expiii$tracking_group[variants_expiii$mut_info %in% case] <- "Yes"
 
 variants_expiii_subset <- variants_expiii %>%
-                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
 
 
 
@@ -254,15 +253,15 @@ fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_mu
     geom_line() +
     facet_wrap(~exp_line, ncol = 1) +
     scale_alpha_manual(values = c(0.1,1)) +
-    labs(title = case, y = "Frequency \n", x = "\n Passage") +
+    labs(title = paste0(case, "\n"), y = "Frequency \n", x = "\n Transfer") +
     scale_color_manual(values = my_col_pal) +
     theme_bw() +
-    theme(plot.title = element_text(size = 25, hjust = 0.5),
-    axis.title = element_text(size = 20),
-    axis.text.x = element_text(size = 10, angle = 90),
-    axis.text.y = element_text(size = 10),
-    strip.text.x = element_text(size = 25),
-    legend.position="none")
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0),
+        legend.position="none")
 
 fig
 
@@ -278,72 +277,60 @@ dev.off()
 
 ```
 
-```{r}
-# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
-df <- data.frame()
 
-for (exp_line in line_labels){
-    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
-    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
-    for (mut in fixed_muts){
-        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
-        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
-        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
-        df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
-    }
-}
+```{r linkage case}
 
-# set column names and right data types
-df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
-        mutate_at(4:6, as.integer) %>%
-        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
-        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+# max(variants_expiii$allele_freq[variants_expiii$passage == 160 & variants_expiii$mut_info == "974_G_C" & variants_expiii$exp_line == "MT-2_1"])
 
-
-# average time to fixation for fixated mutations based on how many times they are repeated
-
-fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
-
-fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
-    "3" = fix_count_table[fix_count_table==3],
-    "2" = fix_count_table[fix_count_table==2],
-    "1" = fix_count_table[fix_count_table==1])
+variants_expiii_subset_mt21 <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts & variants_expiii_subset$exp_line == "MT-2_1",]
 
 
 
 
-df$Occurrence <- NA
-df$Occurrence[df$mut_info %in% names(fix_count_table_list[["1"]])] <- "One"
-df$Occurrence[df$mut_info %in% names(fix_count_table_list[["2"]])] <- "Two"
-df$Occurrence[df$mut_info %in% names(fix_count_table_list[["3"]])] <- "Three"
-df$Occurrence[df$mut_info %in% names(fix_count_table_list[["4"]])] <- "Four"
-df <- df[!is.na(df$Occurrence),]
-df$Occurrence <- factor(df$Occurrence, levels = c("One", "Two", "Three", "Four"))
+
+intersect(variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$passage == 270 & variants_expiii_subset_mt21$allele_freq >= 0.125],
+variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$passage == 280 & variants_expiii_subset_mt21$allele_freq <= 0.14 ])
 
 
-comparisons <- list(
-  c("Four", "Three"),
-  c("Four", "Two"),
-  c("Four", "One"),
-  c("Three", "Two"),
-  c("Three", "One"),
-  c("Two", "One")
+case <- c("972_G_A" , "973_G_A" , "974_G_C")
+
+variants_expiii_subset_mt21$tracking_group <- "No"
+variants_expiii_subset_mt21$tracking_group[variants_expiii_subset_mt21$mut_info %in% case] <- "Yes"
+
+variants_expiii_subset_mt21[variants_expiii_subset_mt21$tracking_group == "Yes",]
+
+variants_expiii_subset_mt21 <- variants_expiii_subset_mt21 %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
+
+
+
+variants_expiii_subset_mt21$passage <- as.numeric(as.character(variants_expiii_subset_mt21$passage))
+
+fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in% fixed_muts,] %>%
+    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info_line, alpha = tracking_group)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_alpha_manual(values = c(0.1,1)) +
+    labs(title = "", y = "Frequency \n", x = "\n Transfer") +
+    scale_color_manual(values = my_col_pal) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0),
+        legend.position="none")
+
+ggplotly(fig)
+
+fig <- fig + geom_text_repel(
+    data = . %>% filter(tracking_group == "Yes" & passage == 180),
+    aes(label = mut_info),
+    size = 10,       # Adjust label text size
+    color = "black" # Optional: set label color
 )
 
 
-# Create the plot
-fig <- ggplot(df, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) + 
-    geom_boxplot(color = "black", alpha = 0.7) +
-    stat_compare_means(comparisons = comparisons, method = "wilcox.test") +
-    # scale_fill_manual(values = c("Group 1" = "#E69F00", "Group 2" = "#56B4E9", "Group 3" = "#7CE335", "Group 4" = "#F3567C")) +
-    labs(fill = "Occurrence", x= "Occurrence", y = "Time to Fixation", title = "Fixation Dynamics Based on Variant Recurrence\n") + # Label for the legend
-    theme_minimal() + # Optional: use a minimal theme
-    theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15)) 
 
 
 
@@ -351,15 +338,8 @@ fig <- ggplot(df, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) +
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "fixation-based-on-recurrence.pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, "frequency_dynamics_linkage_cases.pdf"), height = 14, width = 14)
 fig
 dev.off()
 
-mean(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["1"]])])
-
-
-t.test(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["3"]])],df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["1"]])])
-
-
 ```
-
