@@ -135,6 +135,6 @@ for (psg in sort(unique(variants_sub$passage))){
 colnames(diversity_df) <- c("exp_line", "passage", "genomic_position", "polymorphic", "heterozygosity","shannon_entropy")
 
 
-write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/", cl_line,"_shannon_entropy.tsv"), quote = F, row.names = F, sep = "\t")
+write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/", cl_line,"_diversity_measures.tsv"), quote = F, row.names = F, sep = "\t")
 
 
