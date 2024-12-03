@@ -145,7 +145,7 @@ if (category == "Sporadic"){
 df <- data.frame()
 
 for (exp_line in line_labels){
-    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
     fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
     for (mut in fixed_muts){
         appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.05])))
@@ -226,9 +226,9 @@ fig3 <- ggboxplot(df, x = "exp_line", y = "time_to_fixation", color = "exp_line"
 fig3
 
 # perform pairwise wilcox-test between host line groups per translation impact
-
 pwc <- df %>%
     # filter(mut_info %in% shared) %>%
+    # filter(fixation >= 300) %>%
     group_by(effect_simplified) %>%
     pairwise_wilcox_test(time_to_fixation ~ host_line, p.adjust.method = "BH",pool.sd=FALSE, detailed = T)
 
@@ -236,6 +236,7 @@ pwc <- df %>%
 pwc <- pwc %>% add_xy_position(x = "host_line", step.increase = 1)
 # assign new y.positions 
 pwc$y.position <- sample(seq(500,750,10), replace = F, size = 3)
+
 # make the plot
 fig4 <- ggboxplot(df, x = "host_line", y = "time_to_fixation", color = "host_line") +
     facet_wrap(~effect_simplified, ncol = 3) +
@@ -270,7 +271,6 @@ dev.off()
 pdf(file = paste0(fig_dir, "time_to_fixation_significance_boxplot_per_translation_group_host_line.pdf"), height = 14, width = 14)
 fig4
 dev.off()
-
 
 
 

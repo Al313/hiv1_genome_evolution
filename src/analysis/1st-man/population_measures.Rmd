@@ -126,22 +126,26 @@ p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B,
 
 # make the ggplot object
 
+
+
 titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
                 facet_wrap(~exp_line) +
                 geom_line() +
                 geom_point() +
                 geom_smooth(method = "lm", se = FALSE) +
                 geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
-                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
-                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n") +
+                hjust = 1.1, vjust = 2, size = 8, inherit.aes = FALSE) +
+                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n", color = "Virus Line") +
                 #ylim(c(1000000,40000000)) +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
-                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
-                axis.title.x = element_text(size = 25),
-                axis.title.y = element_text(size = 25),
-                axis.text = element_text(size = 15, color = "black"))
-
+                theme(plot.title = element_text(size = 30, hjust = 0.5),
+                    axis.title = element_text(size = 25),
+                    axis.text.x = element_text(size = 20, angle = 90),
+                    axis.text.y = element_text(size = 20),
+                    legend.title = element_text(size=20),
+                    legend.text = element_text(size = 15),
+                    strip.text = element_text(size = 25))
 
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
@@ -393,13 +397,16 @@ moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)
                 #geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
                 #hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
                 #ylim(c(1000000,40000000)) +
-                labs(title = "MOI", x = "Tranfer", y = "Log10(MOI)") +
+                labs(title = "MOI\n", x = "\nTranfer", y = "Log10(MOI)\n", color = "Virus Line") +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
-                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
-                axis.title.x = element_text(size = 25),
-                axis.title.y = element_text(size = 25),
-                axis.text = element_text(size = 15))
+                theme(plot.title = element_text(size = 30, hjust = 0.5),
+                    axis.title = element_text(size = 25),
+                    axis.text.x = element_text(size = 20, angle = 90),
+                    axis.text.y = element_text(size = 20),
+                    legend.title = element_text(size=20),
+                    legend.text = element_text(size = 15),
+                    strip.text = element_text(size = 25))
 
 
 # save figure
@@ -548,9 +555,9 @@ for (exp_line in line_labels){
     
     for (trans_effect in c("U", "S", "N", "ALL")) {
         if (trans_effect == "ALL"){
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$genomic_pos >= 790 & variants_expiii$genomic_pos <= 2292,]
+            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9408,]
         } else {
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect & variants_expiii$genomic_pos >= 790 & variants_expiii$genomic_pos <= 2292,]
+            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9408,]
         }
         if (str_detect(exp_line, pattern = "MT-2")){
             gen_nr <- 10

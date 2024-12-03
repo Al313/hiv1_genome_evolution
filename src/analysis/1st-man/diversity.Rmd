@@ -122,7 +122,7 @@ lines <- c(13:16)
 shannon_df <- data.frame()
 
 for (line in lines){
-    shannon_df <- rbind(shannon_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_shannon_entropy.tsv"), sep = "\t", header = T))
+    shannon_df <- rbind(shannon_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
 }
 
 # set the correct viral line names and  add host info
@@ -176,12 +176,13 @@ fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line)) +
   labs(x="\nTransfer", y= "Mean Entropy\n", color = "Virus Line", title = paste0("Mean of Entropy per Sample")) +
   scale_color_manual(values = line_col_palette) +
   theme_bw() +
-        theme(plot.title = element_text(size = 20, hjust = 0.5),
-        axis.title = element_text(size = 15),
-        axis.text.x = element_text(size = 10, angle = 90),
-        axis.text.y = element_text(size = 10),
-        legend.title = element_text(size = 15),
-        legend.text = element_text(size = 10))
+  theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    legend.title = element_text(size=20),
+    legend.text = element_text(size = 15),
+    strip.text = element_text(size = 25))
 
 ggplotly(fig)
 
@@ -195,6 +196,67 @@ dev.off()
 
 ```
 
+> Let's take a look at total and mean heterozygosity per sample. 
+
+```{r heterozygosity per sample, results=TRUE}
+
+
+d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (sum_het = sum(heterozygosity, na.rm = T), mean_het = mean(heterozygosity, na.rm = T), .groups = 'drop')
+
+d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+# sum of heterozygosity per sample 
+
+fig <- ggplot(d, aes(x = passage, y = sum_het, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Total Heterozygosity\n", color = "Virus Line", title = paste0("Sum of Heterozygosity per Sample\n")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    legend.title = element_text(size=20),
+    legend.text = element_text(size = 15))
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "heterozygosity_per_sample_sum.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+
+# mean of heterozygosity per sample 
+
+fig <- ggplot(d, aes(x = passage, y = mean_het, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Mean Heterozygosity\n", color = "Virus Line", title = paste0("Mean of Heterozygosity per Sample \n")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    legend.title = element_text(size=20),
+    legend.text = element_text(size = 15),
+    strip.text = element_text(size = 25))
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "heterozygosity_per_sample_mean.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
 
 
 ```{r entropy per position, results=TRUE}
