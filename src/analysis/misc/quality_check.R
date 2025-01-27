@@ -63,7 +63,7 @@ quals_gathered$average_depth <- log10(quals_gathered$average_depth)
 
 
 # render the ggplot object
-
+# quals_gathered[quals_gathered$virus_line_no == 14 & quals_gathered$transfer_no == 690,]
 coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,group=full_sample_name))+
     geom_line(linetype="dashed", color="blue", linewidth=1.2) +
     geom_point(color="red", size=3) +
@@ -71,7 +71,7 @@ coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,
     aes(x=amplicon,y=average_depth,label=full_sample_name),size = 6) +
     labs(title = "Coverage Check!\n", x = "\nAmplicons", y = "Average Sequencing Depth (log10)\n") +
     scale_x_discrete(labels = c("Amp-A (5utr)", "Amp_A","Amp_B","Amp_C","Amp_D","Amp_E", "Amp-E (3utr)")) +
-    scale_y_continuous(limit = c(-1,6), breaks = 0:6) +
+    scale_y_continuous(limit = c(-2,6), breaks = 0:6) +
     geom_hline(yintercept = log10(200), linetype="dashed") +
     theme_bw() +
     theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),

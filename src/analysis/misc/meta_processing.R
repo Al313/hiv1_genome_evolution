@@ -6,11 +6,12 @@ library(dplyr)
 library(stringr)
 
 # set variables to process relevant metadata
-arrival_date <- "14102024"
-ngs_sample_list_version <- "461"
+experiment_data <- c("141024", "261124")
+arrival_date <- c("14102024", "03122024")
+ngs_sample_list_version <- c("461", "466")
 
 # read in the relevant metadata
-ngs_sample_list_new <- read.csv(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/incoming-raw-data/", arrival_date, "/NGS_samples_list_all_runs_NGS_R1R2_v", ngs_sample_list_version, "_141024.csv"), sep = ";", header = T, stringsAsFactors = F)
+ngs_sample_list_new <- read.csv(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/incoming-raw-data/", arrival_date[-1], "/NGS_samples_list_all_runs_NGS_R1R2_v", ngs_sample_list_version[-1], "_",experiment_data[-1], ".csv"), sep = ";", header = T, stringsAsFactors = F)
 ngs_sample_list_new[is.na(ngs_sample_list_new)] <- "NA"
 tail(ngs_sample_list_new$forward_name, n = 10)
 
@@ -18,7 +19,8 @@ tail(ngs_sample_list_new$forward_name, n = 10)
 # filter for relevant samples
 
 # this gives all the samples sequenced in that sequencing batch; i.e., both newly sequenced samples and repeats
-ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = "VPIII13_16_p580_630"),]
+batch_name <- c("VPIII13_16_p580_630", "VPIII13_16_p640-690")
+ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = batch_name[-1]),]
 
 # to get only newly sequenced samples
 # ngs_sample_list_new <- ngs_sample_list_new[ngs_sample_list_new$Set %in% paste("VP III ", seq(520,570,by=10), sep = ""),]
@@ -65,7 +67,7 @@ ngs_sample_list_new$included <- TRUE
 ngs_sample_list_new <- ngs_sample_list_new[,c(2, 8, 11, 9, 5, 16:19, 1, 3:4, 6:7, 10, 12:15, 20:22)]
 
 head(ngs_sample_list_new)
-
+nrow(ngs_sample_list_new)
 
 
 # read in the previous metadata
@@ -129,7 +131,7 @@ ngs_sample_list_updated <-  ngs_sample_list_updated[with(ngs_sample_list_updated
 
 # move the previous version of the metadata to the archived folder
 
-version <- "v2"
+version <- "v3"
 
 file.rename(from = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv",
           to   = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/archived/NGS_samples_list_processed_",version,".csv"))

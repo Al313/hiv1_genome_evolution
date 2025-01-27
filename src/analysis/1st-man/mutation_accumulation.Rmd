@@ -297,7 +297,6 @@ counts <- variants_expiii %>%
             mutate_at(3, as.numeric)
 
 
-
 # visualize 
 
 fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
