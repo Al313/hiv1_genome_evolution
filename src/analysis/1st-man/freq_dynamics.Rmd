@@ -278,6 +278,71 @@ dev.off()
 ```
 
 
+```{r Variant Frequency Trajectories Colored by sharedness, results=TRUE}
+
+
+fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+
+
+variants_expiii_subset <- variants_expiii %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
+
+
+
+fixed_muts <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$allele_freq >= 0.99])
+variants_expiii_subset <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,]
+
+
+for (i in 1:nrow(variants_expiii_subset)){
+    matching_index <- which(sapply(fix_count_table_list, function(x) variants_expiii_subset$mut_info[i] %in% names(x)))
+    if (length(matching_index) == 0) {
+        variants_expiii_subset$rep[i] <- 1
+    } else {
+        variants_expiii_subset$rep[i] <- names(fix_count_table_list)[matching_index]
+    }
+    
+}
+
+
+my_col_pal <- c(alpha("grey", 0.5), "green", "blue", "red")
+
+
+
+
+fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = rep)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Transfer", color = "Occurrence") +
+    scale_color_manual(values = my_col_pal) +
+    scale_x_continuous(breaks = seq(0,500, 50))+
+    theme_bw() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0))
+
+fig
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "frequency_dynamics_per_repeated_",category, ".pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
 ```{r linkage case}
 
 # max(variants_expiii$allele_freq[variants_expiii$passage == 160 & variants_expiii$mut_info == "974_G_C" & variants_expiii$exp_line == "MT-2_1"])
@@ -306,13 +371,22 @@ variants_expiii_subset_mt21 <- variants_expiii_subset_mt21 %>%
 
 variants_expiii_subset_mt21$passage <- as.numeric(as.character(variants_expiii_subset_mt21$passage))
 
+my_col_pal <- c(rep(c(brewer.pal(9,"Reds"),brewer.pal(9,"PuRd"))[9], length.out = sum(table(s$exp_line)[1:2])),
+rep(c(brewer.pal(9,"Blues"),brewer.pal(9,"BuPu"))[9], length.out = sum(table(s$exp_line)[3:4])))
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[1]] <- "#25880b"
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[2]] <- "#0b74a2"
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[3]] <- "#621295"
+variants_expiii_subset_mt21$color[is.na(variants_expiii_subset_mt21$color)] <- c(brewer.pal(9,"Reds"),brewer.pal(9,"PuRd"))[9]
+color_mapping <- setNames(variants_expiii_subset_mt21$color, variants_expiii_subset_mt21$mut_info)
+
 fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in% fixed_muts,] %>%
-    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info_line, alpha = tracking_group)) +
+    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info, alpha = tracking_group, size = tracking_group)) +
     geom_line() +
     facet_wrap(~exp_line, ncol = 1) +
     scale_alpha_manual(values = c(0.1,1)) +
+    scale_size_manual(values = c(1,1.5)) +
     labs(title = "", y = "Frequency \n", x = "\n Transfer") +
-    scale_color_manual(values = my_col_pal) +
+    scale_color_manual(values = color_mapping) +
     theme_bw() +
     theme(plot.title = element_text(size = 55, hjust = 0.5),
         axis.title = element_text(size = 45),
@@ -321,13 +395,14 @@ fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in
         strip.text.x = element_text(size = 35, angle=0),
         legend.position="none")
 
-ggplotly(fig)
+fig
+
 
 fig <- fig + geom_text_repel(
     data = . %>% filter(tracking_group == "Yes" & passage == 180),
     aes(label = mut_info),
     size = 10,       # Adjust label text size
-    color = "black" # Optional: set label color
+    color = c("#25880b", "#0b74a2", "#621295") # Optional: set label color
 )
 
 

@@ -385,7 +385,7 @@ We can also plot the number of new `r category` mutations that appear or disappe
 ```{r prepare difference dataframe for minority}
 
 
-passages <- seq(10,570, 10)
+passages <- seq(10,500, 10)
 diff_df <- data.frame()
 
 

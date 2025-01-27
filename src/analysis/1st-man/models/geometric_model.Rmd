@@ -1,0 +1,317 @@
+---
+title:  
+    "Geometric Modelling of Cumulative Variant counts"
+date: 
+    "Dec 26th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("ggplot2")
+library("dplyr")
+library("tidyr")
+library("stringr")
+library("magrittr")
+library("rstatix")
+
+```
+
+
+```{r simulation}
+
+# Simulating the process of drawing n_draws balls until all n_balls are observed
+simulate_draws <- function(n_balls, n_draws, sampling_freq = 20) {
+  unique_balls <- c()
+  unique_balls_counts <- c()
+  draws <- 0
+  
+  while (length(unique(unique_balls)) < n_balls) {
+    draws <- draws + 1
+    # Randomly sample 2 balls with replacement
+    sampled_balls <- sample(1:n_balls, size = n_draws, replace = FALSE)
+    unique_balls <- unique(append(unique_balls, sampled_balls))
+    if (draws %% sampling_freq == 0){unique_balls_counts <- append(unique_balls_counts, length(unique_balls))} # to replicate sampling every 20th generation
+  }
+  return(unique_balls_counts)
+}
+
+
+# Simulate the process multiple times
+set.seed(123) # For reproducibility
+n_simulations <- 2
+n_draws <- 4
+n_balls <- 1000
+results <- replicate(n_simulations, simulate_draws(n_balls, n_draws, sampling_freq = 1))
+n_balls2 <- 1300
+results2 <- replicate(n_simulations, simulate_draws(n_balls2, n_draws, sampling_freq = 1))
+results <- append(results, results2)
+
+```
+
+```{r visualize simulations}
+
+# Prepare the data for ggplot
+plot_data <- do.call(rbind, lapply(seq_along(results), function(i) {
+  data.frame(
+    Draws = seq_along(results[[i]])*20,
+    UniqueBalls = results[[i]],
+    Simulation = factor(i) # Assign each list a unique identifier
+  )
+}))
+
+# Plot using ggplot
+ggplot(plot_data, aes(x = Draws, y = UniqueBalls, color = Simulation)) +
+  geom_line(size = 1.2) + # Line plot for each simulation
+  geom_point(size = 2) +  # Add points for emphasis
+  labs(
+    title = "Unique Balls Over Draws in Simulations",
+    x = "Draw Number",
+    y = "Number of Unique Balls Observed",
+    color = "Simulation"
+  ) +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") # Use a distinct color palette
+
+
+
+```
+
+
+```{r fit model for simulation: method 1}
+
+
+# Function to compute geometric CDF with parameter p
+geometric_cdf <- function(x, p, scale) {
+    scale*(1 - (1-p)^floor(x))
+}
+
+# x <- c(seq(from =0, length.out = length(results[[1]]), by = 20)) to account for 20 samling
+x <- 1:length(results[[1]])
+fit <- nls(results[[1]] ~ geom_cdf(x, p, scale), start = list(p = 0.1, scale = max(results[[1]])))
+
+p_est <- coef(fit)["p"]
+scale_est <- coef(fit)["scale"]
+
+fitted_cdf <- geometric_cdf(x, p_est, scale_est)
+
+
+df <- data.frame(
+  x = x,
+  Observed = results[[1]],
+  Fitted = fitted_cdf
+)
+
+ggplot(df, aes(x = x)) +
+  geom_point(aes(y = Observed, color = "Observed")) +
+  geom_line(aes(y = Fitted, color = "Fitted")) +
+  labs(
+    title = "Fit of Geometric CDF to Cumulative Data",
+    x = "x",
+    y = "Cumulative Probability"
+  ) +
+  scale_color_manual(values = c("Observed" = "blue", "Fitted" = "red")) +
+  theme_minimal()
+
+```
+
+```{r measures of goodness-of-fit}
+
+
+# Calculate R-squared
+ss_tot <- sum((results[[1]] - mean(results[[1]]))^2)
+ss_res <- sum((results[[1]] - geom_cdf(1:length(results[[1]]), p_est, scale_est))^2)
+r_squared <- 1 - (ss_res / ss_tot)
+
+# RMSE
+n <- length(results[[1]])
+rmse <- sqrt(sum((results[[1]] - fitted_cdf)^2) / n)
+cat("RMSE:", rmse, "\n")
+
+# AIC
+aic_value <- AIC(fit)
+cat("AIC:", aic_value, "\n")
+
+
+```
+
+```{r diagnostic plots}
+
+# Calculate residuals
+residuals <- results[[1]] - fitted_cdf
+
+# Data for residual plot
+residuals_df <- data.frame(
+  Fitted = fitted_cdf,
+  Residuals = residuals
+)
+
+# Residuals vs. Fitted Values Plot
+ggplot(residuals_df, aes(x = Fitted, y = Residuals)) +
+  geom_point(color = "purple", size = 2, alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "Residuals vs. Fitted Values",
+    x = "Fitted Values",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+
+
+# Residuals vs. Predictors Plot
+ggplot(data.frame(x = x, Residuals = residuals), aes(x = x, y = Residuals)) +
+  geom_point(color = "darkgreen", size = 2, alpha = 0.7) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+  labs(
+    title = "Residuals vs. Predictor",
+    x = "Generations",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+
+# QQ Plot of Residuals
+ggplot(data.frame(SampleQuantiles = residuals), aes(sample = SampleQuantiles)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(
+    title = "QQ Plot of Residuals",
+    x = "Theoretical Quantiles",
+    y = "Sample Quantiles"
+  ) +
+  theme_minimal()
+
+
+```
+
+
+####################
+
+
+```{r fit model for data: method 1}
+## counts object from mutation_accumulation.Rmd
+
+
+data <- counts[counts$exp_line == "MT-4_1",]
+View(data)
+x <- 1:length(data$count)
+fit <- nls(data$count ~ geometric_cdf(x, p, scale), start = list(p = 0.1, scale = max(data$count)))
+
+
+p_est <- coef(fit)["p"]
+scale_est <- coef(fit)["scale"]
+
+
+# Generate the fitted geometric CDF values
+fitted_cdf <- geometric_cdf(x, p_est, scale_est)
+
+# Plot the observed cumulative data and fitted CDF
+
+
+df <- data.frame(
+  x = x,
+  Observed = data$count,
+  Fitted = fitted_cdf
+)
+
+ggplot(df, aes(x = x)) +
+  geom_point(aes(y = Observed, color = "Observed")) +
+  geom_line(aes(y = Fitted, color = "Fitted")) +
+  labs(
+    title = "Fit of Geometric CDF to Cumulative Data",
+    x = "x",
+    y = "Cumulative Probability"
+  ) +
+  scale_color_manual(values = c("Observed" = "blue", "Fitted" = "red")) +
+  theme_minimal()
+
+# Calculate R-squared
+ss_tot <- sum((df$Observed - mean(df$Observed))^2)
+ss_res <- sum((df$Observed - geometric_cdf(1:length(df$Observed), p_est, scale_est))^2)
+r_squared <- 1 - (ss_res / ss_tot)
+
+```
+
+```{r predictions beyond the scope of observed}
+# Extend the range of x
+x_extended <- 1:(length(x) + 100) # Add 10 more steps beyond the observed data
+
+# Predict values for the extended range using the fitted parameters
+predicted_cdf <- geometric_cdf(x_extended, p_est, scale_est)
+
+# Create a data frame for plotting
+
+
+df <- data.frame(
+  x = c(x_extended),
+  CDF = c(data$count, rep(NA, length(x_extended) - length(x))),
+  Predicted = c(fitted_cdf, predicted_cdf[(length(x) + 1):length(x_extended)])
+)
+
+# Plot observed data, fitted values, and predictions
+ggplot(df, aes(x = x)) +
+  geom_point(aes(y = CDF, color = "Observed")) +
+  geom_line(aes(y = Predicted, color = "Predicted")) +
+  labs(
+    title = "Geometric CDF Fit and Predictions",
+    x = "x",
+    y = "Cumulative Data"
+  ) +
+  scale_color_manual(values = c("Observed" = "blue", "Predicted" = "red")) +
+  theme_minimal()
+
+```
+
+
+
+
+####################
+
+
+
+
+```{r fit model for simulation: method 2}
+# Function to compute geometric CDF with parameter p
+geom_cdf2 <- function(x, p) {
+    1 - (1-p)^floor(x)
+}
+
+
+# Function to compute difference between your CDF values and geometric CDF
+fit_error <- function(p, cdf_values) {
+    x <- length(cdf_values)  # positions in sequence
+    theo_cdf <- geom_cdf2(1:x, p)
+    sum((cdf_values/max(cdf_values) - theo_cdf)^2)
+}
+
+
+
+# Find best p using optimization
+best_fit <- optimize(fit_error, interval=c(0, 1), cdf_values=results[[1]])
+best_p <- best_fit$minimum
+
+# plot the fit
+plot(results[[1]]/n_balls, x = c(1:length(results[[1]])))
+a <- rgeom(n_balls, prob = best_p)
+lines(ecdf(a), col = "blue")
+
+# Calculate R-squared
+ss_tot <- sum((results[[1]]/n_balls - mean(results[[1]]/n_balls))^2)
+ss_res <- sum((results[[1]]/n_balls - geom_cdf2(1:length(results[[1]]), best_p))^2)
+r_squared <- 1 - (ss_res / ss_tot)
+
+```
+

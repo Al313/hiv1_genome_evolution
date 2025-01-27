@@ -1,0 +1,299 @@
+---
+title:  
+    "Fixation dynamics of EXPIII"
+date: 
+    "Dec 19th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("ggplot2")
+library("ggpubr")
+library("plotly")
+library("ggvenn")
+library("hrbrthemes")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("rstatix")
+library("gtools")
+library("effsize")
+
+
+```
+
+
+
+
+```{r read-in the data}
+
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+
+# correct for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+
+# only keep the EXPIII data
+exp <- "EXPIII"
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
+
+
+# facors
+
+host_factor <- c("MT2", "MT4")
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+translational_impacts <- c("U", "S", "N")
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+# format the dataframe
+variants_ann_expiii <- variants_ann_expiii %>%
+                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
+                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
+                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
+                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+                            mutate(passage = as.factor(passage),
+                            exp_line = factor(exp_line, levels = exp_line_factor),
+                            host_line = factor(host_line, levels = host_factor),
+                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
+
+
+# remove duplicate records for the same variants
+variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
+
+# Visualization settings
+
+line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+breaks_step <- 50
+line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+
+```
+
+
+```{r set paramters}
+
+# set parameters
+category <- "Fixed"
+
+if (category == "Sporadic"){
+    min_threshold <- 0.01
+    max_threshold <- 0.05
+} else if (category == "Minority"){
+    min_threshold <- 0.05
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
+
+```
+
+
+```{r max-fold-increase processing}
+
+
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+df <- data.frame()
+
+
+for (exp_line in line_labels){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        
+        psgs <- seq(appearance, fixation, by = 10)
+        recordings <- data.frame()
+        
+        for (i in 1:(length(psgs)-1)){
+            prev <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == mut & variants_expiii_sub$passage == psgs[i] & variants_expiii_sub$allele_freq > 0.01] # & variants_expiii_sub$allele_freq > 0.01
+            current <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == mut & variants_expiii_sub$passage == psgs[i+1] & variants_expiii_sub$allele_freq > 0.01] #  & variants_expiii_sub$allele_freq > 0.01
+            if (length(c(prev,current)) == 2){
+                recordings <- rbind(recordings, c(psgs[i], psgs[i+1], current/prev))
+            }
+        }
+        
+        if (nrow(recordings) != 0){
+            df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance,as.numeric(recordings[which.max(recordings[,3]),])))
+        } else {
+            df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance,rep(NA,3)))
+        }
+    }
+}
+
+
+
+# set column names and right data types
+df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation", "max_psg_lower", "max_psg_upper", "max_fold_change")) %>% 
+        mutate_at(4:6, as.integer) %>%
+        filter(!is.na(max_fold_change)) %>%
+        mutate(max_psg_range = paste(max_psg_lower, max_psg_upper, sep = "_")) %>%
+        mutate(max_psg_range = factor(max_psg_range),
+        exp_line = factor(exp_line, levels = exp_line_factor),
+        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+
+
+df %<>% mutate(max_fold_change = as.numeric(max_fold_change))
+df %<>% mutate(max_psg_range = factor(max_psg_range, levels = mixedsort(c(levels(max_psg_range),"370_380", "380_390", "390_400","420_430", "430_440", "440_450", "450_460", "460_470", "470_480", "480_490", "490_500"))))
+
+
+
+
+
+# saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc.rds")
+# saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc_2.rds") ## appearance without the minimum threshold of 0.01
+
+```
+
+```{r max-fold-increase (Bertels)}
+
+max_fold <- readRDS(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc.rds")
+
+
+# axis text label data frame
+breaks <- seq(10,490,10)
+labels <- paste0(breaks, "_", breaks+10)
+
+
+fig <- max_fold %>% 
+ ggplot(aes(x = as.numeric(max_psg_lower), y = log10(max_fold_change), color = exp_line)) +
+  # facet_wrap(~exp_line) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add regression line without confidence interval
+  scale_color_manual(labels = line_labels, values = line_palette) +
+  scale_x_continuous(limits = c(0,490), breaks = breaks, labels = labels) +
+  labs(title = "Maximum Fold Increase Trend over Time \n", x = "\n Transfer", y = "Log10(Max. Fold Inc.) \n",
+    color = "Virus Line") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text.x = element_text(size = 15, color = "black", angle = 90),
+                axis.text.y = element_text(size = 15, color = "black"))
+
+
+
+mean(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")])/mean(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
+wilcox.test(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")], max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
+cliff.delta(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")], max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "fixed_max_fold_change_occurrence_trend.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+
+```{r max-fold-increase per appearance time}
+
+# summarize max-fold-increase per passage of appearance
+max_fold_summary <- max_fold %>% group_by(exp_line, appearance) %>%
+                    summarize(Mean = mean(max_fold_change, na.rm=TRUE),
+                    n = n())
+
+
+# fit linear models for each group and extract p-values
+model_A <- lm(log2(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[1], ])
+model_B <- lm(log2(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[2], ])
+model_C <- lm(log2(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[3], ])
+model_D <- lm(log2(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+line <- "MT-4_2"
+model <- lm(log(Mean)~appearance, data = max_fold_summary[max_fold_summary$exp_line == line,])
+summary(model)
+
+
+fig <- max_fold_summary %>% ggplot(aes(x = appearance, y = log(Mean), color = exp_line)) +
+    facet_wrap(~exp_line)+
+    geom_point(aes(size = n)) +
+    geom_smooth(method = "lm", se = FALSE) +
+    xlim(limits = c(0,500)) +
+    geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+    hjust = 1.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+    scale_color_manual(labels = line_labels, values = line_palette) +
+    labs(title = "Maximum Fold Increase Based on Appearance Transfer \n", x = "\n Appearance Transfer", y = "Log2(Average Max. Fold Inc. in VF) \n",
+    color = "Virus Line", size = "# Fixed Variants") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text.x = element_text(size = 15, color = "black", angle = 90),
+                axis.text.y = element_text(size = 15, color = "black"),
+                strip.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "fixed_max_fold_change_per_appearance_transfer.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+

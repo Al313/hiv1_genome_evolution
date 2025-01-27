@@ -99,6 +99,28 @@ data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "M
 ```
 
 
+```{r dilution factor calculation}
+
+
+# exceptional case where 17 microliter of water added
+data[data$`ul-H2O-added-to-reach-17ul` == "17",]
+data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "17"] <- "7"
+
+# modify data to calculate dilution factor of later measurements 
+data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "1:10 Dilution!"] <- "15.3"
+
+# get the dilution factor
+dilution_factor <- (17 - as.numeric(data$`ul-H2O-added-to-reach-17ul`))/17
+
+
+# get the copy number per ml based on average quantity
+data$mean_quantity_per_ml_cell_culture_supernatant <- data$mean_quantity*70*dilution_factor^(-1)
+
+
+
+```
+
+
 ```{r plot qpcr result}
 
 
@@ -155,6 +177,30 @@ pdf(file = paste0(fig_dir, "titration_qpcr_expiii.pdf"), height = 14, width = 14
 titration_fig
 dev.off()
 
+
+
+
+```
+
+```{r qPCR average estimates}
+
+library(boot)
+
+log10(mean(data$mean_quantity_per_ml_cell_culture_supernatant))
+# Define a function to calculate the statistic of interest (e.g., mean)
+mean_stat <- function(data, indices) {
+  return(mean(data[indices]))
+}
+
+boot_results <- boot(data$mean_quantity_per_ml_cell_culture_supernatant, statistic = mean_stat, R = 1000)
+
+ci <- boot.ci(boot_results, type = "perc")
+
+log10(ci$percent[4:5])
+
+
+
+
 ```
 
 ```{r}
@@ -177,7 +223,7 @@ pairwise.t.test(data$mean_quantity_per_ml_cell_culture_supernatant, data$exp_lin
 
 
 data <- as.data.frame(read_excel(paste0(wd, "data/titration/tcid50.xlsx")))
-
+head(data)
 
 
 data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
@@ -397,7 +443,7 @@ moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)
                 #geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
                 #hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
                 #ylim(c(1000000,40000000)) +
-                labs(title = "MOI\n", x = "\nTranfer", y = "Log10(MOI)\n", color = "Virus Line") +
+                labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Virus Line") +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
                 theme(plot.title = element_text(size = 30, hjust = 0.5),
@@ -426,35 +472,65 @@ dev.off()
 
 # The MOI levels for none of the cell lines is statistically difference from one another
 
-pairwise.t.test(data$MOI, data$exp_line, p.adjust.method = "none")
+pairwise.t.test(result$MOI, result$exp_line, p.adjust.method = "none", paired = T)
+pairwise.wilcox.test(result$MOI[result$passage >= 200], result$exp_line[result$passage >= 200], p.adjust.method = "BH")
+
+wilcox.test(400000*result$MOI[result$passage >= 300 & result$exp_line == "MT-2_2"], 400000*result$MOI[result$passage >= 300 & result$exp_line == "MT-4_1"])
 
 
 
-# define a function to calculate the CI
-confidence_interval <- function(data, conf.level = 0.95) {
-    n <- length(data)
-    mean_value <- mean(data)
-    sd_value <- sd(data)
-    
-    # Calculate standard error
-    se <- sd_value / sqrt(n)
-    
-    # Calculate margin of error
-    error_margin <- qt(1 - (1 - conf.level) / 2, df = n - 1) * se
-    
-    # Calculate confidence interval
-    ci_lower <- mean_value - error_margin
-    ci_upper <- mean_value + error_margin
-    
-    return(c(lower = ci_lower, upper = ci_upper))
-}
+mean(result$MOI[result$passage >= 200 & result$exp_line == "MT-4_2"])
+head(data_sub)
+a <- data_sub %>% 
+    filter(passage >= 300 & exp_line %in% c("MT-2_1", "MT-2_2")) %>%
+    select(MOI)
 
-mean(result$MOI)
-confidence_interval(result$MOI)
+median(a$MOI)*400000
+quantile(a$MOI, probs = c(0.25,0.5,0.75))*400000
+
+b <- data_sub %>% 
+    filter(passage >= 300 & exp_line == "MT-4_1") %>%
+    select(MOI)
+
+median(b$MOI)*400000
+quantile(b$MOI, probs = c(0.25,0.5,0.75))*400000
+
+3465/716
+wilcox.test(a$MOI,b$MOI)
+
+result %>%
+    filter(passage >= 200) %>%
+    group_by(exp_line) %>%
+    summarise(val = mean(MOI))
+
+head(result)
 
 median(result$MOI)
+
 quantile(result$MOI, probs = c(0.25,0.5,0.75))
 IQR(result$MOI)
+
+
+
+harmonic_mean <- function(x) {
+  return(length(x) / sum(1 / x))
+}
+
+vec <- c(716.8*12, 716.8*12^2, 716.8*12^3)
+vec2 <- c(3465*12, 3465*12^2, 3465*12^3)
+mean(vec)
+log10(harmonic_mean(vec))
+log10(harmonic_mean(vec2))
+harmonic_mean(vec2)/harmonic_mean(vec)
+
+
+
+vec <- c(716.8*44, 716.8*44^2)
+vec2 <- c(3465*44, 3465*44^2)
+mean(vec)
+log10(harmonic_mean(vec))
+log10(harmonic_mean(vec2))
+harmonic_mean(vec2)/harmonic_mean(vec)
 
 
 ```
@@ -530,194 +606,3 @@ dev.off()
 ```
 
 
-
-
-
-
-## Effective population size
-
-```{r}
-
-## estimating the effective population size (Variance Effective Size) by this formula: Ne ≈ p(1−p)/Var(Δp)
-## if there are more than one generation between the time points: 1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))
-
-df <- data.frame()
-
-
-# exp_line <- "MT-4_1"
-# pres_psg <- 130
-# trans_effect <- "S"
-
-# 8787 9408
-for (exp_line in line_labels){
-    
-    print(exp_line)
-    
-    for (trans_effect in c("U", "S", "N", "ALL")) {
-        if (trans_effect == "ALL"){
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9408,]
-        } else {
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9408,]
-        }
-        if (str_detect(exp_line, pattern = "MT-2")){
-            gen_nr <- 10
-        } else {
-            gen_nr <- 10
-        }
-        print(gen_nr)
-        for (pres_psg in seq(20,570,10)){
-            print(pres_psg)
-            prev_psg <- pres_psg - 10
-            
-            pres_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$allele_freq >= 0.01])
-            prev_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$allele_freq >= 0.01])
-            union_muts <- union(pres_muts, prev_muts)
-            intersect_muts <- intersect(pres_muts, prev_muts)
-            
-            delta_afs <- c()
-            for (mut in intersect_muts){
-                if (mut %in% pres_muts){
-                    pres_mut_af <- variants_expiii_sub$allele_freq[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$mut_info == mut]
-                } else {pre_mut_af <- 0}
-                if (mut %in% prev_muts){
-                    prev_mut_af <- variants_expiii_sub$allele_freq[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$mut_info == mut]
-                } else {prev_mut_af <- 0}
-                
-                delta_af <- pres_mut_af - prev_mut_af
-                delta_afs <- append(delta_afs, delta_af)
-            }
-            
-            af_pres <- sum(variants_expiii_sub$allele_freq[variants_expiii_sub$passage == pres_psg & variants_expiii_sub$allele_freq >= 0.01])
-            af_prev <- sum(variants_expiii_sub$allele_freq[variants_expiii_sub$passage == prev_psg & variants_expiii_sub$allele_freq >= 0.01])
-            af_ave <- af_pres/length(pres_muts)
-            
-            Ne <- tryCatch({1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/gen_nr)))}, error = function(e){NA})
-            
-            df <- rbind(df, c(exp_line, trans_effect, pres_psg, length(union_muts), length(intersect_muts), af_ave, tryCatch({var(delta_afs)}, error = function(e){NA}), Ne))
-        }
-    }
-    
-}
-
-
-
-df %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "intersect_count", "average_allele_freq", "var_freq_change", "Ne")) %>%
-        mutate(
-            psg = as.numeric(psg),
-            var_freq_change = as.numeric(var_freq_change),
-            union_count = as.integer(union_count),
-            intersect_count = as.integer(intersect_count),
-            Ne = as.numeric(Ne))
-
-
-
-# save data on disk
-
-# save(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size_nef.RData")
-
-
-
-load("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size_nef.RData") # or all of genome: variance_effective_size.RData
-
-
-
-
-# plot Ne
-fig <- df[df$effect_simplified == "ALL",] %>% ggplot(aes(x = psg, y = log2(Ne), col = exp_line)) +
-        # facet_wrap(~ exp_line) +
-        geom_line() +
-        scale_y_continuous(breaks = seq(4,15,1),limits = c(4,15))+
-        scale_x_continuous(breaks = seq(0,500,50),limits = c(0,500))+
-        scale_color_manual(values = line_col_palette) +
-        geom_smooth(method = "loess", se = FALSE) +
-        labs(x= "\n Transfer", y = "Log2(Ne) \n", title = "Variance Effective Population Size (nef Variants) \n", color = "Virus Line") + # Label for the legend
-        theme_minimal() + # Optional: use a minimal theme
-        theme(
-            plot.title = element_text(size = 30, hjust = 0.5),
-            strip.text = element_text(size = 25),
-            axis.title = element_text(size = 25),
-            axis.text.x = element_text(size = 20, angle = 90),
-            axis.text.y = element_text(size = 20),
-            legend.title = element_text(size=20),
-            legend.text = element_text(size = 15)) 
-
-
-
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "variance_ne.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-
-# ave Ne per line
-
-df %>%
-    filter(effect_simplified == "ALL") %>%
-    group_by(exp_line) %>%
-    summarise(mean = mean(Ne, na.rm = T))
-
-
-# plot variance in allele freq change
-df[df$effect_simplified != "ALL",] %>% ggplot(aes(x = psg, y = log2(var_freq_change), color = effect_simplified)) +
-        facet_wrap(~ exp_line) +
-        geom_line() +
-        geom_smooth(method = "loess", se = FALSE)
-
-# plot proportion of mutation retention
-df[df$effect_simplified != "ALL",] %>% ggplot(aes(x = psg, y = intersect_count/union_count, color = effect_simplified)) +
-        facet_wrap(~ exp_line) +
-        geom_line() +
-        geom_smooth(method = "loess", se = FALSE)
-
-
-df[df$psg == 130 & df$effect_simplified == "S",]
-
-
-
-```
-
-
-## Effective population size by BEAST
-
-```{r}
-
-# read-in data
-skyline_data <- data.frame()
-line_labels
-for (line in line_labels){
-    data <- read.table(file = paste0("/Applications/BEAST_2.7.6/ltee/ne-estimate/gag/",line,"/",line,"_skyline_data.txt"), sep = "\t", header = T, skip = 1)
-    data$exp_line <- line
-    skyline_data <- rbind(skyline_data, data)
-}
-
-skyline_data %<>% mutate(lower = (lower+mean)/2, upper = (upper+mean)/2)
-
-
-ne__fig <- skyline_data %>% 
-    ggplot(aes(x = time, y = mean, color = exp_line)) +
-    geom_line() +
-    geom_ribbon(aes(ymin = lower, ymax = upper, fill = exp_line), alpha = 0.1, linetype = 0) +
-    labs(title = "Bayesian Skyline Ne Estimates \n", x= "\n Days", y= "Baysian Ne Estimate \n", color = "Virus Line") +
-    scale_color_manual(values = line_col_palette) +
-    scale_fill_manual(values = line_col_palette) +
-    guides(fill = "none") +
-    theme_bw() +
-    theme(
-        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
-        axis.title.x = element_text(size = 25),
-        axis.title.y = element_text(size = 25),
-        axis.text = element_text(size = 15))
-
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "bayesina_ne_estimates.pdf"), height = 14, width = 21)
-ne__fig
-dev.off()
-```

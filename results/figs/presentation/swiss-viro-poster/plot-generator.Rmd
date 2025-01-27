@@ -1,0 +1,283 @@
+
+
+```{r}
+
+
+# fixed variant accumulation
+slopes <- counts %>%
+  group_by(host_line) %>% 
+  summarize(
+    slope = coef(lm(mut_count ~ passage))[2],  # Extract slope (coefficient for passage)
+    x_pos = max(passage) * 0.8,               # Adjust x position for text
+    y_pos = max(mut_count) * 0.9              # Adjust y position for text
+  ) %>%
+  mutate(label = paste0("Slope: ", round(slope, 2))) 
+
+fig <- counts %>% 
+  ggplot(aes(x = passage, y = mut_count, color = exp_line)) +
+  geom_line(linewidth = 2) +
+  geom_smooth(aes(group = host_line, color = host_line), method = "lm", se = FALSE, linetype = "dashed", linewidth = 1) + # Regression by host_line
+  geom_text(
+    data = slopes,
+    aes(x = x_pos, y = y_pos, label = label, color = host_line), # Use slopes data for labels
+    inherit.aes = FALSE, # Prevent inheriting global aesthetics
+    size = 10, hjust = 0.9
+  ) +
+  labs(
+    x = "\nTransfer", 
+    y = "Variant Count\n", 
+    color = "Virus Line", 
+    title = paste0(category, " Variant Accumulation")
+  ) +
+  scale_x_continuous(breaks = seq(0, 570, 50)) +
+  scale_y_continuous(
+    limits = c(0, max(counts$mut_count) + 20), 
+    breaks = seq(0, max(counts$mut_count) + 20, 50)
+  ) +
+  scale_color_manual(
+    labels = c(line_labels, "MT-2 LM Regression", "MT-4 LM Regression"), 
+    values = c(line_palette, "#ff8000", "#00bbff")
+  ) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 30, hjust = 0.5),
+    axis.title = element_text(size = 25),
+    axis.text.x = element_text(size = 20, angle = 90),
+    axis.text.y = element_text(size = 20),
+    legend.title = element_text(size = 20),
+    legend.text = element_text(size = 15)
+  )
+
+
+
+
+# venn diagram
+fig <- ggvenn(muts_list, text_size = 9, fill_color = c("#ff00ff", "#ff2400", "#6600cc", "#0000ff"), set_name_size = 10) +
+        labs(title = paste0("Shared ", category, " Variants at Transfer #", end_psg, "\n"))+
+        scale_fill_manual(labels = line_labels, values = line_palette) +
+        theme(plot.title = element_text(size = 40, hjust = 0.5))
+
+fig
+
+# parallelism per translational group
+
+
+fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
+    geom_col(position = "dodge") +
+    geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = position_dodge(width = 0.9),width = 0.2) +
+    labs(title = paste0("Parallelism per Translation Impact at Tranfer #", end_psg), y = "Shared(%)\n", x = "\nTranslational Impact") +
+    scale_fill_manual(name = "Group",  # Change the legend title here
+        values = c("#038331", "#ffdf50"),
+        labels = c("Observed", "Simulated"))+
+    theme_minimal()+ 
+        theme(plot.title = element_text(size = 40, hjust = 0.5),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(size = 20, angle = 90),
+            axis.text.y = element_text(size = 20),
+            legend.title = element_text(size=35),
+            legend.text = element_text(size = 25))
+
+# cumulative unique variants
+
+fig <- counts[counts$exp_line != "All",] %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        labs(x="\nTransfer", y= "Position Count\n", color = "Virus Line", title = paste0("Cumulative Number of Uniquely\n Mutated Positions (", category,")"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
+        scale_y_continuous(limits = c(0,max(counts$count[counts$exp_line != "All"])+20),breaks = seq(0,max(counts$count[counts$exp_line != "All"])+20,200)) +
+        scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 40, hjust = 0.5),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(size = 20, angle = 90),
+            axis.text.y = element_text(size = 20),
+            legend.title = element_text(size=35),
+            legend.text = element_text(size = 25))
+
+```
+
+```{r}
+
+
+# freq trajectory of fixed variants
+
+
+fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = rep)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Transfer", color = "Occurrence") +
+    scale_color_manual(values = my_col_pal) +
+    scale_x_continuous(breaks = seq(0,500, 50))+
+    theme_bw() +
+    theme(plot.title = element_text(size = 40, hjust = 0.5),
+        axis.title = element_text(size = 30),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        strip.text.x = element_text(size = 30, angle=0),
+        legend.title = element_text(size=30),
+        legend.text = element_text(size = 25))
+
+
+# maximum fold change
+
+
+
+# Time to fixation per recurrence
+
+fig <- ggplot(df, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) + 
+    geom_boxplot(color = "black", alpha = 0.7) +
+    stat_compare_means(comparisons = comparisons, method = "wilcox.test", p.adjust.method = "BH", label = "p.adj", size = 9) +
+    scale_fill_manual(values = my_col_pal) +
+    labs(fill = "Occurrence", x= "Occurrence", y = "Time to Fixation", title = "Fixation Dynamics Based on Variant Recurrence\n") + # Label for the legend
+    theme_minimal() + # Optional: use a minimal theme
+    theme(plot.title = element_text(size = 40, hjust = 0.5),
+        axis.title = element_text(size = 30),
+        axis.text.x = element_text(size = 25, angle = 90, color = "black"),
+        axis.text.y = element_text(size = 25),
+        legend.title = element_text(size=30),
+        legend.text = element_text(size = 25)) 
+
+
+
+
+# rapidly fixed variants
+
+
+fig <- ggplot(df_summary, aes(x = bin, y = n, fill = effect_simplified)) +
+    facet_wrap(~exp_line, ncol = 2) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_color_manual(labels = line_labels, values = line_palette) +
+    labs(title = "Frequency of Rapidly-Fixing* Variants over Time", x = "\nAppearnace Bin", y = "Nr. of Rapidly-Fixing Variants", fill = "Translational\nImpact") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 40, hjust = 0.5),
+        axis.title = element_text(size = 30),
+        axis.text.x = element_text(size = 20, face="bold", angle = 90),
+        axis.text.y = element_text(size = 20),
+        strip.text.x = element_text(size = 30, angle=90),
+        legend.title = element_text(size=30),
+        legend.text = element_text(size = 25))
+
+
+
+```
+
+```{r}
+
+# plot moi
+moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line() +
+                geom_point() +
+                geom_smooth(method = "loess", se = FALSE) +
+                #geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                #hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "Multiplicity of Infection\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Virus Line") +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, hjust = 0.5),
+                    axis.title = element_text(size = 30),
+                    axis.text.x = element_text(size = 20, face="bold", angle = 90),
+                    axis.text.y = element_text(size = 20),
+                    strip.text.x = element_text(size = 30),
+                    legend.title = element_text(size=30),
+                    legend.text = element_text(size = 25))
+
+
+
+
+# plot Ne
+fig <- df[df$effect_simplified == "ALL",] %>% ggplot(aes(x = psg, y = log2(Ne), col = exp_line)) +
+        # facet_wrap(~ exp_line) +
+        geom_line() +
+        scale_y_continuous(breaks = seq(4,15,1),limits = c(4,15))+
+        scale_x_continuous(breaks = seq(0,500,50),limits = c(0,500))+
+        scale_color_manual(values = line_col_palette) +
+        geom_smooth(method = "loess", se = FALSE) +
+        labs(x= "\n Transfer", y = "Log2(Ne) \n", title = "Variance Effective Population Size \n(nef Variants) \n", color = "Virus Line") + # Label for the legend
+        theme_minimal() + # Optional: use a minimal theme
+        theme(
+            plot.title = element_text(size = 40, hjust = 0.5),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(size = 20, face="bold", angle = 90),
+            axis.text.y = element_text(size = 20),
+            strip.text.x = element_text(size = 30),
+            legend.title = element_text(size=30),
+            legend.text = element_text(size = 25)) 
+
+
+# sum of heterozygosity per sample 
+
+fig <- ggplot(d, aes(x = passage, y = sum_het, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Total Heterozygosity\n", color = "Virus Line", title = paste0("Heterozygosity\n")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 40, hjust = 0.5),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(size = 20, face="bold", angle = 90),
+            axis.text.y = element_text(size = 20),
+            strip.text.x = element_text(size = 30),
+            legend.title = element_text(size=30),
+            legend.text = element_text(size = 25))
+
+
+
+
+```
+
+```{r}
+
+
+# sharedness over time
+fig <- df_long %>% 
+    ggplot(aes(x = passage, y = shared_all, group = interaction(Pair,group2), color = Pair, linetype = group2)) +
+    geom_line() +
+    # geom_smooth(method = "loess") +
+    geom_ribbon(
+        data = df_long %>% filter(group2 == "Expected"),  # Only apply CI for the specified group
+        aes(ymin = CI_lower, ymax = CI_upper, fill = Pair),
+        alpha = 0.2  # Transparency of CI ribbon
+    ) +
+    scale_color_manual(name = "Pair",
+    labels = c("MT-2 Replicates", "MT-4 Replicates"), 
+    values = c("#ff8000", "#00bbff")
+    ) +
+    scale_fill_manual(
+        values = c("#ff8000", "#00bbff"),
+        guide = "none"  # Hides the legend for `fill`
+    ) +
+    labs(title = "Sharedness over Time\nAmong Fixed Variants", y = "Shared(%)\n", x = "\nTransfer") +
+    scale_linetype_discrete(name = "Data Type",  # Change the legend title here
+                    labels = c("Observed", "Simulated"))+
+    theme_minimal()+ 
+    theme(plot.title = element_text(size = 40, hjust = 0.5),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(size = 20, face="bold", angle = 90),
+            axis.text.y = element_text(size = 20),
+            strip.text.x = element_text(size = 30),
+            legend.title = element_text(size=30),
+            legend.text = element_text(size = 25))
+
+
+# dn/ds overtime
+
+
+fig <- counts_wide %>%  ggplot(aes(x=passage, y = dnds, color = exp_line)) +
+        # geom_line(linewidth=1) +
+        geom_smooth(method = "gam", se = FALSE) +
+        labs(x="\nTransfer", y= "dN/dS\n",  color = "Virus Lines",
+        title = paste0(category, " dN/dS over Time"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
+        #scale_y_continuous(limits = c(0,max(counts_wide$dnds, na.rm = T)+0.1),breaks = seq(0,max(counts_wide$dnds, na.rm = T)+0.1,0.1)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 40, hjust = 0.5),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(size = 20, face="bold", angle = 90),
+            axis.text.y = element_text(size = 20),
+            strip.text.x = element_text(size = 30),
+            legend.title = element_text(size=30),
+            legend.text = element_text(size = 25))
+
+```
+

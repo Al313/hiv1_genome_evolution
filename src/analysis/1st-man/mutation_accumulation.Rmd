@@ -170,10 +170,18 @@ e <- length(intersect(unique(variants_expiii_subset$mut_info[variants_expiii_sub
 
 
 variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & allele_freq < max_threshold)
+                                filter(allele_freq >= min_threshold & allele_freq < max_threshold & mut_type == "P")
 
 # get the number 
 bb <- length(unique(variants_expiii_subset$genomic_pos))
+a <- unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$exp_line == "MT-2_1"])
+b <- unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$exp_line == "MT-2_2"])
+c <- unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$exp_line == "MT-4_1"])
+d <- unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$exp_line == "MT-4_2"])
+
+length(intersect(a,b))/length(union(a,b))
+length(intersect(c,d))/length(union(c,d))
+length(union(c,d))/length(union(a,b))
 
 # prepare dataset
 variants_expiii_subset2 <- variants_expiii_subset
@@ -186,7 +194,7 @@ variants_expiii_subset_pooled$passage <- as.integer(as.character(variants_expiii
 counts <- data.frame()
 for (psg in seq(10,end_psg,10)){
     d <- variants_expiii_subset_pooled[variants_expiii_subset_pooled$passage <= psg,]
-    dd <- d %>% select(genomic_pos, exp_line) %>% distinct() %>% group_by(exp_line) %>% summarise(count = n())
+    dd <- d %>% dplyr::select(genomic_pos, exp_line) %>% distinct() %>% group_by(exp_line) %>% summarise(count = n())
     dd$passage <- psg
     counts <- rbind(counts, dd)
 }
@@ -221,7 +229,7 @@ dev.off()
 
 ```{r random sampling from pool of possible mutations modelling per host}
 
-counts_sub <- counts[str_detect(counts$exp_line, pattern = "All"),]
+counts_sub <- counts[str_detect(counts$exp_line, pattern = "MT-2"),]
 
 counts_sub %<>% group_by(passage) %>%
         summarize(average = mean(count))
@@ -241,21 +249,21 @@ df_prediction <- data.frame(passage = seq(10,2000,10))
 df_prediction$predicted_mt_2 <- predict(model_exp, newdata = df)
 df_prediction$predicted_mt_4 <- predict(model_exp, newdata = df)
 df_prediction$predicted_all <- predict(model_exp, newdata = df)
-?rep
+
 counts_addon <- data.frame(exp_line = rep(levels(counts$exp_line), each = 150), count = NA, passage = rep(seq(510,2000,10), 5))
 counts <- rbind(counts, counts_addon)
-View(counts)
 
 
-fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
+
+fig <- counts[!str_detect(counts$exp_line, pattern = "All"),] %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         geom_line(linewidth=2) +
         geom_line(data = df_prediction, aes(y = predicted_mt_2), color = "grey", size = 2, linetype = "dashed") +
         geom_line(data = df_prediction, aes(y = predicted_mt_4), color = "grey", size = 2, linetype = "dashed") +
-        geom_line(data = df_prediction, aes(y = predicted_all), color = "grey", size = 2, linetype = "dashed") +
+        # geom_line(data = df_prediction, aes(y = predicted_all), color = "grey", size = 2, linetype = "dashed") +
         labs(x="\nTransfer", y= "Position Count\n", color = "Virus Line", title = paste0("Modelling of Uniquely Mutated Positions (", category,")"))+
         scale_x_continuous(breaks = seq(0,2000,100)) +
-        scale_y_continuous(limits = c(0,max(counts$count+1000, na.rm=T)+20),breaks = seq(0,max(counts$count+1000, na.rm=T)+20,200)) +
-        scale_color_manual(labels = c(line_labels, "All"), values = c(line_palette, "black")) +
+        scale_y_continuous(limits = c(0,max(counts$count+100, na.rm=T)+20),breaks = seq(0,max(counts$count+100, na.rm=T)+20,200)) +
+        scale_color_manual(labels = c(line_labels), values = c(line_palette)) +
         theme_bw() +
         theme(plot.title = element_text(size = 30, hjust = 0.5),
         axis.title = element_text(size = 25),
@@ -294,10 +302,11 @@ counts <- variants_expiii %>%
 
 fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
         geom_line(linewidth=2) +
+        # geom_smooth(aes(group = host_line, color = host_line), method = "lm", se = FALSE, linetype = "dashed", linewidth = 1) + # Regression by host_factor
         labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation"))+
         scale_x_continuous(breaks = seq(0,570,50)) +
         scale_y_continuous(limits = c(0,max(counts$mut_count)+20),breaks = seq(0,max(counts$mut_count)+20,50)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
+        scale_color_manual(labels = c(line_labels, "MT-2 Regression", "MT-4 Regression"), values = c(line_palette,"#ff8000", "#00bbff")) +
         theme_bw() +
         theme(plot.title = element_text(size = 30, hjust = 0.5),
         axis.title = element_text(size = 25),
@@ -436,6 +445,80 @@ dev.off()
 
 ```
 
+
+```{r visualization1: disappearance}
+
+
+passages <- seq(10,500, 10)
+diff_df <- data.frame()
+
+
+
+for (i in 1:49){
+    for (exp_line in c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")){
+        prev_in <- passages[i]
+        pres_in <- passages[i+1]
+
+        prev <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == prev_in & variants_expiii$allele_freq >= min_threshold & variants_expiii$allele_freq < max_threshold]
+
+        pres <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == pres_in & variants_expiii$allele_freq >= min_threshold & variants_expiii$allele_freq < max_threshold]
+
+        addition <- length(setdiff(pres, prev))
+        removal <- length(setdiff(prev,pres))
+
+        diff_df <- rbind(diff_df, c(exp_line, passages[i+1], addition, removal))
+
+    }
+    
+}
+
+diff_df %<>% set_colnames(c("exp_line", "passage", "addition", "removal")) %>%
+            arrange(exp_line) %>%
+            mutate(host_line = ifelse(exp_line %in% c("MT-2_1", "MT-2_2"), "MT2", "MT4")) %>%
+            mutate_at(c(1,5), as.factor) %>%
+            mutate_at(2:4, as.numeric)
+
+# prepare the data for statistical test
+counts <- diff_df %>%
+            group_by(passage, host_line) %>%
+            summarize(addition_mean = mean(addition),
+                    removal_mean = mean(removal), .groups = 'drop')
+
+
+# store the statistical test result
+t_test_result_removal <- t.test(counts$removal_mean[counts$host_line == "MT2"], counts$removal_mean[counts$host_line == "MT4"], paired = TRUE, alternative = "two.sided")
+
+# visualize using plotly
+fig <- diff_df %>%  ggplot(aes(x=passage, y = removal, color = exp_line)) +
+        geom_line(linewidth=1) +
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutations Disappearance"))+
+        scale_x_continuous(breaks = seq(0,500,50)) +
+        scale_y_continuous(limits = c(max(0,min(diff_df$removal)-20),max(diff_df$removal)+5),breaks = seq(max(0,min(diff_df$removal)-20),max(diff_df$removal)+20,20)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+diff_df[diff_df$removal == max(diff_df$removal),]
+
+ggplotly(fig)
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_disappearance.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
 ```{r visualization1: throughout venn diagram}
 
 # prepare data for visualization
@@ -570,11 +653,8 @@ dev.off()
 ```
 
 
-```{r fixed mutation further analysis}
+```{r fixed mutation linear regression}
 
-counts[counts$passage == 500,]
-(230/2)/500
-(111/2)/500
 
 # linear regression
 
@@ -668,3 +748,31 @@ fig
 dev.off()
 ```
 
+```{r}
+
+
+fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2)+
+        geom_line(data = df_lm_mt2, aes(x = passage, y = predicted), color = "#ad1594c2", size = 2)+
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation _ Linear Regression"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
+        scale_y_continuous(limits = c(0,max(counts$mut_count)+20),breaks = seq(0,max(counts$mut_count)+20,50)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_accumulation_regression_whole.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```

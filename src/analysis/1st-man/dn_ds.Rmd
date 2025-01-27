@@ -113,7 +113,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r text numbers}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -205,7 +205,7 @@ cohen_d <- mean_diff / sd_diff
 
 ```
 
-```{r dn/ds}
+```{r dn/ds over time}
 
 
 # prepare data for visualization
@@ -226,7 +226,7 @@ counts <- variants_ann_expiii%>%
 
 
 counts_wide <- counts %>% select(exp_line, passage, effect_simplified, normalized_rate) %>% pivot_wider(names_from = effect_simplified, values_from = c(normalized_rate))
-counts_wide$dS[counts_wide$dS == 0] <- 0.0001
+counts_wide$dS[counts_wide$dS == 0] <- counts_wide$dN[counts_wide$dS == 0]/4
 
 
 counts_wide$dnds <- counts_wide$dN/counts_wide$dS
@@ -239,7 +239,7 @@ fig <- counts_wide %>%  ggplot(aes(x=passage, y = dnds, color = exp_line)) +
         # geom_line(linewidth=1) +
         geom_smooth(method = "gam", se = FALSE) +
         labs(x="\nTransfer", y= "dN/dS\n",  color = "Virus Lines",
-        title = paste0(category, "dN/dS over Time"))+
+        title = paste0(category, " dN/dS over Time"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         #scale_y_continuous(limits = c(0,max(counts_wide$dnds, na.rm = T)+0.1),breaks = seq(0,max(counts_wide$dnds, na.rm = T)+0.1,0.1)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
@@ -265,6 +265,24 @@ dev.off()
 
 
 ```{r dn/ds per gene}
+
+# set parameters
+category <- "Minority"
+
+if (category == "Sporadic"){
+    min_threshold <- 0.01
+    max_threshold <- 0.05
+} else if (category == "Minority"){
+    min_threshold <- 0.05
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
+
 
 counts <- variants_ann_expiii%>% 
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
@@ -313,9 +331,9 @@ sp_cor <- cor(counts3$dnds,counts3$mut_count, method = "spearman")
 fig <- counts3 %>% ggplot(aes(x = mut_count, y = dnds, color = feature, shape = exp_line, group = 1)) +
             geom_point(size = 5) +
             geom_smooth(method = "lm", se = T)+
-            geom_text(label = paste0("Spearman's Rho: ", round(sp_cor,2)), x= 0.15, y = 2, color = "black", size = 8) +
+            geom_text(label = paste0("Spearman's Rho: ", round(sp_cor,2)), x= 0.15, y = 2, color = "black", size = 9) +
             labs(x="\nNormalized Mutation Count", y= "dN/dS\n",  color = "Gene", shape = "Virus Lines",
-            title = "dN/dS and Diversity\n")+
+            title = "dN/dS and Diversity")+
             theme_bw() +
             theme(plot.title = element_text(size = 55, hjust = 0.5),
                 axis.title = element_text(size = 45),
