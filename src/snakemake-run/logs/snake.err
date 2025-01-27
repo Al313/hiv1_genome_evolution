@@ -2,17 +2,26 @@ Building DAG of jobs...
 Using shell: /usr/bin/bash
 Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954
+Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Wed Oct 30 13:33:20 2024]
+[Fri Dec  6 18:15:26 2024]
 rule tree_inference_all:
     input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta
     output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
     jobid: 0
     reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
-    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+    resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-[Wed Oct 30 13:38:05 2024]
-Finished job 0.
-1 of 1 steps (100%) done
+/usr/bin/bash: iqtree: command not found
+[Fri Dec  6 18:15:26 2024]
+Error in rule tree_inference_all:
+    jobid: 0
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta
+    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
+    shell:
+        iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta -m MFP -B 1000 -redo
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message

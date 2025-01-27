@@ -322,7 +322,7 @@ rule extract_annotation:
     output:
         "/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"
     resources:
-        mem_mb=20000
+        mem_mb=50000
     shell:
         "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/aa_change.R && Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/add_mut_context.R"
 
