@@ -5,7 +5,7 @@ Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Mon Jan 27 15:01:18 2025]
+[Fri Jan 31 23:16:30 2025]
 rule tree_inference_all:
     input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta
     output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
@@ -13,6 +13,6 @@ rule tree_inference_all:
     reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
     resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
-[Mon Jan 27 15:06:59 2025]
+[Fri Jan 31 23:23:16 2025]
 Finished job 0.
 1 of 1 steps (100%) done
