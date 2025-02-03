@@ -104,7 +104,7 @@ variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele
 ## only keep the EXPIV data
 
 variants_ann_expiv <- variants_ann[variants_ann$exp_line %in% 17:20,]
-end_passage <- 570
+end_passage <- 630
 variants_ann_expiv <- variants_ann_expiv %>%
                               mutate(exp_line = case_when(exp_line==17 ~ "MT2_1", exp_line==18 ~ "MT2_2", exp_line==19 ~ "MT2_3", exp_line==20 ~ "MT2_4"))
 
