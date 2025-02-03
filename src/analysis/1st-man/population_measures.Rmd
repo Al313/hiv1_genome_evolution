@@ -62,7 +62,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
 
 # determine what data to be included
-end_psg <- 500
+end_psg <- 700
 
 data %<>% 
         filter(exp_line %in% 13:16,
@@ -75,7 +75,7 @@ data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
 data$exp_line[data$exp_line == "A"] <- "16"
 data$exp_line[data$exp_line == "B"] <- "15"
 
-table(data$exp_line, useNA = "always")
+
 
 
 # remove duplicates
@@ -128,12 +128,14 @@ data$mean_quantity_per_ml_cell_culture_supernatant <- data$mean_quantity*70*dilu
 data$passage <- as.numeric(data$passage)
 data$exp_line <- factor(data$exp_line, levels = line_labels)
 
+data$mean_quantity_per_ml_cell_culture_supernatant[data$passage >= 580] <- data$mean_quantity_per_ml_cell_culture_supernatant[data$passage >= 580]/10
+data <- update_values_df(data, 10^8)
 
 # fit linear models for each group and extract p-values
-model_A <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[1], ])
-model_B <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[2], ])
-model_C <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[3], ])
-model_D <- lm(mean_quantity_per_ml_cell_culture_supernatant ~ passage, data = data[data$exp_line == line_labels[4], ])
+model_A <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[1], ])
+model_B <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[2], ])
+model_C <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[3], ])
+model_D <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[4], ])
 
 
 # extract the p-values
@@ -173,7 +175,7 @@ titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "titration_qpcr_expiii.pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, "qpcr_expiii.pdf"), height = 14, width = 14)
 titration_fig
 dev.off()
 
