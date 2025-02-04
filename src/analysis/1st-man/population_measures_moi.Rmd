@@ -1,6 +1,6 @@
 ---
 title:  
-    "Titration of EXPIII"
+    "TCID50 of EXPIII"
 date: 
     "June 10th, 2024"
 author:  
@@ -40,8 +40,7 @@ library(tidyr)
 
 ```
 
-```{r read-in qpcr data}
-
+```{r tcid data}
 
 # determine the server path
 
@@ -59,173 +58,12 @@ line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
 line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 
-data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
-
-# determine what data to be included
-end_psg <- 700
-
-data %<>% 
-        filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-# correct for the switched experimental lines
-data$exp_line[data$exp_line == 15 & data$passage > 360] <- "A"
-data$exp_line[data$exp_line == 16 & data$passage > 360] <- "B"
-
-data$exp_line[data$exp_line == "A"] <- "16"
-data$exp_line[data$exp_line == "B"] <- "15"
-
-
-
-
-# remove duplicates
-data <- data[!(data$exp_line == 16 & data$passage == 340 & data$cDNA_Date == "1) 09.06.2021"),]
-data <- data[!(data$exp_line == 16 & data$passage == 360 & data$cDNA_Date == "3) 09.06.2021"),]
-
-data <- data[!(data$exp_line == 15 & data$passage == 370 & data$cDNA_Date == "4) 09.06.2021"),]
-data <- data[!(data$exp_line == 15 & data$passage == 380 & data$cDNA_Date == "5) 09.06.2021"),]
-data <- data[!(data$exp_line == 15 & data$passage == 390 & data$cDNA_Date == "6) 09.06.2021"),]
-
-
-
-data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) # update exp line labels
-
-
-# needs repeat?
-# data$transferred_quantity_EXP_III[data$exp_line == "MT-2_2" & data$passage == 430]
-
-
-
-```
-
-
-```{r dilution factor calculation}
-
-
-# exceptional case where 17 microliter of water added
-data[data$`ul-H2O-added-to-reach-17ul` == "17",]
-data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "17"] <- "7"
-
-# modify data to calculate dilution factor of later measurements 
-data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "1:10 Dilution!"] <- "15.3"
-
-# get the dilution factor
-dilution_factor <- (17 - as.numeric(data$`ul-H2O-added-to-reach-17ul`))/17
-
-
-# get the copy number per ml based on average quantity
-data$mean_quantity_per_ml_cell_culture_supernatant <- data$mean_quantity*70*dilution_factor^(-1)
-
-
-
-```
-
-
-```{r plot qpcr result}
-
-
-
-data$passage <- as.numeric(data$passage)
-data$exp_line <- factor(data$exp_line, levels = line_labels)
-
-data$mean_quantity_per_ml_cell_culture_supernatant[data$passage >= 580] <- data$mean_quantity_per_ml_cell_culture_supernatant[data$passage >= 580]/10
-data <- update_values_df(data, 10^8)
-
-# fit linear models for each group and extract p-values
-model_A <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[1], ])
-model_B <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[2], ])
-model_C <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[3], ])
-model_D <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[4], ])
-
-
-# extract the p-values
-p_value_A <- summary(model_A)$coefficients[2, 4]  
-p_value_B <- summary(model_B)$coefficients[2, 4]
-p_value_C <- summary(model_C)$coefficients[2, 4]  
-p_value_D <- summary(model_D)$coefficients[2, 4]
-
-# create a data.frame for annotation
-p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
-
-
-# make the ggplot object
-
-
-
-titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
-                facet_wrap(~exp_line) +
-                geom_line() +
-                geom_point() +
-                geom_smooth(method = "lm", se = FALSE) +
-                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
-                hjust = 1.1, vjust = 2, size = 8, inherit.aes = FALSE) +
-                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n", color = "Virus Line") +
-                #ylim(c(1000000,40000000)) +
-                scale_color_manual(values = line_col_palette) +
-                theme_bw() +
-                theme(plot.title = element_text(size = 30, hjust = 0.5),
-                    axis.title = element_text(size = 25),
-                    axis.text.x = element_text(size = 20, angle = 90),
-                    axis.text.y = element_text(size = 20),
-                    legend.title = element_text(size=20),
-                    legend.text = element_text(size = 15),
-                    strip.text = element_text(size = 25))
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "qpcr_expiii.pdf"), height = 14, width = 14)
-titration_fig
-dev.off()
-
-
-
-
-```
-
-```{r qPCR average estimates}
-
-library(boot)
-
-log10(mean(data$mean_quantity_per_ml_cell_culture_supernatant))
-# Define a function to calculate the statistic of interest (e.g., mean)
-mean_stat <- function(data, indices) {
-  return(mean(data[indices]))
-}
-
-boot_results <- boot(data$mean_quantity_per_ml_cell_culture_supernatant, statistic = mean_stat, R = 1000)
-
-ci <- boot.ci(boot_results, type = "perc")
-
-log10(ci$percent[4:5])
-
-
-
-
-```
-
-```{r}
-
-
-# The qPCR levels for none of the cell lines is statistically difference from one another
-
-pairwise.t.test(data$mean_quantity_per_ml_cell_culture_supernatant, data$exp_line, p.adjust.method = "none")
-
-
-
-```
-
-
-
-
-```{r}
 
 # tcid data to plot MOIs
 
 
 data <- as.data.frame(read_excel(paste0(wd, "data/titration/tcid50.xlsx")))
-head(data)
+
 
 
 data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
@@ -435,16 +273,17 @@ p_value_D <- summary(model_D)$coefficients[2, 4]
 # create a data.frame for annotation
 p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
 
+head(result)
+scale_factor <- 400000
+result$btk_size <- result$MOI*scale_factor
 
-
-moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+moi__fig <- result %>% ggplot(aes(x = passage)) +
                 facet_wrap(~ exp_line) +
-                geom_line() +
-                geom_point() +
-                geom_smooth(method = "loess", se = FALSE) +
-                #geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
-                #hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
-                #ylim(c(1000000,40000000)) +
+                geom_line(aes(y = log10(MOI), color = exp_line)) +
+                geom_point(aes(y = log10(MOI), color = exp_line)) +
+                geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
+                scale_y_continuous(
+                sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "Bottleneck Size")) +
                 labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Virus Line") +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
@@ -464,7 +303,6 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
 moi__fig
 dev.off()
-
 
 ```
 
