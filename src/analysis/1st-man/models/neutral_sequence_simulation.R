@@ -1,4 +1,24 @@
-#!/usr/bin/env Rscript
+
+
+# set parameters
+category <- "Fixed"
+
+if (category == "Sporadic"){
+    min_threshold <- 0.01
+    max_threshold <- 0.05
+} else if (category == "Minority"){
+    min_threshold <- 0.05
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+} else if (category == "All"){
+    min_threshold <- 0.01
+    max_threshold <- 1.01
+}
 
 
 
@@ -47,7 +67,7 @@ calculate_proportions <- function(col) {
 
 # Function to find values with frequency > 0.95 or return NA
 find_dominant_values <- function(col) {
-  dominant_values <- names(col[col > 0.5])  # Get values with >99% proportion
+  dominant_values <- names(col[col > min_threshold])  # Get values with >99% proportion
   
   if (length(dominant_values) == 0) {
     return(NA)  # Return NA if no dominant values exist
@@ -100,8 +120,7 @@ for (gen in 1:total_generations) {
 }
 
 
-saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral_simulation_fixed_mutation_counts.rds"))
-
+saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/neutral_simulation_,"category, "_", genome_length, ".rds"))
 
 
 
