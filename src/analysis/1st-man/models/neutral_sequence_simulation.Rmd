@@ -5,60 +5,216 @@
 ```{r}
 
 
+# set.seed(42)  # For reproducibility
+
+# # Parameters
+# genome_length <- 91   # HIV-1 genome length
+# initial_population <- 400  # Initial number of individuals
+# R0 <- 44  # Number of offspring per genome per generation
+# mutation_rate <- 2.16*(10^-4)  # Per base per replication
+# total_generations <- 180  # Total generations
+# bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
+# bottleneck_size <- 400  # Approximate number of viruses transferred
+
+# # Initialize population (matrix of genomes, each row is an individual)
+# init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
+
+# # Store total mutations over time
+# mutation_counts <- numeric(total_generations)
+
+# # Function to modify a base
+# modify_base <- function(x) {
+#     return(sample(setdiff(c("A", "C", "G", "T"), x),1))  # Modify value based on existing value
+# }
+
+# # Define possible values
+# value_types <- c("A", "C", "G", "T")
+
+# # Function to calculate proportions while ensuring all categories are included
+# calculate_proportions <- function(col) {
+#   tab <- table(factor(col, levels = value_types))  # Ensure all values exist
+#   prop.table(tab)  # Convert to proportions
+# }
+
+
+# # Function to find values with frequency > 0.95 or return NA
+# find_dominant_values <- function(col) {
+#   dominant_values <- names(col[col > 0.95])  # Get values with >99% proportion
+  
+#   if (length(dominant_values) == 0) {
+#     return(NA)  # Return NA if no dominant values exist
+#   } else {
+#     return(dominant_values)  # Return the dominant value(s)
+#   }
+# }
+
+# # Simulation loop
+# for (gen in 1:total_generations) {
+#     print(gen)
+#     # set initial population
+#     if (gen == 1) {
+#         population <- init_population
+#     }
+#     # Step 1: Replication - Each genome produces R0 offspring
+#     new_population_size <- nrow(population) * R0
+#     new_population <- population[sample(nrow(population), new_population_size, replace = TRUE), ]  # Select parents
+    
+    
+#     # Step 2: Mutation - Each base mutates with probability mutation_rate
+#     mutations <- matrix(runif(new_population_size * genome_length) < mutation_rate, 
+#                         nrow = new_population_size, ncol = genome_length)
+#     new_population[mutations] <- sapply(new_population[mutations], modify_base)
+
+#     # Step 3: Apply bottleneck every 2 generations
+#     if (gen %% bottleneck_intervals == 0) {
+#         new_population <- new_population[sample(nrow(new_population), bottleneck_size, replace = TRUE), ]
+#     } 
+    
+#     # Step 4: Update population
+#     population <- new_population
+    
+#     # Step 5: Track mutation accumulation
+
+
+#     # Calculate proportions for each column
+#     proportions <- apply(population, 2, calculate_proportions)
+
+#     # Convert to a data frame for better readability
+#     proportions_df <- as.data.frame(proportions)
+
+
+#     # Apply function to each column of proportions_df
+#     dominant_values_per_column <- apply(proportions_df, 2, find_dominant_values)
+#     # proportions_df[,is.na(as.character(dominant_values_per_column) == init_population[1,])]
+
+#     mutation_counts[gen] <- length(which(as.character(dominant_values_per_column) != init_population[1,]))  # Total number of mutations across all genomes
+# }
+
+
+
+
+
+
+
+
+
+# # Plot mutation accumulation over time
+# library(ggplot2)
+# df <- data.frame(Generation = 1:total_generations, Mutations = mutation_counts)
+
+# ggplot(df, aes(x = Generation, y = Mutations)) +
+#     geom_line(color = "blue", size = 1) +
+#     labs(title = "Accumulation of Neutral Mutations Over 180 Generations",
+#         x = "Generation",
+#         y = "Total Mutations") +
+#     theme_minimal()
+
+
+```
+
+
+```{r}
+
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
 set.seed(42)  # For reproducibility
 
 # Parameters
-genome_length <- 9130   # HIV-1 genome length
+genome_length <- 9171   # HIV-1 genome length
 initial_population <- 400  # Initial number of individuals
 R0 <- 44  # Number of offspring per genome per generation
 mutation_rate <- 2.16*(10^-5)  # Per base per replication
-total_generations <- 180  # Total generations
+total_generations <- 1000  # Total generations
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
 bottleneck_size <- 400  # Approximate number of viruses transferred
 
 # Initialize population (matrix of genomes, each row is an individual)
-population <- matrix(0, nrow = initial_population, ncol = genome_length)  # Start with no mutations
+init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
 
 # Store total mutations over time
 mutation_counts <- numeric(total_generations)
 
-gen <- 2
+# Function to modify a base
+modify_base <- function(x) {
+    return(sample(setdiff(c("A", "C", "G", "T"), x),1))  # Modify value based on existing value
+}
+
+# Define possible values
+value_types <- c("A", "C", "G", "T")
+
+# Function to calculate proportions while ensuring all categories are included
+calculate_proportions <- function(col) {
+  tab <- table(factor(col, levels = value_types))  # Ensure all values exist
+  prop.table(tab)  # Convert to proportions
+}
+
+
+# Function to find values with frequency > 0.95 or return NA
+find_dominant_values <- function(col) {
+  dominant_values <- names(col[col > 0.5])  # Get values with >99% proportion
+  
+  if (length(dominant_values) == 0) {
+    return(NA)  # Return NA if no dominant values exist
+  } else {
+    return(dominant_values)  # Return the dominant value(s)
+  }
+}
+
 # Simulation loop
 for (gen in 1:total_generations) {
     print(gen)
+    # set initial population
+    if (gen == 1) {
+        population <- init_population
+    }
+
+    # Step 2: Mutation - Each base mutates with probability mutation_rate
+    mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
+                        nrow = nrow(population), ncol = genome_length)
+    population[mutations] <- sapply(population[mutations], modify_base)
+    
     # Step 1: Replication - Each genome produces R0 offspring
     new_population_size <- nrow(population) * R0
     new_population <- population[sample(nrow(population), new_population_size, replace = TRUE), ]  # Select parents
     
     
-    # Step 2: Mutation - Each base mutates with probability mutation_rate
-    mutations <- matrix(runif(new_population_size * genome_length) < mutation_rate, 
-                        nrow = new_population_size, ncol = genome_length)
-    new_population <- new_population + mutations  # Introduce mutations
-    
     # Step 3: Apply bottleneck every 2 generations
     if (gen %% bottleneck_intervals == 0) {
-        new_population <- new_population[sample(nrow(new_population), bottleneck_size, replace = TRUE), ]
-    }
+        new_population <- new_population[sample(nrow(new_population), bottleneck_size, replace = FALSE), ]
+    } 
     
     # Step 4: Update population
     population <- new_population
     
     # Step 5: Track mutation accumulation
-    mutation_counts[gen] <- sum(population)  # Total number of mutations across all genomes
+
+
+    # Calculate proportions for each column
+    proportions <- apply(population, 2, calculate_proportions)
+
+    # Convert to a data frame for better readability
+    proportions_df <- as.data.frame(proportions)
+
+
+    # Apply function to each column of proportions_df
+    dominant_values_per_column <- apply(proportions_df, 2, find_dominant_values)
+    # proportions_df[,is.na(as.character(dominant_values_per_column) == init_population[1,])]
+
+    mutation_counts[gen] <- length(which(as.character(dominant_values_per_column) != init_population[1,]))  # Total number of mutations across all genomes
 }
 
-# Plot mutation accumulation over time
-library(ggplot2)
-df <- data.frame(Generation = 1:total_generations, Mutations = mutation_counts)
 
-ggplot(df, aes(x = Generation, y = Mutations)) +
-    geom_line(color = "blue", size = 1) +
-    labs(title = "Accumulation of Neutral Mutations Over 180 Generations",
-        x = "Generation",
-        y = "Total Mutations") +
-    theme_minimal()
+saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral_simulation_fixed_mutation_counts.rds"))
 
 
-print("i")
+
+
 ```
