@@ -98,8 +98,6 @@ variants_ann_expiii <- variants_ann_expiii %>%
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
 
-
-
 # Visual settings
 
 line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")

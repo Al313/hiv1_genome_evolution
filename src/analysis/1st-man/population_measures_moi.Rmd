@@ -38,6 +38,21 @@ library(tidyr)
 
 `%notin%` <- Negate(`%in%`)
 
+
+logarithmic_mean <- function(values) {
+  # Check if there are at least two values
+  if (length(values) == 1) {
+    return(values)
+}
+
+harmonic_mean <- function(x) {
+  return(length(x) / sum(1 / x))
+}
+
+moi_cal <- function(tcid50, inoculum_volume=0.002, cell_number=400000) {
+    return(-log(1-tcid50*inoculum_volume/(cell_number)))
+}
+
 ```
 
 ```{r tcid data}
@@ -61,9 +76,8 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 # tcid data to plot MOIs
 
-
 data <- as.data.frame(read_excel(paste0(wd, "data/titration/tcid50.xlsx")))
-
+View(data)
 
 
 data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
@@ -131,11 +145,7 @@ dev.off()
 # produce the MOI figure by taking the average of values for dates where there are more than one data point available.
 
 
-logarithmic_mean <- function(values) {
-  # Check if there are at least two values
-  if (length(values) == 1) {
-    return(values)
-  }
+
   
   # Check if all values are positive
   if (any((as.numeric(table(values)) >= 2))) {
@@ -283,7 +293,7 @@ moi__fig <- result %>% ggplot(aes(x = passage)) +
                 geom_point(aes(y = log10(MOI), color = exp_line)) +
                 geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
                 scale_y_continuous(
-                sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "Bottleneck Size")) +
+                sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per Inoculum")) +
                 labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Virus Line") +
                 scale_color_manual(values = line_col_palette) +
                 theme_bw() +
@@ -308,19 +318,10 @@ dev.off()
 
 
 
-```{r in text measures}
-
-# The MOI levels for none of the cell lines is statistically difference from one another
-
-pairwise.t.test(result$MOI, result$exp_line, p.adjust.method = "none", paired = T)
-pairwise.wilcox.test(result$MOI[result$passage >= 200], result$exp_line[result$passage >= 200], p.adjust.method = "BH")
-
-wilcox.test(400000*result$MOI[result$passage >= 300 & result$exp_line == "MT-2_2"], 400000*result$MOI[result$passage >= 300 & result$exp_line == "MT-4_1"])
+```{r compare MOI levels between lines}
 
 
 
-mean(result$MOI[result$passage >= 200 & result$exp_line == "MT-4_2"])
-head(data_sub)
 a <- data_sub %>% 
     filter(passage >= 300 & exp_line %in% c("MT-2_1", "MT-2_2")) %>%
     select(MOI)
@@ -329,21 +330,19 @@ median(a$MOI)*400000
 quantile(a$MOI, probs = c(0.25,0.5,0.75))*400000
 
 b <- data_sub %>% 
-    filter(passage >= 300 & exp_line == "MT-4_1") %>%
+    filter(passage >= 300 & exp_line == c("MT-4_1", "MT-4_2")) %>%
     select(MOI)
 
 median(b$MOI)*400000
 quantile(b$MOI, probs = c(0.25,0.5,0.75))*400000
 
-3465/716
+
 wilcox.test(a$MOI,b$MOI)
 
 result %>%
     filter(passage >= 200) %>%
     group_by(exp_line) %>%
     summarise(val = mean(MOI))
-
-head(result)
 
 median(result$MOI)
 
@@ -386,7 +385,7 @@ harmonic_mean(vec2)/harmonic_mean(vec)
 
 result <- data_sub %>%
     filter(Source_abv != "2018_christine") %>%
-    mutate(moi_on_mt2 = `TCID50/ml_MT2`*0.7*2/(1000*400000), moi_on_mt4 = `TCID50/ml_MT4`*0.7*2/(1000*400000)) %>%
+    mutate(moi_on_mt2 = moi_cal(`TCID50/ml_MT2`), moi_on_mt4 = moi_cal(`TCID50/ml_MT4`)) %>%
     select(Source_abv,passage,exp_line,moi_on_mt2,moi_on_mt4) %>%
     pivot_longer(
         cols = starts_with("moi_on"),   # Specify columns to pivot

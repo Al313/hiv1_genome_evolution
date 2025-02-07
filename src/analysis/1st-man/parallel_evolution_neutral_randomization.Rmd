@@ -1,6 +1,6 @@
 ---
 title:  
-    "Parallel evolution of EXPIII at end passage"
+    "Parallel evolution of EXPIII _ Neutral randomization + Translational impact"
 date: 
     "June 30th, 2024"
 author:  
@@ -38,6 +38,7 @@ library("stringr")
 library("magrittr")
 library("rstatix")
 library("effsize")
+library("coda")
 
 
 ```
@@ -137,62 +138,30 @@ if (category == "Sporadic"){
 ```
 
 
-```{r venn diagram}
 
 
-end_fixed <- 
-        variants_expiii %>%
-        filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_psg) %>%
-        select(c(exp_line,mut_info)) %>%
-        distinct()
-
-nrow(end_fixed)
-
-# percentage of line specific mutations
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 1)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 2)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 3)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 4)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
 
 
-#table(as.numeric(table(par$mut_info)))
+```{r parallelism neutral randomization}
 
 
-# create a named vector from the df
-muts <- end_fixed$mut_info
-names(muts) <- end_fixed$exp_line
-
-# convert named vector to list
-muts_list <- lapply(split(muts, names(muts)), unname)
-
-
-# visualization
-fig <- ggvenn(muts_list, text_size = 9, fill_color = c("#ff00ff", "#ff2400", "#6600cc", "#0000ff"), set_name_size = 10) +
-        labs(title = paste0(category, " Mutations at Transfer #", end_psg, "\n"))+
-        scale_fill_manual(labels = line_labels, values = line_palette) +
-        theme(plot.title = element_text(size = 40, hjust = 0.5))
-
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "parallel_venn.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-```
-
-
-```{r parallelism simulations}
+k <- 1
+line1 <- "MT-2_1"
+line2 <- "MT-2_2"
+base <- "A"
 
 
 effect_list <- list(Syn = "S", Non_Syn = "N", Untranslated = "U", All = c("S", "N", "U"))
+regions <- list(Syn = 790:9407, Non_Syn = 790:9407, Untranslated = c(454:789,9076:9625), All = 454:9625)
+possible_muts <- c(0.22, 0.78, 1, 1)
+
+max(variants_expiii$genomic_pos)
 
 overall_df <- data.frame()
 
 for (k in 1:4){
     effect <- effect_list[k]
+    effect_factor <- possible_muts[k]
     print(effect)
 
 
@@ -201,42 +170,39 @@ for (k in 1:4){
     variants_expiii$passage <- as.integer(as.character(variants_expiii$passage))
     variants_expiii$effect_simplified <- as.character(variants_expiii$effect_simplified)
 
-    # filter for relevant mutations
-    variants_expiii_sub <- variants_expiii[variants_expiii$effect_simplified %in% effect[[1]] & variants_expiii$mut_type == "P",]
-
-
-
-
+    
     df <- data.frame()
 
     for (line1 in exp_line_factor){
         for (line2 in exp_line_factor){
             exp_all <- data.frame()
             for (base in c("A", "C", "G", "T")){
-                variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$ref_allele == base,]
-                a <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.05 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage <= end_psg]))
-                aa <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.05 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage <= end_psg]))
-                b <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_psg]))
-                bb <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage == end_psg]))
-                
-                c <- length(intersect(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.05 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage <= end_psg],variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.05 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage <= end_psg]))
-                d <- length(intersect(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_psg]),
-                unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage == end_psg])))
+                variants_expiii_sub <- variants_expiii[variants_expiii$ref_allele == base & variants_expiii$genomic_pos %in% regions[[k]] & variants_expiii$mut_type == "P",]
+                minority1 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-150]))
+                minority2 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-150]))
+                shared_minority <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-150],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-150]))
 
+                variants_expiii_sub2 <- variants_expiii[variants_expiii$ref_allele == base & variants_expiii$effect_simplified %in% effect[[1]] & variants_expiii$mut_type == "P",]
+                fixed1 <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_psg]))
+                fixed2 <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage == end_psg]))
+                
+                
                 i <- 0
                 
                 exp_base <- integer()
                 while (i <= 1000){
                     i <- i + 1
-                    j <- sample(1:(a+aa-c), size = b+bb, replace = F)
-                    k <- sample(1:aa, size = bb, replace = F)
-                    exp_base <- c(exp_base,sum(intersect(j,k)<=c))
+                    j <- sample(1:round(minority1*effect_factor), size = fixed1, replace = F)
+                    z <- sample(1:round(minority2*effect_factor), size = fixed2, replace = F)
+                    exp_base <- c(exp_base,sum(intersect(j,z)<=shared_minority))
                 }
 
                 exp_all <- rbind(exp_all, exp_base)
             }
+
             
             exp_shared <- colSums(exp_all)
+            variants_expiii_sub <- variants_expiii[variants_expiii$effect_simplified %in% effect[[1]] & variants_expiii$mut_type == "P",]
             obs_all <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1,line2) & variants_expiii_sub$passage == end_psg]))
             obs_shared <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage == end_psg],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage == end_psg]))
             
@@ -255,7 +221,8 @@ for (k in 1:4){
 
     #######################
     
-    # uniqueness of majority mutations observed at the end of experiment
+    # uniqueness of fixed variants observed at the end of experiment
+    variants_expiii_sub <- variants_expiii[variants_expiii$effect_simplified %in% effect[[1]] & variants_expiii$mut_type == "P",]
     end_fixed <- variants_expiii_sub %>%
                             filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_psg) %>%
                             select(c(exp_line,mut_info)) %>%
@@ -360,12 +327,13 @@ for (k in 1:4){
 
 
     cohen_d <- cohen.d(obs, exp, paired=TRUE)
+    ratio <- mean(obs)/ mean(exp)
 
 
     p_val <- test_res$p.value
 
-    overall_df <- rbind(overall_df, c(names(effect), "Observed", mean_obs, se_obs, p_val, cohen_d$estimate))
-    overall_df <- rbind(overall_df, c(names(effect), "Simulated", mean_exp, se_exp, p_val, cohen_d$estimate))
+    overall_df <- rbind(overall_df, c(names(effect), "Observed", mean_obs, se_obs, p_val, cohen_d$estimate, ratio))
+    overall_df <- rbind(overall_df, c(names(effect), "Simulated", mean_exp, se_exp, p_val, cohen_d$estimate, ratio))
 
 }
 ```
@@ -375,12 +343,12 @@ for (k in 1:4){
 
 ```{r}
 
-colnames(overall_df) <- c("Translation_impact", "group", "mean", "se", "p.val", "cohen_d")
+colnames(overall_df) <- c("Translation_impact", "group", "mean", "se", "p.val", "cohen_d", "ratio")
 
 
 overall_df %<>% mutate_at(1, as.factor)
 overall_df$group <- factor(overall_df$group, levels = c("Observed", "Simulated"))
-overall_df %<>% mutate_at(3:6, as.numeric)
+overall_df %<>% mutate_at(3:7, as.numeric)
 
 
 fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
@@ -389,7 +357,7 @@ fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
     labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Shared(%)\n", x = "\nTranslational Impact") +
     scale_fill_manual(name = "Group",  # Change the legend title here
         values = c("#038331", "#ffdf50"),
-        labels = c("Observed", "Simulated"))+
+        labels = c("Observed", "Randomized"))+
     theme_minimal()+ 
         theme(plot.title = element_text(size = 40, hjust = 0.5),
             axis.title = element_text(size = 30),
@@ -409,4 +377,12 @@ dev.off()
 
 ```
 
+```{r}
 
+View(overall_df)
+
+mean(replicate(1000,sum(sample(10,2, replace = F)<=3)))
+
+round(0.6)
+
+```

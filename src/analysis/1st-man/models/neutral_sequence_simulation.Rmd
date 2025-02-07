@@ -1,0 +1,64 @@
+
+
+
+
+```{r}
+
+
+set.seed(42)  # For reproducibility
+
+# Parameters
+genome_length <- 9130   # HIV-1 genome length
+initial_population <- 400  # Initial number of individuals
+R0 <- 44  # Number of offspring per genome per generation
+mutation_rate <- 2.16*(10^-5)  # Per base per replication
+total_generations <- 180  # Total generations
+bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
+bottleneck_size <- 400  # Approximate number of viruses transferred
+
+# Initialize population (matrix of genomes, each row is an individual)
+population <- matrix(0, nrow = initial_population, ncol = genome_length)  # Start with no mutations
+
+# Store total mutations over time
+mutation_counts <- numeric(total_generations)
+
+gen <- 2
+# Simulation loop
+for (gen in 1:total_generations) {
+    print(gen)
+    # Step 1: Replication - Each genome produces R0 offspring
+    new_population_size <- nrow(population) * R0
+    new_population <- population[sample(nrow(population), new_population_size, replace = TRUE), ]  # Select parents
+    
+    
+    # Step 2: Mutation - Each base mutates with probability mutation_rate
+    mutations <- matrix(runif(new_population_size * genome_length) < mutation_rate, 
+                        nrow = new_population_size, ncol = genome_length)
+    new_population <- new_population + mutations  # Introduce mutations
+    
+    # Step 3: Apply bottleneck every 2 generations
+    if (gen %% bottleneck_intervals == 0) {
+        new_population <- new_population[sample(nrow(new_population), bottleneck_size, replace = TRUE), ]
+    }
+    
+    # Step 4: Update population
+    population <- new_population
+    
+    # Step 5: Track mutation accumulation
+    mutation_counts[gen] <- sum(population)  # Total number of mutations across all genomes
+}
+
+# Plot mutation accumulation over time
+library(ggplot2)
+df <- data.frame(Generation = 1:total_generations, Mutations = mutation_counts)
+
+ggplot(df, aes(x = Generation, y = Mutations)) +
+    geom_line(color = "blue", size = 1) +
+    labs(title = "Accumulation of Neutral Mutations Over 180 Generations",
+        x = "Generation",
+        y = "Total Mutations") +
+    theme_minimal()
+
+
+print("i")
+```
