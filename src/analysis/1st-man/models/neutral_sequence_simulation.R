@@ -22,6 +22,47 @@ if (category == "Sporadic"){
 
 
 
+# define logarithmic mean function
+
+logarithmic_mean <- function(a, b) {
+  if (a == b) {
+    return(a)  # The logarithmic mean of two equal numbers is just the number itself
+  } else {
+    return((a - b) / (log(a) - log(b)))
+  }
+}
+
+
+# define transfer_size calculater function
+
+calculate_transfer_size <- function(t, base_transfer_sizes) {
+  if (t < 1 || t > 500) {
+    stop("Time t must be between 1 and 500")
+  }
+
+  if (t <= 100) {
+    interval = 10
+  } else {
+    interval = 100
+  }
+
+  floor_t = floor(t/interval) * interval
+  ceil_t = ceiling(t/interval) * interval
+
+  # Get transfer sizes for floor and ceiling time points
+  size_floor = base_transfer_sizes[as.character(floor_t)]
+  size_ceil = base_transfer_sizes[as.character(ceil_t)]
+
+  size_t = base_transfer_sizes[as.character(t)]
+
+  result = logarithmic_mean(size_ceil,size_floor)
+
+  return(result)
+}
+
+# define base_transfer_sizes from MOI data
+
+base_transfer_sizes <- NA
 
 # determine the server path
 
@@ -36,13 +77,13 @@ if (file.exists("/home/amovas/")){
 set.seed(42)  # For reproducibility
 
 # Parameters
-genome_length <- 917   # HIV-1 genome length
+genome_length <- 9171   # HIV-1 genome length
 initial_population <- 400  # Initial number of individuals
 R0 <- 44  # Number of offspring per genome per generation
-mutation_rate <- 2.16*(10^-4)  # Per base per replication
+mutation_rate <- 2.16*(10^-5)  # Per base per replication
 total_generations <- 1000  # Total generations
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
-bottleneck_size <- 400  # Approximate number of viruses transferred
+# bottleneck_size <- 400  # Approximate number of viruses transferred
 
 # Initialize population (matrix of genomes, each row is an individual)
 init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
@@ -84,6 +125,8 @@ for (gen in 1:total_generations) {
         population <- init_population
     }
 
+    bottleneck_size <- calculate_transfer_size(gen, base_transfer_sizes)
+
     # Step 2: Mutation - Each base mutates with probability mutation_rate
     mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
                         nrow = nrow(population), ncol = genome_length)
@@ -120,7 +163,7 @@ for (gen in 1:total_generations) {
 }
 
 
-saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/neutral_simulation_,"category, "_", genome_length, ".rds"))
+saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/neutral_simulation_", category, "_", genome_length, ".rds"))
 
 
 
