@@ -181,6 +181,9 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "parallel_venn.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_venn.pdf", height = 14, width = 14)
+fig
+dev.off()
 
 ```
 
@@ -267,7 +270,35 @@ comparison_df <- data.frame(
   HPD_Lower = c(rep(NA, 5), hpd_lower),  # HPD Lower only for Simulated
   HPD_Upper = c(rep(NA, 5), hpd_upper)   # HPD Upper only for Simulated
 )
-# Step 3: Plot with HPD Interval
+
+
+# step 3: Significance test
+
+# Perform t-tests for each category
+p_values <- sapply(1:ncol(results), function(i) {
+  t.test(results[, i], mu = original_counts[i])$p.value
+})
+
+# Adjust p-values for multiple comparisons if necessary (e.g., Bonferroni correction)
+adjusted_p_values <- p.adjust(p_values, method = "bonferroni")
+
+# Determine significance levels
+significance_labels <- sapply(adjusted_p_values, function(p) {
+  if (p < 0.001) {
+    "***"
+  } else if (p < 0.01) {
+    "**"
+  } else if (p < 0.05) {
+    "*"
+  } else {
+    ""
+  }
+})
+
+# Add these labels to the data frame for plotting
+comparison_df$Significance <- c(significance_labels, rep(NA, 5))  # Only add for observed counts
+
+# Step 4: Plot with HPD Interval
 dodge <- position_dodge(width=0.5)
 
 fig <- ggplot(comparison_df, aes(x = Category, y = Count, fill = Type, group = Type)) +
@@ -276,8 +307,14 @@ fig <- ggplot(comparison_df, aes(x = Category, y = Count, fill = Type, group = T
         aes(ymin = Count - SE, ymax = Count + SE),
         width = 0.2,  # Narrower error bars
         position = dodge,  # Match the dodge width exactly
-        size = 1) +  
-    labs(title = "Comparison of Observed vs Randomized Variant Counts\n Sharedness per Environment",
+        size = 1) + 
+    geom_text(
+        data = subset(comparison_df, Type == "Original"),  # Only for observed counts
+        aes(label = Significance, y = Count + c(rep(5,4),30)),  # Position asterisks above the bars
+        position = dodge,
+        size = 6
+    ) +
+    labs(title = "Comparison of Observed vs Randomized \n Fixed Variant Sharedness per Environment",
         x = "Sharedness Category",
         y = "Fixed Variant Count",
         fill = "Dataset") +
@@ -298,6 +335,10 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "environment_randomized_parallel.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/environment_randomized_parallel.pdf", height = 14, width = 14)
+fig
+dev.off()
+
 ```
 
 
