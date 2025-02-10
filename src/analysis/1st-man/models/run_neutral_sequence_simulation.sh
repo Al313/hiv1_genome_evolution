@@ -29,7 +29,7 @@ echo "#!/bin/bash
 
 #SBATCH --cpus-per-task=4
 #SBATCH --time=24:00:00
-#SBATCH --mem=30G
+#SBATCH --mem=100G
 #SBATCH --output=${output_dir}/neutral_seq_sim.out
 
 # Load R module (assuming the cluster has R installed as a module)
