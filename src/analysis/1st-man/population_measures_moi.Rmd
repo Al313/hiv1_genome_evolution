@@ -39,15 +39,36 @@ library(tidyr)
 `%notin%` <- Negate(`%in%`)
 
 
-logarithmic_mean <- function(values) {
-  # Check if there are at least two values
-  if (length(values) == 1) {
-    return(values)
+logarithmic_mean_vector <- function(x) {
+  if (length(x) < 2) {
+    stop("Input vector must contain at least two numbers.")
+  }
+  
+  # Remove zeros to avoid log issues
+  x <- x[x > 0]
+  
+  if (length(x) < 2) {
+    stop("Vector must contain at least two positive numbers.")
+  }
+  
+  # Compute pairwise logarithmic mean
+  L <- x[1]
+  for (i in 2:length(x)) {
+    if (L == x[i]) {
+      next  # Skip if both numbers are the same
+    }
+    L <- (L - x[i]) / (log(L) - log(x[i]))
+  }
+  
+  return(L)
 }
 
 harmonic_mean <- function(x) {
   return(length(x) / sum(1 / x))
 }
+
+logarithmic_mean(c(9,5))
+
 
 moi_cal <- function(tcid50, inoculum_volume=0.002, cell_number=400000) {
     return(-log(1-tcid50*inoculum_volume/(cell_number)))
@@ -263,7 +284,7 @@ result <- data_sub %>%
     filter(Source_abv != "2024_christine") %>%
     # filter(passage %notin% c(10)) %>%
     group_by(exp_line, passage) %>%
-    summarise(MOI = ifelse(n() > 1, logarithmic_mean(MOI), unique(MOI)), .groups = 'drop')
+    summarise(MOI = ifelse(n() > 1, logarithmic_mean_vector(MOI), unique(MOI)), .groups = 'drop')
 
 
 
@@ -286,6 +307,10 @@ p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B,
 head(result)
 scale_factor <- 400000
 result$btk_size <- result$MOI*scale_factor
+
+# save results for estimating transfer_size in simulation of neutral sequence evolution
+# saveRDS(result, file = paste0(wd, "results/tables/moi_cleaned.rds"))
+
 
 moi__fig <- result %>% ggplot(aes(x = passage)) +
                 facet_wrap(~ exp_line) +

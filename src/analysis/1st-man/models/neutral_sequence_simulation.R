@@ -1,8 +1,17 @@
 
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
 
 # set parameters
-category <- "Fixed"
-
+category <- "Majority"
+print(category)
 if (category == "Sporadic"){
     min_threshold <- 0.01
     max_threshold <- 0.05
@@ -35,6 +44,7 @@ logarithmic_mean <- function(a, b) {
 
 # define transfer_size calculater function
 
+
 calculate_transfer_size <- function(t, base_transfer_sizes) {
   if (t < 1 || t > 500) {
     stop("Time t must be between 1 and 500")
@@ -53,43 +63,43 @@ calculate_transfer_size <- function(t, base_transfer_sizes) {
   size_floor = base_transfer_sizes[as.character(floor_t)]
   size_ceil = base_transfer_sizes[as.character(ceil_t)]
 
-  size_t = base_transfer_sizes[as.character(t)]
-
   result = logarithmic_mean(size_ceil,size_floor)
 
-  return(result)
+  return(round(as.numeric(result)))
 }
 
-# define base_transfer_sizes from MOI data
-
-base_transfer_sizes <- NA
-
-# determine the server path
-
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
-} else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-}
-
-set.seed(42)  # For reproducibility
 
 # Parameters
-genome_length <- 9171   # HIV-1 genome length
+host <- "MT-2"
+print(host)
+genome_length <- 917   # HIV-1 genome length
+print(genome_length)
 initial_population <- 400  # Initial number of individuals
 R0 <- 44  # Number of offspring per genome per generation
-mutation_rate <- 2.16*(10^-5)  # Per base per replication
-total_generations <- 1000  # Total generations
+mutation_rate <- 2.16*(10^-5)*(9171/genome_length)  # Per base per replication
+total_generations <- 180  # Total generations
+print(total_generations)
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
 # bottleneck_size <- 400  # Approximate number of viruses transferred
 
 # Initialize population (matrix of genomes, each row is an individual)
 init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
 
-# Store total mutations over time
-mutation_counts <- numeric(total_generations)
+
+# define base_transfer_sizes from MOI data
+
+MOI_results <- readRDS(file = paste0(wd, "results/tables/moi_cleaned.rds"))
+
+
+(MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][1:14] + MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][15:28])/2
+names(base_transfer_sizes) <- unique(MOI_results$passage)
+base_transfer_sizes <- append(base_transfer_sizes[1],base_transfer_sizes)
+names(base_transfer_sizes)[1] <- "0"
+
+
+
+
+
 
 # Function to modify a base
 modify_base <- function(x) {
@@ -117,6 +127,11 @@ find_dominant_values <- function(col) {
   }
 }
 
+# Store total mutations over time
+mutation_counts <- numeric(total_generations)
+
+set.seed(42)  # For reproducibility
+
 # Simulation loop
 for (gen in 1:total_generations) {
     print(gen)
@@ -126,11 +141,13 @@ for (gen in 1:total_generations) {
     }
 
     bottleneck_size <- calculate_transfer_size(gen, base_transfer_sizes)
-
+    print(bottleneck_size)
     # Step 2: Mutation - Each base mutates with probability mutation_rate
     mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
                         nrow = nrow(population), ncol = genome_length)
-    population[mutations] <- sapply(population[mutations], modify_base)
+    if(any(mutations)){
+      population[mutations] <- sapply(population[mutations], modify_base)
+    }
     
     # Step 1: Replication - Each genome produces R0 offspring
     new_population_size <- nrow(population) * R0
@@ -163,7 +180,7 @@ for (gen in 1:total_generations) {
 }
 
 
-saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/neutral_simulation_", category, "_", genome_length, ".rds"))
+saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/neutral_simulation_", host, "_", category, "_", genome_length, "_", total_generations, ".rds"))
 
 
 
