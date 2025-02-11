@@ -1,4 +1,8 @@
 
+args <- commandArgs(trailingOnly = TRUE)  # Get command-line arguments
+exp_line <- args[1]  # First argument is the cell line name
+mut_cat <- args[2]
+generation_time <- args[3]
 
 # load libraries
 
@@ -16,7 +20,7 @@ if (file.exists("/home/amovas/")){
 }
 
 # set parameters
-category <- "Majority"
+category <- mut_cat
 print(category)
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -76,14 +80,14 @@ calculate_transfer_size <- function(t, base_transfer_sizes) {
 
 
 # Parameters
-host <- "MT-2"
+host <- exp_line
 print(host)
 genome_length <- 9171   # HIV-1 genome length
 print(genome_length)
 initial_population <- 400  # Initial number of individuals
 R0 <- 44  # Number of offspring per genome per generation
 mutation_rate <- 2.16*(10^-5)  # Per base per replication
-total_generations <- 180  # Total generations
+total_generations <- as.integer(generation_time)  # Total generations
 print(total_generations)
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
 # bottleneck_size <- 400  # Approximate number of viruses transferred
@@ -97,9 +101,9 @@ bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
 MOI_results <- readRDS(file = paste0(wd, "results/tables/moi_cleaned.rds"))
 
 
-base_transfer_sizes <- (MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][1:14] + MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][15:28])/2
+base_transfer_sizes <- MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][1:14]
 names(base_transfer_sizes) <- unique(MOI_results$passage)
-base_transfer_sizes <- append(base_transfer_sizes[1],base_transfer_sizes)
+base_transfer_sizes <- append(400,base_transfer_sizes)
 names(base_transfer_sizes)[1] <- "0"
 
 
@@ -137,14 +141,14 @@ init_population <- matrix(rep(sample(1:4, genome_length, replace = T), initial_p
 
 # Function to calculate proportions while ensuring all categories are included
 calculate_proportions <- function(col) {
-  tab <- table(factor(col, levels = value_types))  # Ensure all values exist
-  prop.table(tab)  # Convert to proportions
+  tab <- tabulate(factor(col, levels = value_types), nbins = length(value_types))
+  tab / sum(tab)  # Convert to proportions
 }
 
 
 # Function to find values with frequency > 0.95 or return NA
 find_dominant_values <- function(col) {
-  dominant_values <- names(col[col > min_threshold])  # Get values with >99% proportion
+  dominant_values <- names(which(col > min_threshold))  # Get values with >99% proportion
   
   if (length(dominant_values) == 0) {
     return(NA)  # Return NA if no dominant values exist
@@ -168,7 +172,7 @@ for (gen in 1:total_generations) {
 
     bottleneck_size <- calculate_transfer_size(ceiling(gen/2), base_transfer_sizes)
     print(bottleneck_size)
-    # Step 2: Mutation - Each base mutates with probability mutation_rate
+    # Step 1: Mutation - Each base mutates with probability mutation_rate
     
     #mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
     #                    nrow = nrow(population), ncol = genome_length)
@@ -191,37 +195,28 @@ for (gen in 1:total_generations) {
         population[mutation_events] <- sapply(population[mutation_events], modify_base)
     }
     
-    # Step 1: Replication - Each genome produces R0 offspring
+    # Step 2: Replication - Each genome produces R0 offspring
     new_population_size <- nrow(population) * R0
-    new_population <- population[sample(nrow(population), new_population_size, replace = TRUE), ]  # Select parents
+    population <- population[sample(nrow(population), new_population_size, replace = TRUE), ]  # Select parents
     
     
     # Step 3: Apply bottleneck every 2 generations
     if (gen %% bottleneck_intervals == 0) {
-        new_population <- new_population[sample(nrow(new_population), bottleneck_size, replace = FALSE), ]
+        population <- population[sample(nrow(population), bottleneck_size, replace = FALSE), ]
     } 
     
-    # Step 4: Update population
-    population <- new_population
-    
-    rm(new_population)
-    gc()  # Force garbage collection
+
+    # Step 4: Determine variant frequency
+
+    # Calculate proportions for each column
+    proportions_list <- lapply(as.data.frame(population), calculate_proportions)
+    proportions <- do.call(cbind, proportions_list)
+
+    # Apply function to each column of proportions_df
+    dominant_values_per_column <- apply(proportions, 2, find_dominant_values)
 
 
     # Step 5: Track mutation accumulation
-
-
-    # Calculate proportions for each column
-    proportions <- apply(population, 2, calculate_proportions)
-
-    # Convert to a data frame for better readability
-    proportions_df <- as.data.frame(proportions)
-
-
-    # Apply function to each column of proportions_df
-    dominant_values_per_column <- apply(proportions_df, 2, find_dominant_values)
-    # proportions_df[,is.na(as.character(dominant_values_per_column) == init_population[1,])]
-
     mutation_counts[gen] <- length(which(as.character(dominant_values_per_column) != init_population[1,]))  # Total number of mutations across all genomes
 }
 
