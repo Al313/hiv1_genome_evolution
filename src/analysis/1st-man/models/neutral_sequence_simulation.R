@@ -1,4 +1,10 @@
 
+
+# load libraries
+
+library("stringr")
+
+
 # determine the server path
 
 if (file.exists("/home/amovas/")){
@@ -10,7 +16,7 @@ if (file.exists("/home/amovas/")){
 }
 
 # set parameters
-category <- "Majority"
+category <- "Fixed"
 print(category)
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -70,20 +76,20 @@ calculate_transfer_size <- function(t, base_transfer_sizes) {
 
 
 # Parameters
-host <- "MT-2"
+host <- "MT-4"
 print(host)
-genome_length <- 917   # HIV-1 genome length
+genome_length <- 9171   # HIV-1 genome length
 print(genome_length)
 initial_population <- 400  # Initial number of individuals
 R0 <- 44  # Number of offspring per genome per generation
-mutation_rate <- 2.16*(10^-5)*(9171/genome_length)  # Per base per replication
-total_generations <- 180  # Total generations
+mutation_rate <- 2.16*(10^-5)  # Per base per replication
+total_generations <- 1000  # Total generations
 print(total_generations)
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
 # bottleneck_size <- 400  # Approximate number of viruses transferred
 
 # Initialize population (matrix of genomes, each row is an individual)
-init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
+# init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
 
 
 # define base_transfer_sizes from MOI data
@@ -91,7 +97,7 @@ init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace 
 MOI_results <- readRDS(file = paste0(wd, "results/tables/moi_cleaned.rds"))
 
 
-(MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][1:14] + MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][15:28])/2
+base_transfer_sizes <- (MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][1:14] + MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][15:28])/2
 names(base_transfer_sizes) <- unique(MOI_results$passage)
 base_transfer_sizes <- append(base_transfer_sizes[1],base_transfer_sizes)
 names(base_transfer_sizes)[1] <- "0"
@@ -102,12 +108,32 @@ names(base_transfer_sizes)[1] <- "0"
 
 
 # Function to modify a base
-modify_base <- function(x) {
-    return(sample(setdiff(c("A", "C", "G", "T"), x),1))  # Modify value based on existing value
-}
+#modify_base <- function(x) {
+#    return(sample(setdiff(c("A", "C", "G", "T"), x),1))  # Modify value based on existing value
+#}
 
 # Define possible values
-value_types <- c("A", "C", "G", "T")
+#value_types <- c("A", "C", "G", "T")
+
+
+###################
+
+# Define base encoding to save memory
+base_encoding <- c(A = 1, C = 2, G = 3, T = 4)
+base_decoding <- c("A", "C", "G", "T")
+
+value_types <- as.factor(base_encoding)
+
+# Function to mutate a base (returns integer)
+modify_base <- function(x) {
+  return(sample(setdiff(1:4, x), 1))  # Pick a different base
+}
+
+# Initialize population as an **integer matrix**
+init_population <- matrix(sample(1:4, genome_length * initial_population, replace = TRUE),
+                          nrow = initial_population, ncol = genome_length)
+
+################
 
 # Function to calculate proportions while ensuring all categories are included
 calculate_proportions <- function(col) {
@@ -140,13 +166,29 @@ for (gen in 1:total_generations) {
         population <- init_population
     }
 
-    bottleneck_size <- calculate_transfer_size(gen, base_transfer_sizes)
+    bottleneck_size <- calculate_transfer_size(ceiling(gen/2), base_transfer_sizes)
     print(bottleneck_size)
     # Step 2: Mutation - Each base mutates with probability mutation_rate
-    mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
-                        nrow = nrow(population), ncol = genome_length)
-    if(any(mutations)){
-      population[mutations] <- sapply(population[mutations], modify_base)
+    
+    #mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
+    #                    nrow = nrow(population), ncol = genome_length)
+    #if(any(mutations)){
+    #  population[mutations] <- sapply(population[mutations], modify_base)
+    #}
+
+    #rm(mutations
+    #######################
+#    for(i in 1:nrow(population)) {
+#	mutation_indices <- which(runif(genome_length) < mutation_rate)
+#	if (length(mutation_indices) >=1){ 
+#    		population[i, mutation_indices] <- sapply(population[i, mutation_indices], modify_base)
+#	}
+#    }
+    ########################
+
+    mutation_events <- which(runif(length(population)) < mutation_rate, arr.ind = TRUE)
+    if (length(mutation_events) > 0) {
+        population[mutation_events] <- sapply(population[mutation_events], modify_base)
     }
     
     # Step 1: Replication - Each genome produces R0 offspring
@@ -162,6 +204,10 @@ for (gen in 1:total_generations) {
     # Step 4: Update population
     population <- new_population
     
+    rm(new_population)
+    gc()  # Force garbage collection
+
+
     # Step 5: Track mutation accumulation
 
 
