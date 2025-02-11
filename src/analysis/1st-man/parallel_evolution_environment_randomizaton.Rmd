@@ -216,7 +216,7 @@ for (i in 1:num_simulations) {
   shared_mt2 <- intersect(muts_list_new[[1]], muts_list_new[[2]])
   shared_mt4 <- intersect(muts_list_new[[3]], muts_list_new[[4]])
   shared_both <- intersect(c(muts_list_new[[1]], muts_list_new[[2]]), 
-                           c(muts_list_new[[3]], muts_list_new[[4]]))
+                          c(muts_list_new[[3]], muts_list_new[[4]]))
   unique_mt2 <- setdiff(setdiff(c(muts_list_new[[1]], muts_list_new[[2]]), 
                                 c(muts_list_new[[3]], muts_list_new[[4]])), 
                         shared_mt2)
@@ -274,9 +274,13 @@ comparison_df <- data.frame(
 
 # step 3: Significance test
 
-# Perform t-tests for each category
+# not normally distributed, so use wilcoxon test
+plot(density(results$Shared_MT2), col = "red", lwd = 2, main = "Density Plot of Shared Mutations in MT-2")
+shapiro.test(results$Shared_MT2)
+
+# Perform wilcox-tests for each category
 p_values <- sapply(1:ncol(results), function(i) {
-  t.test(results[, i], mu = original_counts[i])$p.value
+  wilcox.test(results[, i], mu = original_counts[i])$p.value
 })
 
 # Adjust p-values for multiple comparisons if necessary (e.g., Bonferroni correction)

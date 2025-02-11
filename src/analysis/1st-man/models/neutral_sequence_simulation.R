@@ -16,7 +16,7 @@ if (file.exists("/home/amovas/")){
 }
 
 # set parameters
-category <- "Fixed"
+category <- "Majority"
 print(category)
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -76,14 +76,14 @@ calculate_transfer_size <- function(t, base_transfer_sizes) {
 
 
 # Parameters
-host <- "MT-4"
+host <- "MT-2"
 print(host)
 genome_length <- 9171   # HIV-1 genome length
 print(genome_length)
 initial_population <- 400  # Initial number of individuals
 R0 <- 44  # Number of offspring per genome per generation
 mutation_rate <- 2.16*(10^-5)  # Per base per replication
-total_generations <- 1000  # Total generations
+total_generations <- 180  # Total generations
 print(total_generations)
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
 # bottleneck_size <- 400  # Approximate number of viruses transferred
@@ -130,7 +130,7 @@ modify_base <- function(x) {
 }
 
 # Initialize population as an **integer matrix**
-init_population <- matrix(sample(1:4, genome_length * initial_population, replace = TRUE),
+init_population <- matrix(rep(sample(1:4, genome_length, replace = T), initial_population), byrow = TRUE,
                           nrow = initial_population, ncol = genome_length)
 
 ################
@@ -157,7 +157,7 @@ find_dominant_values <- function(col) {
 mutation_counts <- numeric(total_generations)
 
 set.seed(42)  # For reproducibility
-
+gen <- 1
 # Simulation loop
 for (gen in 1:total_generations) {
     print(gen)
