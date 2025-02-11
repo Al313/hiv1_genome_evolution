@@ -1,8 +1,11 @@
 
 args <- commandArgs(trailingOnly = TRUE)  # Get command-line arguments
 exp_line <- args[1]  # First argument is the cell line name
+exp_line <- "MT-4_1"
 mut_cat <- args[2]
+mut_cat <- "Majority"
 generation_time <- args[3]
+generation_time <- 180
 
 # load libraries
 
@@ -20,6 +23,7 @@ if (file.exists("/home/amovas/")){
 }
 
 # set parameters
+
 category <- mut_cat
 print(category)
 if (category == "Sporadic"){
@@ -147,8 +151,8 @@ calculate_proportions <- function(col) {
 
 
 # Function to find values with frequency > 0.95 or return NA
-find_dominant_values <- function(col) {
-  dominant_values <- names(which(col > min_threshold))  # Get values with >99% proportion
+find_dominant_values <- function(col, threshold = min_threshold) {
+  dominant_values <- which(col > threshold)  # Get values with >99% proportion
   
   if (length(dominant_values) == 0) {
     return(NA)  # Return NA if no dominant values exist
@@ -156,6 +160,8 @@ find_dominant_values <- function(col) {
     return(dominant_values)  # Return the dominant value(s)
   }
 }
+
+
 
 # Store total mutations over time
 mutation_counts <- numeric(total_generations)
@@ -211,7 +217,7 @@ for (gen in 1:total_generations) {
     # Calculate proportions for each column
     proportions_list <- lapply(as.data.frame(population), calculate_proportions)
     proportions <- do.call(cbind, proportions_list)
-
+    
     # Apply function to each column of proportions_df
     dominant_values_per_column <- apply(proportions, 2, find_dominant_values)
 
