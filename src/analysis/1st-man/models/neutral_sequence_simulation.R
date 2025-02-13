@@ -1,11 +1,8 @@
 
 args <- commandArgs(trailingOnly = TRUE)  # Get command-line arguments
 exp_line <- args[1]  # First argument is the cell line name
-exp_line <- "MT-4_1"
 mut_cat <- args[2]
-mut_cat <- "Majority"
 generation_time <- args[3]
-generation_time <- 180
 
 # load libraries
 
@@ -20,6 +17,9 @@ if (file.exists("/home/amovas/")){
 } else {
   print("Local PC Connection!")
   wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+  exp_line <- "MT-4_1"
+  mut_cat <- "Majority"
+  generation_time <- 180
 }
 
 # set parameters
@@ -164,10 +164,10 @@ find_dominant_values <- function(col, threshold = min_threshold) {
 
 
 # Store total mutations over time
-mutation_counts <- numeric(total_generations)
+mutation_counts <- numeric(round(total_generations/20))
 
-set.seed(42)  # For reproducibility
-gen <- 1
+set.seed(420)  # For reproducibility
+
 # Simulation loop
 for (gen in 1:total_generations) {
     print(gen)
@@ -178,56 +178,53 @@ for (gen in 1:total_generations) {
 
     bottleneck_size <- calculate_transfer_size(ceiling(gen/2), base_transfer_sizes)
     print(bottleneck_size)
-    # Step 1: Mutation - Each base mutates with probability mutation_rate
-    
-    #mutations <- matrix(runif(nrow(population) * genome_length) < mutation_rate, 
-    #                    nrow = nrow(population), ncol = genome_length)
-    #if(any(mutations)){
-    #  population[mutations] <- sapply(population[mutations], modify_base)
-    #}
 
-    #rm(mutations
-    #######################
-#    for(i in 1:nrow(population)) {
-#	mutation_indices <- which(runif(genome_length) < mutation_rate)
-#	if (length(mutation_indices) >=1){ 
-#    		population[i, mutation_indices] <- sapply(population[i, mutation_indices], modify_base)
-#	}
-#    }
-    ########################
+    # Step 1: Mutation - Each base mutate with a probability of mutation_rate
+
 
     mutation_events <- which(runif(length(population)) < mutation_rate, arr.ind = TRUE)
     if (length(mutation_events) > 0) {
         population[mutation_events] <- sapply(population[mutation_events], modify_base)
     }
-    
+
     # Step 2: Replication - Each genome produces R0 offspring
-    new_population_size <- nrow(population) * R0
-    population <- population[sample(nrow(population), new_population_size, replace = TRUE), ]  # Select parents
+ 
+    population <- population[sample(nrow(population), nrow(population)*R0, replace = TRUE), ]  # Select parents
     
-    
+
+
     # Step 3: Apply bottleneck every 2 generations
     if (gen %% bottleneck_intervals == 0) {
-        population <- population[sample(nrow(population), bottleneck_size, replace = FALSE), ]
-    } 
-    
+	    population <- population[sample(nrow(population), bottleneck_size, replace = FALSE), ]
+    }
+
+    if (gen %% 20 == 0){
 
     # Step 4: Determine variant frequency
 
     # Calculate proportions for each column
-    proportions_list <- lapply(as.data.frame(population), calculate_proportions)
+    proportions_list <- lapply(as.data.frame(population)[sample(1:nrow(population),round(nrow(population)/2)),], calculate_proportions)
     proportions <- do.call(cbind, proportions_list)
-    
+
     # Apply function to each column of proportions_df
     dominant_values_per_column <- apply(proportions, 2, find_dominant_values)
 
 
     # Step 5: Track mutation accumulation
     mutation_counts[gen] <- length(which(as.character(dominant_values_per_column) != init_population[1,]))  # Total number of mutations across all genomes
+
+    if (gen != 20){
+            if (mutation_counts[gen] > mutation_counts[gen-20]){
+                    print("######")
+                    print(which(as.character(dominant_values_per_column) != init_population[1,]))
+            }
+    }
+    }
+
 }
 
 
-saveRDS(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/neutral_simulation_", host, "_", category, "_", genome_length, "_", total_generations, ".rds"))
-
+write.table(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_", host, "_", category, "_", genome_length, "_", total_generations, ".tsv"), quote = F, row.names = F, sep = "\t")
+write.table(proportions, file = paste0(wd, "results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_proportion", host, "_", genome_length, "_", total_generations, ".tsv"), quote = F, row.names = F, sep = "\t")
 
 

@@ -25,7 +25,6 @@ fi
 # Define an array of cell lines
 exp_lines=("MT-2_1" "MT-2_2" "MT-4_1" "MT-4_2")
 
-
 # Check if the mutation type argument is provided
 if [ $# -eq 0 ]; then
   echo "Error: Mutation type is required. Please provide a mutation type (e.g., Majority or Fixed)."
@@ -49,7 +48,7 @@ for mut_cat in "${mutation_types[@]}"; do
 if [ "$mut_cat" == "Majority" ]; then
       generation_time=180
       mem="200G"
-elif [ "$mut_cat" == "Fixed" ]; then
+elif [ "$mut_cat" == "Fixed" ] || [ "$mut_cat" == "Minority" ]; then
       generation_time=1000
       mem="300G"
 fi
@@ -61,7 +60,7 @@ job_file="${job_dir}/neutral_seq_sim_${exp_line}_${mut_cat}.job"
 echo "#!/bin/bash
 
 
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=4
 #SBATCH --time=24:00:00
 #SBATCH --mem=${mem}
 #SBATCH --output=${output_dir}/neutral_seq_sim_${exp_line}_${mut_cat}.out
@@ -74,7 +73,12 @@ Rscript ./neutral_sequence_simulation.R ${exp_line} ${mut_cat} ${generation_time
 
 " > ${job_file}
 
-sbatch ${job_file}
+# Submit job and capture the job ID
+    job_submission_output=$(sbatch ${job_file})
+    echo ${job_submission_output}
+    job_id=$(echo ${job_submission_output} | awk '{print $4}')
+    touch ${output_dir}/${job_id}
+
 
 done
 done
