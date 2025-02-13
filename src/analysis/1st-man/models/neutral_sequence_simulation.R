@@ -1,29 +1,29 @@
-
-args <- commandArgs(trailingOnly = TRUE)  # Get command-line arguments
-exp_line <- args[1]  # First argument is the cell line name
+# get arguments from the commandline
+args <- commandArgs(trailingOnly = TRUE)  
+exp_line <- args[1]  
 mut_cat <- args[2]
 generation_time <- args[3]
 
-# load libraries
 
+
+# load libraries
 library("stringr")
 
 
 # determine the server path
-
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
   wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
   print("Local PC Connection!")
   wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-  exp_line <- "MT-4_1"
+  exp_line <- "MT-2_1"
   mut_cat <- "Majority"
   generation_time <- 180
 }
 
-# set parameters
 
+# set parameters
 category <- mut_cat
 print(category)
 if (category == "Sporadic"){
@@ -43,10 +43,9 @@ if (category == "Sporadic"){
     max_threshold <- 1.01
 }
 
-
+## define functions
 
 # define logarithmic mean function
-
 logarithmic_mean <- function(a, b) {
   if (a == b) {
     return(a)  # The logarithmic mean of two equal numbers is just the number itself
@@ -57,8 +56,6 @@ logarithmic_mean <- function(a, b) {
 
 
 # define transfer_size calculater function
-
-
 calculate_transfer_size <- function(t, base_transfer_sizes) {
   if (t < 1 || t > 500) {
     stop("Time t must be between 1 and 500")
@@ -82,66 +79,17 @@ calculate_transfer_size <- function(t, base_transfer_sizes) {
   return(round(as.numeric(result)))
 }
 
-
-# Parameters
-host <- exp_line
-print(host)
-genome_length <- 9171   # HIV-1 genome length
-print(genome_length)
-initial_population <- 400  # Initial number of individuals
-R0 <- 44  # Number of offspring per genome per generation
-mutation_rate <- 2.16*(10^-5)  # Per base per replication
-total_generations <- as.integer(generation_time)  # Total generations
-print(total_generations)
-bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
-# bottleneck_size <- 400  # Approximate number of viruses transferred
-
-# Initialize population (matrix of genomes, each row is an individual)
-# init_population <- matrix(rep(sample(c("A","C","G","T"), genome_length, replace = T), initial_population), nrow = initial_population, ncol = genome_length, byrow = T)  # Start with no mutations
-
-
-# define base_transfer_sizes from MOI data
-
-MOI_results <- readRDS(file = paste0(wd, "results/tables/moi_cleaned.rds"))
-
-
-base_transfer_sizes <- MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = host)][1:14]
-names(base_transfer_sizes) <- unique(MOI_results$passage)
-base_transfer_sizes <- append(400,base_transfer_sizes)
-names(base_transfer_sizes)[1] <- "0"
-
-
-
-
-
-
-# Function to modify a base
-#modify_base <- function(x) {
-#    return(sample(setdiff(c("A", "C", "G", "T"), x),1))  # Modify value based on existing value
-#}
-
-# Define possible values
-#value_types <- c("A", "C", "G", "T")
-
-
-###################
-
-# Define base encoding to save memory
-base_encoding <- c(A = 1, C = 2, G = 3, T = 4)
-base_decoding <- c("A", "C", "G", "T")
-
-value_types <- as.factor(base_encoding)
-
 # Function to mutate a base (returns integer)
 modify_base <- function(x) {
   return(sample(setdiff(1:4, x), 1))  # Pick a different base
 }
 
-# Initialize population as an **integer matrix**
-init_population <- matrix(rep(sample(1:4, genome_length, replace = T), initial_population), byrow = TRUE,
-                          nrow = initial_population, ncol = genome_length)
 
-################
+# use base encoding to save memory
+base_encoding <- c(A = 1, C = 2, G = 3, T = 4)
+base_decoding <- c("A", "C", "G", "T")
+
+value_types <- as.factor(base_encoding)
 
 # Function to calculate proportions while ensuring all categories are included
 calculate_proportions <- function(col) {
@@ -160,6 +108,40 @@ find_dominant_values <- function(col, threshold = min_threshold) {
     return(dominant_values)  # Return the dominant value(s)
   }
 }
+
+
+
+# read-in MOI data for transfer size estimation
+
+MOI_results <- readRDS(file = paste0(wd, "results/tables/moi_cleaned.rds"))
+
+base_transfer_sizes <- MOI_results$btk_size[str_detect(MOI_results$exp_line, pattern = exp_line)][1:14]
+names(base_transfer_sizes) <- unique(MOI_results$passage)
+base_transfer_sizes <- append(base_transfer_sizes[1],base_transfer_sizes)
+names(base_transfer_sizes)[1] <- "0"
+
+
+
+# Set simulation parameters
+host <- exp_line
+print(host)
+genome_length <- 9171   # HIV-1 genome length
+print(genome_length)
+initial_population <- 400  # Initial number of individuals
+R0 <- 44  # Number of offspring per genome per generation
+mutation_rate <- 2.16*(10^-5)  # Per base per replication
+total_generations <- as.integer(generation_time)  # Total generations
+print(total_generations)
+bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
+
+
+
+
+
+# Initialize population as an **integer matrix**
+init_population <- matrix(rep(sample(1:4, genome_length, replace = T), initial_population), byrow = TRUE,
+                          nrow = initial_population, ncol = genome_length)
+
 
 
 
@@ -188,18 +170,18 @@ for (gen in 1:total_generations) {
     }
 
     # Step 2: Replication - Each genome produces R0 offspring
- 
+
     population <- population[sample(nrow(population), nrow(population)*R0, replace = TRUE), ]  # Select parents
     
 
 
     # Step 3: Apply bottleneck every 2 generations
     if (gen %% bottleneck_intervals == 0) {
-	    population <- population[sample(nrow(population), bottleneck_size, replace = FALSE), ]
+      population <- population[sample(nrow(population), bottleneck_size, replace = FALSE), ]
     }
 
     if (gen %% 20 == 0){
-
+    psg <- round(gen/20)
     # Step 4: Determine variant frequency
 
     # Calculate proportions for each column
@@ -211,10 +193,10 @@ for (gen in 1:total_generations) {
 
 
     # Step 5: Track mutation accumulation
-    mutation_counts[gen] <- length(which(as.character(dominant_values_per_column) != init_population[1,]))  # Total number of mutations across all genomes
+    mutation_counts[psg] <- length(which(as.character(dominant_values_per_column) != init_population[1,]))  # Total number of mutations across all genomes
 
-    if (gen != 20){
-            if (mutation_counts[gen] > mutation_counts[gen-20]){
+    if (psg != 1){
+            if (mutation_counts[psg] > mutation_counts[psg-1]){
                     print("######")
                     print(which(as.character(dominant_values_per_column) != init_population[1,]))
             }
