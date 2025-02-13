@@ -1,0 +1,284 @@
+---
+title:  
+    "Reconstructing EXPIII Phylogeny based on Minority information"
+date: 
+    "February 13th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("ggplot2")
+library("ggpubr")
+library("plotly")
+library("ggvenn")
+library("hrbrthemes")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("rstatix")
+library("ape")
+
+```
+
+
+
+
+
+```{r read-in the data}
+
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
+sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+
+
+# correct for the switched experimental lines
+variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
+variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+
+variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
+variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+
+# determine what data to be included
+
+exp <- "EXPIII"
+end_psg <- 500
+
+variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
+        passage <= end_psg) 
+
+
+rm(variants_ann)
+
+# facors
+
+host_factor <- c("MT2", "MT4")
+exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+translational_impacts <- c("U", "S", "N")
+gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
+feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
+
+# format the dataframe
+variants_ann_expiii <- variants_ann_expiii %>%
+                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
+                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
+                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
+                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+                            mutate(passage = as.factor(passage),
+                            exp_line = factor(exp_line, levels = exp_line_factor),
+                            host_line = factor(host_line, levels = host_factor),
+                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
+
+# remove duplicate records for the same variants
+variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
+
+# Visual settings
+
+line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+breaks_step <- 50
+line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+
+```
+
+
+```{r hamming distance, echo=FALSE}
+
+
+# Define the number of experimental lines and passages
+num_lines <- 4
+num_passages <- length(seq(10, 90, 10))  # 50 passages
+
+# Total number of rows/columns
+matrix_size <- num_lines * num_passages  # 200 x 200
+
+# Preallocate a matrix filled with NAs
+hamming_matrix <- matrix(NA, nrow = matrix_size, ncol = matrix_size)
+
+# Assign row and column names (combine lineage + passage number)
+rownames(hamming_matrix) <- colnames(hamming_matrix) <- 
+  expand.grid(line_labels, seq(10,90,10)) %>% apply(1, paste, collapse="_")
+
+# Fill the matrix
+for (l in 1:num_lines) {
+  exp_line_1 <- line_labels[l]
+  for (k in 1:num_lines) {
+    exp_line_2 <- line_labels[k]
+    
+    for (i in seq(10,90,10)) {
+      row_idx <- (l - 1) * num_passages + (i / 10)  # Row index
+      a <- variants_expiii %>% filter(exp_line == exp_line_1 & passage == i) %>% pull(mut_info)
+      
+      for (j in seq(10,90,10)) {
+        col_idx <- (k - 1) * num_passages + (j / 10)  # Column index
+        b <- variants_expiii %>% filter(exp_line == exp_line_2 & passage == j) %>% pull(mut_info)
+
+        # Compute Hamming distance
+        if (row_idx <= col_idx) {
+          hamming_matrix[row_idx, col_idx] <- length(setdiff(a, b)) + length(setdiff(b, a))
+        }
+      }
+    }
+  }
+}
+
+# Make the matrix symmetric by mirroring the upper triangle
+hamming_matrix[lower.tri(hamming_matrix)] <- t(hamming_matrix)[lower.tri(hamming_matrix)]
+
+# Convert to a distance object
+hamming_dist <- as.dist(hamming_matrix)
+
+# Perform Neighbor-Joining
+
+nj_tree <- nj(hamming_dist)
+plot(nj_tree, main="Neighbor-Joining Phylogeny")
+
+
+```
+
+
+
+```{r frequency-based distance, echo=FALSE}
+
+
+
+
+
+# Define purines and pyrimidines
+purines <- c("A", "G")  # Adenine, Guanine
+pyrimidines <- c("C", "T")  # Cytosine, Thymine
+
+
+
+df <- variants_expiii %>% 
+                filter(passage %in% seq(10,500,10) & allele_freq >= 0.01 & coverage >= 1000 & mut_type == "P") %>%
+                select(c(genomic_pos, ref_allele, alt_allele, allele_freq, exp_line, passage)) %>%
+                mutate(
+    mutation_type = case_when(
+        (ref_allele %in% purines & alt_allele %in% purines) |
+        (ref_allele %in% pyrimidines & alt_allele %in% pyrimidines) ~ "Transition",
+        TRUE ~ "Transversion")
+    )
+
+
+# Step 1: Create a unique population identifier
+df <- df %>%
+  mutate(population = paste(exp_line, passage, sep = "_")) 
+
+# Step 2: Reshape data to wide format
+df_wide <- df %>%
+  pivot_wider(
+    id_cols = c(genomic_pos, alt_allele, mutation_type),  # Ensures each row is unique to a genomic position and allele
+    names_from = population, 
+    values_from = allele_freq, 
+    values_fill = list(allele_freq = 0)
+  )
+
+# Step 3: Compute Distance Matrix
+populations <- colnames(df_wide)[-(1:3)]  # Remove genomic_pos & alt_allele columns
+num_pops <- length(populations)
+
+# Initialize distance matrix
+distance_matrix <- matrix(0, nrow = num_pops, ncol = num_pops, dimnames = list(populations, populations))
+
+# Compute absolute frequency differences across positions
+for (i in 1:num_pops) {
+  for (j in i:num_pops) {
+    pop_i_tr <- df_wide[df_wide$mutation_type == "Transition",][[populations[i]]]
+    pop_j_tr <- df_wide[df_wide$mutation_type == "Transition",][[populations[j]]]
+    
+    pop_i_tv <- df_wide[df_wide$mutation_type == "Transversion",][[populations[i]]]
+    pop_j_tv <- df_wide[df_wide$mutation_type == "Transversion",][[populations[j]]]
+    
+    # Compute absolute differences, summing over all positions
+    distance_matrix[i, j] <- sum(c(abs(pop_i_tr - pop_j_tr), abs(pop_i_tv - pop_j_tv)), na.rm = TRUE)
+  }
+}
+
+
+# Make the matrix symmetric
+distance_matrix[lower.tri(distance_matrix)] <- t(distance_matrix)[lower.tri(distance_matrix)]
+
+
+
+# Step 4: Convert to Distance Object
+distance_obj <- as.dist(distance_matrix)
+
+# Step 5: Perform Neighbor-Joining Phylogeny
+nj_tree <- nj(distance_obj)
+
+# Define colors for each lineage/population
+color_map <- c(
+  "MT-2_1" = "#ff00ff",   # Color for MT-4_1
+  "MT-2_2" = "#ff2400", # Color for MT-4_2
+  "MT-4_1" = "#6600cc",  # Color for MT-2_1
+  "MT-4_2" = "#0000ff" # Color for MT-2_2
+)
+
+# Assign colors based on population (assuming tip labels are the populations)
+node_colors <- sapply(nj_tree$tip.label, function(x) {
+  # Extract population info from the tip label (assuming labels are like "MT-2_1")
+  if (grepl("MT-4_1", x)) {
+    return(color_map["MT-4_1"])
+  } else if (grepl("MT-4_2", x)) {
+    return(color_map["MT-4_2"])
+  } else if (grepl("MT-2_1", x)) {
+    return(color_map["MT-2_1"])
+  } else if (grepl("MT-2_2", x)) {
+    return(color_map["MT-2_2"])
+  } else {
+    return("black")  # Default color for unknown patterns
+  }
+})
+
+
+plot(nj_tree, main = "Neighbor-Joining Tree of Variant Frequencies", cex = 0.6, tip.color = node_colors)
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "frequency_phylo.pdf"), height = 14, width = 14)
+plot(nj_tree, main = "Neighbor-Joining Tree of Variant Frequencies", cex = 0.6, tip.color = node_colors)
+dev.off()
+pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/frequency_phylo.pdf", height = 14, width = 14)
+plot(nj_tree, main = "Neighbor-Joining Tree of Variant Frequencies", cex = 0.6, tip.color = node_colors)
+dev.off()
+
+
+# Save the phylogenetic tree in Newick format
+write.tree(nj_tree, file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/phylogenetic_tree.nwk")
+
+```
