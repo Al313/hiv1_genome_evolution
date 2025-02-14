@@ -133,7 +133,7 @@ mutation_rate <- 2.16*(10^-5)  # Per base per replication
 total_generations <- as.integer(generation_time)  # Total generations
 print(total_generations)
 bottleneck_intervals <- 2  # Every 2 generations, apply bottleneck
-
+sampling_freq <- 1
 
 
 
@@ -146,7 +146,7 @@ init_population <- matrix(rep(sample(1:4, genome_length, replace = T), initial_p
 
 
 # Store total mutations over time
-mutation_counts <- numeric(round(total_generations/20))
+mutation_counts <- numeric(round(total_generations/sampling_freq))
 
 set.seed(420)  # For reproducibility
 
@@ -180,8 +180,8 @@ for (gen in 1:total_generations) {
       population <- population[sample(nrow(population), bottleneck_size, replace = FALSE), ]
     }
 
-    if (gen %% 20 == 0){
-    psg <- round(gen/20)
+    if (gen %% sampling_freq == 0){
+    psg <- round(gen/sampling_freq)
     # Step 4: Determine variant frequency
 
     # Calculate proportions for each column
@@ -206,7 +206,7 @@ for (gen in 1:total_generations) {
 }
 
 
-write.table(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_", host, "_", category, "_", genome_length, "_", total_generations, ".tsv"), quote = F, row.names = F, sep = "\t")
-write.table(proportions, file = paste0(wd, "results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_proportion", host, "_", genome_length, "_", total_generations, ".tsv"), quote = F, row.names = F, sep = "\t")
+write.table(mutation_counts, file = paste0(wd, "results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_1", host, "_", category, "_", genome_length, "_", total_generations, ".tsv"), quote = F, row.names = F, sep = "\t")
+write.table(proportions, file = paste0(wd, "results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_proportion1", host, "_", genome_length, "_", total_generations, ".tsv"), quote = F, row.names = F, sep = "\t")
 
 

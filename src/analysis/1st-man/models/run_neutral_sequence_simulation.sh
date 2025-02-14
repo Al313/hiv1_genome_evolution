@@ -68,8 +68,8 @@ echo "#!/bin/bash
 # Load R module (assuming the cluster has R installed as a module)
 source activate ha_proj
 
-# Run the R script
-Rscript ./neutral_sequence_simulation.R ${exp_line} ${mut_cat} ${generation_time}
+# Run the python script
+stdbuf -oL ./neutral_sequence_simulation.py ${exp_line} ${mut_cat} ${generation_time}
 
 " > ${job_file}
 
