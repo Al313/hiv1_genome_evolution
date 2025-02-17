@@ -22,7 +22,11 @@ output:
 
 ```{r}
 
-sim_mut_count <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_MT-2_1_Majority_9171_180.tsv", header = TRUE, sep = "\t")
+sim_mut_count <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_MT-2_1_Majority_91_180.tsv", header = FALSE, sep = "\t")
 
-prop <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_proportionMT-2_1_9171_180.tsv", header = TRUE, sep = "\t")
+prop <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_proportion_MT-2_1_917_180.tsv", header = FALSE, sep = "\t")
+head(prop)
+
+
+
 ```

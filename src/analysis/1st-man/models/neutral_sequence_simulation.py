@@ -10,7 +10,7 @@ import os
 import math
 
 # Get command-line arguments
-args = sys.argv[1:] if len(sys.argv) > 1 else ["MT-2_1", "Majority", "180"]
+args = sys.argv[1:] if len(sys.argv) > 1 else ["MT-2_1", "Majority", 180]
 exp_line, mut_cat, generation_time = args
 
 # Determine working directory
@@ -20,7 +20,7 @@ if os.path.exists("/home/amovas/"):
 else:
     print("Local PC Connection!")
     wd = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-    exp_line, mut_cat, generation_time = "MT-2_1", "Majority", 250
+    exp_line, mut_cat, generation_time = "MT-4_2", "Majority", 180
 
 # Set mutation category thresholds
 category = mut_cat
@@ -82,8 +82,8 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 
 # Set simulation parameters
 print(exp_line)
-genome_length, initial_population = 91, 400
-R0, mutation_rate = 44, 2.16e-3
+genome_length, initial_population = 917, 400
+R0, mutation_rate = 44, 2e-4
 total_generations = int(generation_time)
 print(total_generations)
 bottleneck_intervals, sampling_freq = 2, 1
@@ -100,6 +100,8 @@ mutation_counts = np.zeros(total_generations // sampling_freq)
 # Simulation loop
 population = init_population.copy()
 
+
+
 for gen in range(1, total_generations + 1):
     print(gen)
 
@@ -113,7 +115,10 @@ for gen in range(1, total_generations + 1):
         population[mutation_indices] = np.array([modify_base(x) for x in population[mutation_indices]])
 
     # Step 2: Replication - Each genome produces R0 offspring
-    population = population[np.random.choice(population.shape[0], population.shape[0] * R0, replace=True)]
+    if gen % bottleneck_intervals == 0:
+        population = population[np.repeat(np.random.choice(population.shape[0], population.shape[0], replace=True), repeats = R0)]
+    else :
+        population = population[np.random.choice(population.shape[0], population.shape[0]*R0, replace=True)]
 
     # Step 3: Apply bottleneck every 2 generations
     if gen % bottleneck_intervals == 0:
@@ -123,7 +128,7 @@ for gen in range(1, total_generations + 1):
         psg = gen // sampling_freq
 
         # Step 4: Determine variant frequency
-        sampled_population = population[np.random.choice(population.shape[0], population.shape[0] // 2, replace=False)]
+        sampled_population = population[np.random.choice(population.shape[0], population.shape[0], replace=False)]
         proportions = np.apply_along_axis(calculate_proportions, axis=0, arr=sampled_population)
 
         # Apply function to each column
@@ -131,6 +136,8 @@ for gen in range(1, total_generations + 1):
 
         # Step 5: Track mutation accumulation
         mutation_counts[psg - 1] = np.count_nonzero(dominant_values_per_column != init_population[0, :])
+        # mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & ~np.isnan(dominant_values_per_column))
+
 
         if psg > 1 and mutation_counts[psg - 1] > mutation_counts[psg - 2]:
             print("######")
