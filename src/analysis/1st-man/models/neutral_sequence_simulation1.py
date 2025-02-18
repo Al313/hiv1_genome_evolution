@@ -68,7 +68,6 @@ def calculate_proportions(column):
     return props / np.sum(props) if np.sum(props) > 0 else props
 
 
-
 # Function to find dominant values
 def find_dominant_values(column, threshold):
     dominant_values = np.where(column > threshold)[0]
@@ -81,14 +80,14 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 
 # Set simulation parameters
 print(exp_line, flush = True)
-genome_length, initial_population = 917, 400
-R0, mutation_rate = 44, 2e-4
+genome_length, initial_population = 91, 400
+R0, mutation_rate = 44, 2e-3
 total_generations = int(generation_time)
 print(total_generations, flush = True)
 bottleneck_intervals, sampling_freq = 2, 2
 
 # Initialize population as an integer NumPy array
-np.random.seed(1)
+np.random.seed(2)
 
 init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
 
@@ -125,13 +124,13 @@ for gen in range(1, total_generations + 1):
 
         # Determine variant frequency
         proportions = np.apply_along_axis(calculate_proportions, axis=0, arr=population).astype(np.float32)
-
+        
         # Apply function to each column
         dominant_values_per_column = np.apply_along_axis(find_dominant_values, axis=0, arr=proportions, threshold=min_threshold)+1
-
+        
         # Step 4: Track mutation accumulation
         # mutation_counts[psg - 1] = np.count_nonzero(dominant_values_per_column != init_population[0, :])
-        mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & ~np.isnan(dominant_values_per_column))
+        mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & (dominant_values_per_column>0))
 
 
         if psg > 1 and mutation_counts[psg - 1] > mutation_counts[psg - 2]:
