@@ -155,7 +155,7 @@ counts <- variants_ann_expiii%>%
             mutate_at(4, as.numeric) %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
             mutate_at(c(1,3), as.factor) %>%
-            mutate(normalized_rate = ifelse(effect_simplified == "dS", count/S_site,count/N_site))
+            mutate(normalized_rate = ifelse(effect_simplified == "dS", (count*100)/((S_site/100)*(9407-790)*3),(count*100)/((N_site/100)*(9407-790)*3)))
 
 
 # visualize using plotly
@@ -163,8 +163,8 @@ counts <- variants_ann_expiii%>%
 
 fig <- counts %>%  ggplot(aes(x=passage, y = normalized_rate, color = exp_line, linetype = effect_simplified)) +
         geom_line(linewidth=1) +
-        labs(x="\nTransfer", y= "Normalized Mutation Count\n",  color = "Virus Lines", linetype = "Translational Impact",
-        title = paste0(category, " Mutation Accumulation Based on Translational Impact"))+
+        labs(x="\nTransfer", y= "Normalized Mutation Count (%)\n",  color = "Virus Lines", linetype = "Translational Impact",
+        title = paste0(category, " Mutation Accumulation \n (Syn vs Non-Syn)"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$normalized_rate)+0.1),breaks = seq(0,max(counts$normalized_rate)+0.1,0.1)) +
         scale_color_manual(labels = line_labels, values = line_palette) +
@@ -181,10 +181,12 @@ fig
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, category, "_accumulation_dn&ds.pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, category, "_mut_accumulation_ds_vs_dn.pdf"), height = 14, width = 14)
 fig
 dev.off()
-
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/",category, "_mut_accumulation_ds_vs_dn.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
 ## compute effect sizes
 # Filter data for each condition

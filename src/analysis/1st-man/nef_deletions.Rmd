@@ -72,8 +72,8 @@ nef_deletions$line_type <- factor(nef_deletions$line_type, levels = c("solid", "
 
 fig <- nef_deletions %>% 
     ggplot(aes(x = passage, y = consensus_vf, color = deletion_id, linetype = line_type)) + 
-    labs(x="\nTransfer", y= "Deletion Frequency\n",  color = "Deletion ID",
-        title = "Nef Deletions Frequency in MT-2_1\n") +
+    labs(x="\nTransfer", y= "Deletion Frequency\n",  color = "Deletion ID") +
+    ggtitle(expression("Frequency of " * italic("nef") * " Large Deletions in MT-2_1")) +
     guides(linetype = "none") +
     scale_color_manual(values=brewer.pal(5, "Dark2")) +
     geom_line() +
@@ -91,6 +91,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "MT-2_1_nef_deletion.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/MT-2_1_nef_deletion.pdf"), height = 14, width = 14)
 fig
 dev.off()
 

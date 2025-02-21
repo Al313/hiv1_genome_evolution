@@ -43,6 +43,16 @@ library(tidyr)
 line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
 line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
 
 ```
 
@@ -54,7 +64,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 ## Effective population size
 
-```{r}
+```{r measure variance ne}
 
 ## estimating the effective population size (Variance Effective Size) by this formula: Ne ≈ p(1−p)/Var(Δp)
 ## if there are more than one generation between the time points: 1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))
@@ -131,11 +141,14 @@ df %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "i
 
 # save data on disk
 
-# save(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size_nef.RData")
+save(df, file = paste0(wd,"results/tables/misc/variance_effective_size_nef.RData"))
+
+```
 
 
+```{r visualize variance ne}
 
-load("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/variance_effective_size_nef.RData") # or all of genome: variance_effective_size.RData
+load(paste0(wd,"results/tables/misc/variance_effective_size_nef.RData")) # or all of genome: variance_effective_size.RData
 
 
 
@@ -169,7 +182,15 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "variance_ne.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/variance_ne.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
+```
+
+
+
+```{r in-line numbers}
 
 # ave Ne per line
 head(df)

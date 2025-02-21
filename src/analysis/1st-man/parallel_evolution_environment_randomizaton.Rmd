@@ -178,10 +178,49 @@ fig <- ggvenn(muts_list, text_size = 9, fill_color = c("#ff00ff", "#ff2400", "#6
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "parallel_venn.pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, "parallel_venn_end_passage.pdf"), height = 14, width = 14)
 fig
 dev.off()
-pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_venn.pdf", height = 14, width = 14)
+pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_venn_end_passage.pdf", height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+```{r visualization1: throughout venn diagram}
+
+# prepare data for visualization
+variants_expiii_subset <- variants_expiii %>%
+            filter(allele_freq >= min_threshold & allele_freq < max_threshold)
+
+# uniqueness of majority mutations observed throughout the experiment
+throughout <- variants_expiii_subset %>%
+                select(c(exp_line,mut_info)) %>%
+                distinct()
+
+
+#table(as.numeric(table(par_whole$mut_info)))
+
+# create a named vector from the df
+muts <- throughout$mut_info
+names(muts) <- throughout$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
+
+
+# visualization
+fig <- ggvenn(muts_list) +
+        labs(title = paste0(category, " Mutations Occurrence Venn Diagram"))+
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1), "cm"))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, category, "_occurrence_venn.pdf"), height = 14, width = 14)
 fig
 dev.off()
 

@@ -138,7 +138,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r set parameters}
 
 # set parameters
-category <- "Fixed"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -162,24 +162,27 @@ if (category == "Sporadic"){
 ```{r number of mutations per genomic feature}
 
 
-
+possible_muts <- c(0.22*3, 0.78*3, 1*3)
+names(possible_muts) <- c("S", "N", "U")
 variants_ann_expiii$feature[variants_ann_expiii$feature == "envelope"] <- "env"
 variants_ann_expiii$feature[variants_ann_expiii$genomic_pos >= 9076 & variants_ann_expiii$genomic_pos <= 9407] <- "nef_3UTR"
 variants_ann_expiii$feature[variants_ann_expiii$genomic_pos >= 8787 & variants_ann_expiii$genomic_pos <= 9075] <- "nef_only"
 # prepare data for visualization
+variants_ann_expiii$possible_muts <- possible_muts[as.character(variants_ann_expiii$effect_simplified)]
+
+
 
 counts <- variants_ann_expiii %>% 
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
             #filter(passage == end_psg) %>%
-            select(exp_line, mut_info, feature, effect_simplified) %>%
+            select(exp_line, mut_info, feature, effect_simplified, possible_muts) %>%
             distinct() %>%
-            group_by(exp_line, feature, effect_simplified) %>%
+            group_by(exp_line, feature, effect_simplified, possible_muts) %>%
             summarise(count = n()) %>%
             mutate_at(c(1,2,3), as.factor) %>%
             left_join(feature_df[,c("feature", "length")], by = join_by(feature == feature)) %>%
             mutate(feature = factor(feature, levels = feature_factor_new)) %>%
-            mutate(normalized_count = count*100/length)
-
+            mutate(normalized_count = (count*100)/round(length*possible_muts))
 
 # make the visualization
 fig <- ggplot(counts[counts$feature %notin% c("5R", "3R"),]) +
@@ -187,7 +190,7 @@ fig <- ggplot(counts[counts$feature %notin% c("5R", "3R"),]) +
             position = "stack",
             stat = "identity") +
     scale_fill_manual(labels = line_labels, values = line_palette) +
-    labs(x = "Genomic Features", y = "Normalized Count", fill = "Line", title = paste0(category, " Mutation Distribution \n"))+
+    labs(x = "Genomic Features", y = "Normalized Minority Count (%)", fill = "Virus Line", title = paste0(category, " Mutation Distribution \n"))+
     facet_grid(~ feature, switch = "x") +
     theme_bw()+
     theme(strip.placement = "outside",
@@ -208,6 +211,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "mutation_distribution_", category,".pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/mutation_distribution_", category,".pdf"), height = 14, width = 14)
 fig
 dev.off()
 

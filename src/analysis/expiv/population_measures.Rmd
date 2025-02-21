@@ -25,7 +25,7 @@ line_labels <- c("MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
 data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
 
 # determine what data to be included
-end_psg <- 700
+end_psg <- 630
 
 data %<>% 
         filter(exp_line %in% 17:20,
@@ -47,15 +47,15 @@ data %<>% mutate(exp_line = case_when(exp_line==17 ~ "MT-2_i", exp_line==18 ~ "M
 data$passage <- as.numeric(data$passage)
 data$exp_line <- factor(data$exp_line, levels = line_labels)
 
-data$mean_quantity_per_ml_cell_culture_supernatant[data$passage >= 640] <- data$mean_quantity_per_ml_cell_culture_supernatant[data$passage >= 640]/10
-data <- update_values_df(data, 10^6)
+
+data_cleaned <- data %>% filter(mean_quantity_per_ml_cell_culture_supernatant > 10^5)
 
 
 # fit linear models for each group and extract p-values
-model_A <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[1], ])
-model_B <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[2], ])
-model_C <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[3], ])
-model_D <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data[data$exp_line == line_labels[4], ])
+model_A <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == line_labels[1], ])
+model_B <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == line_labels[2], ])
+model_C <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == line_labels[3], ])
+model_D <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == line_labels[4], ])
 
 
 # extract the p-values
@@ -72,7 +72,7 @@ p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B,
 
 
 
-titration_fig <- data %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
+titration_fig <- data_cleaned %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
                 facet_wrap(~exp_line) +
                 geom_line() +
                 geom_point() +

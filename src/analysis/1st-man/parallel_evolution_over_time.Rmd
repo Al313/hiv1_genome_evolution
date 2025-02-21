@@ -256,11 +256,11 @@ fig <- df_long %>%
     values = c("#ff8000", "#00bbff")
     ) +
     scale_fill_manual(
-        values = c("#ff8000", "#00bbff"),
+        values = c("#ad1594c2", "#00bbff"),
         guide = "none"  # Hides the legend for `fill`
     ) +
     labs(title = "Sharedness over Time\n Among Fixed Variants", y = "Shared(%)\n", x = "\nTransfer") +
-    scale_linetype_discrete(name = "Data Type",  # Change the legend title here
+    scale_linetype_discrete(name = "Dataset",  # Change the legend title here
                     labels = c("Observed", "Simulated"))+
     theme_minimal()+ 
     theme(plot.title = element_text(size = 55, hjust = 0.5),
@@ -280,5 +280,7 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "parallel_over_time.pdf"), height = 14, width = 14)
 fig
 dev.off()
-
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_over_time.pdf"), height = 14, width = 14)
+fig
+dev.off()
 ```

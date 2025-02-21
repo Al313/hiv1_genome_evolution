@@ -166,6 +166,9 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "shannon_per_sample_sum.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/shannon_per_sample_sum.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
 
 

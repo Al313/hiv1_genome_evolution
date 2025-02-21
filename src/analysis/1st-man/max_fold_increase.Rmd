@@ -80,7 +80,7 @@ variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
 
 # facors
 
-host_factor <- c("MT2", "MT4")
+host_factor <- c("MT-2", "MT-4")
 exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 translational_impacts <- c("U", "S", "N")
@@ -186,7 +186,7 @@ x_axis_labels <- paste0(breaks, "_", breaks+10)
 
 
 
-fig <- max_fold[max_fold$effect_simplified == "N",] %>% 
+fig <- max_fold %>% 
     ggplot(aes(x = as.numeric(max_psg_lower), y = log10(max_fold_change), color = exp_line)) +
     # facet_wrap(~exp_line) +
     geom_point() +
@@ -196,7 +196,7 @@ fig <- max_fold[max_fold$effect_simplified == "N",] %>%
     labs(title = "Maximum Fold Increase Trend over Time \n", x = "\n Transfer", y = "Log10(Max. Fold Inc.) \n",
     color = "Virus Line") +
     theme_bw() +
-    theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+    theme(plot.title = element_text(size = 40, hjust = 0.5),
         axis.title.x = element_text(size = 25),
         axis.title.y = element_text(size = 25),
         axis.text.x = element_text(size = 15, color = "black", angle = 90),
@@ -209,6 +209,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "fixed_max_fold_change_occurrence_trend.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/fixed_max_fold_change_occurrence_trend.pdf"), height = 14, width = 14)
 fig
 dev.off()
 
@@ -255,10 +258,22 @@ fig <- max_fold %>%
 modell <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-4_2",])
 summary(modell)
 
-# no significant trend over time for neither of host lines
+# significant trend over time for MT-4 lines
 model_mt2 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$host_line == "MT-2",])
 model_mt4 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$host_line == "MT-4",])
-summary(model_mt2)
+summary(model_mt4)
+
+# significant trend over time per line
+
+model_mt21 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-2_1",])
+model_mt22 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-2_2",])
+model_mt41 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-4_1",])
+model_mt42 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-4_2",])
+
+
+summary(model_mt42)
+
+
 
 
 # significant higher max fold increase in MT-2 compared to MT-4
@@ -320,6 +335,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "fixed_max_fold_change_per_appearance_transfer.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/fixed_max_fold_change_per_appearance_transfer.pdf"), height = 14, width = 14)
 fig
 dev.off()
 

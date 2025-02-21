@@ -267,13 +267,18 @@ dev.off()
 pdf(file = paste0(fig_dir, "time_to_fixation_significance_boxplot_per_line.pdf"), height = 14, width = 14)
 fig2
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/time_to_fixation_significance_boxplot_per_line.pdf"), height = 14, width = 14)
+fig2
+dev.off()
 pdf(file = paste0(fig_dir, "time_to_fixation_significance_boxplot_per_translation_group.pdf"), height = 14, width = 14)
 fig3
 dev.off()
 pdf(file = paste0(fig_dir, "time_to_fixation_significance_boxplot_per_translation_group_host_line.pdf"), height = 14, width = 14)
 fig4
 dev.off()
-
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/time_to_fixation_significance_boxplot_per_translation_group_host_line.pdf"), height = 14, width = 14)
+fig4
+dev.off()
 
 
 # get inline variables
@@ -332,6 +337,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "Rapidly_Fixating_Mutations_over_Time.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/Rapidly_Fixating_Mutations_over_Time.pdf"), height = 14, width = 14)
 fig
 dev.off()
 
@@ -573,6 +581,9 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "fixation-based-on-recurrence.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/time-to-fixation-based-on-recurrence.pdf"), height = 14, width = 14)
+fig
+dev.off()
 
 mean(df$time_to_fixation[df$mut_info %in% names(fix_count_table_list[["1"]])])
 
@@ -752,8 +763,8 @@ my_col_pal <- c(alpha("grey"), "green", "blue", "red")
 fig <- ggplot(df_summary, aes(x = bin, y = n, fill = Occurrence)) +
   facet_wrap(~exp_line, ncol = 2) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(labels = line_labels, values = my_col_pal) +
-  labs(title = "Frequency of Rapidly Fixating Mutations over Time\n", x = "\nTime Bin", y = "Nr. of Fixed Variants \n with TF <= 100\n", fill = "Appearnace Bin\n") +
+  scale_fill_manual(labels = c("1", "2", "3", "4"), values = my_col_pal) +
+  labs(title = "Frequency of Rapidly Fixating Mutations over Time\n", x = "\nTime Bin", y = "Nr. of Fixed Variants \n with TF <= 100\n", fill = "Occurrence\n") +
   theme_bw() +
   theme(plot.title = element_text(size = 30, hjust = 0.5),
         axis.title = element_text(size = 20),
@@ -770,6 +781,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "Rapidly_Fixating_Shared_Variants_over_Time.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/Rapidly_Fixating_Shared_Variants_over_Time.pdf"), height = 14, width = 14)
 fig
 dev.off()
 

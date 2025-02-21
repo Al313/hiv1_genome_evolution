@@ -221,5 +221,58 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "frequency_dynamics_linkage_cases.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/frequency_dynamics_linkage_cases.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+
+```{r clonal interference case, results=TRUE}
+
+
+# 566_G_A  678_G_A 7854_A_G 
+case <- c("566_G_A")
+
+variants_expiii$tracking_group <- "No"
+variants_expiii$tracking_group[variants_expiii$mut_info %in% case] <- "Yes"
+
+variants_expiii_subset <- variants_expiii %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
+
+
+
+
+
+fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info_line, alpha = tracking_group)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_alpha_manual(values = c(0.1,1)) +
+    labs(title = paste0(case, "\n"), y = "Frequency \n", x = "\n Transfer") +
+    scale_color_manual(values = my_col_pal) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0),
+        legend.position="none")
+
+fig
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "frequency_dynamics_",case, ".pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/", "frequency_dynamics_",case, ".pdf"), height = 14, width = 14)
+fig
+dev.off()
+
 
 ```

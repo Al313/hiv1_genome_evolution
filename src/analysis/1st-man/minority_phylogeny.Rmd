@@ -1,3 +1,4 @@
+
 ---
 title:  
     "Reconstructing EXPIII Phylogeny based on Minority information"
@@ -118,17 +119,18 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 # Define the number of experimental lines and passages
 num_lines <- 4
-num_passages <- length(seq(10, 90, 10))  # 50 passages
+end_psg <- 500
+num_passages <- length(seq(10, end_psg, 10))  # 50 passages
 
 # Total number of rows/columns
-matrix_size <- num_lines * num_passages  # 200 x 200
+matrix_size <- num_lines * num_passages 
 
 # Preallocate a matrix filled with NAs
 hamming_matrix <- matrix(NA, nrow = matrix_size, ncol = matrix_size)
 
 # Assign row and column names (combine lineage + passage number)
 rownames(hamming_matrix) <- colnames(hamming_matrix) <- 
-  expand.grid(line_labels, seq(10,90,10)) %>% apply(1, paste, collapse="_")
+  expand.grid(line_labels, seq(10,end_psg,10)) %>% apply(1, paste, collapse="_")
 
 # Fill the matrix
 for (l in 1:num_lines) {
@@ -136,11 +138,11 @@ for (l in 1:num_lines) {
   for (k in 1:num_lines) {
     exp_line_2 <- line_labels[k]
     
-    for (i in seq(10,90,10)) {
+    for (i in seq(10,end_psg,10)) {
       row_idx <- (l - 1) * num_passages + (i / 10)  # Row index
       a <- variants_expiii %>% filter(exp_line == exp_line_1 & passage == i) %>% pull(mut_info)
       
-      for (j in seq(10,90,10)) {
+      for (j in seq(10,end_psg,10)) {
         col_idx <- (k - 1) * num_passages + (j / 10)  # Column index
         b <- variants_expiii %>% filter(exp_line == exp_line_2 & passage == j) %>% pull(mut_info)
 

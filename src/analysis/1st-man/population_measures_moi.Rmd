@@ -211,7 +211,7 @@ p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B,
 
 
 
-moi__fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+moi_fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
                 facet_wrap(~ exp_line) +
                 geom_line() +
                 geom_point() +
@@ -233,7 +233,10 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
-moi__fig
+moi_fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/moi_cleaned.pdf"), height = 14, width = 14)
+moi_fig
 dev.off()
 
 ```
@@ -304,7 +307,7 @@ p_value_D <- summary(model_D)$coefficients[2, 4]
 # create a data.frame for annotation
 p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
 
-head(result)
+
 scale_factor <- 400000
 result$btk_size <- result$MOI*scale_factor
 
@@ -338,6 +341,11 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
 moi__fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/moi_cleaned.pdf"), height = 14, width = 14)
+moi__fig
+dev.off()
+
+
 
 ```
 

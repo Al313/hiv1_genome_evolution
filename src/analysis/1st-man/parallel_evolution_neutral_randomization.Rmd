@@ -155,7 +155,7 @@ effect_list <- list(Syn = "S", Non_Syn = "N", Untranslated = "U", All = c("S", "
 regions <- list(Syn = 790:9407, Non_Syn = 790:9407, Untranslated = c(454:789,9076:9625), All = 454:9625)
 possible_muts <- c(0.22, 0.78, 1, 1)
 
-max(variants_expiii$genomic_pos)
+
 
 overall_df <- data.frame()
 
@@ -336,6 +336,7 @@ for (k in 1:4){
     overall_df <- rbind(overall_df, c(names(effect), "Simulated", mean_exp, se_exp, p_val, cohen_d$estimate, ratio))
 
 }
+
 ```
 
 
@@ -355,7 +356,7 @@ fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
     geom_col(position = "dodge") +
     geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = position_dodge(width = 0.9),width = 0.2) +
     labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Shared(%)\n", x = "\nTranslational Impact") +
-    scale_fill_manual(name = "Group",  # Change the legend title here
+    scale_fill_manual(name = "Dataset",  # Change the legend title here
         values = c("#038331", "#ffdf50"),
         labels = c("Observed", "Randomized"))+
     theme_minimal()+ 
@@ -370,7 +371,10 @@ fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "parallel_summary_barplot.pdf"), height = 14, width = 14)
+pdf(file = paste0(fig_dir, "parallel_summary_barplot_translational_impact.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_summary_barplot_translational_impact.pdf"), height = 14, width = 14)
 fig
 dev.off()
 

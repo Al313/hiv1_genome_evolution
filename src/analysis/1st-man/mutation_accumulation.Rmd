@@ -114,7 +114,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 ```{r text numbers}
 
 # set parameters
-category <- "Fixed"
+category <- "Minority"
 
 if (category == "Sporadic"){
     min_threshold <- 0.01
@@ -140,7 +140,7 @@ variants_expiii_subset <- variants_expiii %>%
 bb <- length(unique(paste0(variants_expiii_subset$exp_line,variants_expiii_subset$mut_info)))
 b <- length(unique(variants_expiii_subset$mut_info))
 
-# numbers per trasnaltional impact groups
+# numbers per translational impact groups
 variants_expiii_subset_unique <- variants_expiii_subset %>% select(mut_info, effect_simplified) %>% distinct()
 prop.table(table(variants_expiii_subset_unique$effect_simplified))
 
@@ -197,6 +197,7 @@ for (psg in seq(10,end_psg,10)){
     counts <- rbind(counts, dd)
 }
 
+# counts <- counts[counts$exp_line != "All",]
 
 fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         geom_line(linewidth=2) +
@@ -218,6 +219,9 @@ date <- str_split(Sys.time(), pattern = " ")[[1]][1]
 fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, category, "_cumulative_mutated_pos.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/", category, "_cumulative_mutated_pos.pdf"), height = 14, width = 14)
 fig
 dev.off()
 
@@ -512,43 +516,7 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, category, "_disappearance.pdf"), height = 14, width = 14)
 fig
 dev.off()
-
-```
-
-
-```{r visualization1: throughout venn diagram}
-
-# prepare data for visualization
-variants_expiii_subset <- variants_expiii %>%
-            filter(allele_freq >= min_threshold & allele_freq < max_threshold)
-
-# uniqueness of majority mutations observed throughout the experiment
-throughout <- variants_expiii_subset %>%
-                select(c(exp_line,mut_info)) %>%
-                distinct()
-
-
-#table(as.numeric(table(par_whole$mut_info)))
-
-# create a named vector from the df
-muts <- throughout$mut_info
-names(muts) <- throughout$exp_line
-
-# convert named vector to list
-muts_list <- lapply(split(muts, names(muts)), unname)
-
-
-# visualization
-fig <- ggvenn(muts_list) +
-        labs(title = paste0(category, " Mutations Occurrence Venn Diagram"))+
-        theme(plot.title = element_text(size = 20, hjust = 0.5),
-        plot.margin = unit(c(1,1,1,1), "cm"))
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, category, "_occurrence_venn.pdf"), height = 14, width = 14)
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/",category,"disappearance.pdf"), height = 14, width = 14)
 fig
 dev.off()
 
@@ -556,107 +524,24 @@ dev.off()
 
 
 
-```{r accumulation per translational impact}
 
-
-
-# prepare data for visualization
-counts <- variants_ann_expiii%>% 
-            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-            group_by(exp_line, passage, effect_simplified) %>%
-            summarise(nr_majority = n()) %>%
-            mutate_at(4, as.numeric) %>%
-            mutate(passage = as.numeric(as.character(passage))) %>%
-            mutate_at(c(1,3), as.factor)
-            
-# visualize using plotly
-
-
-
-
-fig <- counts %>%  ggplot(aes(x=passage, y = nr_majority, color = exp_line, linetype = effect_simplified)) +
-        geom_line(linewidth=1) +
-        labs(x="\nTransfer", y= "Mutation Count\n",  color = "Virus Lines", linetype = "Translational Impact",
-        title = paste0(category, " Mutation Accumulation Based on Translational Effect"))+
-        scale_x_continuous(breaks = seq(0,end_psg,50)) +
-        scale_y_continuous(limits = c(0,max(counts$nr_majority)+10),breaks = seq(0,max(counts$nr_majority)+10,10)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
-        theme_bw() +
-        theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
-
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir,category, "_accumulation_translational_impact.pdf"), height = 21, width = 21)
-fig
-dev.off()
-
-```
-
-
-```{r accumulation per translational impact normalized for length}
-
-
-# prepare data for visualization
-counts <- variants_ann_expiii %>% 
-            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-            mutate(effect_simplified2 = ifelse(effect_simplified %in% c("S","N"), "S/N", "U")) %>%
-            group_by(exp_line, passage, effect_simplified2) %>%
-            summarise(count = n()) %>%
-            mutate_at(4, as.numeric) %>%
-            mutate(passage = as.numeric(as.character(passage))) %>%
-            mutate_at(c(1,3), as.factor) %>%
-            mutate(density = ifelse(effect_simplified2 == "S/N", count*100/(9407-790),count*100/(9626-9076+789-454)))
-
-
-# visualize using plotly
-
-
-
-fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
-        geom_line(linewidth=1) +
-        labs(x="\nTransfer", y= "Normalized Mutation Count\n", color = "Virus Lines", linetype = "Translational Impact",
-        title = paste0("Normalized ",category, " Mutation Accumulation Based on Translational Effect"))+
-        scale_x_continuous(breaks = seq(0,end_psg,50)) +
-        scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
-        theme_bw() +
-        theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir,category, "_mut_accumulation_translational_impact_u_vs_ns.pdf"), height = 21, width = 21)
-fig
-dev.off()
-
-```
 
 
 ```{r fixed mutation linear regression}
 
+# prepare data for visualization
+counts <- variants_expiii %>%
+            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+            group_by(exp_line, passage, .drop = FALSE) %>%
+            count() %>%
+            dplyr::rename(mut_count = n) %>%
+            mutate(host_line = ifelse(exp_line %in% c("MT-2_1","MT-2_2"), "MT2", "MT4")) %>%
+            mutate_at(c(1,4), as.factor) %>%
+            mutate(passage = as.numeric(as.character(passage))) %>%
+            mutate_at(3, as.numeric)
+
 
 # linear regression
-
-
-head(counts)
 
 counts2 <- counts %>% select(passage,mut_count,host_line) %>% group_by(passage,host_line) %>% summarize(ave_count = mean(mut_count))
 
@@ -721,36 +606,6 @@ df_lm_mt2_500$predicted <- predict(lm_mt2_500, new_data = seq(210,500,10))
 fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
         geom_line(linewidth=2) +
         geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2)+
-        geom_line(data = df_lm_mt2_200, aes(x = passage, y = predicted, linetype = line_type), color = "#ad1594c2", size = 2)+
-        geom_line(data = df_lm_mt2_500, aes(x = passage, y = predicted, linetype = line_type), color = "#ad1594c2", size = 2)+
-        scale_linetype(guide = "none")+
-        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation _ Linear Regression"))+
-        scale_x_continuous(breaks = seq(0,end_psg,50)) +
-        scale_y_continuous(limits = c(0,max(counts$mut_count)+20),breaks = seq(0,max(counts$mut_count)+20,50)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
-        theme_bw() +
-        theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, category, "_accumulation_regression.pdf"), height = 14, width = 14)
-fig
-dev.off()
-```
-
-```{r}
-
-
-fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
-        geom_line(linewidth=2) +
-        geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2)+
         geom_line(data = df_lm_mt2, aes(x = passage, y = predicted), color = "#ad1594c2", size = 2)+
         labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation _ Linear Regression"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
@@ -771,5 +626,65 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, category, "_accumulation_regression_whole.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/", category, "_accumulation_regression_whole.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+```{r accumulation per coding and non-coding regions normalized for length}
+
+
+# prepare data for visualization
+counts <- variants_ann_expiii %>% 
+            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+            mutate(effect_simplified2 = ifelse(effect_simplified %in% c("S","N"), "Coding", "Non-Coding")) %>%
+            group_by(exp_line, passage, effect_simplified2) %>%
+            summarise(count = n()) %>%
+            mutate_at(4, as.numeric) %>%
+            mutate(passage = as.numeric(as.character(passage))) %>%
+            mutate_at(c(1,3), as.factor) %>%
+            mutate(density = ifelse(effect_simplified2 == "Coding", count*100/(9407-790),count*100/(9626-9076+789-454)))
+
+
+# visualize using plotly
+
+
+
+fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
+        geom_line(linewidth=1) +
+        labs(x="\nTransfer", y= "Normalized Mutation Count (%)\n", color = "Virus Lines", linetype = "Region",
+        title = paste0("Normalized ",category, " Mutation Accumulation \n (Coding vs Non-Coding)"))+
+        scale_x_continuous(breaks = seq(0,end_psg,50)) +
+        scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
+        scale_color_manual(labels = line_labels, values = line_palette) +
+        theme_bw() +
+        theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 25),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size=20),
+        legend.text = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir,category, "_mut_accumulation_coding_vs_noncoding.pdf"), height = 14, width = 14)
+fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/", category, "_mut_accumulation_coding_vs_noncoding.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+```{r accumulation per syn and non-syn normalized for sites}
+
+# In dn_ds.Rmd 
 
 ```
