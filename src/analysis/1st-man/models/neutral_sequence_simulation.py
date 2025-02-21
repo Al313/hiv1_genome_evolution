@@ -68,8 +68,6 @@ def calculate_proportions(column):
     return props / np.sum(props) if np.sum(props) > 0 else props
 
 
-
-
 # Function to find dominant values
 def find_dominant_values(column, threshold):
     dominant_values = np.where(column > threshold)[0]
@@ -83,23 +81,27 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 # Set simulation parameters
 print(exp_line, flush = True)
 genome_length, initial_population = 9171, 400
-R0, mutation_rate = 44, 2e-5
+if genome_length == 917:
+    mutation_rate = 2e-4
+elif genome_length == 9171:
+    mutation_rate = 2e-5
+R0 = 44
+seq_sampling_frac = 2
 total_generations = int(generation_time)
 print(total_generations, flush = True)
-bottleneck_intervals, sampling_freq = 2, 1
+bottleneck_intervals, sampling_freq = 2, 2
 
 # Initialize population as an integer NumPy array
-np.random.seed(420)
+np.random.seed(2)
 
-init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True), (initial_population, 1))
+init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
 
 
 # Store total mutations over time
-mutation_counts = np.zeros(total_generations // sampling_freq)
+mutation_counts = np.zeros((total_generations // sampling_freq)-1)
 
 # Simulation loop
 population = init_population.copy()
-
 
 
 for gen in range(1, total_generations + 1):
@@ -120,39 +122,49 @@ for gen in range(1, total_generations + 1):
     else :
         population = population[np.random.choice(population.shape[0], population.shape[0]*R0, replace=True)]
 
-    # Step 3: Apply bottleneck every 2 generations
-    if gen % bottleneck_intervals == 0:
-        population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
 
-    if gen % sampling_freq == 0:
+    # Step 3: Sequencing
+    if gen % sampling_freq == 1:
         psg = gen // sampling_freq
 
-        # Step 4: Determine variant frequency
-        sampled_population = population[np.random.choice(population.shape[0], population.shape[0], replace=False)]
-        proportions = np.apply_along_axis(calculate_proportions, axis=0, arr=sampled_population)
+        # Determine variant frequency
+        proportions = np.apply_along_axis(calculate_proportions, axis=0, arr=population).astype(np.float32)
+        # population[np.random.choice(population.shape[0], round(population.shape[0]/seq_sampling_frac))]
 
         # Apply function to each column
         dominant_values_per_column = np.apply_along_axis(find_dominant_values, axis=0, arr=proportions, threshold=min_threshold)+1
+        dominant_values_per_column = dominant_values_per_column.flatten()
 
-        # Step 5: Track mutation accumulation
-        mutation_counts[psg - 1] = np.count_nonzero(dominant_values_per_column != init_population[0, :])
-        # mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & ~np.isnan(dominant_values_per_column))
+        # Step 4: Track mutation accumulation
+        # mutation_counts[psg - 1] = np.count_nonzero(dominant_values_per_column != init_population[0, :])
+        mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & (dominant_values_per_column>0))
 
 
         if psg > 1 and mutation_counts[psg - 1] > mutation_counts[psg - 2]:
             print("######", flush = True)
-            print(np.where(dominant_values_per_column != init_population[0, :]), flush = True)
+            print(np.where(dominant_values_per_column != init_population[0, :] & (dominant_values_per_column>0)), flush = True)
+    
+    # Step 5: Apply bottleneck every 2 generations
+    if gen % bottleneck_intervals == 0:
+        population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
+    else:
+        pass
+
+
+
+
 
 # Save results
 mutation_counts_df = pd.DataFrame(mutation_counts)
 mutation_counts_df.to_csv(
-    f"{wd}results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_{exp_line}_{category}_{genome_length}_{total_generations}.tsv",
+    f"{wd}results/tables/misc/neutral-seq-sim/mut_counts/neutral_simulation_{exp_line}_{category}_{genome_length}_{total_generations}_{seq_sampling_frac}.tsv",
     sep="\t", index=False, header=False
 )
 
 proportions_df = pd.DataFrame(proportions)
 proportions_df.to_csv(
-    f"{wd}results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_proportion_{exp_line}_{genome_length}_{total_generations}.tsv",
+    f"{wd}results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_{exp_line}_{genome_length}_{total_generations}_{seq_sampling_frac}.tsv",
     sep="\t", index=False, header=False
 )
+
 

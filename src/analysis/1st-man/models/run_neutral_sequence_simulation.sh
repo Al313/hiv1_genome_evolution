@@ -47,7 +47,7 @@ for mut_cat in "${mutation_types[@]}"; do
 # Set the generation time based on the mutation type
 if [ "$mut_cat" == "Majority" ]; then
       generation_time=1000
-      mem="200G"
+      mem="400G"
 elif [ "$mut_cat" == "Fixed" ] || [ "$mut_cat" == "Minority" ]; then
       generation_time=1000
       mem="300G"
@@ -69,7 +69,7 @@ echo "#!/bin/bash
 source activate ha_proj
 
 # Run the python script
-stdbuf -oL ./neutral_sequence_simulation1.py ${exp_line} ${mut_cat} ${generation_time}
+stdbuf -oL ./neutral_sequence_simulation.py ${exp_line} ${mut_cat} ${generation_time}
 
 " > ${job_file}
 
