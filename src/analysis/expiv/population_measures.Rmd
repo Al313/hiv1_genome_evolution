@@ -101,3 +101,57 @@ dev.off()
 
 
 ```
+
+
+
+```{r}
+
+library(lme4)
+library(lmerTest)
+data$handler <- factor(data$handler)
+
+
+
+data_cleaned <- data %>% filter(mean_quantity_per_ml_cell_culture_supernatant > 10^5)
+
+
+# fit linear models for each group and extract p-values
+model_A <- lmer(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage + (1 | handler), data = data_cleaned[data_cleaned$exp_line == line_labels[1], ])
+model_B <- lmer(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage + (1 | handler), data = data_cleaned[data_cleaned$exp_line == line_labels[2], ])
+model_C <- lmer(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage + (1 | handler), data = data_cleaned[data_cleaned$exp_line == line_labels[3], ])
+model_D <- lmer(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage + (1 | handler), data = data_cleaned[data_cleaned$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 5]
+p_value_B <- summary(model_B)$coefficients[2, 5]
+p_value_C <- summary(model_C)$coefficients[2, 5]  
+p_value_D <- summary(model_D)$coefficients[2, 5]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+# make the ggplot object
+
+
+
+titration_fig <- data_cleaned %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = handler)) +
+                facet_wrap(~exp_line) +
+                geom_line() +
+                geom_point() +
+                geom_smooth(method = "lm", se = FALSE) +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 1.1, vjust = 2, size = 8, inherit.aes = FALSE) +
+                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n", color = "Handler") +
+                theme_bw() +
+                theme(plot.title = element_text(size = 30, hjust = 0.5),
+                    axis.title = element_text(size = 25),
+                    axis.text.x = element_text(size = 20, angle = 90),
+                    axis.text.y = element_text(size = 20),
+                    legend.title = element_text(size=20),
+                    legend.text = element_text(size = 15),
+                    strip.text = element_text(size = 25))
+
+
+```

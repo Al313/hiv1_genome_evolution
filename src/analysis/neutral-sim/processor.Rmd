@@ -1,0 +1,43 @@
+
+```{r}
+
+library(tidyr)
+library(dplyr)
+
+sampling_freq <- 2
+end_psg <- 1000
+
+data <- read.csv("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/src/analysis/neutral-sim/final.0.csv", header = T)
+
+
+fixed_count4 <- c()
+
+for (psg in seq(2,end_psg,sampling_freq)){
+    print(psg)
+
+    print("#######")
+    data <- read.csv(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/src/analysis/neutral-sim/samples/sample_",psg,"_0.csv"), header = T)
+
+    tab <- table(unlist(strsplit(rep(data$haplotype, data$count), ";")))
+    tab <- tab[names(tab) != "wt"]
+    counts <- as.numeric(tab)
+    pos <- as.numeric(sapply(strsplit(names(tab), ":"), "[[", 1)) + 1
+    ref <- sapply(strsplit(sapply(strsplit(names(tab), ":"), "[[", 2), "->"), "[[", 1)
+    alt <- sapply(strsplit(sapply(strsplit(names(tab), ":"), "[[", 2), "->"), "[[", 2)
+
+
+    df <- data.frame(Position = pos, Ref = ref, Alt = alt, Count = counts)
+    df <- df[order(df$Position),]
+
+    fixed_count4 <- append(fixed_count4, sum((df$Count/sum(data$count)) == 1))
+    print(sum((df$Count/sum(data$count)) == 1))
+}
+
+
+hist(df$Count/sum(data$count))
+max(df$Count/sum(data$count))
+
+df[df$Count == max(df$Count),]
+
+
+```
