@@ -2,6 +2,8 @@
 ```{r}
 
 library(tidyr)
+library(reshape2)
+library(ggplot2)
 library(dplyr)
 
 sampling_freq <- 2
@@ -9,10 +11,12 @@ end_psg <- 1000
 
 data <- read.csv("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/src/analysis/neutral-sim/final.0.csv", header = T)
 
-
-fixed_count4 <- c()
-
+i <- 1
+fixed_count_list <- list()
+fixed_count <- c()
+i <- i + 1
 for (psg in seq(2,end_psg,sampling_freq)){
+    
     print(psg)
 
     print("#######")
@@ -29,15 +33,47 @@ for (psg in seq(2,end_psg,sampling_freq)){
     df <- data.frame(Position = pos, Ref = ref, Alt = alt, Count = counts)
     df <- df[order(df$Position),]
 
-    fixed_count4 <- append(fixed_count4, sum((df$Count/sum(data$count)) == 1))
+    fixed_count <- append(fixed_count, sum((df$Count/sum(data$count)) == 1))
     print(sum((df$Count/sum(data$count)) == 1))
 }
 
+fixed_count_list[[i]] <- fixed_count
 
-hist(df$Count/sum(data$count))
+# Convert list to data frame
+fixed_count_df <- as.data.frame(fixed_count_list)
+
+# Rename columns to run_1, run_2, ..., run_7
+colnames(fixed_count_df) <- paste0("run_", seq_along(fixed_count_list))
+head(fixed_count_df)
+
+
+# Add time column (row index)
+fixed_count_df$time <- seq_len(nrow(fixed_count_df))
+
+# Reshape data from wide to long format
+fixed_count_df_long <- melt(fixed_count_df, id.vars = "time", variable.name = "run", value.name = "value")
+
+# Plot using ggplot2
+ggplot(fixed_count_df_long, aes(x = time, y = value, group = run, color = run)) +
+  geom_line(size = 1, alpha = 0.5) +  # Line plot
+  geom_point(size = 2) + # Add points for visibility
+  labs(title = "Fixed Variant Count Over Time",
+       x = "Time",
+       y = "Value",
+       color = "Run") +
+  theme_minimal()
+
+
+# size of sampled set
+sum(data$count)
+# number of haplotypes in the sampled set
+nrow(data)
+# number of unique mutations in the sampled set
+nrow(df)
+# highest allele frequency of a variant in the sampled set
 max(df$Count/sum(data$count))
-
-df[df$Count == max(df$Count),]
+# allele frequency distribution of variants in the sampled set
+hist(df$Count/sum(data$count))
 
 
 ```
