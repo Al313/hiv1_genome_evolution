@@ -35,7 +35,7 @@ source activate ha_proj
 
 snakemake \
         -s mysnakefile.smk \
-	--jobs 477 \
+	--jobs 24 \
         --default-resource mem_mb=20000 \
         --cluster '
         sbatch \
