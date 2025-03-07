@@ -142,6 +142,7 @@ if (category == "Sporadic"){
 
 ```{r calculate time to fixation}
 
+## Method 1
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
 df <- data.frame()
 
@@ -155,6 +156,25 @@ for (exp_line in line_labels){
         df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
     }
 }
+
+## Method 2
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+df <- data.frame()
+
+
+for (exp_line in line_labels){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+    }
+}
+
+
 
 # set column names and right data types
 df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
@@ -305,30 +325,47 @@ fig
 
 ```{r distribution of rapidly fixating mutations over time}
 
-quantile(df$time_to_fixation, probs = c(0.25, 0.5, 0.75))
+quantile(df$time_to_fixation[df$exp_line == "MT-4_2"], probs = c(0.25, 0.5, 0.75))
+
+df <- df %>%
+  group_by(exp_line) %>%
+  mutate(p10 = quantile(time_to_fixation, 0.10)) %>%
+  mutate(p90 = quantile(time_to_fixation, 0.90)) %>%
+  ungroup()
+
+labels_with_p10 <- with(df, setNames(
+  paste0(exp_line, "\n(", round(p10, 1), ")"),
+  exp_line
+))
+
+df %<>% mutate(labels = labels_with_p10)
+
 
 bins <- seq(0,400, 100)
 
-df_summary <- df[df$time_to_fixation <= 100,] %>%
-        mutate(bin = cut(appearance, breaks = bins, right = FALSE)) %>%
-        group_by(exp_line,effect_simplified) %>%
+df_summary <- df[df$time_to_fixation < df$p10,] %>%
+        mutate(bin = cut(fixation, breaks = bins, right = FALSE)) %>%
+        group_by(exp_line,labels, effect_simplified) %>%
         count(bin, .drop = FALSE)
 
 df_summary <- df_summary[!is.na(df_summary$bin),]
 
+
+
 fig <- ggplot(df_summary, aes(x = effect_simplified, y = n, fill = bin)) +
-  facet_wrap(~exp_line, ncol = 2) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_color_manual(labels = line_labels, values = line_palette) +
-  labs(title = "Frequency of Rapidly Fixating Mutations over Time", x = "Translational Impact", y = "Nr. of Fixed Mutations \n with Time to Fixation below 100", fill = "Appearnace Bin") +
-  theme_bw() +
-  theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 20),
-        axis.text.x = element_text(size = 15, face="bold", angle = 90),
-        axis.text.y = element_text(size = 15),
-        strip.text.x = element_text(size = 20, angle=90),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
+    facet_wrap(~labels, ncol = 2) +
+    geom_bar(stat = "identity", position = "dodge") +
+    scale_color_manual(labels = line_labels, values = line_palette) +
+    scale_y_continuous(limits = c(0, 10), breaks = seq(0, 12, by = 2)) +
+    labs(title = "Frequency of Rapidly Fixating Mutations over Time", x = "Translational Impact", y = "Count of Rapidly Fixing Variants \n (10th Percentile Time to Fixation)", fill = "Fixation Period") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 30, hjust = 0.5),
+        axis.title = element_text(size = 40),
+        axis.text.x = element_text(size = 30, face="bold", angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 40, angle=90),
+        legend.title = element_text(size=40),
+        legend.text = element_text(size = 30))
 
 fig
 

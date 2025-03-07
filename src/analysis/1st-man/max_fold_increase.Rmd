@@ -137,8 +137,8 @@ for (exp_line in exp_line_factor){
         recordings <- data.frame()
         
         for (j in 1:(length(psgs)-1)){
-            prev_freq <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == fixed_muts[i] & variants_expiii_sub$passage == psgs[j] & variants_expiii_sub$allele_freq >= 0.01] #  & variants_expiii_sub$allele_freq >= 0.01
-            current_freq <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == fixed_muts[i] & variants_expiii_sub$passage == psgs[j+1] & variants_expiii_sub$allele_freq >= 0.01] #  & variants_expiii_sub$allele_freq >= 0.01
+            prev_freq <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == fixed_muts[i] & variants_expiii_sub$passage == psgs[j] & variants_expiii_sub$allele_freq >= 0.001] #  & variants_expiii_sub$allele_freq >= 0.01
+            current_freq <- variants_expiii_sub$allele_freq[variants_expiii_sub$mut_info == fixed_muts[i] & variants_expiii_sub$passage == psgs[j+1] & variants_expiii_sub$allele_freq >= 0.001] #  & variants_expiii_sub$allele_freq >= 0.01
             if (length(c(prev_freq,current_freq)) == 2){
                 recordings <- rbind(recordings, c(psgs[j], psgs[j+1], current_freq/prev_freq))
             }
@@ -168,8 +168,8 @@ df %<>% mutate(max_fold_change = as.numeric(max_fold_change))
 df %<>% mutate(max_psg_range = factor(max_psg_range, levels = mixedsort(unique(c(levels(max_psg_range),"370_380", "380_390", "390_400","420_430", "430_440", "440_450", "450_460", "460_470", "470_480", "480_490", "490_500")))))
 
 
-
-
+max_fold <- df
+head(max_fold)
 
 # saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc.rds")
 # saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc_2.rds") ## appearance without the minimum threshold of 0.01
@@ -184,10 +184,14 @@ max_fold <- readRDS(file = "/Users/alimos313/Documents/studies/phd/hpc-research/
 breaks <- seq(10,490,10)
 x_axis_labels <- paste0(breaks, "_", breaks+10)
 
+# summarize max-fold-increase per passage of appearance
+max_fold_summary <- max_fold %>% group_by(exp_line, max_psg_lower, max_psg_range) %>%
+                    summarize(Mean = mean(max_fold_change, na.rm=TRUE),
+                    n = n())
 
 
-fig <- max_fold %>% 
-    ggplot(aes(x = as.numeric(max_psg_lower), y = log10(max_fold_change), color = exp_line)) +
+fig <- max_fold_summary %>% 
+    ggplot(aes(x = as.numeric(max_psg_lower), y = log10(Mean), color = exp_line)) +
     # facet_wrap(~exp_line) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE) +  # Add regression line without confidence interval
@@ -311,7 +315,7 @@ p_value_df <- data.frame(exp_line = exp_line_factor, p_val = c(p_value_A, p_valu
 
 
 
-fig <- max_fold_summary %>% ggplot(aes(x = appearance, y = log(Mean), color = exp_line)) +
+fig <- max_fold_summary %>% ggplot(aes(x = appearance, y = log2(Mean), color = exp_line)) +
     facet_wrap(~exp_line)+
     geom_point(aes(size = n)) +
     geom_smooth(method = "lm", se = FALSE) +

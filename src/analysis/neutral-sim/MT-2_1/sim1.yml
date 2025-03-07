@@ -2,19 +2,19 @@ parameters:
  - mutation_rate: 1e-5
    recombination_rate: 0.5
    host_population_size: 400000
-   infection_fraction: 1.0
-   basic_reproductive_number: 2005
+   infection_fraction: 0.01
+   basic_reproductive_number: 250000
    max_population: 1000
    dilution: 0.0005
    substitution_matrix:
-     - [0.0, 1.0, 1.0, 1.0]
-     - [1.0, 0.0, 1.0, 1.0]
-     - [1.0, 1.0, 0.0, 1.0]
-     - [1.0, 1.0, 1.0, 0.0]
+     - [0.0, .5, 1.0, 0.5]
+     - [0.5, 0.0, 0.5, 0.5]
+     - [1.0, 0.5, 0.0, 0.5]
+     - [0.5, 0.5, 0.5, 0.0]
    fitness_model: !SingleHost
      distribution: !Neutral
      utility: !Linear
 schedule:
  - generation: "{} % 2"
    event: sample
-   value: 20
+   value: 100

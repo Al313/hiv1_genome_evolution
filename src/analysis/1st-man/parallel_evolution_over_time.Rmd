@@ -244,7 +244,7 @@ df_long$group2 <- factor(df_long$group2, levels = c("Observed", "Expected"))
 
 fig <- df_long %>% 
     ggplot(aes(x = passage, y = shared_all, group = interaction(Pair,group2), color = Pair, linetype = group2)) +
-    geom_line() +
+    geom_line(size = 2) +
     # geom_smooth(method = "loess") +
     geom_ribbon(
         data = df_long %>% filter(group2 == "Expected"),  # Only apply CI for the specified group
@@ -253,7 +253,7 @@ fig <- df_long %>%
     ) +
     scale_color_manual(name = "Pair",
     labels = c("MT-2 Replicates", "MT-4 Replicates"), 
-    values = c("#ff8000", "#00bbff")
+    values = c("#ad1594c2", "#00bbff")
     ) +
     scale_fill_manual(
         values = c("#ad1594c2", "#00bbff"),

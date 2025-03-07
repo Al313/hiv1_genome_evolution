@@ -355,5 +355,8 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "dn_ds_ratio_cor_diversity.pdf"), height = 14, width = 14)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/dn_ds_ratio_cor_diversity.pdf"), height = 14, width = 14)
+fig
+dev.off()
 ```
 
