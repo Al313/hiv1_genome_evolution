@@ -185,3 +185,30 @@ for (i in 1:nrow(nef_deletions_distinct)){
 }
 
 ```
+
+
+```{r nef stop-gained}
+
+variants_ann_expiii[variants_ann_expiii$effect == "stop_gained" & variants_ann_expiii$allele_freq >= 0.99 & variants_ann_expiii$feature == "nef",]
+
+case <- "8801_G_A"
+
+fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1, drop = FALSE) +
+    scale_alpha_manual(values = c(0.1,1)) +
+    scale_y_continuous(breaks = c(0, -1, -2, -3), labels = c("1", "0.1", "0.01", "0.001")) +
+    labs(title = paste0(case, "\n"), y = "Frequency \n", x = "\n Transfer") +
+    # scale_color_manual(values = my_col_pal) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0),
+        legend.position="none")
+
+fig
+
+
+```

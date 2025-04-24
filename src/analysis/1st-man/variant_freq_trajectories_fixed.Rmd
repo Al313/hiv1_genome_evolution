@@ -263,3 +263,170 @@ dev.off()
 
 
 ```
+
+```{r new colors}
+
+
+
+
+blues_colors <- c("#A4DDED", "#A3C1AD", "#CCCCFF", "#00CCFF", "#15f4ee", 
+"#0071c5", "#5A4FCF", "#004687", "#0000CD", "#191970")
+
+triples <- blues_colors
+names(triples) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"])[order(unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"]))]
+
+reds_colors <- brewer.pal(5, "Reds")[3:5]
+quad <- reds_colors
+names(quad) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "4"])
+
+
+
+variants_expiii_subset %<>%
+    mutate(mut_info2 = case_when(rep == 1 ~ "Single Occurrence",
+                                rep == 2 ~ "Double Occurrence",
+                                rep == 3 ~ mut_info,
+                                rep == 4 ~ mut_info)) %>%
+    mutate(mut_info2 = factor(mut_info2, levels = c("Single Occurrence", "Double Occurrence", names(triples), names(quad))))
+
+
+
+custom_colors <- c(
+    "Single Occurrence" = alpha("grey", 0.3),
+    "Double Occurrence" = alpha("green", 0.6)
+)
+custom_colors <- c(custom_colors, triples, quad)
+
+
+
+
+
+fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info2)) +
+    geom_line(size = 2) +
+    facet_wrap(~exp_line, ncol = 2) +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Transfer", color = "Variant") +
+    scale_color_manual(values = custom_colors) +
+    scale_x_continuous(breaks = seq(0,500, 50))+
+    theme_bw() +
+    theme(plot.title = element_text(size = 50, hjust = 0.5),
+        axis.title = element_text(size = 50),
+        axis.text.x = element_text(size = 40, color = "black", angle = 90),
+        axis.text.y = element_text(size = 40, color = "black"),
+        strip.text.x = element_text(size = 50, angle=0),
+        legend.title = element_text(size=50),
+        legend.text = element_text(size = 40))
+
+fig
+
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/frequency_dynamics_per_repeated_",category, ".pdf"), height = 21, width = 42)
+fig
+dev.off()
+
+```
+
+```{r}
+
+variants_expiii_subset2 <- variants_expiii_subset[variants_expiii_subset$exp_line == "MT-2_1",]
+
+variants_expiii_subset2 <- variants_expiii_subset2 %>% filter(passage %in% c(270,310))
+
+head(variants_expiii_subset2)
+
+
+variants_expiii_subset2_wide <- variants_expiii_subset2 %>%
+    select(mut_info, passage, allele_freq) %>%
+    pivot_wider(names_from = passage, values_from = allele_freq)
+
+head(variants_expiii_subset2_wide)
+variants_expiii_subset2_wide <- variants_expiii_subset2_wide %>%
+  filter(!is.na(`270`) & !is.na(`310`))
+
+nrow(variants_expiii_subset2_wide)
+
+df_doubled <- variants_expiii_subset2_wide %>%
+  filter(`310` >= 2 * `270`)
+
+nrow(df_doubled)
+View(df_doubled)
+ss <- variants_expiii$mut_info[variants_expiii$exp_line == "MT-2_1" & variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg]
+
+df_doubled$mut_info[df_doubled$mut_info %in% ss]
+
+table(variants_expiii_subset2$effect_simplified[variants_expiii_subset2$mut_info %in% df_doubled$mut_info[df_doubled$mut_info %in% ss]],
+variants_expiii_subset2$mut_info[variants_expiii_subset2$mut_info %in% df_doubled$mut_info[df_doubled$mut_info %in% ss]])
+
+```
+
+
+
+```{r table of fixed variants}
+
+
+fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+
+
+variants_expiii_subset <- variants_expiii %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
+
+
+unique(variants_expiii[variants_expiii$mut_info %in% names(fix_count_table_list[[2]])[i],c(2,3,4,6,11,12,16,17,18,19,20)], n = 1)
+
+
+df <- data.frame()
+
+
+for (mut in names(setNames(unlist(fix_count_table_list, use.names = FALSE), unlist(lapply(fix_count_table_list, names))))){
+    
+    lines <- as.vector(table(variants_expiii$exp_line[variants_expiii$mut_info == mut & variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg]))
+    occurrence <- sum(lines)
+    lines <- ifelse(lines == 0, "❌", "✅")
+    
+    for (i in 1:nrow(unique(variants_ann_expiii[variants_ann_expiii$mut_info == mut,c(2,3,4,6,11,12,16,18,19,20)]))){
+        df <- rbind(df, c(as.character(unique(variants_ann_expiii[variants_ann_expiii$mut_info == mut,c(14,15)])[i,]), mut, occurrence, lines, as.character(unique(variants_ann_expiii[variants_ann_expiii$mut_info == mut,c(2,3,4,6,11,12,16,18,19,20)])[i,])))
+    }
+    
+    
+}
+
+
+
+colnames(df) <- c("variant_id", "annotation_id", "variant_name", "occurrence", "MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2", names(variants_ann_expiii[variants_ann_expiii$mut_info == mut,c(2,3,4,6,11,12,16,18,19,20)]))
+
+df$genomic_pos <- as.numeric(df$genomic_pos)
+df <- df[order(df$genomic_pos),]
+
+
+View(df)
+
+
+library(DT)
+library(htmlwidgets)
+
+
+
+
+# Create datatable with caption
+table_widget <- datatable(
+  df,
+  caption = htmltools::tags$caption(
+    style = 'caption-side: top; text-align: left; font-weight: bold;',
+    "Table 2: Fixed Variants At Transfer 500"
+  )
+)
+
+# Save as HTML
+saveWidget(
+  table_widget,
+  "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/fixed_variants.html",
+  selfcontained = TRUE
+)
+
+# df$loc_in_protein[df$loc_in_protein != ""][!(as.numeric(sapply(str_split(df$loc_in_protein[df$loc_in_protein != ""], pattern = "/"), "[[", 1)) <= as.numeric(sapply(str_split(df$loc_in_protein[df$loc_in_protein != ""], pattern = "/"), "[[", 2)))]
+
+```

@@ -138,7 +138,7 @@ df <- data.frame()
 
 for (exp_line in line_labels){
     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
     for (mut in fixed_muts){
         appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
@@ -158,27 +158,56 @@ df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance"
 
 df %<>% group_by(mut_info) %>% 
     mutate(Occurrence = n()) %>%
-    mutate(Occurrence = factor(num, levels = c("1","2","3","4"))) %>%
+    mutate(Occurrence = factor(Occurrence, levels = c("1","2","3","4"))) %>%
     mutate(exp_line_number = case_when(exp_line == "MT-2_1" ~ 1,
                                         exp_line == "MT-2_2" ~ 2,
                                         exp_line == "MT-4_1" ~ 3,
-                                        exp_line == "MT-4_2" ~ 4))   
+                                        exp_line == "MT-4_2" ~ 4)) %>%
+    ungroup()
 
 
 df_jittered <- df %>%
     mutate(y_jittered = exp_line_number + runif(n(), min = -0.1, max = 0.1))  # Add jitter to y values
 
-my_col_pal <- c(alpha("grey"), "green", "blue", "red")
 
-fig <- ggplot(df_jittered, aes(x = fixation, y = exp_line, group = mut_info)) +
+library(RColorBrewer)
+
+
+blues_colors <- c("#A4DDED", "#A3C1AD", "#CCCCFF", "#00CCFF", "#15f4ee", 
+"#0071c5", "#5A4FCF", "#004687", "#0000CD", "#191970")
+triples <- blues_colors
+names(triples) <- unique(df_jittered$mut_info[df_jittered$Occurrence == "3"])[order(unique(df_jittered$mut_info[df_jittered$Occurrence == "3"]))]
+
+reds_colors <- brewer.pal(5, "Reds")[3:5]
+quad <- reds_colors
+names(quad) <- unique(df_jittered$mut_info[df_jittered$Occurrence == "4"])
+
+
+
+df_jittered %<>%
+    mutate(mut_info2 = case_when(Occurrence == 1 ~ "Single Occurrence",
+                                Occurrence == 2 ~ "Double Occurrence",
+                                Occurrence == 3 ~ mut_info,
+                                Occurrence == 4 ~ mut_info)) %>%
+    mutate(mut_info2 = factor(mut_info2, levels = c("Single Occurrence", "Double Occurrence", names(triples), names(quad))))
+
+
+
+custom_colors <- c(
+    "Single Occurrence" = "grey",
+    "Double Occurrence" = "green"
+)
+custom_colors <- c(custom_colors, triples, quad)
+
+fig <- ggplot(df_jittered, aes(x = fixation, y = exp_line, group = mut_info, color = mut_info2)) +
     # Add lines connecting identical mutations within the same group
-    geom_line(aes(y = y_jittered, color = Occurrence),
+    geom_line(aes(y = y_jittered),
                 alpha = 0.5, 
                 size = 1) +
     # Add points for mutations
-    geom_point(aes(y = y_jittered, color = Occurrence), size = 3) +
+    geom_point(aes(y = y_jittered), size = 3) +
     scale_y_continuous(breaks = 1:4, labels = line_labels) +
-    scale_color_manual(values = my_col_pal) +
+    scale_color_manual(values = custom_colors) +
     labs(title = "Mutation Fixation Timeline",
         x = "Transfer", y = "Virus Line") +
     xlim(0, 500) +
@@ -199,5 +228,9 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "fixation_timeline.pdf"), height = 14, width = 28)
 fig
 dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/fixation_timeline.pdf"), height = 14, width = 28)
+fig
+dev.off()
+
 
 ```

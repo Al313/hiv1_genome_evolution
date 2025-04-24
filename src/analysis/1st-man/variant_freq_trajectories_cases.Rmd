@@ -276,3 +276,62 @@ dev.off()
 
 
 ```
+
+
+```{r UTR SHAREd}
+
+
+case <- c("566_G_A", "678_G_A", "9412_G_A", "9416_T_C", "9439_G_A", "9522_C_T", "9528_T_G")
+
+
+
+blues_colors <- c("#A4DDED", "#A3C1AD", "#CCCCFF", "#00CCFF", "#15f4ee", 
+"#0071c5", "#5A4FCF", "#004687", "#0000CD", "#191970")
+
+triples <- blues_colors
+names(triples) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"])[order(unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"]))]
+
+reds_colors <- brewer.pal(5, "Reds")[3:5]
+quad <- reds_colors
+names(quad) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "4"])
+
+
+head(variants_expiii_subset)
+variants_expiii_subset2 <- variants_expiii_subset %>%
+    filter(mut_info %in% case) %>%
+    mutate(mut_info2 = case_when(rep == 1 ~ "Single Occurrence",
+                                rep == 2 ~ "Double Occurrence",
+                                rep == 3 ~ mut_info,
+                                rep == 4 ~ mut_info)) %>%
+    mutate(mut_info2 = factor(mut_info2, levels = c("Single Occurrence", "Double Occurrence", names(triples), names(quad))))
+
+
+
+custom_colors <- c(triples, quad)
+
+
+
+
+
+fig <- variants_expiii_subset2 %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info2)) +
+    geom_line(size = 2) +
+    facet_wrap(~exp_line, ncol = 2) +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Transfer", color = "Variant") +
+    scale_color_manual(values = custom_colors) +
+    scale_x_continuous(breaks = seq(0,500, 50))+
+    theme_bw() +
+    theme(plot.title = element_text(size = 50, hjust = 0.5),
+        axis.title = element_text(size = 50),
+        axis.text.x = element_text(size = 40, color = "black", angle = 90),
+        axis.text.y = element_text(size = 40, color = "black"),
+        strip.text.x = element_text(size = 50, angle=0),
+        legend.title = element_text(size=50),
+        legend.text = element_text(size = 40))
+
+fig
+
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/", "frequency_dynamics_utr_triple_quad.pdf"), height = 21, width = 21)
+fig
+dev.off()
+
+```

@@ -156,6 +156,11 @@ regions <- list(Syn = 790:9407, Non_Syn = 790:9407, Untranslated = c(454:789,907
 possible_muts <- c(0.22, 0.78, 1, 1)
 
 
+if (str_detect(line1, "MT-2")){
+    offset1 <- 140
+} else {
+    offset1 <- 185
+}
 
 overall_df <- data.frame()
 
@@ -175,12 +180,24 @@ for (k in 1:4){
 
     for (line1 in exp_line_factor){
         for (line2 in exp_line_factor){
+            if (str_detect(line1, "MT-2")){
+                offset1 <- 140
+            } else {
+                offset1 <- 185
+            }
+
+            if (str_detect(line2, "MT-2")){
+                offset2 <- 140
+            } else {
+                offset2 <- 185
+            }
+
             exp_all <- data.frame()
             for (base in c("A", "C", "G", "T")){
                 variants_expiii_sub <- variants_expiii[variants_expiii$ref_allele == base & variants_expiii$genomic_pos %in% regions[[k]] & variants_expiii$mut_type == "P",]
-                minority1 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-150]))
-                minority2 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-150]))
-                shared_minority <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-150],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-150]))
+                minority1 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-offset1]))
+                minority2 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-offset2]))
+                shared_minority <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-offset1],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-offset2]))
 
                 variants_expiii_sub2 <- variants_expiii[variants_expiii$ref_allele == base & variants_expiii$effect_simplified %in% effect[[1]] & variants_expiii$mut_type == "P",]
                 fixed1 <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_psg]))

@@ -543,19 +543,24 @@ dev.off()
 
 
 ```{r fixation time based on number of recurrence}
+
+## Method 2
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
 df <- data.frame()
 
+
 for (exp_line in line_labels){
-    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,]
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
     fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
     for (mut in fixed_muts){
-        appearance <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.01])))
+        variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
         translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
         df <- rbind(df, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
     }
 }
+
 
 # set column names and right data types
 df %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
@@ -599,16 +604,16 @@ my_col_pal <- c(alpha("grey"), "green", "blue", "red")
 # Create the plot
 fig <- ggplot(df, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) + 
     geom_boxplot(color = "black", alpha = 0.7) +
-    stat_compare_means(comparisons = comparisons, method = "wilcox.test", p.adjust.method = "BH", label = "p.adj") +
+    stat_compare_means(comparisons = comparisons, method = "wilcox.test", p.adjust.method = "BH", label = "p.adj", size = 12) +
     scale_fill_manual(values = my_col_pal) +
     labs(fill = "Occurrence", x= "Occurrence", y = "Time to Fixation", title = "Fixation Dynamics Based on Variant Recurrence\n") + # Label for the legend
     theme_minimal() + # Optional: use a minimal theme
     theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15)) 
+        axis.title = element_text(size = 40),
+        axis.text.x = element_text(size = 35, angle = 90, color = "black"),
+        axis.text.y = element_text(size = 35, color = "black"),
+        legend.title = element_text(size=40),
+        legend.text = element_text(size = 35)) 
 
 
 # save figure

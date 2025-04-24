@@ -219,7 +219,7 @@ ss <- as.data.frame(ss)
 ss$feature <- row.names(ss)
 colnames(ss)[1] <- "parallel_fix"
 counts_all <- merge(counts, ss, by = "feature")
-
+counts_all %<>% group_by(feature, exp_line, passage) %>% mutate(mean = mean(normalized_min_count)) %>% select(feature, exp_line, passage, parallel_fix, mean)
 
 
 
@@ -231,7 +231,7 @@ df <- data.frame()
 options(scipen = 999)
 for (psg in seq(10,500, 10)){
     for (exp_line in exp_line_factor){
-        model <- lm(counts_all$parallel_fix[counts_all$exp_line == exp_line & counts_all$passage == psg] ~ counts_all$normalized_min_count[counts_all$exp_line == exp_line & counts_all$passage == psg])
+        model <- lm(counts_all$parallel_fix[counts_all$exp_line == exp_line & counts_all$passage == psg] ~ counts_all$mean[counts_all$exp_line == exp_line & counts_all$passage == psg])
         model_sum <- summary(model)
         model_sum$adj.r.squared
         df <- rbind(df, data.frame(passage = psg, exp_line = exp_line, r2 = model_sum$r.squared))
@@ -265,14 +265,15 @@ dev.off()
 
 
 # Subset the data for clarity
-subset_data <- counts_all[counts_all$exp_line == "MT-2_1" & counts_all$passage == 30, ]
+subset_data <- counts_all[counts_all$exp_line == "MT-4_2" & counts_all$passage == 40, ]
 
 
-fig <- ggplot(subset_data, aes(x = normalized_min_count, y = 100*parallel_fix)) +
+
+fig <- ggplot(subset_data, aes(x = mean, y = 100*parallel_fix)) +
     geom_point(color = "blue", size = 3) +  # Plot points
     geom_smooth(method = "lm", color = "black", se = TRUE) + 
     geom_text(aes(label = feature), hjust = -0.2, color = "darkred", size = 5) +  # Add annotations
-    labs(title = paste0("MT-2_1 Passage #30 Diversity vs\n passage #500 Parallism"), y = "Fixed Parallelism (%)\n", x = "\n Normalized Minority Count (%)") +
+    labs(title = paste0("MT-4_2 Passage #40 Diversity vs\n passage #500 Parallism"), y = "Fixed Parallelism (%)\n", x = "\n Normalized Minority Count (%)") +
     theme_bw()+ 
     theme(plot.title = element_text(size = 40, hjust = 0.5),
             axis.title = element_text(size = 30),
@@ -288,10 +289,14 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "diversity_parallel_association_mt-2_1_30.pdf"), height = 14, width = 14)
 fig
 dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/diversity_parallel_association_mt-2_1_30.pdf"), height = 14, width = 14)
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/diversity_parallel_association_mt-4_2_40.pdf"), height = 14, width = 14)
 fig
 dev.off()
 
 
+model <- lm(parallel_fix ~ mean, data = subset_data)
+model_sum <- summary(model)
+
+model_sum$r.squared
 
 ```

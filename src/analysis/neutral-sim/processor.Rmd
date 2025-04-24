@@ -10,7 +10,7 @@ exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 sampling_freq <- 2
 end_psg <- 1000
 
-data <- read.csv("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/src/analysis/neutral-sim/final.0.csv", header = T)
+data <- read.csv(paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/src/analysis/neutral-sim/", exp_line_factor[1],"/final.0.csv", header = T)
 
 
 fixed_count_list <- list()
@@ -69,7 +69,7 @@ fixed_count_df_long$mut_count <- round(fixed_count_df_long$mut_count/3)
 head(fixed_count_df_long)
 
 # Plot using ggplot2
-ggplot(fixed_count_df_long, aes(x = passage, y = Fixed_count, group = exp_line, color = exp_line)) +
+ggplot(fixed_count_df_long, aes(x = passage, y = mut_count, group = exp_line, color = exp_line)) +
   geom_line(size = 1, alpha = 0.5) +  # Line plot
   geom_point(size = 2) + # Add points for visibility
   labs(title = "Fixed Variant Count Over Time (Neutral Simulation)",
