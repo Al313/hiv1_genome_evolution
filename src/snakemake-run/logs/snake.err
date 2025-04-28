@@ -2,85 +2,26 @@ Building DAG of jobs...
 Using shell: /usr/bin/bash
 Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954
+Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Thu Apr 24 10:44:06 2025]
-rule extract_annotation:
-    input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.ann.vcf.gz
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz
+[Sun Apr 27 12:55:32 2025]
+rule tree_inference_all:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta
+    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz
-    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
+    resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
+ERROR: Please rename sequences listed above!
+[Sun Apr 27 12:55:33 2025]
+Error in rule tree_inference_all:
+    jobid: 0
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta
+    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
+    shell:
+        iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta -m MFP -B 1000 -redo
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
 
-   *****       ***   vcfR   ***       *****
-   This is vcfR 1.14.0 
-     browseVignettes('vcfR') # Documentation
-     citation('vcfR') # Citation
-   *****       *****      *****       *****
-
-Warning message:
-package ‘vcfR’ was built under R version 4.2.3 
-
-Attaching package: ‘dplyr’
-
-The following objects are masked from ‘package:stats’:
-
-    filter, lag
-
-The following objects are masked from ‘package:base’:
-
-    intersect, setdiff, setequal, union
-
-Warning message:
-package ‘dplyr’ was built under R version 4.2.3 
-Warning message:
-package ‘stringr’ was built under R version 4.2.3 
-Loading required package: BiocGenerics
-
-Attaching package: ‘BiocGenerics’
-
-The following objects are masked from ‘package:stats’:
-
-    IQR, mad, sd, var, xtabs
-
-The following objects are masked from ‘package:base’:
-
-    anyDuplicated, aperm, append, as.data.frame, basename, cbind,
-    colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
-    get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
-    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
-    Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
-    table, tapply, union, unique, unsplit, which.max, which.min
-
-Loading required package: S4Vectors
-Loading required package: stats4
-
-Attaching package: ‘S4Vectors’
-
-The following objects are masked from ‘package:base’:
-
-    expand.grid, I, unname
-
-Loading required package: IRanges
-Loading required package: XVector
-Loading required package: GenomeInfoDb
-
-Attaching package: ‘Biostrings’
-
-The following object is masked from ‘package:base’:
-
-    strsplit
-
-Warning messages:
-1: package ‘Biostrings’ was built under R version 4.2.3 
-2: package ‘S4Vectors’ was built under R version 4.2.3 
-3: package ‘IRanges’ was built under R version 4.2.3 
-4: package ‘XVector’ was built under R version 4.2.3 
-5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
-Warning message:
-package ‘stringr’ was built under R version 4.2.3 
-[Thu Apr 24 12:00:20 2025]
-Finished job 0.
-1 of 1 steps (100%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message

@@ -2,17 +2,17 @@ IQ-TREE multicore version 2.3.4 COVID-edition for Linux x86 64-bit built Jun  5 
 Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung, Olga Chernomor,
 Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan, Thomas Wong
 
-Host:    u20-cva0000-004 (AVX2, FMA3, 30 GB RAM)
+Host:    u20-cva0000-103 (AVX2, FMA3, 122 GB RAM)
 Command: iqtree -s /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta -m MFP -B 1000 -redo
-Seed:    139853 (Using SPRNG - Scalable Parallel Random Number Generator)
-Time:    Tue Feb 25 15:28:43 2025
+Seed:    892103 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Sun Apr 27 12:55:32 2025
 Kernel:  AVX+FMA - 1 threads (1 CPU cores detected)
 
 Reading alignment file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta ... Fasta format detected
-Reading fasta file: done in 0.0533359 secs using 88.82% CPU
+Reading fasta file: done in 0.0511077 secs using 94.69% CPU
 Alignment most likely contains DNA/RNA sequences
-Alignment has 275 sequences with 9182 columns, 1248 distinct patterns
-817 parsimony-informative, 305 singleton sites, 8060 constant sites
+Alignment has 286 sequences with 9182 columns, 1315 distinct patterns
+847 parsimony-informative, 320 singleton sites, 8015 constant sites
 WARNING: Some sequence names are changed as follows:
 MT-4_2:670 -> MT-4_2_670
 MT-4_1:550 -> MT-4_1_550
@@ -21,10 +21,10 @@ MT-2_1:530 -> MT-2_1_530
 MT-2_1:570 -> MT-2_1_570
 MT-2_2:670 -> MT-2_2_670
 MT-4_1:680 -> MT-4_1_680
-MT-2_2:520 -> MT-2_2_520
+MT-2_2:80 -> MT-2_2_80
 MT-4_1:660 -> MT-4_1_660
 MT-4_1:430 -> MT-4_1_430
-MT-2_2:80 -> MT-2_2_80
+MT-2_2:520 -> MT-2_2_520
 MT-4_1:490 -> MT-4_1_490
 MT-4_1:650 -> MT-4_1_650
 MT-4_1:670 -> MT-4_1_670
@@ -33,6 +33,7 @@ MT-4_1:70 -> MT-4_1_70
 MT-4_2:40 -> MT-4_2_40
 MT-4_1:230 -> MT-4_1_230
 MT-4_1:150 -> MT-4_1_150
+MT-4_2:630 -> MT-4_2_630
 MT-4_2:60 -> MT-4_2_60
 MT-4_1:30 -> MT-4_1_30
 MT-4_2:570 -> MT-4_2_570
@@ -44,9 +45,11 @@ MT-4_1:360 -> MT-4_1_360
 MT-4_1:140 -> MT-4_1_140
 MT-4_2:450 -> MT-4_2_450
 MT-4_1:90 -> MT-4_1_90
+MT-4_2:670 -> MT-4_2_670
 MT-4_2:580 -> MT-4_2_580
 MT-4_2:470 -> MT-4_2_470
 MT-4_2:600 -> MT-4_2_600
+MT-4_1:700 -> MT-4_1_700
 MT-4_2:520 -> MT-4_2_520
 MT-4_1:180 -> MT-4_1_180
 MT-4_2:650 -> MT-4_2_650
@@ -108,6 +111,7 @@ MT-4_1:50 -> MT-4_1_50
 MT-4_2:120 -> MT-4_2_120
 MT-4_2:300 -> MT-4_2_300
 MT-4_2:270 -> MT-4_2_270
+MT-4_2:700 -> MT-4_2_700
 MT-4_2:170 -> MT-4_2_170
 MT-4_1:410 -> MT-4_1_410
 MT-4_1:40 -> MT-4_1_40
@@ -141,6 +145,7 @@ MT-4_1:530 -> MT-4_1_530
 MT-4_2:30 -> MT-4_2_30
 MT-4_2:210 -> MT-4_2_210
 MT-4_2:200 -> MT-4_2_200
+MT-4_1:670 -> MT-4_1_670
 MT-4_1:460 -> MT-4_1_460
 MT-4_2:70 -> MT-4_2_70
 MT-4_2:20 -> MT-4_2_20
@@ -174,6 +179,7 @@ MT-2_2:350 -> MT-2_2_350
 MT-2_2:550 -> MT-2_2_550
 MT-2_2:420 -> MT-2_2_420
 MT-2_2:660 -> MT-2_2_660
+MT-2_2:670 -> MT-2_2_670
 MT-2_2:120 -> MT-2_2_120
 MT-2_2:210 -> MT-2_2_210
 MT-2_2:30 -> MT-2_2_30
@@ -186,11 +192,13 @@ MT-2_2:500 -> MT-2_2_500
 MT-2_2:230 -> MT-2_2_230
 MT-2_2:540 -> MT-2_2_540
 MT-2_2:360 -> MT-2_2_360
+MT-2_2:690 -> MT-2_2_690
 MT-2_2:590 -> MT-2_2_590
 MT-2_2:480 -> MT-2_2_480
 MT-2_2:430 -> MT-2_2_430
 MT-2_2:150 -> MT-2_2_150
 MT-2_2:290 -> MT-2_2_290
+MT-2_2:700 -> MT-2_2_700
 MT-2_2:40 -> MT-2_2_40
 MT-2_2:410 -> MT-2_2_410
 MT-2_2:440 -> MT-2_2_440
@@ -203,6 +211,7 @@ MT-2_2:400 -> MT-2_2_400
 MT-2_2:460 -> MT-2_2_460
 MT-2_2:60 -> MT-2_2_60
 MT-2_2:70 -> MT-2_2_70
+MT-2_2:580 -> MT-2_2_580
 MT-2_2:690 -> MT-2_2_690
 MT-2_2:380 -> MT-2_2_380
 MT-2_2:180 -> MT-2_2_180
@@ -215,6 +224,7 @@ MT-2_2:200 -> MT-2_2_200
 MT-2_2:560 -> MT-2_2_560
 MT-2_2:490 -> MT-2_2_490
 MT-2_2:600 -> MT-2_2_600
+MT-2_2:610 -> MT-2_2_610
 MT-2_2:390 -> MT-2_2_390
 MT-2_2:250 -> MT-2_2_250
 MT-2_1:340 -> MT-2_1_340
@@ -262,6 +272,7 @@ MT-2_1:480 -> MT-2_1_480
 MT-2_1:370 -> MT-2_1_370
 MT-2_1:330 -> MT-2_1_330
 MT-2_1:130 -> MT-2_1_130
+MT-2_1:700 -> MT-2_1_700
 MT-2_1:20 -> MT-2_1_20
 MT-2_1:660 -> MT-2_1_660
 MT-2_1:600 -> MT-2_1_600
@@ -288,487 +299,11 @@ MT-4_1:20 -> MT-4_1_20
 MT-4_2:10 -> MT-4_2_10
 MT-2_2:10 -> MT-2_2_10
 
-                                  Gap/Ambiguity  Composition  p-value
-Analyzing sequences: done in 0.000735135 secs using 74.68% CPU
-   1  MT-4_2_670                         70.09%    passed     22.83%
-   2  MT-4_1_550                          4.38%    passed     88.43%
-   3  MT-4_1_580                          4.20%    passed     89.18%
-   4  MT-2_1_530                          3.96%    passed     63.25%
-   5  MT-2_1_570                          4.25%    passed     62.01%
-   6  MT-2_2_670                         32.39%    passed     22.17%
-   7  MT-4_1_680                          4.37%    passed     84.44%
-   8  MT-2_2_520                          2.21%    passed     52.72%
-   9  MT-4_1_660                          4.41%    passed     82.18%
-  10  MT-4_1_430                          4.17%    passed     92.48%
-  11  MT-2_2_80                           0.11%    passed     75.37%
-  12  MT-4_1_490                          4.32%    passed     89.29%
-  13  MT-4_1_650                          4.39%    passed     85.34%
-  14  MT-4_1_670                         64.66%    passed     99.05%
-  15  MT-4_1_200                          0.51%    passed     93.29%
-  16  MT-4_1_70                           0.11%    passed     68.06%
-  17  MT-4_2_40                           0.11%    passed     61.96%
-  18  MT-4_1_230                          1.29%    passed     98.43%
-  19  MT-4_1_150                          0.35%    passed     82.48%
-  20  MT-4_2_60                           0.12%    passed     62.79%
-  21  MT-4_1_30                           0.11%    passed     60.40%
-  22  MT-4_2_570                          0.49%    passed     99.04%
-  23  MT-4_1_260                          0.49%    passed     98.92%
-  24  MT-4_1_240                          2.55%    passed     99.72%
-  25  MT-4_1_80                           0.12%    passed     68.49%
-  26  MT-4_2_430                          0.47%    passed     99.73%
-  27  MT-4_1_360                          1.42%    passed     99.59%
-  28  MT-4_1_140                          0.27%    passed     82.06%
-  29  MT-4_2_450                          0.47%    passed     99.84%
-  30  MT-4_1_90                           0.12%    passed     75.26%
-  31  MT-4_2_580                          0.49%    passed     98.39%
-  32  MT-4_2_470                          0.47%    passed    100.00%
-  33  MT-4_2_600                          0.48%    passed     97.40%
-  34  MT-4_2_520                          0.49%    passed     99.95%
-  35  MT-4_1_180                          0.33%    passed     88.25%
-  36  MT-4_2_650                          0.50%    passed     93.07%
-  37  MT-4_2_420                          0.47%    passed     99.68%
-  38  MT-4_1_10                           0.11%    passed     58.10%
-  39  MT-4_1_110                          0.11%    passed     80.72%
-  40  MT-4_1_210                          1.79%    passed     94.76%
-  41  MT-4_2_540                          0.47%    passed     99.95%
-  42  MT-4_2_410                          0.39%    passed     99.56%
-  43  MT-4_2_400                          0.37%    passed     99.71%
-  44  MT-4_2_660                          0.50%    passed     90.50%
-  45  MT-4_1_330                          0.44%    passed     99.97%
-  46  MT-4_2_440                          0.47%    passed     99.87%
-  47  MT-4_2_390                          0.41%    passed     99.21%
-  48  MT-4_1_340                          0.74%    passed     99.50%
-  49  MT-4_1_100                          0.11%    passed     76.61%
-  50  MT-4_2_50                           0.11%    passed     63.50%
-  51  MT-4_2_690                          0.51%    passed     87.33%
-  52  MT-4_2_380                          0.38%    passed     99.30%
-  53  MT-4_2_640                          0.52%    passed     94.19%
-  54  MT-4_2_510                          0.49%    passed     99.91%
-  55  MT-4_1_220                          1.68%    passed     97.38%
-  56  MT-4_1_170                          0.37%    passed     85.72%
-  57  MT-4_2_680                          0.51%    passed     89.26%
-  58  MT-4_1_190                          1.21%    passed     89.45%
-  59  MT-4_2_560                          0.50%    passed     99.21%
-  60  MT-4_1_300                          0.52%    passed     99.39%
-  61  MT-4_2_630                          0.52%    passed     95.65%
-  62  MT-4_1_160                          0.37%    passed     83.22%
-  63  MT-4_1_350                          0.52%    passed     99.93%
-  64  MT-4_2_480                          0.48%    passed     99.95%
-  65  MT-4_2_550                          0.47%    passed     99.70%
-  66  MT-4_1_310                          0.45%    passed     99.77%
-  67  MT-4_1_250                          1.30%    passed     99.38%
-  68  MT-4_1_280                          1.26%    passed     99.60%
-  69  MT-4_2_490                          0.48%    passed     99.82%
-  70  MT-4_1_120                          1.46%    passed     87.99%
-  71  MT-4_1_320                          0.50%    passed     99.92%
-  72  MT-4_1_130                          1.03%    passed     86.69%
-  73  MT-4_1_290                          0.58%    passed     99.08%
-  74  MT-4_2_610                          0.49%    passed     97.41%
-  75  MT-4_2_370                          0.38%    passed     98.94%
-  76  MT-4_2_500                          0.48%    passed     99.77%
-  77  MT-4_2_460                          0.47%    passed     99.95%
-  78  MT-4_2_530                          0.49%    passed     99.97%
-  79  MT-4_1_270                          1.30%    passed     99.52%
-  80  MT-4_2_590                          0.48%    passed     98.02%
-  81  MT-4_2_360                          0.37%    passed     98.83%
-  82  MT-4_1_560                          1.24%    passed     96.09%
-  83  MT-4_2_320                          0.38%    passed     96.52%
-  84  MT-4_1_390                          0.61%    passed     99.74%
-  85  MT-4_1_60                           0.11%    passed     61.96%
-  86  MT-4_2_190                          0.27%    passed     87.52%
-  87  MT-4_1_640                          3.08%    passed     88.97%
-  88  MT-4_1_520                          1.05%    passed     95.06%
-  89  MT-4_2_160                          0.22%    passed     87.01%
-  90  MT-4_1_380                          0.58%    passed     99.68%
-  91  MT-4_1_50                           0.11%    passed     58.84%
-  92  MT-4_2_120                          0.11%    passed     78.35%
-  93  MT-4_2_300                          0.37%    passed     97.61%
-  94  MT-4_2_270                          0.38%    passed     96.34%
-  95  MT-4_2_170                          0.21%    passed     85.51%
-  96  MT-4_1_410                          0.47%    passed     99.30%
-  97  MT-4_1_40                           0.11%    passed     57.27%
-  98  MT-4_2_330                          0.37%    passed     98.53%
-  99  MT-4_1_500                          3.06%    passed     93.35%
- 100  MT-4_1_610                          2.81%    passed     89.63%
- 101  MT-4_2_110                          0.11%    passed     75.52%
- 102  MT-4_1_370                          0.53%    passed     99.75%
- 103  MT-4_2_310                          0.37%    passed     96.54%
- 104  MT-4_2_250                          0.37%    passed     92.76%
- 105  MT-4_1_400                          1.66%    passed     96.14%
- 106  MT-4_2_230                          0.38%    passed     91.63%
- 107  MT-4_2_140                          0.22%    passed     84.00%
- 108  MT-4_2_240                          0.37%    passed     93.99%
- 109  MT-4_2_180                          0.21%    passed     87.22%
- 110  MT-4_2_350                          0.39%    passed     98.23%
- 111  MT-4_1_630                          1.45%    passed     94.12%
- 112  MT-4_2_290                          0.37%    passed     97.19%
- 113  MT-4_2_130                          0.21%    passed     81.91%
- 114  MT-4_1_450                          2.96%    passed     95.78%
- 115  MT-4_1_690                          3.20%    passed     85.61%
- 116  MT-4_1_590                          3.95%    passed     86.80%
- 117  MT-4_2_100                          0.11%    passed     75.84%
- 118  MT-4_1_510                          3.92%    passed     90.45%
- 119  MT-4_1_540                          3.57%    passed     91.11%
- 120  MT-4_2_90                           0.11%    passed     72.70%
- 121  MT-4_2_280                          0.37%    passed     96.05%
- 122  MT-4_2_340                          0.37%    passed     98.80%
- 123  MT-4_1_470                          2.23%    passed     96.76%
- 124  MT-4_1_530                          2.99%    passed     94.89%
- 125  MT-4_2_30                           0.11%    passed     55.71%
- 126  MT-4_2_210                          0.37%    passed     91.23%
- 127  MT-4_2_200                          0.37%    passed     89.27%
- 128  MT-4_1_460                          2.49%    passed     97.49%
- 129  MT-4_2_70                           0.11%    passed     64.53%
- 130  MT-4_2_20                           0.11%    passed     57.27%
- 131  MT-4_2_260                          0.37%    passed     95.09%
- 132  MT-4_1_440                          3.28%    passed     92.02%
- 133  MT-4_2_80                           0.11%    passed     70.08%
- 134  MT-4_1_480                          2.90%    passed     94.69%
- 135  MT-4_2_150                          0.23%    passed     84.48%
- 136  MT-4_1_600                          2.30%    passed     92.40%
- 137  MT-4_2_220                          0.37%    passed     91.04%
- 138  MT-4_1_420                          0.52%    passed     99.49%
- 139  MT-4_1_570                          2.54%    passed     88.18%
- 140  MT-2_2_100                          0.11%    passed     78.35%
- 141  MT-2_2_610                          2.56%    passed     49.48%
- 142  MT-2_2_680                          2.68%    passed     31.89%
- 143  MT-2_2_450                          2.21%    passed     77.42%
- 144  MT-2_2_370                          1.21%    passed     93.34%
- 145  MT-2_2_260                          0.38%    passed     99.87%
- 146  MT-2_2_640                          1.59%    passed     50.30%
- 147  MT-2_2_470                          2.25%    passed     64.45%
- 148  MT-2_2_630                          2.09%    passed     54.62%
- 149  MT-2_2_580                          1.71%    passed     49.01%
- 150  MT-2_2_510                          1.56%    passed     66.20%
- 151  MT-2_2_110                          0.11%    passed     80.96%
- 152  MT-2_2_330                          0.34%    passed     99.59%
- 153  MT-2_2_170                          0.27%    passed     96.96%
- 154  MT-2_2_310                          0.73%    passed     96.52%
- 155  MT-2_2_240                          1.70%    passed     99.97%
- 156  MT-2_2_320                          0.39%    passed     99.05%
- 157  MT-2_2_350                          0.37%    passed     99.18%
- 158  MT-2_2_550                          2.30%    passed     50.75%
- 159  MT-2_2_420                          0.84%    passed     80.41%
- 160  MT-2_2_660                          1.73%    passed     43.11%
- 161  MT-2_2_120                          0.12%    passed     86.58%
- 162  MT-2_2_210                          0.27%    passed     98.83%
- 163  MT-2_2_30                           0.11%    passed     57.99%
- 164  MT-2_2_270                          0.38%    passed     99.97%
- 165  MT-2_2_650                          2.69%    passed     39.04%
- 166  MT-2_2_130                          0.27%    passed     91.58%
- 167  MT-2_2_300                          0.38%    passed     99.39%
- 168  MT-2_2_140                          0.27%    passed     96.48%
- 169  MT-2_2_500                          2.22%    passed     54.55%
- 170  MT-2_2_230                          0.27%    passed     99.13%
- 171  MT-2_2_540                          0.52%    passed     62.05%
- 172  MT-2_2_360                          1.23%    passed     95.79%
- 173  MT-2_2_590                          0.84%    passed     63.53%
- 174  MT-2_2_480                          2.21%    passed     66.20%
- 175  MT-2_2_430                          0.33%    passed     93.51%
- 176  MT-2_2_150                          0.27%    passed     96.16%
- 177  MT-2_2_290                          0.39%    passed     99.70%
- 178  MT-2_2_40                           0.11%    passed     61.12%
- 179  MT-2_2_410                          2.21%    passed     79.94%
- 180  MT-2_2_440                          0.74%    passed     85.63%
- 181  MT-2_2_50                           0.11%    passed     60.76%
- 182  MT-2_2_280                          0.35%    passed     99.82%
- 183  MT-2_2_340                          0.73%    passed     98.49%
- 184  MT-2_2_190                          0.27%    passed     98.66%
- 185  MT-2_2_570                          2.40%    passed     48.07%
- 186  MT-2_2_400                          2.21%    passed     84.67%
- 187  MT-2_2_460                          2.21%    passed     70.57%
- 188  MT-2_2_60                           0.11%    passed     65.04%
- 189  MT-2_2_70                           0.11%    passed     68.58%
- 190  MT-2_2_690                          2.64%    passed     24.44%
- 191  MT-2_2_380                          0.36%    passed     94.63%
- 192  MT-2_2_180                          0.27%    passed     97.43%
- 193  MT-2_2_90                           0.11%    passed     79.44%
- 194  MT-2_2_160                          0.27%    passed     95.59%
- 195  MT-2_2_530                          2.27%    passed     53.66%
- 196  MT-2_2_20                           0.11%    passed     56.23%
- 197  MT-2_2_220                          0.27%    passed     98.27%
- 198  MT-2_2_200                          0.28%    passed     98.67%
- 199  MT-2_2_560                          1.38%    passed     59.37%
- 200  MT-2_2_490                          2.22%    passed     65.05%
- 201  MT-2_2_600                          1.73%    passed     56.43%
- 202  MT-2_2_390                          1.99%    passed     85.82%
- 203  MT-2_2_250                          0.37%    passed     99.71%
- 204  MT-2_1_340                          0.70%    passed     98.09%
- 205  MT-2_1_500                          3.28%    passed     68.73%
- 206  MT-2_1_30                           0.11%    passed     59.66%
- 207  MT-2_1_110                          0.27%    passed     78.23%
- 208  MT-2_1_170                          0.27%    passed     84.35%
- 209  MT-2_1_440                          1.64%    passed     91.31%
- 210  MT-2_1_690                          2.84%    passed     35.12%
- 211  MT-2_1_610                          2.04%    passed     47.37%
- 212  MT-2_1_90                           0.27%    passed     72.47%
- 213  MT-2_1_400                          0.66%    passed     94.96%
- 214  MT-2_1_590                          0.73%    passed     62.88%
- 215  MT-2_1_310                          0.29%    passed     94.10%
- 216  MT-2_1_630                          1.10%    passed     63.81%
- 217  MT-2_1_510                          2.17%    passed     67.29%
- 218  MT-2_1_100                          0.28%    passed     78.75%
- 219  MT-2_1_250                          0.27%    passed     98.03%
- 220  MT-2_1_670                          2.62%    passed     36.97%
- 221  MT-2_1_140                          0.27%    passed     81.12%
- 222  MT-2_1_390                          0.66%    passed     95.82%
- 223  MT-2_1_520                          2.04%    passed     61.31%
- 224  MT-2_1_80                           0.27%    passed     67.54%
- 225  MT-2_1_460                          3.70%    passed     77.33%
- 226  MT-2_1_270                          0.27%    passed     98.10%
- 227  MT-2_1_190                          0.28%    passed     90.13%
- 228  MT-2_1_380                          0.65%    passed     96.32%
- 229  MT-2_1_550                          0.63%    passed     68.62%
- 230  MT-2_1_280                          0.27%    passed     98.09%
- 231  MT-2_1_230                          1.18%    passed     98.16%
- 232  MT-2_1_650                          2.09%    passed     46.36%
- 233  MT-2_1_360                          0.84%    passed     97.88%
- 234  MT-2_1_40                           0.11%    passed     62.67%
- 235  MT-2_1_580                          2.25%    passed     65.43%
- 236  MT-2_1_560                          2.68%    passed     66.03%
- 237  MT-2_1_150                          0.27%    passed     83.21%
- 238  MT-2_1_300                          0.28%    passed     98.47%
- 239  MT-2_1_240                          0.27%    passed     96.72%
- 240  MT-2_1_410                          1.96%    passed     89.43%
- 241  MT-2_1_450                          1.38%    passed     95.44%
- 242  MT-2_1_290                          0.28%    passed     99.00%
- 243  MT-2_1_160                          0.27%    passed     80.16%
- 244  MT-2_1_350                          0.99%    passed     97.03%
- 245  MT-2_1_480                          2.93%    passed     75.49%
- 246  MT-2_1_370                          0.65%    passed     97.05%
- 247  MT-2_1_330                          0.68%    passed     96.85%
- 248  MT-2_1_130                          0.27%    passed     82.31%
- 249  MT-2_1_20                           0.11%    passed     59.35%
- 250  MT-2_1_660                          1.44%    passed     42.90%
- 251  MT-2_1_600                          1.21%    passed     73.13%
- 252  MT-2_1_540                          2.12%    passed     59.66%
- 253  MT-2_1_320                          0.90%    passed     94.57%
- 254  MT-2_1_200                          0.27%    passed     86.39%
- 255  MT-2_1_680                          2.67%    passed     35.35%
- 256  MT-2_1_420                          1.24%    passed     89.55%
- 257  MT-2_1_640                          2.05%    passed     33.40%
- 258  MT-2_1_50                           0.11%    passed     66.77%
- 259  MT-2_1_70                           0.12%    passed     65.96%
- 260  MT-2_1_120                          0.27%    passed     79.31%
- 261  MT-2_1_620                          0.90%    passed     54.97%
- 262  MT-2_1_10                           0.11%    passed     60.07%
- 263  MT-2_1_60                           0.11%    passed     66.42%
- 264  MT-2_1_430                          1.59%    passed     87.17%
- 265  MT-2_1_470                          3.19%    passed     67.61%
- 266  MT-2_1_210                          0.50%    passed     90.63%
- 267  MT-2_1_220                          1.03%    passed     95.84%
- 268  MT-2_1_490                          0.71%    passed     68.59%
- 269  MT-2_1_180                          0.27%    passed     87.17%
- 270  MT-2_1_260                          0.27%    passed     97.72%
- 271  K03455.1                            0.11%    passed     39.30%
- 272  MT-4_1_20                           0.11%    passed     58.10%
- 273  MT-4_2_10                           0.11%    passed     58.10%
- 274  MT-2_2_10                           0.11%    passed     58.10%
- 275  NL43_ann_wk0virusPassRef_plasmid    0.11%    passed     58.10%
-WARNING: 2 sequences contain more than 50% gaps/ambiguity
-****  TOTAL                               1.62%  0 sequences failed composition chi2 test (p-value<5%; df=3)
-NOTE: MT-4_1_20 is identical to MT-4_1_10 but kept for subsequent analysis
-NOTE: 3 identical sequences (see below) will be ignored for subsequent analysis
-NOTE: MT-4_2_10 (identical to MT-4_1_10) is ignored but added at the end
-NOTE: MT-2_2_10 (identical to MT-4_1_10) is ignored but added at the end
-NOTE: NL43_ann_wk0virusPassRef_plasmid (identical to MT-4_1_10) is ignored but added at the end
-Alignment was printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.uniqueseq.phy
-
-For your convenience alignment with unique sequences printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.uniqueseq.phy
-
-
-Create initial parsimony tree by phylogenetic likelihood library (PLL)... 0.043 seconds
-Perform fast likelihood tree search using GTR+I+G model...
-Estimate model parameters (epsilon = 5.000)
-Perform nearest neighbor interchange...
-Estimate model parameters (epsilon = 1.000)
-1. Initial log-likelihood: -32461.951
-2. Current log-likelihood: -32457.196
-3. Current log-likelihood: -32453.116
-4. Current log-likelihood: -32449.319
-5. Current log-likelihood: -32445.778
-6. Current log-likelihood: -32442.501
-7. Current log-likelihood: -32439.501
-8. Current log-likelihood: -32436.764
-9. Current log-likelihood: -32434.288
-10. Current log-likelihood: -32432.053
-11. Current log-likelihood: -32430.049
-12. Current log-likelihood: -32428.263
-13. Current log-likelihood: -32426.691
-14. Current log-likelihood: -32425.301
-15. Current log-likelihood: -32424.078
-16. Current log-likelihood: -32423.016
-Optimal log-likelihood: -32421.854
-Rate parameters:  A-C: 1.53407  A-G: 8.94799  A-T: 1.24690  C-G: 0.54338  C-T: 7.70270  G-T: 1.00000
-Base frequencies:  A: 0.364  C: 0.177  G: 0.237  T: 0.222
-Proportion of invariable sites: 0.767
-Gamma shape alpha: 0.576
-Parameters optimization took 16 rounds (6.750 sec)
-Time for fast ML tree search: 16.268 seconds
-
-NOTE: ModelFinder requires 115 MB RAM!
-ModelFinder will test up to 484 DNA models (sample size: 9182) ...
- No. Model         -LnL         df  AIC          AICc         BIC
-  1  GTR+F         35316.236    549 71730.473    71800.433    75642.098
-  2  GTR+F+I       32683.287    550 66466.575    66536.799    70385.325
-  3  GTR+F+G4      32952.998    550 67005.996    67076.219    70924.746
-  4  GTR+F+I+G4    32418.077    551 65938.153    66008.641    69864.029
-  5  GTR+F+R2      32478.943    551 66059.887    66130.374    69985.762
-  6  GTR+F+R3      32464.292    553 66034.585    66105.601    69974.710
-  7  GTR+F+R4      32463.842    555 66037.684    66109.231    69992.059
- 14  GTR+F+I+R2    32361.283    552 65826.565    65897.316    69759.565
- 15  GTR+F+I+R3    32309.551    554 65727.102    65798.383    69674.352
- 16  GTR+F+I+R4    32308.957    556 65729.914    65801.726    69691.414
- 37  SYM+I+R3      32677.726    551 66457.452    66527.939    70383.327
- 59  TVM+F+I+R3    32311.428    553 65728.855    65799.871    69668.980
- 81  TVMe+I+R3     32731.220    550 66562.440    66632.663    70481.190
-103  TIM3+F+I+R3   32337.251    552 65778.502    65849.253    69711.502
-125  TIM3e+I+R3    32740.584    549 66579.169    66649.130    70490.794
-147  TIM2+F+I+R3   32318.554    552 65741.108    65811.859    69674.108
-169  TIM2e+I+R3    32689.796    549 66477.592    66547.552    70389.217
-191  TIM+F+I+R3    32332.142    552 65768.284    65839.035    69701.284
-213  TIMe+I+R3     32738.565    549 66575.130    66645.091    70486.755
-235  TPM3u+F+I+R3  32340.223    551 65782.446    65852.933    69708.321
-257  TPM3+I+R3     32800.603    548 66697.205    66766.903    70601.705
-279  TPM2u+F+I+R3  32320.556    551 65743.111    65813.598    69668.986
-301  TPM2+I+R3     32744.015    548 66584.030    66653.728    70488.530
-323  K3Pu+F+I+R3   32335.152    551 65772.304    65842.791    69698.179
-345  K3P+I+R3      32798.925    548 66693.851    66763.549    70598.351
-367  TN+F+I+R3     32337.312    551 65776.625    65847.112    69702.500
-389  TNe+I+R3      32743.144    548 66582.288    66651.986    70486.788
-411  HKY+F+I+R3    32340.282    550 65780.564    65850.787    69699.314
-433  K2P+I+R3      32803.594    547 66701.188    66770.625    70598.564
-455  F81+F+I+R3    33511.036    549 68120.072    68190.033    72031.698
-477  JC+I+R3       34101.610    546 69295.220    69364.395    73185.470
-Akaike Information Criterion:           GTR+F+I+R3
-Corrected Akaike Information Criterion: GTR+F+I+R3
-Bayesian Information Criterion:         TVM+F+I+R3
-Best-fit model: TVM+F+I+R3 chosen according to BIC
-
-All model information printed to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.model.gz
-CPU time for ModelFinder: 153.036 seconds (0h:2m:33s)
-Wall-clock time for ModelFinder: 154.114 seconds (0h:2m:34s)
-Generating 1000 samples for ultrafast bootstrap (seed: 139853)...
-
-NOTE: 37 MB RAM (0 GB) is required!
-Estimate model parameters (epsilon = 0.100)
-1. Initial log-likelihood: -32311.428
-Optimal log-likelihood: -32311.379
-Rate parameters:  A-C: 1.58190  A-G: 8.53365  A-T: 1.24886  C-G: 0.53911  C-T: 8.53365  G-T: 1.00000
-Base frequencies:  A: 0.364  C: 0.177  G: 0.237  T: 0.222
-Proportion of invariable sites: 0.764
-Site proportion and rates:  (0.171,1.359) (0.060,9.620) (0.005,37.970)
-Parameters optimization took 1 rounds (0.505 sec)
-Wrote distance file to... 
-Computing ML distances based on estimated model parameters...
-Calculating distance matrix: done in 0.35035 secs using 100% CPU
-Computing ML distances took 0.352052 sec (of wall-clock time) 0.352053 sec (of CPU time)
-Setting up auxiliary I and S matrices: done in 0.00271341 secs
-Computing RapidNJ tree took 0.007474 sec (of wall-clock time) 0.003467 sec (of CPU time)
-Log-likelihood of RapidNJ tree: -33223.762
---------------------------------------------------------------------
-|             INITIALIZING CANDIDATE TREE SET                      |
---------------------------------------------------------------------
-Generating 98 parsimony trees... 5.582 second
-Computing log-likelihood of 98 initial trees ... 6.559 seconds
-Current best score: -32311.379
-
-Do NNI search on 20 best initial trees
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 1: -32311.334
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 2: -32300.819
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 10: -32296.956
-Iteration 10 / LogL: -32296.956 / Time: 0h:3m:2s
-Iteration 20 / LogL: -32314.967 / Time: 0h:3m:14s
-Finish initializing candidate tree set (20)
-Current best tree score: -32296.956 / CPU time: 38.309
-Number of iterations: 20
---------------------------------------------------------------------
-|               OPTIMIZING CANDIDATE TREE SET                      |
---------------------------------------------------------------------
-Iteration 30 / LogL: -32301.285 / Time: 0h:3m:25s (0h:2m:20s left)
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 35: -32296.659
-Iteration 40 / LogL: -32296.917 / Time: 0h:3m:37s (0h:2m:35s left)
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 44: -32295.258
-Iteration 50 / LogL: -32297.459 / Time: 0h:3m:54s (0h:2m:33s left)
-Log-likelihood cutoff on original alignment: -32378.716
-Iteration 60 / LogL: -32295.476 / Time: 0h:4m:7s (0h:2m:12s left)
-Iteration 70 / LogL: -32298.814 / Time: 0h:4m:19s (0h:1m:52s left)
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 73: -32294.595
-Iteration 80 / LogL: -32298.724 / Time: 0h:4m:32s (0h:2m:19s left)
-Estimate model parameters (epsilon = 0.100)
-BETTER TREE FOUND at iteration 86: -32294.483
-Iteration 90 / LogL: -32301.654 / Time: 0h:4m:44s (0h:2m:21s left)
-Iteration 100 / LogL: -32294.859 / Time: 0h:4m:57s (0h:2m:4s left)
-Log-likelihood cutoff on original alignment: -32376.125
-NOTE: Bootstrap correlation coefficient of split occurrence frequencies: 0.997
-Iteration 110 / LogL: -32302.303 / Time: 0h:5m:10s (0h:2m:9s left)
-Iteration 120 / LogL: -32307.680 / Time: 0h:5m:23s (0h:1m:53s left)
-Iteration 130 / LogL: -32297.520 / Time: 0h:5m:35s (0h:1m:38s left)
-Iteration 140 / LogL: -32294.867 / Time: 0h:5m:47s (0h:1m:23s left)
-Iteration 150 / LogL: -32306.864 / Time: 0h:5m:59s (0h:1m:8s left)
-Log-likelihood cutoff on original alignment: -32376.125
-Iteration 160 / LogL: -32309.914 / Time: 0h:6m:12s (0h:0m:54s left)
-Iteration 170 / LogL: -32296.695 / Time: 0h:6m:25s (0h:0m:41s left)
-Iteration 180 / LogL: -32295.856 / Time: 0h:6m:37s (0h:0m:27s left)
-TREE SEARCH COMPLETED AFTER 187 ITERATIONS / Time: 0h:6m:46s
-
---------------------------------------------------------------------
-|                    FINALIZING TREE SEARCH                        |
---------------------------------------------------------------------
-Performs final model parameters optimization
-Estimate model parameters (epsilon = 0.010)
-1. Initial log-likelihood: -32294.483
-2. Current log-likelihood: -32294.425
-3. Current log-likelihood: -32294.363
-4. Current log-likelihood: -32294.308
-5. Current log-likelihood: -32294.266
-6. Current log-likelihood: -32294.228
-7. Current log-likelihood: -32294.196
-8. Current log-likelihood: -32294.169
-9. Current log-likelihood: -32294.145
-10. Current log-likelihood: -32294.124
-11. Current log-likelihood: -32294.106
-12. Current log-likelihood: -32294.092
-13. Current log-likelihood: -32294.079
-14. Current log-likelihood: -32294.068
-Optimal log-likelihood: -32294.056
-Rate parameters:  A-C: 1.58007  A-G: 8.61228  A-T: 1.24750  C-G: 0.54451  C-T: 8.61228  G-T: 1.00000
-Base frequencies:  A: 0.364  C: 0.177  G: 0.237  T: 0.222
-Proportion of invariable sites: 0.801
-Site proportion and rates:  (0.149,2.097) (0.046,11.066) (0.004,41.820)
-Parameters optimization took 14 rounds (5.838 sec)
-BEST SCORE FOUND : -32294.056
-Creating bootstrap support values...
-Split supports printed to NEXUS file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.splits.nex
-Total tree length: 0.364
-
-Total number of iterations: 187
-CPU time used for tree search: 247.820 sec (0h:4m:7s)
-Wall-clock time used for tree search: 250.771 sec (0h:4m:10s)
-Total CPU time used: 408.925 sec (0h:6m:48s)
-Total wall-clock time used: 413.353 sec (0h:6m:53s)
-
-Computing bootstrap consensus tree...
-Reading input file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.splits.nex...
-272 taxa and 854 splits.
-Consensus tree written to /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.contree
-Reading input trees file /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.contree
-Log-likelihood of consensus tree: -32294.714
-
-Analysis results written to: 
-  IQ-TREE report:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree
-  Maximum-likelihood tree:       /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.treefile
-  Likelihood distances:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.mldist
-
-Ultrafast bootstrap approximation results written to:
-  Split support values:          /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.splits.nex
-  Consensus tree:                /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.contree
-  Screen log file:               /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.log
-
-Date and Time: Tue Feb 25 15:35:37 2025
+ERROR: Duplicated sequence name MT-2_2_580
+ERROR: Duplicated sequence name MT-2_2_610
+ERROR: Duplicated sequence name MT-2_2_670
+ERROR: Duplicated sequence name MT-2_2_690
+ERROR: Duplicated sequence name MT-4_1_670
+ERROR: Duplicated sequence name MT-4_2_630
+ERROR: Duplicated sequence name MT-4_2_670
+ERROR: Please rename sequences listed above!
