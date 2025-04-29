@@ -6,9 +6,9 @@ library(dplyr)
 library(stringr)
 
 # set variables to process relevant metadata
-experiment_data <- c("141024", "261124", "300125", "240225")
-arrival_date <- c("14102024", "03122024", "300125", "240225")
-ngs_sample_list_version <- c("461", "466", "472", "475")
+experiment_data <- c("141024", "261124", "300125", "240225", "230425")
+arrival_date <- c("14102024", "03122024", "300125", "240225", "240425")
+ngs_sample_list_version <- c("461", "466", "472", "475","494")
 
 # read in the relevant metadata
 ngs_sample_list_new <- read.csv(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/incoming-raw-data/", arrival_date[length(arrival_date)], "/NGS_samples_list_all_runs_NGS_R1R2_v", ngs_sample_list_version[length(ngs_sample_list_version)], "_",experiment_data[length(experiment_data)], ".csv"), sep = ",", header = T, stringsAsFactors = F)
@@ -19,8 +19,9 @@ tail(ngs_sample_list_new, n = 10)
 # filter for relevant samples
 
 # this gives all the samples sequenced in that sequencing batch; i.e., both newly sequenced samples and repeats
-batch_name <- c("VPIII13_16_p580_630", "VPIII13_16_p640-690", "VPIV17-20p580-630", "VPIV17-20p640-690")
+batch_name <- c("VPIII13_16_p580_630", "VPIII13_16_p640-690", "VPIV17-20p580-630", "VPIV17-20p640-690", "VPIII_IVrepetitions")
 ngs_sample_list_new <- ngs_sample_list_new[str_detect(ngs_sample_list_new$forward_name, pattern = batch_name[length(batch_name)]),]
+
 
 # to get only newly sequenced samples
 # ngs_sample_list_new <- ngs_sample_list_new[ngs_sample_list_new$Set %in% paste("VP III ", seq(520,570,by=10), sep = ""),]
@@ -119,6 +120,43 @@ ngs_sample_list_old <- ngs_sample_list_old[ngs_sample_list_old$virus_line_no != 
 nrow(ngs_sample_list_updated)
 ngs_sample_list_updated <- rbind(ngs_sample_list_old, ngs_sample_list_new)
 
+
+### for 24042025 update
+"13MT2EXPIIIVP450combinedseq20052022"
+"16MT4EXPIIIVP510seq09092022"
+ngs_sample_list_updated <- ngs_sample_list_updated[!(ngs_sample_list_updated$full_sample_name %in% c("13MT2EXPIIIVP450combinedseq20052022", "16MT4EXPIIIVP510seq09092022")),]
+
+exclusion_list <- c("14MT2EXPIIIVP580seq10102024", "14MT2EXPIIIVP610seq10102024", "14MT2EXPIIIVP670seq31102024", "15MT4EXPIIIVP670seq31102024",
+"16MT4EXPIIIVP670seq31102024", "17MT2EXPIVVP580seq23012025", "17MT2EXPIVVP610seq23012025", "17MT2EXPIVVP640seq20022025",
+"18MT2EXPIVVP660seq20022025", "18MT2EXPIVVP670seq20022025", "18MT2EXPIVVP680seq20022025", "18MT2EXPIVVP690seq20022025",
+"19MT2EXPIVVP650seq20022025", "19MT2EXPIVVP680seq20022025", "20MT2EXPIVVP590seq23012025", "20MT2EXPIVVP610seq23012025",
+"20MT2EXPIVVP620seq23012025", "20MT2EXPIVVP630seq23012025", "20MT2EXPIVVP640seq20022025", "20MT2EXPIVVP670seq20022025")
+
+ngs_sample_list_updated <- ngs_sample_list_updated[!(ngs_sample_list_updated$full_sample_name %in% exclusion_list),]
+
+merged_list <- c("14MT2EXPIIIVP690seq31102024", "15MT4EXPIIIVP630seq10102024", "19MT2EXPIVVP640seq20022025", "20MT2EXPIVVP680seq20022025",
+"20MT2EXPIVVP690seq20022025")
+
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "14MT2EXPIIIVP690seq17042025",c("used", "paired_sample", "included")] <- c("T/2", "14MT2EXPIIIVP690seq31102024", TRUE)
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "15MT4EXPIIIVP630seq17042025",c("used", "paired_sample", "included")] <- c("T/2", "15MT4EXPIIIVP630seq10102024", TRUE)
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "19MT2EXPIVVP640seq17042025",c("used", "paired_sample", "included")] <- c("T/2", "19MT2EXPIVVP640seq20022025", TRUE)
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "20MT2EXPIVVP680seq17042025",c("used", "paired_sample", "included")] <- c("T/2", "20MT2EXPIVVP680seq20022025", TRUE)
+ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == "20MT2EXPIVVP690seq17042025",c("used", "paired_sample", "included")] <- c("T/2", "20MT2EXPIVVP690seq20022025", TRUE)
+
+ngs_sample_list_updated <- ngs_sample_list_updated[!(ngs_sample_list_updated$full_sample_name %in% merged_list),]
+
+
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 14 & ngs_sample_list_old$transfer_no == 690,"full_sample_name"] <- "14MT2EXPIIIVP690combinedseq17042025"
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 15 & ngs_sample_list_old$transfer_no == 630,"full_sample_name"] <- "15MT4EXPIIIVP630combinedseq17042025"
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 19 & ngs_sample_list_old$transfer_no == 640,"full_sample_name"] <- "19MT2EXPIVVP640combinedseq17042025"
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 20 & ngs_sample_list_old$transfer_no == 680,"full_sample_name"] <- "20MT2EXPIVVP680combinedseq17042025"
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 20 & ngs_sample_list_old$transfer_no == 690,"full_sample_name"] <- "20MT2EXPIVVP690combinedseq17042025"
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 16 & ngs_sample_list_old$transfer_no == 700,"full_sample_name"] <- "16MT4EXPIIIVP700seq17042025"
+ngs_sample_list_old[ngs_sample_list_old$virus_line_no == 15 & ngs_sample_list_old$transfer_no == 700,"full_sample_name"] <- "15MT4EXPIIIVP700seq17042025"
+
+
+nrow(ngs_sample_list_updated)
+
 ###########
 
 # prepare the dataframe for saving
@@ -132,7 +170,7 @@ ngs_sample_list_updated <-  ngs_sample_list_updated[with(ngs_sample_list_updated
 
 # move the previous version of the metadata to the archived folder
 
-version <- "v5"
+version <- "v6"
 
 file.rename(from = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv",
           to   = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/archived/NGS_samples_list_processed_",version,".csv"))
@@ -142,6 +180,4 @@ file.rename(from = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-e
 
 # save the updated metadata
 write.table(ngs_sample_list_updated, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", quote = F, row.names = F)
-
-
 

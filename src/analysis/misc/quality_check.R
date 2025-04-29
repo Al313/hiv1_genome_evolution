@@ -23,21 +23,16 @@ quals = read.table(file = paste0(wd, "results/tables/pipeline-outputs/qc/all_qua
 colnames(quals) = c("file","average","cover","average_5","average_a","average_b","average_c","average_d","average_e","average_3","cover_all","mapped", "mapquality")
 quals$full_sample_name = as.character(lapply(str_split(lapply(str_split(quals$file, pattern = "/"), "[[", 12), pattern = "_"), "[[", 1))
 quals = quals[,-1]
-quals$full_sample_name <- gsub("4VP", "IVVP", quals$full_sample_name)
-quals$full_sample_name <- gsub("3VP", "IIIVP", quals$full_sample_name)
-quals %<>% filter(str_detect(full_sample_name, pattern = "IVVP"))
+
 
 # read in the metadata
 meta = read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", header = TRUE, stringsAsFactors = FALSE)
 meta = meta[meta$included == TRUE,]
 
-meta$full_sample_name <- gsub("4VP", "IVVP", meta$full_sample_name)
-meta$full_sample_name <- gsub("3VP", "IIIVP", meta$full_sample_name)
-meta %<>% filter(str_detect(full_sample_name, pattern = "IVVP"))
 
 # merge the two dataset
 quals_meta <- merge(quals, meta, by = "full_sample_name")
-
+nrow(quals_meta)
 options(scipen = 999)
 quals_meta[quals_meta$transfer_no >= 580 & quals_meta$virus_line_no %in% 17:20,]
 
@@ -84,6 +79,7 @@ coverage_map <- ggplot(data=quals_gathered, aes(x = amplicon, y = average_depth,
         axis.text = element_text(size = 15))
 
 
+quals_gathered[quals_gathered$virus_line_no == 19 & quals_gathered$transfer_no == 670,]
 
 # save the ggplot object
 png(filename = paste0(wd, "results/figs/png/coverage_map.png"),
