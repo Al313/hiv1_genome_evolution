@@ -7,7 +7,7 @@ Create a new intermediary directory in incoming-raw-data (name corresponds to da
 
 Check the coverage of repeated samples and decide whether to combine them or not.
 
-If the need to be combined combine them in a separate directory (cat a.R1.fastq.gz b.R1.fastq.gz > xxx.R1.fastq.gz ... then rename to new sequencing sample name including "combined before seq in the name). Do this for both reads of samples. Then transfer these samples to their respective directories.
+If the need to be combined combine them in a separate directory (zcat a.R1.fastq.gz b.R1.fastq.gz | gzip > acombined.R1.fastq.gz ... then rename to new sequencing sample name including "combined before seq in the name). Do this for both reads of samples. Then transfer these samples to their respective directories.
 
 
 For repeated samples whether combined or replaced make sure to move the bam/bam.bai of previous versions to archived.
