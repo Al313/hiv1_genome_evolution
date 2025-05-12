@@ -1,229 +1,28 @@
 Building DAG of jobs...
-Building DAG of jobs...
-Using shell: /usr/bin/bash
 Using shell: /usr/bin/bash
 Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
 Rules claiming more threads will be scaled down.
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Select jobs to execute...
+Provided resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-
-[Tue Apr 29 14:53:33 2025]
-[Tue Apr 29 14:53:33 2025]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/15
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_15_multiqc_report.html
+[Mon May 12 13:28:49 2025]
+rule msa_50th:
+    input: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full2.fasta
+    output: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full_msa.fasta
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_15_multiqc_report.html
-    wildcards: experiment=iii, line=15
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/14
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_14_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_14_multiqc_report.html
-    wildcards: experiment=iii, line=14
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/data/processed-data/consensus/pipeline-outputs/full/50th_consensus_full_msa.fasta
+    resources: mem_mb=20000, mem_mib=19074, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
 
+muscle 5.1.linux64 []  129Gb RAM, 32 cores
+Built May 16 2023 07:53:40
+(C) Copyright 2004-2021 Robert C. Edgar.
+https://drive5.com
 
-  /// MultiQC 🔍 | v1.21
+Input: 50 seqs, avg length 9172, max 9172
 
+00:00 8.8Mb  CPU has 32 cores, defaulting to 20 threads
 
-  /// MultiQC 🔍 | v1.21
+WARNING: Max OMP threads 1
 
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/14
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/15
-Building DAG of jobs...
-Building DAG of jobs...
-Building DAG of jobs...
-Building DAG of jobs...
-Building DAG of jobs...
-Building DAG of jobs...
-Using shell: /usr/bin/bash
-Using shell: /usr/bin/bash
-Using shell: /usr/bin/bash
-Using shell: /usr/bin/bash
-Using shell: /usr/bin/bash
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Rules claiming more threads will be scaled down.
-Rules claiming more threads will be scaled down.
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Rules claiming more threads will be scaled down.
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Select jobs to execute...
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Provided resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954
-Select jobs to execute...
-Select jobs to execute...
-Select jobs to execute...
-Select jobs to execute...
-Select jobs to execute...
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 276/276  
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 276/276  
-
-
-
-
-
-
-[Tue Apr 29 14:53:42 2025]
-[Tue Apr 29 14:53:42 2025]
-[Tue Apr 29 14:53:42 2025]
-[Tue Apr 29 14:53:42 2025]
-[Tue Apr 29 14:53:42 2025]
-[Tue Apr 29 14:53:42 2025]
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/20
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_20_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_20_multiqc_report.html
-    wildcards: experiment=iv, line=20
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-rule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/18
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_18_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_18_multiqc_report.html
-    wildcards: experiment=iv, line=18
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovasrule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/17
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_17_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_17_multiqc_report.html
-    wildcards: experiment=iv, line=17
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovasrule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/19
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_19_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iv_19_multiqc_report.html
-    wildcards: experiment=iv, line=19
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovasrule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/16
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_16_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_16_multiqc_report.html
-    wildcards: experiment=iii, line=16
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovasrule collect_sequencing_quality:
-    input: /home/amovas/data/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/13
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_13_multiqc_report.html
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/qc/iii_13_multiqc_report.html
-    wildcards: experiment=iii, line=13
-    resources: mem_mb=5000, mem_mib=4769, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-
-
-
-
-
-
-
-
-
-
-|            fastqc | Found 138 reports
-|            fastqc | Found 138 reports
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-
-  /// MultiQC 🔍 | v1.21
-
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | MultiQC Version v1.28 now available!
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/13
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iii/16
-|           multiqc | Report      : multiqc/multiqc_report.html
-/data/processed-data/fastqc-reports/pipeline-outputs/iv/20
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/19
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/18
-|           multiqc | Search path : /data/amovas/genome-evo-proj/data/processed-data/fastqc-reports/pipeline-outputs/iv/17
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-[Tue Apr 29 14:53:51 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-[Tue Apr 29 14:53:52 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 276/276  |         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 280/280  
-
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 280/280  |         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 280/280  
-
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 280/280  
-|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 280/280  
-|            fastqc | Found 138 reports
-|            fastqc | Found 140 reports
-|            fastqc | Found 140 reports
-|            fastqc | Found 140 reports
-|            fastqc | Found 140 reports
-|            fastqc | Found 140 reports
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | Report      : multiqc/multiqc_report.html
-|           multiqc | Data        : multiqc/multiqc_data
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-|           multiqc | MultiQC complete
-[Tue Apr 29 14:54:01 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-[Tue Apr 29 14:54:01 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-[Tue Apr 29 14:54:01 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-[Tue Apr 29 14:54:01 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-[Tue Apr 29 14:54:01 2025]
-Finished job 0.
-1 of 1 steps (100%) done
-[Tue Apr 29 14:54:01 2025]
-Finished job 0.
-1 of 1 steps (100%) done
+00:00 8.8Mb   0.082% Calc posteriors00:21 9.0Mb    0.16% Calc posteriors00:36 9.2Mb    0.24% Calc posteriors00:51 9.3Mb    0.33% Calc posteriors01:06 9.4Mb    0.41% Calc posteriors01:21 9.5Mb    0.49% Calc posteriors01:36 9.6Mb    0.57% Calc posteriors01:50 9.7Mb    0.65% Calc posteriors02:05 9.8Mb    0.73% Calc posteriors02:19 9.9Mb    0.82% Calc posteriors02:34 10Mb      0.9% Calc posteriors02:48 10Mb     0.98% Calc posteriors03:02 10Mb      1.1% Calc posteriors03:17 10Mb      1.1% Calc posteriors03:32 11Mb      1.2% Calc posteriors03:46 11Mb      1.3% Calc posteriors04:01 11Mb      1.4% Calc posteriors04:16 11Mb      1.5% Calc posteriors04:30 11Mb      1.6% Calc posteriors04:45 11Mb      1.6% Calc posteriors05:00 11Mb      1.7% Calc posteriors05:14 11Mb      1.8% Calc posteriors05:29 12Mb      1.9% Calc posteriors05:43 12Mb      2.0% Calc posteriors05:58 12Mb      2.0% Calc posteriors06:13 12Mb      2.1% Calc posteriors06:27 12Mb      2.2% Calc posteriors06:41 12Mb      2.3% Calc posteriors06:56 12Mb      2.4% Calc posteriors07:11 12Mb      2.4% Calc posteriors07:26 12Mb      2.5% Calc posteriors07:40 13Mb      2.6% Calc posteriors07:55 13Mb      2.7% Calc posteriors08:10 13Mb      2.8% Calc posteriors08:25 13Mb      2.9% Calc posteriors08:40 13Mb      2.9% Calc posteriors08:55 13Mb      3.0% Calc posteriorsslurmstepd: error: *** JOB 21377719 ON u20-cva0000-125 CANCELLED AT 2025-05-12T13:37:47 ***
