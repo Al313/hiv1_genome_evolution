@@ -334,7 +334,7 @@ df <- df %>%
   ungroup()
 
 labels_with_p10 <- with(df, setNames(
-  paste0(exp_line, "\n(", round(p10, 1), ")"),
+  paste0(exp_line, "(", round(p10, 1), ")"),
   exp_line
 ))
 
@@ -353,18 +353,18 @@ df_summary <- df_summary[!is.na(df_summary$bin),]
 
 
 fig <- ggplot(df_summary, aes(x = effect_simplified, y = n, fill = bin)) +
-    facet_wrap(~labels, ncol = 2) +
+    facet_wrap(~labels, ncol = 2, strip.position = "top") +
     geom_bar(stat = "identity", position = "dodge") +
     scale_color_manual(labels = line_labels, values = line_palette) +
     scale_y_continuous(limits = c(0, 10), breaks = seq(0, 12, by = 2)) +
-    labs(title = "Frequency of Rapidly Fixating Mutations over Time", x = "Translational Impact", y = "Count of Rapidly Fixing Variants \n (10th Percentile Time to Fixation)", fill = "Fixation Period") +
+    labs(title = "", x = "\nTranslational Impact", y = "Count of Rapidly Fixing Variants \n", fill = "Fixation Period") +
     theme_bw() +
-    theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 40),
-        axis.text.x = element_text(size = 30, face="bold", angle = 90),
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 30),
         axis.text.y = element_text(size = 30),
-        strip.text.x = element_text(size = 40, angle=90),
-        legend.title = element_text(size=40),
+        strip.text.x = element_text(size = 30),
+        legend.title = element_text(size=45),
         legend.text = element_text(size = 30))
 
 fig
@@ -603,10 +603,12 @@ comparisons <- list(
 my_col_pal <- c(alpha("grey"), "green", "blue", "red")
 # Create the plot
 fig <- ggplot(df, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) + 
-    geom_boxplot(color = "black", alpha = 0.7) +
+    geom_boxplot(color = "black", alpha = 0.7, outliers = FALSE) +
+    geom_jitter(aes(color = Occurrence), width = 0.2, size = 2, alpha = 0.9) +
     stat_compare_means(comparisons = comparisons, method = "wilcox.test", p.adjust.method = "BH", label = "p.adj", size = 12) +
     scale_fill_manual(values = my_col_pal) +
-    labs(fill = "Occurrence", x= "Occurrence", y = "Time to Fixation", title = "Fixation Dynamics Based on Variant Recurrence\n") + # Label for the legend
+    scale_color_manual(values = my_col_pal) +
+    labs(fill = "Occurrence", x= "Occurrence", y = "Time to Fixation", title = "") + # Label for the legend
     theme_minimal() + # Optional: use a minimal theme
     theme(plot.title = element_text(size = 30, hjust = 0.5),
         axis.title = element_text(size = 40),

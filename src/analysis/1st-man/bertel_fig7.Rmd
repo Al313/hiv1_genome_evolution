@@ -242,14 +242,14 @@ fig <- df %>% ggplot(aes(x = passage, y = r2, color = exp_line)) +
     geom_line() + 
     geom_point() +
     scale_color_manual(values = line_palette, name = "Virus Line") + 
-    labs(title = paste0("Fixed Parallelism Association with Diversity per Gene"), y = "R-squared\n", x = "\nTransfer") +
+    labs(title = "", y = "R-squared\n", x = "\nTransfer") +
     theme_bw() +
-    theme(plot.title = element_text(size = 40, hjust = 0.5),
-        axis.title = element_text(size = 30),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=35),
-        legend.text = element_text(size = 25))
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 30, angle = 90),
+        axis.text.y = element_text(size = 30),
+        legend.title = element_text(size=45),
+        legend.text = element_text(size = 30))
 
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]
@@ -272,15 +272,16 @@ subset_data <- counts_all[counts_all$exp_line == "MT-4_2" & counts_all$passage =
 fig <- ggplot(subset_data, aes(x = mean, y = 100*parallel_fix)) +
     geom_point(color = "blue", size = 3) +  # Plot points
     geom_smooth(method = "lm", color = "black", se = TRUE) + 
-    geom_text(aes(label = feature), hjust = -0.2, color = "darkred", size = 5) +  # Add annotations
-    labs(title = paste0("MT-4_2 Passage #40 Diversity vs\n passage #500 Parallism"), y = "Fixed Parallelism (%)\n", x = "\n Normalized Minority Count (%)") +
+    geom_text(aes(label = feature), vjust = +1.2, hjust = +0.8, color = "darkred", size = 8) +  # Add annotations
+    labs(title = "", y = "Fixed Parallelism (%)\n", x = "\n Normalized Minority Count (%)") +
+    scale_x_continuous(breaks = seq(0, 1, by = 0.25), labels = seq(0, 1, by = 0.25), limit = c(0,1.2)) +
     theme_bw()+ 
-    theme(plot.title = element_text(size = 40, hjust = 0.5),
-            axis.title = element_text(size = 30),
-            axis.text.x = element_text(size = 20, angle = 90),
-            axis.text.y = element_text(size = 20),
-            legend.title = element_text(size=35),
-            legend.text = element_text(size = 25))
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+            axis.title = element_text(size = 45),
+            axis.text.x = element_text(size = 30, angle = 90),
+            axis.text.y = element_text(size = 30),
+            legend.title = element_text(size=45),
+            legend.text = element_text(size = 30))
 
 # save figure
 date <- str_split(Sys.time(), pattern = " ")[[1]][1]

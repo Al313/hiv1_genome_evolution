@@ -259,17 +259,16 @@ fig <- df_long %>%
         values = c("#ad1594c2", "#00bbff"),
         guide = "none"  # Hides the legend for `fill`
     ) +
-    labs(title = "Sharedness over Time\n Among Fixed Variants", y = "Shared(%)\n", x = "\nTransfer") +
+    labs(title = "", y = "Shared(%)\n", x = "\nTransfer") +
     scale_linetype_discrete(name = "Dataset",  # Change the legend title here
                     labels = c("Observed", "Simulated"))+
-    theme_minimal()+ 
+    theme_bw()+ 
     theme(plot.title = element_text(size = 55, hjust = 0.5),
             axis.title = element_text(size = 45),
-            axis.text.x = element_text(size = 20, face="bold"),
+            axis.text.x = element_text(size = 30, angle = 90),
             axis.text.y = element_text(size = 30),
-            strip.text.x = element_text(size = 35, angle=90),
-            legend.title = element_text(size=40),
-            legend.text = element_text(size = 35))
+            legend.title = element_text(size=45),
+            legend.text = element_text(size = 30))
 
 
 

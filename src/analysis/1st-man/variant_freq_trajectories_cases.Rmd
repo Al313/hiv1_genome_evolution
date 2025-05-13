@@ -127,7 +127,7 @@ fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = p
     theme_bw() +
     theme(plot.title = element_text(size = 55, hjust = 0.5),
         axis.title = element_text(size = 45),
-        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.x = element_text(size = 30, angle = 90),
         axis.text.y = element_text(size = 30),
         strip.text.x = element_text(size = 35, angle=0),
         legend.position="none")
@@ -188,7 +188,7 @@ color_mapping <- setNames(variants_expiii_subset_mt21$color, variants_expiii_sub
 fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in% fixed_muts,] %>%
     ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info, alpha = tracking_group, size = tracking_group)) +
     geom_line() +
-    facet_wrap(~exp_line, ncol = 1) +
+    facet_grid(rows = vars(exp_line), switch = "y") +
     scale_alpha_manual(values = c(0.1,1)) +
     scale_size_manual(values = c(1,1.5)) +
     labs(title = "", y = "Frequency \n", x = "\n Transfer") +
@@ -196,9 +196,9 @@ fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in
     theme_bw() +
     theme(plot.title = element_text(size = 55, hjust = 0.5),
         axis.title = element_text(size = 45),
-        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.x = element_text(size = 30, angle = 90),
         axis.text.y = element_text(size = 30),
-        strip.text.x = element_text(size = 35, angle=0),
+        strip.text.y = element_text(size = 35, angle=0),
         legend.position="none")
 
 
@@ -248,16 +248,16 @@ variants_expiii_subset <- variants_expiii %>%
 
 fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info_line, alpha = tracking_group)) +
     geom_line() +
-    facet_wrap(~exp_line, ncol = 1) +
+    facet_grid(rows = vars(exp_line), switch = "y") +
     scale_alpha_manual(values = c(0.1,1)) +
-    labs(title = paste0(case, "\n"), y = "Frequency \n", x = "\n Transfer") +
+    labs(title = "", y = "Frequency \n", x = "\n Transfer") + #title = paste0(case, "\n")
     scale_color_manual(values = my_col_pal) +
     theme_bw() +
     theme(plot.title = element_text(size = 55, hjust = 0.5),
         axis.title = element_text(size = 45),
-        axis.text.x = element_text(size = 20, angle = 90),
+        axis.text.x = element_text(size = 30, angle = 90),
         axis.text.y = element_text(size = 30),
-        strip.text.x = element_text(size = 35, angle=0),
+        strip.text.y = element_text(size = 35, angle=0),
         legend.position="none")
 
 fig
