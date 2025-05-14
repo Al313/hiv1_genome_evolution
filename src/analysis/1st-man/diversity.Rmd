@@ -172,11 +172,12 @@ dev.off()
 
 # mean of entropy per sample 
 
-fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line)) +
+fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line, alpha = exp_line)) +
   geom_line(linewidth=2) + 
   labs(x="\nTransfer", y= "Mean Entropy\n", color = "Virus Line", title = paste0("Mean of Entropy per Sample")) +
   scale_color_manual(values = line_col_palette) +
-  scale_x_continuous(breaks = seq(0,570,50)) +
+  scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
+  scale_alpha_manual(values = c("MT-2_1" = 0.1, "MT-2_2" = 0.1, "MT-4_1" = 1, "MT-4_2" = 0.1)) +  # Adjust for your line names
   theme_bw() +
   theme(plot.title = element_text(size = 50, hjust = 0.5),
     axis.title = element_text(size = 40),

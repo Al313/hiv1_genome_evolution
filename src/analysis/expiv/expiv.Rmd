@@ -104,9 +104,12 @@ variants_ann$mut_info <- paste(variants_ann$genomic_pos, variants_ann$ref_allele
 ## only keep the EXPIV data
 
 variants_ann_expiv <- variants_ann[variants_ann$exp_line %in% 17:20,]
-end_passage <- 690
+end_passage <- 700
 variants_ann_expiv <- variants_ann_expiv %>%
-                              mutate(exp_line = case_when(exp_line==17 ~ "MT2_1", exp_line==18 ~ "MT2_2", exp_line==19 ~ "MT2_3", exp_line==20 ~ "MT2_4"))
+                              mutate(exp_line = case_when(exp_line==17 ~ "MT2_i", exp_line==18 ~ "MT2_ii", exp_line==19 ~ "MT2_iii", exp_line==20 ~ "MT2_iv"))
+
+line_col_palette <- c("#66ff66", "#00cc99", "#009900", "#558000")
+line_labels <- c("MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
 
 variants_expiv <- variants_ann_expiv %>% filter(!duplicated(variant_id))
 
@@ -125,9 +128,9 @@ variants_expiv <- variants_ann_expiv %>% filter(!duplicated(variant_id))
 ```{r number of min mutations}
 
 exp <- "EXPIV"
-category <- "Fixed"
-min_threshold <- 0.99
-max_threshold <- 1.01
+category <- "Minority"
+min_threshold <- 0.05
+max_threshold <- 0.5
 
 # get numbers for in-text reporting
 variants_expiv_subset <- variants_expiv %>%
@@ -167,6 +170,22 @@ fig <- fig %>% layout(title = paste0(category, " Mutations Accumulation"),
 
 fig
 
+
+fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
+        geom_line(linewidth=2) +
+        # geom_smooth(aes(group = host_line, color = host_line), method = "lm", se = FALSE, linetype = "dashed", linewidth = 1) + # Regression by host_factor
+        labs(x="\nTransfer", y= "Mutation Count\n", color = "Virus Line", title = paste0(category, " Mutation Accumulation"))+
+        scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
+        scale_y_continuous(limits = c(0,max(counts$mut_count, na.rm = T)+20),breaks = seq(0,max(counts$mut_count, na.rm = T)+20,20)) +
+        scale_color_manual(values = line_col_palette) +
+        # scale_alpha_manual(values = c("MT-2_1" = 0.1, "MT-2_2" = 0.1, "MT-4_1" = 1, "MT-4_2" = 0.1)) +  # Adjust for your line names
+        theme_bw() +
+        theme(plot.title = element_text(size = 50, hjust = 0.5),
+        axis.title = element_text(size = 40),
+        axis.text.x = element_text(size = 40, angle = 90, color = "black"),
+        axis.text.y = element_text(size = 40, color = "black"),
+        legend.title = element_text(size=50),
+        legend.text = element_text(size = 40))
 
 ```
 
