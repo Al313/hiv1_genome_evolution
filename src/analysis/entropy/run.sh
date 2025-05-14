@@ -19,7 +19,7 @@ echo "#!/bin/bash
 #SBATCH --array=13-20
 #SBATCH -c 1
 #SBATCH --time=3-00:00:00
-#SBATCH --mem=10G	
+#SBATCH --mem=15G	
 #SBATCH --output=${out_dir}/%x-%j-%a.out
 
 echo \$SLURM_ARRAY_TASK_ID
