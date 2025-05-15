@@ -82,9 +82,9 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 # Set simulation parameters
 print(exp_line, flush = True)
 genome_length, initial_population = 2100, 400
-mutation_rate = 2e-5
+mutation_rate = 5e-4
 R0 = 12
-seq_sampling_frac = 20
+seq_sampling_frac = 100
 # total_generations = int(generation_time)
 sample_nr = int(sample_nr)
 # print(total_generations, flush = True)

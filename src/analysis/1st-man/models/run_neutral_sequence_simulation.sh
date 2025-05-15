@@ -47,7 +47,7 @@ mutation_types=("Fixed")
 
 
 # Set the generation time based on the mutation type
-tot_gen_nr=150
+tot_gen_nr=1500
 
 bottleneck_freq=3
 seq_sampling_freq=30
