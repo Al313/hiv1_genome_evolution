@@ -11,7 +11,7 @@ import math
 
 # Get command-line arguments
 args = sys.argv[1:] if len(sys.argv) > 1 else ["MT-2_1", "Majority", 180]
-exp_line, mut_cat, generation_time = args
+exp_line, mut_cat, generation_time, sample_nr, bottleneck_freq, seq_sampling_freq = args
 
 # Determine working directory
 if os.path.exists("/home/amovas/"):
@@ -32,6 +32,7 @@ category_thresholds = {
     "Fixed": (0.99, 1.01),
     "All": (0.01, 1.01),
 }
+
 min_threshold, max_threshold = category_thresholds.get(category, (0.01, 1.01))
 
 # Define logarithmic mean function
@@ -80,31 +81,43 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 
 # Set simulation parameters
 print(exp_line, flush = True)
-genome_length, initial_population = 9171, 400
+genome_length, initial_population = 917, 400
 if genome_length == 917:
     mutation_rate = 2e-4
 elif genome_length == 9171:
     mutation_rate = 2e-5
 R0 = 44
-seq_sampling_frac = 2
-total_generations = int(generation_time)
-print(total_generations, flush = True)
-bottleneck_intervals, sampling_freq = 2, 2
+seq_sampling_frac = 20
+# total_generations = int(generation_time)
+sample_nr = int(sample_nr)
+# print(total_generations, flush = True)
+# bottleneck_intervals, sampling_freq = 2, 2
+bottleneck_intervals = int(bottleneck_freq)
+seq_sampling_freq = int(seq_sampling_freq)
 
 # Initialize population as an integer NumPy array
-np.random.seed(2)
+np.random.seed(2+sample_nr)
 
-init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
+if sample_nr == 1:
+    init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
+    np.save(f"{wd}results/tables/misc/neutral-seq-sim/sequences/init_population.npy", init_population)
+else:
+    prev_sample_nr = sample_nr-1
+    init_population = np.load(f"{wd}results/tables/misc/neutral-seq-sim/sequences/init_population.npy")
+    starting_population = np.load(f"{wd}results/tables/misc/neutral-seq-sim/populations/{prev_sample_nr}.npy")
 
 
 # Store total mutations over time
-mutation_counts = np.zeros((total_generations // sampling_freq)-1)
+# mutation_counts = np.zeros((total_generations // sampling_freq)-1)
 
 # Simulation loop
-population = init_population.copy()
+if sample_nr == 1:
+    population = init_population.copy()
+else:
+    population = starting_population.copy()
 
 
-for gen in range(1, total_generations + 1):
+for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_freq + 1):
     print(gen, flush = True)
 
     bottleneck_size = calculate_transfer_size((gen + 1) // 2, base_transfer_sizes)
@@ -124,36 +137,39 @@ for gen in range(1, total_generations + 1):
 
 
     # Step 3: Sequencing
-    if gen % sampling_freq == 1:
-        psg = gen // sampling_freq
+    if gen % seq_sampling_freq == 0:
+        # psg = sample_nr
 
         # Determine variant frequency
-        proportions = np.apply_along_axis(calculate_proportions, axis=0, arr=population).astype(np.float32)
-        # population[np.random.choice(population.shape[0], round(population.shape[0]/seq_sampling_frac))]
+        #proportions = np.apply_along_axis(calculate_proportions, axis=0, arr=population).astype(np.float32)
+        sampled_population = population[np.random.choice(population.shape[0], round(population.shape[0]/seq_sampling_frac))]
 
         # Apply function to each column
-        dominant_values_per_column = np.apply_along_axis(find_dominant_values, axis=0, arr=proportions, threshold=min_threshold)+1
-        dominant_values_per_column = dominant_values_per_column.flatten()
+        # dominant_values_per_column = np.apply_along_axis(find_dominant_values, axis=0, arr=proportions, threshold=min_threshold)+1
+        # dominant_values_per_column = dominant_values_per_column.flatten()
 
         # Step 4: Track mutation accumulation
         # mutation_counts[psg - 1] = np.count_nonzero(dominant_values_per_column != init_population[0, :])
-        mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & (dominant_values_per_column>0))
+        # mutation_counts[psg - 1] = np.count_nonzero((dominant_values_per_column != init_population[0, :]) & (dominant_values_per_column>0))
 
-
-        if psg > 1 and mutation_counts[psg - 1] > mutation_counts[psg - 2]:
-            print("######", flush = True)
-            print(np.where(dominant_values_per_column != init_population[0, :] & (dominant_values_per_column>0)), flush = True)
+        np.save(f"{wd}results/tables/misc/neutral-seq-sim/sequences/{sample_nr}.npy", sampled_population)
+        
+        # if psg > 1 and mutation_counts[psg - 1] > mutation_counts[psg - 2]:
+        #     print("######", flush = True)
+        #     print(np.where(dominant_values_per_column != init_population[0, :] & (dominant_values_per_column>0)), flush = True)
     
     # Step 5: Apply bottleneck every 2 generations
     if gen % bottleneck_intervals == 0:
         population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
+        if gen % seq_sampling_freq == 0:
+            np.save(f"{wd}results/tables/misc/neutral-seq-sim/populations/{sample_nr}.npy", population)
     else:
         pass
 
 
 
 
-
+"""
 # Save results
 mutation_counts_df = pd.DataFrame(mutation_counts)
 mutation_counts_df.to_csv(
@@ -166,5 +182,4 @@ proportions_df.to_csv(
     f"{wd}results/tables/misc/neutral-seq-sim/proportions/neutral_simulation_{exp_line}_{genome_length}_{total_generations}_{seq_sampling_frac}.tsv",
     sep="\t", index=False, header=False
 )
-
-
+"""

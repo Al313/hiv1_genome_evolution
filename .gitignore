@@ -31,3 +31,4 @@ src/analysis/mut-sig/MutationalPatterns/
 
 src/analysis/neutral-sim/**/samples/
 
+results/tables/misc/neutral-seq-sim/populations/
