@@ -91,7 +91,7 @@ for sample_nr in \$(seq 1 \${tot_seq}); do
 
 job_file="\${job_dir}/neutral_seq_sim_\${exp_line}_\${mut_cat}_\${sample_nr}.job"
 
-mem=\$(( sample_nr * 3 + 50 ))
+mem=\$(( sample_nr * 3 + 20 ))
 
 echo "#!/bin/bash
 

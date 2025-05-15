@@ -117,7 +117,7 @@ else:
 for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_freq + 1):
     print(gen, flush = True)
 
-    bottleneck_size = calculate_transfer_size((gen + 1) // 2, base_transfer_sizes)
+    bottleneck_size = calculate_transfer_size(max(1, (gen + 1) // 3), base_transfer_sizes)
     print(bottleneck_size, flush = True)
 
     # Step 1: Mutation - Apply mutation rate
