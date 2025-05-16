@@ -57,7 +57,7 @@ print(exp_line, flush = True)
 genome_length, initial_population = 2100, 400
 mutation_rate = 2e-5
 seq_sampling_frac = 100
-infection_success_rate = 0.1
+infection_success_rate = 0.5
 sample_nr = int(sample_nr)
 bottleneck_intervals = int(bottleneck_freq)
 if bottleneck_intervals == 2:
@@ -91,8 +91,8 @@ else:
 
 
 # Define path and filename
-folder_path_population = f"{wd}results/tables/misc/neutral-seq-sim/populations/{bottleneck_intervals}"
-folder_path_sequence = f"{wd}results/tables/misc/neutral-seq-sim/sequences/{bottleneck_intervals}"
+folder_path_population = f"{wd}results/tables/misc/neutral-seq-sim/populations/{bottleneck_intervals}/{exp_line}"
+folder_path_sequence = f"{wd}results/tables/misc/neutral-seq-sim/sequences/{bottleneck_intervals}/{exp_line}"
 # Ensure the directory exists
 os.makedirs(folder_path_population, exist_ok=True)
 os.makedirs(folder_path_sequence, exist_ok=True)

@@ -21,6 +21,10 @@ if [ ! -d ${output_dir} ]; then
 fi
 
 
+# Loop over lines
+exp_lines=("MT-4_1" "MT-4_2")
+
+for exp_line in "${exp_lines[@]}"; do
 
 cat > "${job_file}" <<EOF
 #!/bin/bash
@@ -37,7 +41,7 @@ source activate ha_proj
 
 # parameters
 
-bottleneck_freq=3
+bottleneck_freq=2
 tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
@@ -70,13 +74,12 @@ fi
 
 
 
-rm /home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/populations/\${bottleneck_freq}/*
-rm /home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/sequences/\${bottleneck_freq}/*
+rm /home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/*
+rm /home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/sequences/\${bottleneck_freq}/\${exp_line}/*
 
 
 
-# Loop over each cell line and submit a separate job
-for exp_line in "\${exp_lines[@]}"; do
+# Loop over samples
 
 for sample_nr in \$(seq 1 \${tot_seq}); do
 
@@ -120,7 +123,8 @@ done
 
 
 done
-done
 EOF
 
 sbatch ${job_file}
+
+done
