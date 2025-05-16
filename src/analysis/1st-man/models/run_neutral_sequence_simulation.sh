@@ -70,6 +70,10 @@ fi
 
 
 
+rm /home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/populations/\${bottleneck_freq}/*
+rm /home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/sequences/\${bottleneck_freq}/*
+
+
 
 # Loop over each cell line and submit a separate job
 for exp_line in "\${exp_lines[@]}"; do
@@ -80,6 +84,9 @@ for sample_nr in \$(seq 1 \${tot_seq}); do
 job_file="\${job_dir}/neutral_seq_sim_\${exp_line}_\${sample_nr}.job"
 
 mem=\$(( sample_nr + 10 ))
+
+
+
 
 echo "#!/bin/bash
 

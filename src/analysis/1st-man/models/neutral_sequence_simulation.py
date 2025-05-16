@@ -57,6 +57,7 @@ print(exp_line, flush = True)
 genome_length, initial_population = 2100, 400
 mutation_rate = 2e-5
 seq_sampling_frac = 100
+infection_success_rate = 0.1
 sample_nr = int(sample_nr)
 bottleneck_intervals = int(bottleneck_freq)
 if bottleneck_intervals == 2:
@@ -77,7 +78,7 @@ os.makedirs(folder_path_sequence, exist_ok=True)
 
 
 # Create and save initial ancestral population and read previous populations
-np.random.seed(2+sample_nr)
+np.random.seed(sample_nr)
 
 if sample_nr == 1:
     init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
@@ -111,7 +112,7 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
     print(gen, flush = True)
 
     bottleneck_size = calculate_transfer_size(max(1, (gen + 1) // bottleneck_intervals), base_transfer_sizes)
-    bottleneck_size = round(bottleneck_size/10)
+    bottleneck_size = round(bottleneck_size*infection_success_rate)
     print(bottleneck_size, flush = True)
 
     # Step 1: Mutation - Apply mutation rate
