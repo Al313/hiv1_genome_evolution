@@ -47,10 +47,10 @@ mutation_types=("Fixed")
 
 
 # Set the generation time based on the mutation type
-tot_gen_nr=1500
+tot_gen_nr=1000
 
-bottleneck_freq=3
-seq_sampling_freq=30
+bottleneck_freq=2
+seq_sampling_freq=20
 
 
 
@@ -91,7 +91,7 @@ for sample_nr in \$(seq 1 \${tot_seq}); do
 
 job_file="\${job_dir}/neutral_seq_sim_\${exp_line}_\${mut_cat}_\${sample_nr}.job"
 
-mem=\$(( sample_nr * 3 + 20 ))
+mem=\$(( sample_nr + 10 ))
 
 echo "#!/bin/bash
 

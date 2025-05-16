@@ -82,7 +82,7 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 # Set simulation parameters
 print(exp_line, flush = True)
 genome_length, initial_population = 2100, 400
-mutation_rate = 5e-4
+mutation_rate = 2e-5
 R0 = 12
 seq_sampling_frac = 100
 # total_generations = int(generation_time)
@@ -117,7 +117,7 @@ else:
 for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_freq + 1):
     print(gen, flush = True)
 
-    bottleneck_size = calculate_transfer_size(max(1, (gen + 1) // 3), base_transfer_sizes)
+    bottleneck_size = calculate_transfer_size(max(1, (gen + 1) // bottleneck_intervals), base_transfer_sizes)
     print(bottleneck_size, flush = True)
 
     # Step 1: Mutation - Apply mutation rate
@@ -157,7 +157,7 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
     
     # Step 5: Apply bottleneck every 2 generations
     if gen % bottleneck_intervals == 0:
-        population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
+        population = population[np.random.choice(population.shape[0], round(bottleneck_size/3), replace=False)]
         if gen % seq_sampling_freq == 0:
             np.save(f"{wd}results/tables/misc/neutral-seq-sim/populations/{sample_nr}.npy", population)
     else:
