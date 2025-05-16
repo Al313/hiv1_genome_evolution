@@ -83,13 +83,16 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 print(exp_line, flush = True)
 genome_length, initial_population = 2100, 400
 mutation_rate = 2e-5
-R0 = 12
 seq_sampling_frac = 100
 # total_generations = int(generation_time)
 sample_nr = int(sample_nr)
 # print(total_generations, flush = True)
 # bottleneck_intervals, sampling_freq = 2, 2
 bottleneck_intervals = int(bottleneck_freq)
+if bottleneck_intervals == 2:
+    R0 = 44
+elif bottleneck_intervals == 3:
+    R0 = 12
 seq_sampling_freq = int(seq_sampling_freq)
 
 # Initialize population as an integer NumPy array
