@@ -65,16 +65,38 @@ elif bottleneck_intervals == 3:
     R0 = 12
 seq_sampling_freq = int(seq_sampling_freq)
 
-# Initialize population as an integer NumPy array
+
+
+
+# Define path and filename
+folder_path_population = f"{wd}results/tables/misc/neutral-seq-sim/populations/{bottleneck_intervals}"
+folder_path_sequence = f"{wd}results/tables/misc/neutral-seq-sim/sequences/{bottleneck_intervals}"
+# Ensure the directory exists
+os.makedirs(folder_path_population, exist_ok=True)
+os.makedirs(folder_path_sequence, exist_ok=True)
+
+
+# Create and save initial ancestral population and read previous populations
 np.random.seed(2+sample_nr)
 
 if sample_nr == 1:
     init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
-    np.save(f"{wd}results/tables/misc/neutral-seq-sim/sequences/init_population.npy", init_population)
+    np.save(f"{folder_path_sequence}/init_population.npy", init_population)
 else:
     prev_sample_nr = sample_nr-1
-    init_population = np.load(f"{wd}results/tables/misc/neutral-seq-sim/sequences/init_population.npy")
-    starting_population = np.load(f"{wd}results/tables/misc/neutral-seq-sim/populations/{prev_sample_nr}.npy")
+    init_population = np.load(f"{folder_path_sequence}/init_population.npy")
+    starting_population = np.load(f"{folder_path_population}/{prev_sample_nr}.npy")
+
+
+
+# Define path and filename
+folder_path_population = f"{wd}results/tables/misc/neutral-seq-sim/populations/{bottleneck_intervals}"
+folder_path_sequence = f"{wd}results/tables/misc/neutral-seq-sim/sequences/{bottleneck_intervals}"
+# Ensure the directory exists
+os.makedirs(folder_path_population, exist_ok=True)
+os.makedirs(folder_path_sequence, exist_ok=True)
+
+
 
 
 
@@ -112,14 +134,14 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
         sampled_population = population[np.random.choice(population.shape[0], round(population.shape[0]/seq_sampling_frac))]
 
 
-        np.save(f"{wd}results/tables/misc/neutral-seq-sim/sequences/{sample_nr}.npy", sampled_population)
+        np.save(f"{folder_path_sequence}/{sample_nr}.npy", sampled_population)
         
     
     # Step 5: Apply bottleneck every 2 generations
     if gen % bottleneck_intervals == 0:
         population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
         if gen % seq_sampling_freq == 0:
-            np.save(f"{wd}results/tables/misc/neutral-seq-sim/populations/{sample_nr}.npy", population)
+            np.save(f"{folder_path_population}/{sample_nr}.npy", population)
     else:
         pass
 

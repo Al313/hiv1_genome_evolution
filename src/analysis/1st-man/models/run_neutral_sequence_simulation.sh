@@ -37,7 +37,7 @@ source activate ha_proj
 
 # parameters
 
-bottleneck_freq=2
+bottleneck_freq=3
 tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
@@ -104,7 +104,7 @@ job_id=\$(echo \${job_submission_output} | awk '{print \$4}')
 touch \${output_dir}/\${job_id}
 
 # Path to the file youre waiting for
-FILE="/home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/populations/\${sample_nr}.npy"
+FILE="/home/amovas/data/genome-evo-proj/results/tables/misc/neutral-seq-sim/populations/\${bottleneck_freq}/\${sample_nr}.npy"
 
 while [ ! -f "\$FILE" ]; do
 echo "Waiting for \$FILE to be created..."
