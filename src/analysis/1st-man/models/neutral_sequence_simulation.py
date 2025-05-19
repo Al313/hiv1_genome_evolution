@@ -8,6 +8,7 @@ import pandas as pd
 import sys
 import os
 import math
+import re
 
 # Get command-line arguments
 args = sys.argv[1:] if len(sys.argv) > 1 else ["MT-2_1", "Majority", 180]
@@ -54,9 +55,18 @@ base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]
 
 # Set simulation parameters
 print(exp_line, flush = True)
-genome_length, initial_population = 2100, 400
+
+if re.match(r"^MT-2(?:_|$)", exp_line):
+    neutral_pos = 2000
+elif re.match(r"^MT-4(?:_|$)", exp_line):
+    neutral_pos = 1500
+
+print(exp_line)
+print(neutral_pos)
+
+initial_population = 400
 mutation_rate = 2e-5
-seq_sampling_frac = 100
+seq_sampling_frac = 1000
 infection_success_rate = 0.1
 sample_nr = int(sample_nr)
 bottleneck_intervals = int(bottleneck_freq)
@@ -81,7 +91,7 @@ os.makedirs(folder_path_sequence, exist_ok=True)
 np.random.seed(sample_nr)
 
 if sample_nr == 1:
-    init_population = np.tile(np.random.choice([1, 2, 3, 4], genome_length, replace=True).astype(np.uint8), (initial_population, 1))
+    init_population = np.tile(np.random.choice([1, 2, 3, 4], neutral_pos, replace=True).astype(np.uint8), (initial_population, 1))
     np.save(f"{folder_path_sequence}/init_population.npy", init_population)
 else:
     prev_sample_nr = sample_nr-1

@@ -1,4 +1,4 @@
-
+#!/usr/bin/env Rscript
 
 library(reticulate)
 library(tidyr)
