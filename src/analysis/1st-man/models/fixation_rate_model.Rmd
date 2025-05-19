@@ -43,7 +43,7 @@ pop_size <- 2000
 btk_size <- 20
 r0 <- 10
 mut_rate <- (3*10^(-4) + 3*10^(-5))/2
-genome_length <- 9300
+# genome_length <- 9300
 
 
 pop <- rep ("A", pop_size)
