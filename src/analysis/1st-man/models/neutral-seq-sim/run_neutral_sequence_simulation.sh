@@ -45,7 +45,7 @@ bottleneck_freq=2
 tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
-exp_line="MT-2_2"
+exp_line="MT-2_1"
 
 
 
