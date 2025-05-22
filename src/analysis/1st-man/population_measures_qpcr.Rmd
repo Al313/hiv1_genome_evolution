@@ -63,7 +63,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
 
 # determine what data to be included
-end_psg <- 570
+end_psg <- 500
 
 data %<>% 
         filter(exp_line %in% 13:16,
@@ -94,7 +94,8 @@ data <- data[!(data$exp_line == 15 & data$passage == 370 & data$cDNA_Date == "4)
 data <- data[!(data$exp_line == 15 & data$passage == 380 & data$cDNA_Date == "5) 09.06.2021"),]
 data <- data[!(data$exp_line == 15 & data$passage == 390 & data$cDNA_Date == "6) 09.06.2021"),]
 
-
+#data_repeat <- data[str_detect(data$cDNA_Date, "25.02.2025"),]
+data <- data[!str_detect(data$cDNA_Date, "25.02.2025"),]
 
 data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) # update exp line labels
 
