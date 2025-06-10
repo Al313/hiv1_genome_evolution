@@ -1,8 +1,8 @@
 ---
 title:  
-    "TCID50 of EXPIII"
+    "TCID50"
 date: 
-    "June 10th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -38,6 +38,10 @@ library(tidyr)
 
 `%notin%` <- Negate(`%in%`)
 
+# Visual settings
+
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
+
 
 logarithmic_mean_vector <- function(x) {
   if (length(x) < 2) {
@@ -67,7 +71,7 @@ harmonic_mean <- function(x) {
   return(length(x) / sum(1 / x))
 }
 
-logarithmic_mean(c(9,5))
+
 
 
 moi_cal <- function(tcid50, inoculum_volume=0.002, cell_number=400000) {
@@ -98,7 +102,7 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 # tcid data to plot MOIs
 
 data <- as.data.frame(read_excel(paste0(wd, "data/titration/tcid50.xlsx")))
-View(data)
+
 
 
 data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
@@ -149,13 +153,7 @@ moi__fig <- data_sub %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_lin
                 axis.text = element_text(size = 15))
 
 
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "moi.pdf"), height = 14, width = 14)
-moi__fig
-dev.off()
+
 
 ```
 
@@ -168,21 +166,21 @@ dev.off()
 
 
   
-  # Check if all values are positive
-  if (any((as.numeric(table(values)) >= 2))) {
-    return(values[1])
-  }
-  
-  # Calculate the logarithmic mean
-  n <- length(values)
-  log_mean <- mean(sapply(1:(n-1), function(i) {
-    a <- values[i]
-    b <- values[i+1]
-    (b - a) / (log(b) - log(a))
-  }))
-  
-  return(log_mean)
+# Check if all values are positive
+if (any((as.numeric(table(values)) >= 2))) {
+  return(values[1])
 }
+
+# Calculate the logarithmic mean
+n <- length(values)
+log_mean <- mean(sapply(1:(n-1), function(i) {
+  a <- values[i]
+  b <- values[i+1]
+  (b - a) / (log(b) - log(a))
+}))
+
+return(log_mean)
+
 
 
 result <- data_sub %>%
@@ -321,35 +319,23 @@ moi__fig <- result %>% ggplot(aes(x = passage)) +
                 geom_point(aes(y = log10(MOI), color = exp_line)) +
                 geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
                 scale_y_continuous(
-                sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per Inoculum")) +
-                labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Virus Line") +
+                sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per inoculum")) +
+                labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Lineage") +
                 scale_color_manual(values = line_col_palette) +
-                theme_bw() +
-                theme(plot.title = element_text(size = 30, hjust = 0.5),
-                    axis.title = element_text(size = 25),
-                    axis.text.x = element_text(size = 20, angle = 90),
-                    axis.text.y = element_text(size = 20),
-                    legend.title = element_text(size=20),
-                    legend.text = element_text(size = 15),
-                    strip.text = element_text(size = 25))
-
+                custom_plot_theme(application = "publication")
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
-moi__fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/moi_cleaned.pdf"), height = 14, width = 14)
-moi__fig
-dev.off()
-
-
+custom_plot_save(moi__fig, "moi_cleaned.pdf", height = 14, width = 14)
 
 ```
 
+```{r in-text measures}
 
+mean(result$MOI[result$exp_line %in% c("MT-2_1","MT-2_2")])
+mean(result$MOI[result$exp_line %in% c("MT-4_1","MT-4_2")])
+quantile(result$btk_size[result$exp_line %in% c("MT-2_1","MT-2_2")], probs = c(0.25,0.5,0.75))
+
+```
 
 ```{r compare MOI levels between lines}
 
@@ -411,7 +397,7 @@ harmonic_mean(vec2)/harmonic_mean(vec)
 
 
 
-```{r}
+```{r crossed TCID50 values}
 
 
 # are tcid50 values different on the other line?

@@ -1,8 +1,8 @@
 ---
 title:  
-    "Parallel evolution of EXPIII _ Neutral randomization + Translational impact"
+    "Parallel evolution _ neutral randomization + Translational impact"
 date: 
-    "June 30th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -44,10 +44,9 @@ library("coda")
 ```
 
 
-```{r read-in the data}
+```{r read-in variant data}
 
 # determine the server path
-
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
   wd <- "/home/amovas/data/genome-evo-proj/"
@@ -57,62 +56,18 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
-
-
-# correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
-
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-
-# only keep the EXPIII data
-exp <- "EXPIII"
-end_psg <- 500
-
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-# facors
-
-host_factor <- c("MT-2", "MT-4")
-exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-translational_impacts <- c("U", "S", "N")
-gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
-feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
-
-# format the dataframe
-variants_ann_expiii <- variants_ann_expiii %>%
-                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
-                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
-                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                            mutate(passage = as.factor(passage),
-                            exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor),
-                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
-
-# remove duplicate records for the same variants
-variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-
-
-# Visual settings
-
-line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-breaks_step <- 50
-line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
+source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 ```
 
 
+```{r load visualization settings}
+
+# Visual settings
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
+
+
+```
 
 
 
@@ -138,17 +93,7 @@ if (category == "Sporadic"){
 ```
 
 
-
-
-
-
-```{r parallelism neutral randomization}
-
-
-k <- 1
-line1 <- "MT-2_1"
-line2 <- "MT-2_2"
-base <- "A"
+```{r parallelism neutral randomization + heatmap}
 
 
 effect_list <- list(Syn = "S", Non_Syn = "N", Untranslated = "U", All = c("S", "N", "U"))
@@ -156,11 +101,6 @@ regions <- list(Syn = 790:9407, Non_Syn = 790:9407, Untranslated = c(454:789,907
 possible_muts <- c(0.22, 0.78, 1, 1)
 
 
-if (str_detect(line1, "MT-2")){
-    offset1 <- 140
-} else {
-    offset1 <- 185
-}
 
 overall_df <- data.frame()
 
@@ -181,9 +121,9 @@ for (k in 1:4){
     for (line1 in exp_line_factor){
         for (line2 in exp_line_factor){
             if (str_detect(line1, "MT-2")){
-                offset1 <- 140
+                offset1 <- 140 # median(df$time_to_fixation[df$exp_line %in% c("MT-2_1","MT-2_2")])
             } else {
-                offset1 <- 185
+                offset1 <- 185 # median(df$time_to_fixation[df$exp_line %in% c("MT-4_1","MT-4_2")])
             }
 
             if (str_detect(line2, "MT-2")){
@@ -229,7 +169,11 @@ for (k in 1:4){
             # Calculate the z-score
             z_score <- (obs_shared - mean_data) / sd_data
             # Calculate the p-value
-            p_value <- 2 * (1 - pnorm(abs(z_score)))
+            if (obs_shared > mean_data){
+                p_value <- 2 * (1 - pnorm(z_score))
+            } else {
+                1
+            }
             df <- rbind(df,c(line1,line2,obs_all,obs_shared,obs_shared/obs_all,mean_data/obs_all,p_value))
         }
     }
@@ -311,25 +255,15 @@ for (k in 1:4){
             labs(title = paste0("Pairwise Overlap Among ", category, " Variants \nat Passage #", end_psg)) +
             scale_fill_gradient2(low = "white", high = "red", 
             midpoint = 1, limit = c(0,100), space = "Lab", 
-            name="% Shared\n") +
-            theme_minimal()+ 
-            theme(plot.title = element_text(size = 40, hjust = 0.5),
-                axis.title = element_blank(),
-                axis.text.x = element_text(size = 30, angle = 90, color = "black"),
-                axis.text.y = element_text(size = 30, color = "black"),
-                legend.title = element_text(size=35),
-                legend.text = element_text(size = 25)) +
+            name="Shared(%)") +
+            custom_plot_theme() +
+            theme(axis.title = element_blank())+
             coord_fixed()
 
 
 
     # save figure
-    date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-    fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-    ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-    pdf(file = paste0(fig_dir, "parallel_heatmap_", names(effect),".pdf"), height = 14, width = 14)
-    print(fig)
-    dev.off()
+    custom_plot_save(fig, paste0("parallel_heatmap_", names(effect),".pdf"), height = 14, width = 14)
     
     #######################
 
@@ -359,7 +293,7 @@ for (k in 1:4){
 
 
 
-```{r}
+```{r parallel translational impact barplot summary}
 
 colnames(overall_df) <- c("Translation_impact", "group", "mean", "se", "p.val", "cohen_d", "ratio")
 
@@ -372,38 +306,15 @@ overall_df %<>% mutate_at(3:7, as.numeric)
 fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
     geom_col(position = "dodge") +
     geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = position_dodge(width = 0.9),width = 0.2) +
-    labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Shared(%)\n", x = "\nTranslational Impact") +
+    labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Shared(%)\n", x = "\nTranslational impact") +
     scale_fill_manual(name = "Dataset",  # Change the legend title here
         values = c("#038331", "#ffdf50"),
         labels = c("Observed", "Randomized"))+
-    theme_minimal()+ 
-        theme(plot.title = element_text(size = 40, hjust = 0.5),
-            axis.title = element_text(size = 30),
-            axis.text.x = element_text(size = 20, angle = 90),
-            axis.text.y = element_text(size = 20),
-            legend.title = element_text(size=35),
-            legend.text = element_text(size = 25))
+    custom_plot_theme()
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "parallel_summary_barplot_translational_impact.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_summary_barplot_translational_impact.pdf"), height = 14, width = 14)
-fig
-dev.off()
+custom_plot_save(fig, "parallel_summary_barplot_translational_impact.pdf", height = 14, width = 14)
 
 
 ```
 
-```{r}
-
-View(overall_df)
-
-mean(replicate(1000,sum(sample(10,2, replace = F)<=3)))
-
-round(0.6)
-
-```

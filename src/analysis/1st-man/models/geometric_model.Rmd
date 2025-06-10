@@ -102,7 +102,7 @@ geometric_cdf <- function(x, p, scale) {
 
 # x <- c(seq(from =0, length.out = length(results[[1]]), by = 20)) to account for 20 samling
 x <- 1:length(results[[1]])
-fit <- nls(results[[1]] ~ geom_cdf(x, p, scale), start = list(p = 0.1, scale = max(results[[1]])))
+fit <- nls(results[[1]] ~ geometric_cdf(x, p, scale), start = list(p = 0.1, scale = max(results[[1]])))
 
 p_est <- coef(fit)["p"]
 scale_est <- coef(fit)["scale"]
@@ -134,7 +134,7 @@ ggplot(df, aes(x = x)) +
 
 # Calculate R-squared
 ss_tot <- sum((results[[1]] - mean(results[[1]]))^2)
-ss_res <- sum((results[[1]] - geom_cdf(1:length(results[[1]]), p_est, scale_est))^2)
+ss_res <- sum((results[[1]] - geometric_cdf(1:length(results[[1]]), p_est, scale_est))^2)
 r_squared <- 1 - (ss_res / ss_tot)
 
 # RMSE

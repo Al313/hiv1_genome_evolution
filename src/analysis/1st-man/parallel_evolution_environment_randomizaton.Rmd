@@ -1,8 +1,8 @@
 ---
 title:  
-    "Parallel evolution of EXPIII _ Environment effect"
+    "Parallel evolution"
 date: 
-    "June 30th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -44,10 +44,9 @@ library("coda")
 ```
 
 
-```{r read-in the data}
+```{r read-in variant data}
 
 # determine the server path
-
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
   wd <- "/home/amovas/data/genome-evo-proj/"
@@ -57,62 +56,17 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
-
-
-# correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
-
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-
-# only keep the EXPIII data
-exp <- "EXPIII"
-end_psg <- 500
-
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-# facors
-
-host_factor <- c("MT-2", "MT-4")
-exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-translational_impacts <- c("U", "S", "N")
-gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
-feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
-
-# format the dataframe
-variants_ann_expiii <- variants_ann_expiii %>%
-                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
-                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
-                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                            mutate(passage = as.factor(passage),
-                            exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor),
-                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
-
-# remove duplicate records for the same variants
-variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-
-
-# Visual settings
-
-line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-breaks_step <- 50
-line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
+source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 ```
 
+```{r load visualization settings}
 
+# Visual settings
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
+
+
+```
 
 
 
@@ -138,26 +92,14 @@ if (category == "Sporadic"){
 ```
 
 
-```{r venn diagram}
 
+```{r environment randomization}
 
 end_fixed <- 
         variants_expiii %>%
         filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_psg) %>%
         select(c(exp_line,mut_info)) %>%
         distinct()
-
-nrow(end_fixed)
-
-# percentage of line specific mutations
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 1)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 2)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 3)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 4)/length(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))))
-
-
-#table(as.numeric(table(par$mut_info)))
-
 
 # create a named vector from the df
 muts <- end_fixed$mut_info
@@ -167,147 +109,82 @@ names(muts) <- end_fixed$exp_line
 muts_list <- lapply(split(muts, names(muts)), unname)
 
 
-# visualization
-fig <- ggvenn(muts_list, text_size = 9, fill_color = c("#ff00ff", "#ff2400", "#6600cc", "#0000ff"), set_name_size = 10) +
-        labs(title = paste0(category, " Mutations at Transfer #", end_psg, "\n"))+
-        scale_fill_manual(labels = line_labels, values = line_palette) +
-        theme(plot.title = element_text(size = 40, hjust = 0.5))
-
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "parallel_venn_end_passage.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_venn_end_passage.pdf", height = 14, width = 14)
-fig
-dev.off()
-
-```
-
-
-```{r visualization1: throughout venn diagram}
-
-# prepare data for visualization
-variants_expiii_subset <- variants_expiii %>%
-            filter(allele_freq >= min_threshold & allele_freq < max_threshold)
-
-# uniqueness of majority mutations observed throughout the experiment
-throughout <- variants_expiii_subset %>%
-                select(c(exp_line,mut_info)) %>%
-                distinct()
-
-
-#table(as.numeric(table(par_whole$mut_info)))
-
-# create a named vector from the df
-muts <- throughout$mut_info
-names(muts) <- throughout$exp_line
-
-# convert named vector to list
-muts_list <- lapply(split(muts, names(muts)), unname)
-
-
-# visualization
-fig <- ggvenn(muts_list) +
-        labs(title = paste0(category, " Mutations Occurrence Venn Diagram"))+
-        theme(plot.title = element_text(size = 20, hjust = 0.5),
-        plot.margin = unit(c(1,1,1,1), "cm"))
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, category, "_occurrence_venn.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-```
-
-
-```{r}
-
-
-
-# Number of iterations
-num_simulations <- 1000
-
 # Store results
+num_simulations <- 10000  # Number of simulations
 results <- data.frame(Shared_MT2 = numeric(num_simulations),
                       Shared_MT4 = numeric(num_simulations),
                       Shared_Both = numeric(num_simulations),
                       Unique_MT2 = numeric(num_simulations),
                       Unique_MT4 = numeric(num_simulations))
 
+set.seed(123)  # For reproducibility
 # Run the process 1000 times
 for (i in 1:num_simulations) {
-  
-  # Shuffle names
-  muts_vec <- unlist(muts_list)
-  names(muts_vec) <- sample(rep(names(muts_list), lengths(muts_list)))
-  
-  # Convert back to list
-  muts_list_new <- split(muts_vec, names(muts_vec))
-  
-  # Calculate mutation categories
-  shared_mt2 <- intersect(muts_list_new[[1]], muts_list_new[[2]])
-  shared_mt4 <- intersect(muts_list_new[[3]], muts_list_new[[4]])
-  shared_both <- intersect(c(muts_list_new[[1]], muts_list_new[[2]]), 
-                          c(muts_list_new[[3]], muts_list_new[[4]]))
-  unique_mt2 <- setdiff(setdiff(c(muts_list_new[[1]], muts_list_new[[2]]), 
+
+    # Shuffle names
+    muts_vec <- unname(unlist(muts_list))
+    names(muts_vec) <- sample(rep(names(muts_list), lengths(muts_list)))
+
+    # Convert back to list
+    muts_list_new <- split(muts_vec, names(muts_vec))
+
+    # Calculate mutation categories
+    shared_mt2 <- intersect(muts_list_new[[1]], muts_list_new[[2]])
+    shared_mt4 <- intersect(muts_list_new[[3]], muts_list_new[[4]])
+    shared_both <- intersect(c(muts_list_new[[1]], muts_list_new[[2]]), 
+                            c(muts_list_new[[3]], muts_list_new[[4]]))
+    unique_mt2 <- setdiff(setdiff(c(muts_list_new[[1]], muts_list_new[[2]]), 
                                 c(muts_list_new[[3]], muts_list_new[[4]])), 
                         shared_mt2)
-  unique_mt4 <- setdiff(setdiff(c(muts_list_new[[3]], muts_list_new[[4]]), 
+    unique_mt4 <- setdiff(setdiff(c(muts_list_new[[3]], muts_list_new[[4]]), 
                                 c(muts_list_new[[1]], muts_list_new[[2]])), 
                         shared_mt4)
-  
-  # Store results
-  results[i, ] <- c(length(shared_mt2), length(shared_mt4), length(shared_both), 
-                     length(unique_mt2), length(unique_mt4))
+
+    # Store results
+    results[i, ] <- c(length(shared_mt2), length(shared_mt4), length(shared_both), 
+                        length(unique_mt2), length(unique_mt4))
 }
 
-# Assuming your simulated results are stored in 'results' (a matrix or data frame)
+# get hpd values
 hpd_results <- apply(results, 2, function(x) HPDinterval(as.mcmc(x), prob = 0.95))
 
-# Extract lower and upper bounds for the HPD intervals
+# extract lower and upper bounds for the HPD intervals
 hpd_lower <- as.integer(hpd_results[1,]) # Lower bounds
 hpd_upper <- as.integer(hpd_results[2,]) # Upper bounds
 
 
 ```
 
-```{r}
+```{r prepare data}
 
 
 # Step 1: Compute Original Mutation Counts
 original_shared_mt2 <- intersect(muts_list[[1]], muts_list[[2]])
 original_shared_mt4 <- intersect(muts_list[[3]], muts_list[[4]])
 original_shared_both <- intersect(c(muts_list[[1]], muts_list[[2]]), 
-                                  c(muts_list[[3]], muts_list[[4]]))
+                                c(muts_list[[3]], muts_list[[4]]))
 original_unique_mt2 <- setdiff(setdiff(c(muts_list[[1]], muts_list[[2]]), 
-                                       c(muts_list[[3]], muts_list[[4]])), 
-                               original_shared_mt2)
+                                    c(muts_list[[3]], muts_list[[4]])), 
+                            original_shared_mt2)
 original_unique_mt4 <- setdiff(setdiff(c(muts_list[[3]], muts_list[[4]]), 
-                                       c(muts_list[[1]], muts_list[[2]])), 
-                               original_shared_mt4)
+                                    c(muts_list[[1]], muts_list[[2]])), 
+                            original_shared_mt4)
 
 original_counts <- c(length(original_shared_mt2), length(original_shared_mt4), 
-                     length(original_shared_both), length(original_unique_mt2), 
-                     length(original_unique_mt4))
+                    length(original_shared_both), length(original_unique_mt2), 
+                    length(original_unique_mt4))
+
 
 # Step 2: Prepare Data for Plotting
 comparison_df <- data.frame(
-  Category = factor(
-    c("Shared in MT-2", "Shared in MT-4", "Shared in both", "Unique to MT-2", "Unique to MT-4"),
-    levels = c("Shared in MT-2", "Shared in MT-4", "Shared in both", "Unique to MT-2", "Unique to MT-4")  # Explicit order
-  ),
-  Type = rep(c("Original", "Simulated"), each = 5),  # Labels for grouping
-  Count = c(original_counts, colMeans(results)),  # Combine original and simulated means
-  SE = c(rep(NA, 5), apply(results, 2, function(x) sd(x) / sqrt(length(x)))),  # Standard Error for Simulated
-  HPD_Lower = c(rep(NA, 5), hpd_lower),  # HPD Lower only for Simulated
-  HPD_Upper = c(rep(NA, 5), hpd_upper)   # HPD Upper only for Simulated
+    Category = factor(
+        c("Shared in MT-2", "Shared in MT-4", "Shared in both"),
+        levels = c("Shared in MT-2", "Shared in MT-4", "Shared in both")),
+    Type = rep(c("Original", "Simulated"), each = 3),  # Labels for grouping
+    Count = c(original_counts[1:3], colMeans(results[1:3])),  # Combine original and simulated means
+    SE = c(rep(NA, 3), apply(results[1:3], 2, function(x) sd(x) / sqrt(length(x)))),  # Standard Error for Simulated
+    HPD_Lower = c(rep(NA, 3), hpd_lower[1:3]),  # HPD Lower only for Simulated
+    HPD_Upper = c(rep(NA, 3), hpd_upper[1:3])   # HPD Upper only for Simulated
 )
 
 
@@ -317,16 +194,23 @@ comparison_df <- data.frame(
 plot(density(results$Shared_MT2), col = "red", lwd = 2, main = "Density Plot of Shared Mutations in MT-2")
 shapiro.test(results$Shared_MT2)
 
-# Perform wilcox-tests for each category
-p_values <- sapply(1:ncol(results), function(i) {
-  wilcox.test(results[, i], mu = original_counts[i])$p.value
+# Perform significance test for each category
+
+empirical_p <- function(simulated, observed) {
+  mean(abs(simulated - mean(simulated)) >= abs(observed - mean(simulated)))
+}
+
+empirical_p_values <- sapply(1:ncol(results[1:3]), function(i) {
+  empirical_p(results[[i]], original_counts[i])
 })
 
-# Adjust p-values for multiple comparisons if necessary (e.g., Bonferroni correction)
-adjusted_p_values <- p.adjust(p_values, method = "bonferroni")
+
+# Adjust if needed
+adjusted_empirical_p <- p.adjust(empirical_p_values, method = "bonferroni")
+
 
 # Determine significance levels
-significance_labels <- sapply(adjusted_p_values, function(p) {
+significance_labels <- sapply(adjusted_empirical_p, function(p) {
   if (p < 0.001) {
     "***"
   } else if (p < 0.01) {
@@ -334,12 +218,17 @@ significance_labels <- sapply(adjusted_p_values, function(p) {
   } else if (p < 0.05) {
     "*"
   } else {
-    ""
+    "n.s."
   }
 })
 
 # Add these labels to the data frame for plotting
-comparison_df$Significance <- c(significance_labels, rep(NA, 5))  # Only add for observed counts
+comparison_df$Significance <- c(significance_labels, rep(NA, 3))  # Only add for observed counts
+
+
+```
+
+```{r visualization #1}
 
 # Step 4: Plot with HPD Interval
 dodge <- position_dodge(width=0.5)
@@ -347,40 +236,26 @@ dodge <- position_dodge(width=0.5)
 fig <- ggplot(comparison_df, aes(x = Category, y = Count, fill = Type, group = Type)) +
     geom_bar(stat = "identity", position = dodge, width = 0.5) +  # Increased dodge width
     geom_errorbar( 
-        aes(ymin = Count - SE, ymax = Count + SE),
+        aes(ymin = HPD_Lower, ymax = HPD_Upper), # Count - SE, ymax = Count + SE
         width = 0.2,  # Narrower error bars
         position = dodge,  # Match the dodge width exactly
         size = 1) + 
     geom_text(
         data = subset(comparison_df, Type == "Original"),  # Only for observed counts
-        aes(label = Significance, y = Count + c(rep(5,4),30)),  # Position asterisks above the bars
+        aes(label = Significance, y = c(25,20,40)),  # Position asterisks above the bars
         position = dodge,
         size = 6
     ) +
     labs(title = "Comparison of Observed vs Randomized \n Fixed Variant Sharedness per Environment",
-        x = "Sharedness Category",
-        y = "Fixed Variant Count",
+        x = "\nSharedness group",
+        y = paste0(category," variant count\n"),
         fill = "Dataset") +
     scale_fill_manual(labels = c("Observed", "Randomized"), values = c("#038331", "#ffdf50")) +
-    theme_bw() +
-    theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
+    custom_plot_theme(application = "publication")
 
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "environment_randomized_parallel.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/environment_randomized_parallel.pdf", height = 14, width = 14)
-fig
-dev.off()
+custom_plot_save(fig, "environment_randomized_parallel.pdf", height = 14, width = 14)
 
 ```
 

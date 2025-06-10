@@ -1,8 +1,8 @@
 ---
 title:  
-    "qpcr results of EXPIII"
+    "qpcr results"
 date: 
-    "Feb 4th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -94,14 +94,11 @@ data <- data[!(data$exp_line == 15 & data$passage == 370 & data$cDNA_Date == "4)
 data <- data[!(data$exp_line == 15 & data$passage == 380 & data$cDNA_Date == "5) 09.06.2021"),]
 data <- data[!(data$exp_line == 15 & data$passage == 390 & data$cDNA_Date == "6) 09.06.2021"),]
 
-#data_repeat <- data[str_detect(data$cDNA_Date, "25.02.2025"),]
+# qPCR repeats for later time points
 data <- data[!str_detect(data$cDNA_Date, "25.02.2025"),]
 
 data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) # update exp line labels
 
-
-# needs repeat?
-# data$transferred_quantity_EXP_III[data$exp_line == "MT-2_2" & data$passage == 430]
 
 
 
@@ -113,7 +110,7 @@ data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "M
 
 # exceptional case where 17 microliter of water added
 data[data$`ul-H2O-added-to-reach-17ul` == "17",]
-data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "17"] <- "7"
+data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "17"] <- "16"
 
 # modify data to calculate dilution factor of later measurements 
 data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "1:10 Dilution!"] <- "15.3"
@@ -143,7 +140,7 @@ data_cleaned <- data %>% filter(mean_quantity_per_ml_cell_culture_supernatant > 
 data_cleaned$passage <- as.numeric(data_cleaned$passage)
 data_cleaned$exp_line <- factor(data_cleaned$exp_line, levels = line_labels)
 
-data_cleaned$mean_quantity_per_ml_cell_culture_supernatant[data_cleaned$passage >= 580] <- data_cleaned$mean_quantity_per_ml_cell_culture_supernatant[data_cleaned$passage >= 580]/10
+# data_cleaned$mean_quantity_per_ml_cell_culture_supernatant[data_cleaned$passage >= 580] <- data_cleaned$mean_quantity_per_ml_cell_culture_supernatant[data_cleaned$passage >= 580]/10
 
 # fit linear models for each group and extract p-values
 model_A <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == line_labels[1], ])
@@ -174,29 +171,15 @@ qpcr_fig <- data_cleaned %>% ggplot(aes(x = passage, y = log10(mean_quantity_per
                 scale_x_continuous(breaks = seq(0, 700, by = 50)) +
                 geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
                 hjust = 1.1, vjust = 2, size = 8, inherit.aes = FALSE) +
-                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n", color = "Virus Line") +
+                labs(title = "qPCR Result \n", x = "\n Transfer", y = "Log10(RNA Copy/ml)\n", color = "Lineage") +
                 #ylim(c(1000000,40000000)) +
                 scale_color_manual(values = line_col_palette) +
-                theme_bw() +
-                theme(plot.title = element_text(size = 30, hjust = 0.5),
-                    axis.title = element_text(size = 25),
-                    axis.text.x = element_text(size = 20, angle = 90),
-                    axis.text.y = element_text(size = 20),
-                    legend.title = element_text(size=20),
-                    legend.text = element_text(size = 15),
-                    strip.text = element_text(size = 25))
+                custom_plot_theme(application = "publication")
+
 
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "qpcr_expiii.pdf"), height = 14, width = 14)
-qpcr_fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/qpcr_expiii.pdf"), height = 14, width = 14)
-qpcr_fig
-dev.off()
+custom_plot_save(qpcr_fig, "qpcr_expiii.pdf", height = 14, width = 14)
 
 
 

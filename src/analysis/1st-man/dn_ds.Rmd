@@ -1,8 +1,8 @@
 ---
 title:  
-    "dn/ds of EXPIII"
+    "dn/ds"
 date: 
-    "Oct 29th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -41,9 +41,8 @@ library("rstatix")
 ```
 
 
-```{r read-in the data}
+```{r read-in variant data}
 
-# determine the server path
 
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
@@ -54,57 +53,15 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
+source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
-# correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+```
 
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-# determine what data to be included
-
-exp <- "EXPIII"
-end_psg <- 500
-
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-
-# facors
-
-host_factor <- c("MT2", "MT4")
-exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-translational_impacts <- c("U", "S", "N")
-gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
-feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
-
-# format the dataframe
-variants_ann_expiii <- variants_ann_expiii %>%
-                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
-                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
-                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                            mutate(passage = as.factor(passage),
-                            exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor),
-                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
-
-# remove duplicate records for the same variants
-variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-
+```{r load visualization settings}
 # Visual settings
 
-line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-breaks_step <- 50
-line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 
 ```
@@ -115,11 +72,8 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 # set parameters
 category <- "Fixed"
 
-if (category == "Sporadic"){
+if (category == "Minority"){
     min_threshold <- 0.01
-    max_threshold <- 0.05
-} else if (category == "Minority"){
-    min_threshold <- 0.05
     max_threshold <- 0.5
 } else if (category == "Majority"){
     min_threshold <- 0.5
@@ -132,7 +86,7 @@ if (category == "Sporadic"){
 ```
 
 
-```{r accumulation per translational impact normalized for site sequence bias}
+```{r syn and non-syn accumulation over time}
 
 # read in the gene summary data
 gene_summary <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/gene_summary_table.tsv", sep = "\t", header = T)
@@ -143,50 +97,39 @@ S_site <- sum(gene_summary$synonymous_count)
 
 N_site <- mean(gene_summary$nonsynonymous_percentage)*100
 S_site <- mean(gene_summary$synonymous_percentage)*100
+
 # prepare data for visualization
 counts <- variants_ann_expiii%>% 
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "dS", effect == "untranslated_region" ~ "U")) %>%
-            mutate(effect_simplified = replace_na(effect_simplified, "dN")) %>%
+            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "syn", effect == "untranslated_region" ~ "U")) %>%
+            mutate(effect_simplified = replace_na(effect_simplified, "non-syn")) %>%
             filter(effect_simplified != "U") %>%
-            mutate(effect_simplified = factor(effect_simplified, levels = c("dN", "dS"))) %>%
+            mutate(effect_simplified = factor(effect_simplified, levels = c("non-syn", "syn"))) %>%
             group_by(exp_line, passage, effect_simplified,.drop = FALSE) %>%
             summarise(count = n()) %>%
             mutate_at(4, as.numeric) %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
             mutate_at(c(1,3), as.factor) %>%
-            mutate(normalized_rate = ifelse(effect_simplified == "dS", (count*100)/((S_site/100)*(9407-790)*3),(count*100)/((N_site/100)*(9407-790)*3)))
+            mutate(normalized_rate = ifelse(effect_simplified == "syn", (count*100)/((S_site/100)*(9407-790)*3),(count*100)/((N_site/100)*(9407-790)*3)))
 
 
-# visualize using plotly
+# visualize
 
 
 fig <- counts %>%  ggplot(aes(x=passage, y = normalized_rate, color = exp_line, linetype = effect_simplified)) +
         geom_line(linewidth=1) +
-        labs(x="\nTransfer", y= "Normalized Mutation Count (%)\n",  color = "Virus Lines", linetype = "Translational Impact",
+        labs(x="\nTransfer", y= "Normalized fixed variant count (%)\n",  color = "Lineage", linetype = "Translational impact",
         title = paste0(category, " Mutation Accumulation \n (Syn vs Non-Syn)"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$normalized_rate)+0.1),breaks = seq(0,max(counts$normalized_rate)+0.1,0.1)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
-        theme_bw() +
-        theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
+        scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
+        custom_plot_theme(application = "publication")
 
-fig
 
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, category, "_mut_accumulation_ds_vs_dn.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/",category, "_mut_accumulation_ds_vs_dn.pdf"), height = 14, width = 14)
-fig
-dev.off()
+
+custom_plot_save(fig, paste0(category, "_mut_accumulation_ds_vs_dn.pdf"), height = 14, width = 14)
+
+
 
 ## compute effect sizes
 # Filter data for each condition
@@ -240,123 +183,18 @@ counts_wide$dnds <- counts_wide$dN/counts_wide$dS
 fig <- counts_wide %>%  ggplot(aes(x=passage, y = dnds, color = exp_line)) +
         # geom_line(linewidth=1) +
         geom_smooth(method = "gam", se = FALSE) +
-        labs(x="\nTransfer", y= "dN/dS\n",  color = "Virus Lines",
+        labs(x="\nTransfer", y= "dN/dS\n",  color = "Lineage",
         title = paste0(category, " dN/dS over Time"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         #scale_y_continuous(limits = c(0,max(counts_wide$dnds, na.rm = T)+0.1),breaks = seq(0,max(counts_wide$dnds, na.rm = T)+0.1,0.1)) +
-        scale_color_manual(labels = line_labels, values = line_palette) +
-        theme_bw() +
-        theme(plot.title = element_text(size = 30, hjust = 0.5),
-        axis.title = element_text(size = 25),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 20),
-        legend.title = element_text(size=20),
-        legend.text = element_text(size = 15))
+        scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
+        custom_plot_theme(application = "publication")
 
 fig
 
 
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, category, "_accumulation_dn_ds_ratio.pdf"), height = 14, width = 14)
-fig
-dev.off()
 
-```
+custom_plot_save(fig, paste0(category, "_dn_ds_ratio_over_time.pdf"), height = 14, width = 14)
 
-
-```{r dn/ds per gene}
-
-# set parameters
-category <- "Minority"
-
-if (category == "Sporadic"){
-    min_threshold <- 0.01
-    max_threshold <- 0.05
-} else if (category == "Minority"){
-    min_threshold <- 0.05
-    max_threshold <- 0.5
-} else if (category == "Majority"){
-    min_threshold <- 0.5
-    max_threshold <- 1.01
-} else if (category == "Fixed"){
-    min_threshold <- 0.99
-    max_threshold <- 1.01
-}
-
-
-counts <- variants_ann_expiii%>% 
-            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-            filter(effect_simplified != "U") %>%
-            mutate(feature = factor(feature, levels = gene_factor),
-            effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
-            select(exp_line, feature, effect_simplified, mut_info) %>%
-            distinct() %>%
-            group_by(exp_line, effect_simplified, feature, .drop = FALSE) %>%
-            summarise(count = n()) %>%
-            pivot_wider(names_from = effect_simplified, values_from = count)
-
-counts2 <- merge(counts, gene_summary[,c("gene", "nonsynonymous_count", "synonymous_count")], by.x = "feature", by.y = "gene")
-
-counts2 %<>% mutate(S = ifelse(S == 0, 1, S)) %>%
-            mutate(dnds = (N/nonsynonymous_count)/(S/synonymous_count))
-
-
-# get the counts for minority
-# prepare data for visualization
-counts_minority <- variants_ann_expiii %>%
-            filter(allele_freq >= 0.05 & allele_freq < 0.5) %>%
-            select(exp_line, feature, mut_info) %>%
-            distinct() %>%
-            group_by(exp_line,feature, .drop = FALSE) %>%
-            summarise(mut_count = n())
-
-counts_minority2 <- merge(counts_minority, gene_summary[,c("gene","gene_length")], by.x = "feature", by.y = "gene")
-counts_minority2$mut_count <- counts_minority2$mut_count/counts_minority2$gene_length
-
-counts2$bind <- paste0(counts2$exp_line, counts2$feature)
-counts_minority2$bind <- paste0(counts_minority2$exp_line, counts_minority2$feature)
-
-
-counts3 <- merge(counts2, counts_minority2[,c("bind", "mut_count")], by = "bind")
-
-counts3$feature <- as.factor(counts3$feature)
-counts3$exp_line <- as.factor(counts3$exp_line)
-
-
-sp_cor <- cor(counts3$dnds,counts3$mut_count, method = "spearman")
-
-
-fig <- counts3 %>% ggplot(aes(x = mut_count, y = dnds, color = feature, shape = exp_line, group = 1)) +
-            geom_point(size = 5) +
-            geom_smooth(method = "lm", se = T)+
-            geom_text(label = paste0("Spearman's Rho: ", round(sp_cor,2)), x= 0.155, y = 0.85, color = "black", size = 9) +
-            labs(x="\nNormalized Mutation Count", y= "dN/dS\n",  color = "Gene", shape = "Virus Lines",
-            title = "")+
-            theme_bw() +
-            theme(plot.title = element_text(size = 55, hjust = 0.5),
-                axis.title = element_text(size = 45),
-                axis.text.x = element_text(size = 30, angle = 90),
-                axis.text.y = element_text(size = 30),
-                strip.text.x = element_text(size = 35, angle=90),
-                legend.title = element_text(size=45),
-                legend.text = element_text(size = 30))
-
-
-model <- lm(dnds ~ mut_count, data = counts3)
-summary(model)
-
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "dn_ds_ratio_cor_diversity.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/dn_ds_ratio_cor_diversity.pdf"), height = 14, width = 14)
-fig
-dev.off()
 ```
 

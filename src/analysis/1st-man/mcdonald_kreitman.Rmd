@@ -2,7 +2,7 @@
 title:  
     "McDonald-Kreitman neutrality test"
 date: 
-    "June 18th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -36,10 +36,8 @@ library("rstatix")
 
 ```
 
-```{r read-in data}
+```{r read-in variant data}
 
-
-# determine the server path
 
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
@@ -50,59 +48,15 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
+source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
-# correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+```
 
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-# determine what data to be included
-
-exp <- "EXPIII"
-end_psg <- 500
-
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-
-# facors
-
-host_factor <- c("MT2", "MT4")
-exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-translational_impacts <- c("U", "S", "N")
-gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
-feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
-
-# format the dataframe
-variants_ann_expiii <- variants_ann_expiii %>%
-                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
-                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
-                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                            mutate(passage = as.factor(passage),
-                            exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor),
-                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
-
-# remove duplicate records for the same variants
-variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-
+```{r load visualization settings}
 # Visual settings
 
-line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-breaks_step <- 50
-line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 
 ```
@@ -110,47 +64,33 @@ line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 
 
 
-```{r}
-unique(variants_expiii$feature)
-head(variants_expiii[variants_expiii$feature == "gag",])
-head(variants_expiii[variants_expiii$feature == "3UTR",])
-head(variants_expiii[variants_expiii$feature == "nef",])
-exp_line <- "MT-4_2"
-passage <- 500
-variants_expiii_nef <- variants_expiii[variants_expiii$passage == passage & variants_expiii$exp_line == exp_line & variants_expiii$feature == "envelope",]
-variants_expiii_nef <- variants_expiii[variants_expiii$passage == passage & variants_expiii$exp_line == exp_line & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9075,]
-
-P_S <- nrow(variants_expiii_nef[variants_expiii_nef$effect_simplified == "S" & variants_expiii_nef$allele_freq >= 0.01,])
-D_S <- nrow(variants_expiii_nef[variants_expiii_nef$effect_simplified == "S" & variants_expiii_nef$allele_freq >= 0.99,])
-
-P_N <- nrow(variants_expiii_nef[variants_expiii_nef$effect_simplified == "N" & variants_expiii_nef$allele_freq >= 0.01,])
-D_N <- nrow(variants_expiii_nef[variants_expiii_nef$effect_simplified == "N" & variants_expiii_nef$allele_freq >= 0.99,])
-
-# Calculate Neutrality Index
-NI <- (P_N / P_S) / (D_N / D_S)
-print(NI)
-
-# Create a contingency table
-MK_table <- matrix(c(D_N, D_S, P_N, P_S), nrow = 2, byrow = TRUE,
-                   dimnames = list(c("Fixed", "Polymorphic"),
-                                c("Nonsynonymous", "Synonymous")))
-print(MK_table)
-
-# Perform Fisher's Exact Test
-MK_result <- fisher.test(MK_table)
-print(MK_result)
+```{r McDonald-Kreitman test}
 
 
 
+df <- data.frame()
 
-for (exp_line in line_labels){
-    
-    print(exp_line)
-    
-    for (trans_effect in c("U", "S", "N", "ALL")) {
-        if (trans_effect == "ALL"){
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9408,]
-        } else {
-            variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect & variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9408,]
+for (exp_line in exp_line_factor){
+    for (gene in c("gag", "pol","envelope", "nef")){
+        variants_expiii_subset <- variants_expiii[variants_expiii$passage == end_psg & variants_expiii$exp_line == exp_line & variants_expiii$feature == gene,]
+
+        P_S <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "S" & variants_expiii_subset$allele_freq >= 0.01,])
+        D_S <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "S" & variants_expiii_subset$allele_freq >= 0.99,])
+
+        P_N <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "N" & variants_expiii_subset$allele_freq >= 0.01,])
+        D_N <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "N" & variants_expiii_subset$allele_freq >= 0.99,])
+        # Calculate Neutrality Index
+        NI <- (P_N / P_S) / (D_N / D_S)
+        # Create a contingency table
+        MK_table <- matrix(c(D_N, D_S, P_N, P_S), nrow = 2, byrow = TRUE,
+                        dimnames = list(c("Fixed", "Polymorphic"),
+                                        c("Nonsynonymous", "Synonymous")))
+
+        # Perform Fisher's Exact Test
+        MK_result <- fisher.test(MK_table)
+        MK_result$p.value
+        df <- rbind(df, c(exp_line, gene, P_S, D_S, P_N, D_N, NI, MK_result$p.value))
+
+    }
 }
 ```

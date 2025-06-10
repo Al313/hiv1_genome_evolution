@@ -1,8 +1,8 @@
 ---
 title:  
-    "Parallel evolution of EXPIII over time"
+    "Parallel evolution of over time"
 date: 
-    "Feb 4th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -42,76 +42,21 @@ library("effsize")
 
 ```
 
-
-```{r read-in the data}
-
-# determine the server path
-
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
-} else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-}
+```{r read-in variant data}
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
-
-# correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
-
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-
-# only keep the EXPIII data
-exp <- "EXPIII"
-end_psg <- 500
-
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-# facors
-
-host_factor <- c("MT-2", "MT-4")
-exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-translational_impacts <- c("U", "S", "N")
-gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
-feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
-
-# format the dataframe
-variants_ann_expiii <- variants_ann_expiii %>%
-                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
-                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
-                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                            mutate(passage = as.factor(passage),
-                            exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor),
-                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
-
-# remove duplicate records for the same variants
-variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-
-
-# Visual settings
-
-line_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-breaks_step <- 50
-line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
+source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 ```
 
+```{r load visualization settings}
+# Visual settings
 
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
+
+
+```
 
 
 
@@ -139,12 +84,7 @@ if (category == "Sporadic"){
 
 
 
-
-
-
-
-
-```{r}
+```{r simulation of parallel evolution over time}
 
 effect_list <- list(Syn = "S", Non_Syn = "N", Untranslated = "U", All = c("S", "N", "U"))
 
@@ -235,51 +175,37 @@ df_long %<>%
     mutate(shared_all = round(100*shared_all, digits = 2),
     CI_lower = round(100*CI_lower, digits = 2),
     CI_upper = round(100*CI_upper, digits = 2)) %>%
-    mutate(group2 = case_when(group == "pct_shared" ~ "Observed", group == "expected_pct_shared" ~ "Expected")) %>%
+    mutate(group2 = case_when(group == "pct_shared" ~ "Observed", group == "expected_pct_shared" ~ "Randomized")) %>%
     select(c(Pair, passage, group2, CI_lower,CI_upper, shared_all, total_unique)) %>%
     mutate_at(c(1), as.factor) %>%
-    mutate(group2 = factor(group2, levels = c("Observed", "Expected")))
+    mutate(group2 = factor(group2, levels = c("Observed", "Randomized")))
 
-df_long$group2 <- factor(df_long$group2, levels = c("Observed", "Expected"))
+df_long$group2 <- factor(df_long$group2, levels = c("Observed", "Randomized"))
 
 fig <- df_long %>% 
     ggplot(aes(x = passage, y = shared_all, group = interaction(Pair,group2), color = Pair, linetype = group2)) +
     geom_line(size = 2) +
     # geom_smooth(method = "loess") +
     geom_ribbon(
-        data = df_long %>% filter(group2 == "Expected"),  # Only apply CI for the specified group
+        data = df_long %>% filter(group2 == "Randomized"),  # Only apply CI for the specified group
         aes(ymin = CI_lower, ymax = CI_upper, fill = Pair),
         alpha = 0.2  # Transparency of CI ribbon
     ) +
     scale_color_manual(name = "Pair",
-    labels = c("MT-2 Replicates", "MT-4 Replicates"), 
-    values = c("#ad1594c2", "#00bbff")
+    labels = c("MT-2 replicates", "MT-4 replicates"), 
+    values = c("#ff8b08", "#00bbff")
     ) +
     scale_fill_manual(
-        values = c("#ad1594c2", "#00bbff"),
+        values = c("#ff8b08", "#00bbff"),
         guide = "none"  # Hides the legend for `fill`
     ) +
     labs(title = "", y = "Shared(%)\n", x = "\nTransfer") +
     scale_linetype_discrete(name = "Dataset",  # Change the legend title here
-                    labels = c("Observed", "Simulated"))+
-    theme_bw()+ 
-    theme(plot.title = element_text(size = 55, hjust = 0.5),
-            axis.title = element_text(size = 45),
-            axis.text.x = element_text(size = 30, angle = 90),
-            axis.text.y = element_text(size = 30),
-            legend.title = element_text(size=45),
-            legend.text = element_text(size = 30))
+                    labels = c("Observed", "Randomized"))+
+    custom_plot_theme(application = "publication")
 
 
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "parallel_over_time.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/parallel_over_time.pdf"), height = 14, width = 14)
-fig
-dev.off()
+custom_plot_save(fig, "parallel_over_time.pdf", height = 14, width = 14)
 ```

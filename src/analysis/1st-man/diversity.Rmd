@@ -1,8 +1,8 @@
 ---
 title:  
-    "Diversity of EXPIII"
+    "Diversity measures"
 date: 
-    "June 30th, 2024"
+    "May 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -19,8 +19,6 @@ output:
 ---
 
 
-
-
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
@@ -29,7 +27,6 @@ library("ggpubr")
 library("plotly") 
 library("patchwork")
 library("reshape2")
-library("ggvenn")
 library("hrbrthemes")
 library("DT")
 library("dplyr")
@@ -43,9 +40,8 @@ library("rstatix")
 ```
 
 
-```{r read-in the data}
+```{r read-in variant data}
 
-# determine the server path
 
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
@@ -56,215 +52,96 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
-sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
+source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
-# correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+```
 
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-
-# determine what data to be included
-
-exp <- "EXPIII"
-end_psg <- 500
-
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) 
-
-
-# facors
-
-host_factor <- c("MT2", "MT4")
-exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-
-translational_impacts <- c("U", "S", "N")
-gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "envelope", "nef")
-feature_factor <- c("5utr", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "envelope", "tat2", "rev2", "nef", "3utr")
-
-# format the dataframe
-variants_ann_expiii <- variants_ann_expiii %>%
-                            mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
-                            exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
-                            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                            mutate(passage = as.factor(passage),
-                            exp_line = factor(exp_line, levels = exp_line_factor),
-                            host_line = factor(host_line, levels = host_factor),
-                            effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
-
-# remove duplicate records for the same variants
-variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
+```{r load visualization settings}
 # Visual settings
 
-line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-names(line_col_palette) <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-breaks_step <- 50
-line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 
 ```
 
 
-
-```{r read in the data}
+```{r read in diversity data}
 
 
 lines <- c(13:16)
 
-shannon_df <- data.frame()
+diversity_df <- data.frame()
+
 
 for (line in lines){
-    shannon_df <- rbind(shannon_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
+    diversity_df <- rbind(diversity_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
 }
 
 # set the correct viral line names and  add host info
-
-shannon_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14","17", "18", "19", "20"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+diversity_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
                 mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) %>%
                 filter(passage <= end_psg)
 
 ```
 
 
-> First let's take a look at total and mean entropy per sample. 
-
-```{r entropy per sample, results=TRUE}
+```{r visualization1: mean shannon entropy per sample}
 
 
-d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), .groups = 'drop')
+shannon_measure <- diversity_df %>% group_by(host_line,exp_line,passage) %>%
+  summarise (sum_ent = sum(shannon_entropy, na.rm = T), 
+    mean_ent = mean(shannon_entropy, na.rm = T), 
+    .groups = 'drop') %>%
+  mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
 
-d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
 
-# sum of entropy per sample 
 
-fig <- ggplot(d, aes(x = passage, y = sum_ent, color = exp_line)) +
+# visualize 
+fig <- ggplot(shannon_measure, aes(x = passage, y = mean_ent, color = exp_line)) +
   geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Total Entropy\n", color = "Virus Line", title = paste0("Sum of Entropy per Sample\n")) +
-  scale_color_manual(values = line_col_palette) +
-  theme_bw() +
-  theme(plot.title = element_text(size = 30, hjust = 0.5),
-    axis.title = element_text(size = 25),
-    axis.text.x = element_text(size = 20, angle = 90),
-    axis.text.y = element_text(size = 20),
-    legend.title = element_text(size=20),
-    legend.text = element_text(size = 15))
-
-ggplotly(fig)
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "shannon_per_sample_sum.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-
-
-
-# mean of entropy per sample 
-
-fig <- ggplot(d, aes(x = passage, y = mean_ent, color = exp_line, alpha = exp_line)) +
-  geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Mean Entropy\n", color = "Virus Line", title = paste0("Mean of Entropy per Sample")) +
+  labs(x="\nTransfer", y= "Mean entropy\n", color = "Lineage", title = paste0("Mean of Entropy per Sample")) +
   scale_color_manual(values = line_col_palette) +
   scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
-  scale_alpha_manual(values = c("MT-2_1" = 0.1, "MT-2_2" = 0.1, "MT-4_1" = 1, "MT-4_2" = 0.1)) +  # Adjust for your line names
-  theme_bw() +
-  theme(plot.title = element_text(size = 50, hjust = 0.5),
-    axis.title = element_text(size = 40),
-    axis.text.x = element_text(size = 30, color = "black", angle = 90),
-    axis.text.y = element_text(size = 30, color = "black"),
-    legend.title = element_text(size=40),
-    legend.text = element_text(size = 30))
+  custom_plot_theme(application = "publication")
 
-ggplotly(fig)
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "shannon_per_sample_mean.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/shannon_per_sample_mean.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-```
-
-> Let's take a look at total and mean heterozygosity per sample. 
-
-```{r heterozygosity per sample, results=TRUE}
-
-
-d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (sum_het = sum(heterozygosity, na.rm = T), mean_het = mean(heterozygosity, na.rm = T), .groups = 'drop')
-
-d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
-
-# sum of heterozygosity per sample 
-
-fig <- ggplot(d, aes(x = passage, y = sum_het, color = exp_line)) +
-  geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Total Heterozygosity\n", color = "Virus Line", title = paste0("Sum of Heterozygosity per Sample\n")) +
-  scale_color_manual(values = line_col_palette) +
-  theme_bw() +
-  theme(plot.title = element_text(size = 30, hjust = 0.5),
-    axis.title = element_text(size = 25),
-    axis.text.x = element_text(size = 20, angle = 90),
-    axis.text.y = element_text(size = 20),
-    legend.title = element_text(size=20),
-    legend.text = element_text(size = 15))
-
-ggplotly(fig)
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "heterozygosity_per_sample_sum.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-
-
-# mean of heterozygosity per sample 
-
-fig <- ggplot(d, aes(x = passage, y = mean_het, color = exp_line)) +
-  geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Mean Heterozygosity\n", color = "Virus Line", title = paste0("Mean of Heterozygosity per Sample \n")) +
-  scale_color_manual(values = line_col_palette) +
-  theme_bw() +
-  theme(plot.title = element_text(size = 30, hjust = 0.5),
-    axis.title = element_text(size = 25),
-    axis.text.x = element_text(size = 20, angle = 90),
-    axis.text.y = element_text(size = 20),
-    legend.title = element_text(size=20),
-    legend.text = element_text(size = 15),
-    strip.text = element_text(size = 25))
-
-ggplotly(fig)
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "heterozygosity_per_sample_mean.pdf"), height = 14, width = 14)
-fig
-dev.off()
+custom_plot_save(fig, "shannon_per_sample_mean.pdf", height = 14, width = 14)
 
 ```
 
 
-```{r entropy per position, results=TRUE}
+```{r visualization2: mean heterozygosity per sample}
+
+
+het_measure <- diversity_df %>% group_by(host_line,exp_line,passage) %>%
+  summarise (sum_het = sum(heterozygosity, na.rm = T), 
+    mean_het = mean(heterozygosity, na.rm = T), 
+    .groups = 'drop') %>%
+  mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+# visualize
+fig <- ggplot(het_measure, aes(x = passage, y = mean_het, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Mean heterozygosity\n", color = "Lineage", title = paste0("Mean of Heterozygosity per Sample \n")) +
+  scale_color_manual(values = line_col_palette) +
+  custom_plot_theme(application = "publication")
+
+
+
+# save figure
+custom_plot_save(fig, "heterozygosity_per_sample_mean.pdf", height = 14, width = 14)
+
+```
+
+
+####!!!!
+####!!!!
+
+
+```{r entropy per position}
 
 dd <- shannon_df %>% group_by(host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), var_ent = var(shannon_entropy, na.rm = T),.groups = 'drop')
 
