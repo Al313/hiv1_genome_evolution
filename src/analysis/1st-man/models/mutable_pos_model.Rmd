@@ -74,11 +74,8 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 # set parameters
 category <- "Minority"
 
-if (category == "Sporadic"){
+if (category == "Minority"){
     min_threshold <- 0.01
-    max_threshold <- 0.05
-} else if (category == "Minority"){
-    min_threshold <- 0.05
     max_threshold <- 0.5
 } else if (category == "Majority"){
     min_threshold <- 0.5

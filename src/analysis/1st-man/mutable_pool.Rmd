@@ -69,7 +69,7 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 # Accumulation
 
-```{r text numbers}
+```{r category thresholds}
 
 # set parameters
 category <- "Minority"

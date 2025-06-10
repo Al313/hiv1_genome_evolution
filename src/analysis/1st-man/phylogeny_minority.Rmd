@@ -1,4 +1,3 @@
-
 ---
 title:  
     "Reconstructing EXPIII Phylogeny based on Minority information"

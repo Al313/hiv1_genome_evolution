@@ -62,16 +62,13 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 # Accumulation
 
-```{r set paramters}
+```{r category thresholds}
 
 # set parameters
-category <- "Fixed"
+category <- "Minority"
 
-if (category == "Sporadic"){
+if (category == "Minority"){
     min_threshold <- 0.01
-    max_threshold <- 0.05
-} else if (category == "Minority"){
-    min_threshold <- 0.05
     max_threshold <- 0.5
 } else if (category == "Majority"){
     min_threshold <- 0.5
@@ -80,9 +77,7 @@ if (category == "Sporadic"){
     min_threshold <- 0.99
     max_threshold <- 1.01
 }
-
 ```
-
 
 
 

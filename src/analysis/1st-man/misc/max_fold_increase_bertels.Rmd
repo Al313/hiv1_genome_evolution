@@ -113,7 +113,7 @@ breaks_step <- 50
 ```
 
 
-```{r max-fold-increase processing _ Bertels' replicate}
+```{r max-fold-increase processing _ Bertels replicate}
 
 
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
@@ -179,7 +179,7 @@ saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-e
 
 ```
 
-```{r max-fold-increase figure _ Bertels' replicate}
+```{r max-fold-increase figure _ Bertels replicate}
 
 
 max_fold <- readRDS(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/max_fold_inc_bertels.rds")

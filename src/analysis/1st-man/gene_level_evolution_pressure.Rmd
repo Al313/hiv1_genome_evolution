@@ -70,7 +70,7 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 
 
-```{r corrlation between dn_ds and diversity}
+```{r text numbers}
 
 # set parameters
 category <- "Minority"
@@ -86,7 +86,10 @@ if (category == "Minority"){
     max_threshold <- 1.01
 }
 
+```
 
+
+```{r corrlation between dn_ds and diversity}
 
 # prepare variant data for visualization
 counts <- variants_ann_expiii %>%
