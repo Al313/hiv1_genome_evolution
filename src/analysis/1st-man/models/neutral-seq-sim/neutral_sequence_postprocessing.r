@@ -19,9 +19,9 @@ if (file.exists("/home/amovas/")){
 exp_lines <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 bottleneck_freq <- 2
 min_af <- 0.99
-
 mut_count_all <- list()
-i <- 50
+long_df_all <- data.frame()
+
 for (exp_line in exp_lines){
   print(exp_line)
   mut_count <- c()
@@ -46,17 +46,17 @@ for (exp_line in exp_lines){
                       dimnames = list(values, 1:ncol(pop)))
 
     # Calculate proportions for each column
-    for (i in seq_len(ncol(pop))) {
+    for (j in seq_len(ncol(pop))) {
       # Count occurrences of each value in the column
-      counts <- table(factor(pop[, i], levels = values))
+      counts <- table(factor(pop[, j], levels = values))
       # Convert counts to proportions
-      prop_mat[, i] <- counts / sum(counts)
+      prop_mat[, j] <- counts / sum(counts)
     }
 
 
     # set ref allele freq to 0
-    for (i in seq_along(init_pop)) {
-      prop_mat[as.character(init_pop[i]), i] <- 0
+    for (j in seq_along(init_pop)) {
+      prop_mat[as.character(init_pop[j]), j] <- 0
     }
 
 
@@ -79,8 +79,11 @@ for (exp_line in exp_lines){
     long_df$base_allele <- init_pop[long_df$pos]
 
     long_df <- long_df[order(long_df$pos),]
+    long_df$passage <- i*10
+    long_df$exp_line <- exp_line
+    long_df <- long_df[,c("exp_line", "passage", "pos", "base_allele", "alt_allele", "allele_freq")]
 
-
+    long_df_all <- rbind(long_df_all, long_df)
     count <- sum(long_df$allele_freq >= min_af)
     mut_count <- append(mut_count, count)
     mut_count_all[[exp_line]] <- mut_count
@@ -88,7 +91,7 @@ for (exp_line in exp_lines){
 }
 
 
-
+saveRDS(long_df_all, paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
 saveRDS(mut_count_all, paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
 
 

@@ -1,0 +1,383 @@
+```{r}
+
+
+ngs_sample_list_updated <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", header = TRUE)
+
+library(stringr)
+result_list_all <- list()
+
+View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no < 700) | (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no == 700),])
+
+nn <- ngs_sample_list_updated$full_sample_name[(ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no < 700) | 
+                                              (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no == 700)]
+
+
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+vp_numbers <- as.numeric(sub(".*VP([0-9]+).*", "\\1", nn))
+
+# Replace 15 with 13 and MT4 with MT2 for transfer 700
+nn <- ifelse(
+  vp_numbers == 700,
+  sub("MT4", "MT2", sub("^15", "13", nn)),
+  nn
+)
+
+
+result_list$`13MT2EXPIIIVP450combinedseq13072023`$forward_name <- append(result_list$`13MT2EXPIIIVP450combinedseq13072023`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220520_VPIII_430_480_90_Cultures13_16/13MT2EXPIIIVP450seq20052022_S3_L001_R1_001.fastq.gz")
+result_list$`13MT2EXPIIIVP450combinedseq13072023`$reverse_name <- append(result_list$`13MT2EXPIIIVP450combinedseq13072023`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220520_VPIII_430_480_90_Cultures13_16/13MT2EXPIIIVP450seq20052022_S3_L001_R2_001.fastq.gz")
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+####
+
+View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 14,])
+
+
+
+nn <- ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 14]
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`14MT2EXPIIIVP430combinedseq08122022`$forward_name <- append(result_list$`14MT2EXPIIIVP430combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220520_VPIII_430_480_90_Cultures13_16/14MT2EXPIIIVP430seq20052022_S8_L001_R1_001.fastq.gz")
+result_list$`14MT2EXPIIIVP430combinedseq08122022`$reverse_name <- append(result_list$`14MT2EXPIIIVP430combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220520_VPIII_430_480_90_Cultures13_16/14MT2EXPIIIVP430seq20052022_S8_L001_R2_001.fastq.gz")
+
+result_list$`14MT2EXPIIIVP690combinedseq17042025`$forward_name <- append(result_list$`14MT2EXPIIIVP690combinedseq17042025`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20241031_Illumina_VPIII13_16_p640-690/14MT2EXPIIIVP690seq31102024_S12_L001_R1_001.fastq.gz")
+result_list$`14MT2EXPIIIVP690combinedseq17042025`$reverse_name <- append(result_list$`14MT2EXPIIIVP690combinedseq17042025`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20241031_Illumina_VPIII13_16_p640-690/14MT2EXPIIIVP690seq31102024_S12_L001_R2_001.fastq.gz")
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+
+
+####
+
+View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no <= 360) | (ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no > 360),])
+
+nn <- c(ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no <= 360],
+        ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no > 360])
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`16MT4EXPIIIVP400combinedseq08122022`$forward_name <- append(result_list$`16MT4EXPIIIVP400combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/16MT4EXP3VP400seq03062022-KN_S10_L001_R1_001.fastq.gz")
+result_list$`16MT4EXPIIIVP400combinedseq08122022`$reverse_name <- append(result_list$`16MT4EXPIIIVP400combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/16MT4EXP3VP400seq03062022-KN_S10_L001_R2_001.fastq.gz")
+
+result_list$`16MT4EXPIIIVP410combinedseq08122022`$forward_name <- append(result_list$`16MT4EXPIIIVP410combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/16MT4EXP3VP410seq03062022-KN_S11_L001_R1_001.fastq.gz")
+result_list$`16MT4EXPIIIVP410combinedseq08122022`$reverse_name <- append(result_list$`16MT4EXPIIIVP410combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/16MT4EXP3VP410seq03062022-KN_S11_L001_R2_001.fastq.gz")
+
+result_list$`16MT4EXPIIIVP420combinedseq08122022`$forward_name <- append(result_list$`16MT4EXPIIIVP420combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/16MT4EXP3VP420seq03062022-KN_S12_L001_R1_001.fastq.gz")
+result_list$`16MT4EXPIIIVP420combinedseq08122022`$reverse_name <- append(result_list$`16MT4EXPIIIVP420combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/16MT4EXP3VP420seq03062022-KN_S12_L001_R2_001.fastq.gz")
+
+
+vp_numbers <- as.numeric(sub(".*VP([0-9]+).*", "\\1", nn))
+
+# Replace 15 with 16 if the number is above 360
+nn <- ifelse(
+  vp_numbers > 360,
+  sub("^16", "15", nn),
+  nn
+)
+
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+
+###
+
+
+
+View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no <= 360) | (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no > 360 & ngs_sample_list_updated$transfer_no < 700) | (ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no == 700),])
+
+nn <- c(ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no <= 360],
+        ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no > 360 & ngs_sample_list_updated$transfer_no < 700],
+        ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no == 700])
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`15MT4EXPIIIVP630combinedseq17042025`$forward_name <- append(result_list$`15MT4EXPIIIVP630combinedseq17042025`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20241010_Illumina_VPIII13_16_p580_630/15MT4EXPIIIVP630seq10102024_S17_L001_R1_001.fastq.gz")
+result_list$`15MT4EXPIIIVP630combinedseq17042025`$reverse_name <- append(result_list$`15MT4EXPIIIVP630combinedseq17042025`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20241010_Illumina_VPIII13_16_p580_630/15MT4EXPIIIVP630seq10102024_S17_L001_R2_001.fastq.gz")
+
+
+
+vp_numbers <- as.numeric(sub(".*VP([0-9]+).*", "\\1", nn))
+
+# Replace 15 with 16 if the number is above 360
+nn <- ifelse(
+  vp_numbers > 360,
+  sub("^15", "16", nn),
+  nn
+)
+
+# Replace 13 with 16 for transfer 700
+nn <- ifelse(
+  vp_numbers == 700,
+  sub("MT2", "MT4", sub("^13", "16", nn)),
+  nn
+)
+
+
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+###
+
+
+
+View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 17 & ngs_sample_list_updated$transfer_no != 620,])
+
+
+
+nn <- ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 17 & ngs_sample_list_updated$transfer_no != 620]
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`17MT2EXPIVVP420combinedseq08122022`$forward_name <- append(result_list$`17MT2EXPIVVP420combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/17MT2EXP4VP420seq03062022-KN_S15_L001_R1_001.fastq.gz")
+result_list$`17MT2EXPIVVP420combinedseq08122022`$reverse_name <- append(result_list$`17MT2EXPIVVP420combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/17MT2EXP4VP420seq03062022-KN_S15_L001_R2_001.fastq.gz")
+
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+
+###
+
+
+View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620),])
+
+
+
+nn <- ngs_sample_list_updated$full_sample_name[(ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620)]
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`19MT2EXPIVVP430combinedseq08122022`$forward_name <- append(result_list$`19MT2EXPIVVP430combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP430seq22072022_S17_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP430combinedseq08122022`$reverse_name <- append(result_list$`19MT2EXPIVVP430combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP430seq22072022_S17_L001_R2_001.fastq.gz")
+
+result_list$`19MT2EXPIVVP440combinedseq08122022`$forward_name <- append(result_list$`19MT2EXPIVVP440combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP440seq22072022_S18_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP440combinedseq08122022`$reverse_name <- append(result_list$`19MT2EXPIVVP440combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP440seq22072022_S18_L001_R2_001.fastq.gz")
+
+result_list$`19MT2EXPIVVP450combinedseq08122022`$forward_name <- append(result_list$`19MT2EXPIVVP450combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP450seq22072022_S19_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP450combinedseq08122022`$reverse_name <- append(result_list$`19MT2EXPIVVP450combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP450seq22072022_S19_L001_R2_001.fastq.gz")
+
+result_list$`19MT2EXPIVVP460combinedseq08122022`$forward_name <- append(result_list$`19MT2EXPIVVP460combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP460seq22072022_S20_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP460combinedseq08122022`$reverse_name <- append(result_list$`19MT2EXPIVVP460combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP460seq22072022_S20_L001_R2_001.fastq.gz")
+
+result_list$`19MT2EXPIVVP470combinedseq08122022`$forward_name <- append(result_list$`19MT2EXPIVVP470combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP470seq22072022_S21_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP470combinedseq08122022`$reverse_name <- append(result_list$`19MT2EXPIVVP470combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP470seq22072022_S21_L001_R2_001.fastq.gz")
+
+result_list$`19MT2EXPIVVP480combinedseq08122022`$forward_name <- append(result_list$`19MT2EXPIVVP480combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP480seq22072022_S22_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP480combinedseq08122022`$reverse_name <- append(result_list$`19MT2EXPIVVP480combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/19MT2EXPIVVP480seq22072022_S22_L001_R2_001.fastq.gz")
+
+result_list$`19MT2EXPIVVP640combinedseq17042025`$forward_name <- append(result_list$`19MT2EXPIVVP640combinedseq17042025`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20250220_Illumina_VPIV17-20p640-690/19MT2EXP4VP640seq20022025_S13_L001_R1_001.fastq.gz")
+result_list$`19MT2EXPIVVP640combinedseq17042025`$reverse_name <- append(result_list$`19MT2EXPIVVP640combinedseq17042025`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20250220_Illumina_VPIV17-20p640-690/19MT2EXP4VP640seq20022025_S13_L001_R2_001.fastq.gz")
+
+vp_numbers <- as.numeric(sub(".*VP([0-9]+).*", "\\1", nn))
+
+# Replace 15 with 16 if the number is above 360
+nn <- ifelse(
+  vp_numbers > 350,
+  sub("^19", "18", nn),
+  nn
+)
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+###
+
+
+View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620),])
+
+
+
+nn <- ngs_sample_list_updated$full_sample_name[(ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620)]
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`18MT2EXPIVVP420combinedseq08122022`$forward_name <- append(result_list$`18MT2EXPIVVP420combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/18MT2EXP4VP420seq03062022-KN_S18_L001_R1_001.fastq.gz")
+result_list$`18MT2EXPIVVP420combinedseq08122022`$reverse_name <- append(result_list$`18MT2EXPIVVP420combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/18MT2EXP4VP420seq03062022-KN_S18_L001_R2_001.fastq.gz")
+
+result_list$`18MT2EXPIVVP450combinedseq08122022`$forward_name <- append(result_list$`18MT2EXPIVVP450combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/18MT2EXPIVVP450seq22072022_S11_L001_R1_001.fastq.gz")
+result_list$`18MT2EXPIVVP450combinedseq08122022`$reverse_name <- append(result_list$`18MT2EXPIVVP450combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/18MT2EXPIVVP450seq22072022_S11_L001_R2_001.fastq.gz")
+
+result_list$`18MT2EXPIVVP470combinedseq08122022`$forward_name <- append(result_list$`18MT2EXPIVVP470combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/18MT2EXPIVVP470seq22072022_S13_L001_R1_001.fastq.gz")
+result_list$`18MT2EXPIVVP470combinedseq08122022`$reverse_name <- append(result_list$`18MT2EXPIVVP470combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220722_VPIV_430_480_Cultures17_20_rep_VPIII_14_90/18MT2EXPIVVP470seq22072022_S13_L001_R2_001.fastq.gz")
+
+
+vp_numbers <- as.numeric(sub(".*VP([0-9]+).*", "\\1", nn))
+
+# Replace 15 with 16 if the number is above 360
+nn <- ifelse(
+  vp_numbers > 350,
+  sub("^18", "19", nn),
+  nn
+)
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+###
+
+
+View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 20 & ngs_sample_list_updated$transfer_no != 680,])
+
+
+
+nn <- ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 20 & ngs_sample_list_updated$transfer_no != 680]
+
+result_list_all <- list()
+
+
+result_list <- lapply(nn, function(name) {
+  subset_df <- ngs_sample_list_updated[ngs_sample_list_updated$full_sample_name == name, ]
+  list(
+    forward_name = subset_df$forward_name,
+    reverse_name = subset_df$reverse_name
+  )
+})
+
+names(result_list) <- nn
+
+
+result_list$`20MT2EXPIVVP410combinedseq08122022`$forward_name <- append(result_list$`20MT2EXPIVVP410combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/20MT2EXP4VP410seq03062022-KN_S23_L001_R1_001.fastq.gz")
+result_list$`20MT2EXPIVVP410combinedseq08122022`$reverse_name <- append(result_list$`20MT2EXPIVVP410combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/20MT2EXP4VP410seq03062022-KN_S23_L001_R2_001.fastq.gz")
+
+result_list$`20MT2EXPIVVP420combinedseq08122022`$forward_name <- append(result_list$`20MT2EXPIVVP420combinedseq08122022`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/20MT2EXP4VP420seq03062022-KN_S24_L001_R1_001.fastq.gz")
+result_list$`20MT2EXPIVVP420combinedseq08122022`$reverse_name <- append(result_list$`20MT2EXPIVVP420combinedseq08122022`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20220603_VPIII_IV_400_420_Cultures13_20/20MT2EXP4VP420seq03062022-KN_S24_L001_R2_001.fastq.gz")
+
+result_list$`20MT2EXPIVVP690combinedseq17042025`$forward_name <- append(result_list$`20MT2EXPIVVP690combinedseq17042025`$forward_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20250220_Illumina_VPIV17-20p640-690/20MT2EXP4VP690seq20022025_S24_L001_R1_001.fastq.gz")
+result_list$`20MT2EXPIVVP690combinedseq17042025`$reverse_name <- append(result_list$`20MT2EXPIVVP690combinedseq17042025`$reverse_name, "\\\\fs-group\\INF_Forschungen\\INF_FL_Labor\\0_Karin_lab\\NGS\\ILLUMINA\\20250220_Illumina_VPIV17-20p640-690/20MT2EXP4VP690seq20022025_S24_L001_R2_001.fastq.gz")
+
+
+names <- sapply(str_split(nn, pattern = "-"), "[[", 1)
+names <- str_remove(names, pattern = "FullRep")
+
+names(result_list) <- names
+
+result_list_all <- append(result_list_all, result_list)
+
+
+
+output <- capture.output(print(result_list_all))
+writeLines(output, "/Users/alimos313/Desktop/sample_name_converter.txt")
+
+
+
+```

@@ -181,3 +181,4 @@ file.rename(from = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-e
 # save the updated metadata
 write.table(ngs_sample_list_updated, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", quote = F, row.names = F)
 
+

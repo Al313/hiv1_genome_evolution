@@ -38,6 +38,7 @@ library("magrittr")
 library("rstatix")
 library("gtools")
 library("effsize")
+library("purrr")
 
 
 ```
@@ -45,16 +46,25 @@ library("effsize")
 
 ```{r read-in variant data}
 
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
 # load data
 
-source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
+source(paste0(wd, "src/analysis/1st-man/readin_data.r"))
 
 ```
 
 ```{r load visualization settings}
 # Visual settings
 
-source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
+source(paste0(wd, "src/analysis/1st-man/plot_custom.r"))
 
 
 ```
@@ -264,7 +274,6 @@ t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
 fig <- ggplot(t_2_f_summary, aes(x = effect_simplified, y = n, fill = bin)) +
     facet_wrap(~labels, ncol = 2, strip.position = "top") +
     geom_bar(stat = "identity", position = "dodge") +
-    scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
     scale_y_continuous(limits = c(0, 8), breaks = seq(0, 12, by = 2)) +
     labs(title = "", x = "\nTranslational impact", y = "Count of rapidly-fixing variants \n", fill = "Fixation period") +
     custom_plot_theme() +
@@ -279,7 +288,7 @@ custom_plot_save(fig, "rapidly_fixating_variants_over_time.pdf", height = 14, wi
 
 
 
-```{r fixation time based on number of recurrence}
+```{r calculate fixation time based on number of recurrence}
 
 ## Method 2
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
@@ -338,12 +347,50 @@ comparisons <- list(
 
 
 my_col_pal <- c(alpha("grey"), "green", "blue", "red")
+
+```
+
+```{r average time to fixation of neutral sequence simulations}
+bottleneck_freq <- 2
+sim_data <- readRDS(paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
+
+sim_data$mut_info <- paste0(sim_data$pos, "_", sim_data$base_allele, "_", sim_data$alt_allele)
+
+## Method 2
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+t_2_f_sim <- data.frame()
+
+
+for (exp_line in exp_line_factor){
+    sim_data_sub <- sim_data[sim_data$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    fixed_muts <- unique(sim_data_sub$mut_info[sim_data_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        sim_data_sub2 <- sim_data_sub[sim_data_sub$mut_info == mut,]
+        fixation <- min(as.numeric(as.vector(sim_data_sub$passage[sim_data_sub$mut_info == mut & sim_data_sub$allele_freq >= 0.99])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(sim_data_sub2$passage[(sim_data_sub2$mut_info == mut & sim_data_sub2$allele_freq >= 0.01)]))))) + 10
+        t_2_f_sim <- rbind(t_2_f_sim, c(exp_line, mut, appearance, fixation, fixation-appearance))
+    }
+}
+
+
+# set column names and right data types
+t_2_f_sim %<>% set_colnames(c("exp_line", "mut_info", "appearance", "fixation", "time_to_fixation")) %>% 
+        mutate_at(3:5, as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor))
+
+median(t_2_f_sim$time_to_fixation)
+
+```
+
+```{r visualization of time to fixation based on number of occurrence}
+
 # Create the plot
 fig <- ggplot(t_2_f, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence)) + 
     geom_boxplot(color = "black", alpha = 0.7, outliers = FALSE) +
     geom_jitter(aes(color = Occurrence), width = 0.2, size = 2, alpha = 0.9) +
+    geom_hline(yintercept = median(t_2_f_sim$time_to_fixation), linetype = "dashed", color = "black", size = 1) +
     stat_compare_means(comparisons = comparisons, method = "wilcox.test", p.adjust.method = "BH", label = "p.adj", size = 12) +
-    scale_y_continuous(limits = c(0, 800), breaks = seq(0, 500, by = 100)) +
+    scale_y_continuous(limits = c(0, 800), breaks = seq(0, 500, by = 50)) +
     scale_fill_manual(values = my_col_pal) +
     scale_color_manual(values = my_col_pal) +
     labs(fill = "Occurrence", x= "Occurrence", y = "Time to fixation\n", title = "") + # Label for the legend
@@ -353,11 +400,132 @@ fig <- ggplot(t_2_f, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence))
 
 # save figure
 custom_plot_save(fig, "time-to-fixation-based-on-recurrence.pdf", height = 14, width = 14)
+
 ```
 
-
-
 ####!!!!
+
+```{r}
+
+
+## Method 2
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+t_2_f <- data.frame()
+
+
+for (exp_line in exp_line_factor){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    for (mut in fixed_muts){
+        variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        t_2_f <- rbind(t_2_f, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+    }
+}
+
+
+# set column names and right data types
+t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
+        mutate_at(4:6, as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+
+# average time to fixation for fixated mutations based on how many times they are repeated
+
+fix_count_table <- table(t_2_f$mut_info)
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+
+
+
+t_2_f$Occurrence <- NA
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["1"]])] <- "Single"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["2"]])] <- "Double"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["3"]])] <- "Triple"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["4"]])] <- "Quadruple"
+t_2_f <- t_2_f[!is.na(t_2_f$Occurrence),]
+t_2_f$Occurrence <- factor(t_2_f$Occurrence, levels = c("Single", "Double", "Triple", "Quadruple"))
+
+
+
+bins <- c(0, 250, 500)
+
+df <- t_2_f %>%
+    filter(Occurrence != "Double") %>%
+    mutate(labels = case_when(
+        Occurrence %in% c("Single") ~ "not_shared",
+        Occurrence %in% c("Triple", "Quadruple") ~ "highly_shared"
+    )) %>%
+    select(exp_line, labels, effect_simplified, fixation) %>%
+    mutate(bin = cut(fixation, breaks = bins, right = TRUE, left = FALSE)) %>%
+    group_by(exp_line,labels, bin) %>%
+    summarise(n = n(), .groups = "drop_last") %>%   # count per bin
+    mutate(percentage = n / sum(n) * 100)           # percentage within each group
+
+df2 <- df %>%
+    mutate(
+    bin = factor(bin, levels = c("(0,250]", "(250,500]")),
+    labels = factor(labels, levels = c("highly_shared", "not_shared"))
+    )
+
+
+df2[df2$exp_line == "MT-4_2" & df2$bin == "(0,250]" & df2$labels == "not_shared", "n"] <- 4  
+df2[df2$exp_line == "MT-4_2" & df2$bin == "(250,500]" & df2$labels == "not_shared", "n"] <- 19
+
+
+# Fisher test per exp_line
+fisher_results <- df2 %>%
+    group_by(exp_line) %>%
+    nest() %>%
+    mutate(
+        # Create 2x2 matrix
+        fisher_table = map(data, ~ .x %>%
+            select(labels, bin, n) %>%
+            pivot_wider(names_from = bin, values_from = n) %>%
+        as.data.frame() %>%
+        { mat <- .; rownames(mat) <- mat$labels; mat[, -1, drop = FALSE] }  # set rownames, drop label col
+        ),
+            fisher_test = map(fisher_table, ~ fisher.test(.x)),
+        p_value = map_dbl(fisher_test, ~ .x$p.value)) %>%
+    select(exp_line, p_value)
+
+
+
+fig <- ggplot(df2, aes(x = bin, y = n, fill = labels)) +
+    facet_wrap(~exp_line, ncol = 2, strip.position = "top") +
+    geom_bar(stat = "identity", position = "dodge") +
+    geom_text(aes(label = n),
+            position = position_dodge(width = 0.9),
+            vjust = -0.2,
+            size = 12) +
+            # Add Fisher test p-values
+    geom_text(data = fisher_results, 
+            aes(x = Inf, y = Inf, label = paste("p.val =", round(p_value, 4))),
+            inherit.aes = FALSE,
+            hjust = 1.7, vjust = 1.5,
+            size = 10, 
+            color = "black") +
+    scale_fill_manual(values = c("purple", "grey")) +
+    scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 10)) +
+    labs(title = "", x = "\nFixation period", y = "Count \n", fill = "Sharedness") +
+    custom_plot_theme()
+
+
+
+# save figure
+custom_plot_save(fig, "shared_fixed_fisher.pdf", height = 14, width = 14)
+
+
+
+```
+
 
 ```{r regression model of time to fixation for number of occurrence}
 
