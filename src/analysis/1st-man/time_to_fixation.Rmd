@@ -319,6 +319,8 @@ t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearan
 
 fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
 
+
+
 fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
     "3" = fix_count_table[fix_count_table==3],
     "2" = fix_count_table[fix_count_table==2],

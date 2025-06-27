@@ -1,12 +1,12 @@
 ```{r}
-
+library(stringr)
 
 ngs_sample_list_updated <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/metadata/NGS_samples_list_processed_vlast.csv", sep = ",", header = TRUE)
 
-library(stringr)
+
 result_list_all <- list()
 
-View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no < 700) | (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no == 700),])
+# View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no < 700) | (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no == 700),])
 
 nn <- ngs_sample_list_updated$full_sample_name[(ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no < 700) | 
                                               (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no == 700)]
@@ -46,13 +46,13 @@ result_list_all <- append(result_list_all, result_list)
 
 ####
 
-View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 14,])
+# View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 14,])
 
 
 
 nn <- ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 14]
 
-result_list_all <- list()
+
 
 
 result_list <- lapply(nn, function(name) {
@@ -83,12 +83,12 @@ result_list_all <- append(result_list_all, result_list)
 
 ####
 
-View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no <= 360) | (ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no > 360),])
+# View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no <= 360) | (ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no > 360),])
 
 nn <- c(ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no <= 360],
         ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no > 360])
 
-result_list_all <- list()
+
 
 
 result_list <- lapply(nn, function(name) {
@@ -136,13 +136,13 @@ result_list_all <- append(result_list_all, result_list)
 
 
 
-View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no <= 360) | (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no > 360 & ngs_sample_list_updated$transfer_no < 700) | (ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no == 700),])
+# View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no <= 360) | (ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no > 360 & ngs_sample_list_updated$transfer_no < 700) | (ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no == 700),])
 
 nn <- c(ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 16 & ngs_sample_list_updated$transfer_no <= 360],
         ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 15 & ngs_sample_list_updated$transfer_no > 360 & ngs_sample_list_updated$transfer_no < 700],
         ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 13 & ngs_sample_list_updated$transfer_no == 700])
 
-result_list_all <- list()
+
 
 
 result_list <- lapply(nn, function(name) {
@@ -192,13 +192,12 @@ result_list_all <- append(result_list_all, result_list)
 
 
 
-View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 17 & ngs_sample_list_updated$transfer_no != 620,])
+# View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 17 & ngs_sample_list_updated$transfer_no != 620,])
 
 
 
 nn <- ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 17 & ngs_sample_list_updated$transfer_no != 620]
 
-result_list_all <- list()
 
 
 result_list <- lapply(nn, function(name) {
@@ -227,13 +226,13 @@ result_list_all <- append(result_list_all, result_list)
 ###
 
 
-View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620),])
+# View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620),])
 
 
 
 nn <- ngs_sample_list_updated$full_sample_name[(ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620)]
 
-result_list_all <- list()
+
 
 
 result_list <- lapply(nn, function(name) {
@@ -287,13 +286,12 @@ result_list_all <- append(result_list_all, result_list)
 ###
 
 
-View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620),])
+# View(ngs_sample_list_updated[(ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620),])
 
 
 
 nn <- ngs_sample_list_updated$full_sample_name[(ngs_sample_list_updated$virus_line_no == 19 & ngs_sample_list_updated$transfer_no <= 350) | (ngs_sample_list_updated$virus_line_no == 18 & ngs_sample_list_updated$transfer_no > 350 & ngs_sample_list_updated$transfer_no != 620)]
 
-result_list_all <- list()
 
 
 result_list <- lapply(nn, function(name) {
@@ -336,13 +334,13 @@ result_list_all <- append(result_list_all, result_list)
 ###
 
 
-View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 20 & ngs_sample_list_updated$transfer_no != 680,])
+# View(ngs_sample_list_updated[ngs_sample_list_updated$virus_line_no == 20 & ngs_sample_list_updated$transfer_no != 680,])
 
 
 
 nn <- ngs_sample_list_updated$full_sample_name[ngs_sample_list_updated$virus_line_no == 20 & ngs_sample_list_updated$transfer_no != 680]
 
-result_list_all <- list()
+
 
 
 result_list <- lapply(nn, function(name) {
@@ -378,6 +376,7 @@ result_list_all <- append(result_list_all, result_list)
 output <- capture.output(print(result_list_all))
 writeLines(output, "/Users/alimos313/Desktop/sample_name_converter.txt")
 
-
-
+# then in command line:
+# sed 's/\//\\\\/g' sample_name_converter.txt > sample_name_converter_fixed.txt
+# sed 's/\\\\/\\/g' sample_name_converter_fixed.txt > sample_name_converter_fixed2.txt
 ```
