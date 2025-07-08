@@ -72,7 +72,7 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 ```{r category thresholds}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Minority"){
     min_threshold <- 0.01
@@ -94,12 +94,6 @@ end_fixed <-
         select(c(exp_line,mut_info)) %>%
         distinct()
 
-# create a named vector from the df
-muts <- end_fixed$mut_info
-names(muts) <- end_fixed$exp_line
-
-# convert named vector to list
-muts_list <- lapply(split(muts, names(muts)), unname)
 
 
 # Store results
@@ -110,32 +104,40 @@ results <- data.frame(Shared_MT2 = numeric(num_simulations),
                       Unique_MT2 = numeric(num_simulations),
                       Unique_MT4 = numeric(num_simulations))
 
+end_fixed_ran <- data.frame(exp_line = character(nrow(end_fixed)),
+                              mut_info = character(nrow(end_fixed)))
+
 set.seed(123)  # For reproducibility
 # Run the process 1000 times
 for (i in 1:num_simulations) {
 
-    # Shuffle names
-    muts_vec <- unname(unlist(muts_list))
-    names(muts_vec) <- sample(rep(names(muts_list), lengths(muts_list)))
+  # random sampling
+  end_fixed_ran$exp_line <- sample(end_fixed$exp_line)
+  end_fixed_ran$mut_info <- sample(end_fixed$mut_info)
 
-    # Convert back to list
-    muts_list_new <- split(muts_vec, names(muts_vec))
 
-    # Calculate mutation categories
-    shared_mt2 <- intersect(muts_list_new[[1]], muts_list_new[[2]])
-    shared_mt4 <- intersect(muts_list_new[[3]], muts_list_new[[4]])
-    shared_both <- intersect(c(muts_list_new[[1]], muts_list_new[[2]]), 
-                            c(muts_list_new[[3]], muts_list_new[[4]]))
-    unique_mt2 <- setdiff(setdiff(c(muts_list_new[[1]], muts_list_new[[2]]), 
-                                c(muts_list_new[[3]], muts_list_new[[4]])), 
-                        shared_mt2)
-    unique_mt4 <- setdiff(setdiff(c(muts_list_new[[3]], muts_list_new[[4]]), 
-                                c(muts_list_new[[1]], muts_list_new[[2]])), 
-                        shared_mt4)
+  # create a named vector from the df
+  muts_new <- end_fixed_ran$mut_info
+  names(muts_new) <- end_fixed_ran$exp_line
 
-    # Store results
-    results[i, ] <- c(length(shared_mt2), length(shared_mt4), length(shared_both), 
-                        length(unique_mt2), length(unique_mt4))
+  # convert named vector to list
+  muts_list_new <- lapply(split(muts_new, names(muts_new)), unname)
+
+  # Calculate mutation categories
+  shared_mt2 <- intersect(muts_list_new[[1]], muts_list_new[[2]])
+  shared_mt4 <- intersect(muts_list_new[[3]], muts_list_new[[4]])
+  shared_both <- intersect(c(muts_list_new[[1]], muts_list_new[[2]]), 
+                          c(muts_list_new[[3]], muts_list_new[[4]]))
+  unique_mt2 <- setdiff(setdiff(c(muts_list_new[[1]], muts_list_new[[2]]), 
+                              c(muts_list_new[[3]], muts_list_new[[4]])), 
+                      shared_mt2)
+  unique_mt4 <- setdiff(setdiff(c(muts_list_new[[3]], muts_list_new[[4]]), 
+                              c(muts_list_new[[1]], muts_list_new[[2]])), 
+                      shared_mt4)
+
+  # Store results
+  results[i, ] <- c(length(shared_mt2), length(shared_mt4), length(shared_both), 
+                      length(unique_mt2), length(unique_mt4))
 }
 
 # get hpd values
@@ -149,6 +151,13 @@ hpd_upper <- as.integer(hpd_results[2,]) # Upper bounds
 ```
 
 ```{r prepare data}
+
+# create a named vector from the df
+muts <- end_fixed$mut_info
+names(muts) <- end_fixed$exp_line
+
+# convert named vector to list
+muts_list <- lapply(split(muts, names(muts)), unname)
 
 
 # Step 1: Compute Original Mutation Counts
@@ -170,14 +179,14 @@ original_counts <- c(length(original_shared_mt2), length(original_shared_mt4),
 
 # Step 2: Prepare Data for Plotting
 comparison_df <- data.frame(
-    Category = factor(
-        c("Shared in MT-2", "Shared in MT-4", "Shared in both"),
-        levels = c("Shared in MT-2", "Shared in MT-4", "Shared in both")),
-    Type = rep(c("Original", "Simulated"), each = 3),  # Labels for grouping
-    Count = c(original_counts[1:3], colMeans(results[1:3])),  # Combine original and simulated means
-    SE = c(rep(NA, 3), apply(results[1:3], 2, function(x) sd(x) / sqrt(length(x)))),  # Standard Error for Simulated
-    HPD_Lower = c(rep(NA, 3), hpd_lower[1:3]),  # HPD Lower only for Simulated
-    HPD_Upper = c(rep(NA, 3), hpd_upper[1:3])   # HPD Upper only for Simulated
+  Category = factor(
+      c("Shared in MT-2", "Shared in MT-4", "Shared in both"),
+      levels = c("Shared in MT-2", "Shared in MT-4", "Shared in both")),
+  Type = rep(c("Original", "Simulated"), each = 3),  # Labels for grouping
+  Count = c(original_counts[1:3], colMeans(results[1:3])),  # Combine original and simulated means
+  SE = c(rep(NA, 3), apply(results[1:3], 2, function(x) sd(x) / sqrt(length(x)))),  # Standard Error for Simulated
+  HPD_Lower = c(rep(NA, 3), hpd_lower[1:3]),  # HPD Lower only for Simulated
+  HPD_Upper = c(rep(NA, 3), hpd_upper[1:3])   # HPD Upper only for Simulated
 )
 
 
@@ -185,7 +194,7 @@ comparison_df <- data.frame(
 
 # not normally distributed, so use wilcoxon test
 plot(density(results$Shared_MT2), col = "red", lwd = 2, main = "Density Plot of Shared Mutations in MT-2")
-shapiro.test(results$Shared_MT2)
+# shapiro.test(results$Shared_MT2)
 
 # Perform significance test for each category
 
@@ -221,30 +230,30 @@ comparison_df$Significance <- c(significance_labels, rep(NA, 3))  # Only add for
 
 ```
 
-```{r visualization #1}
+```{r visualization 1}
 
 # Step 4: Plot with HPD Interval
 dodge <- position_dodge(width=0.5)
 
 fig <- ggplot(comparison_df, aes(x = Category, y = Count, fill = Type, group = Type)) +
-    geom_bar(stat = "identity", position = dodge, width = 0.5) +  # Increased dodge width
-    geom_errorbar( 
-        aes(ymin = HPD_Lower, ymax = HPD_Upper), # Count - SE, ymax = Count + SE
-        width = 0.2,  # Narrower error bars
-        position = dodge,  # Match the dodge width exactly
-        size = 1) + 
-    geom_text(
-        data = subset(comparison_df, Type == "Original"),  # Only for observed counts
-        aes(label = Significance, y = c(25,20,40)),  # Position asterisks above the bars
-        position = dodge,
-        size = 6
-    ) +
-    labs(title = "Comparison of Observed vs Randomized \n Fixed Variant Sharedness per Environment",
-        x = "\nSharedness group",
-        y = paste0(category," variant count\n"),
-        fill = "Dataset") +
-    scale_fill_manual(labels = c("Observed", "Randomized"), values = c("#038331", "#ffdf50")) +
-    custom_plot_theme(application = "publication")
+  geom_bar(stat = "identity", position = dodge, width = 0.5) +  # Increased dodge width
+  geom_errorbar( 
+      aes(ymin = HPD_Lower, ymax = HPD_Upper), # Count - SE, ymax = Count + SE
+      width = 0.2,  # Narrower error bars
+      position = dodge,  # Match the dodge width exactly
+      size = 1) + 
+  geom_text(
+      data = subset(comparison_df, Type == "Original"),  # Only for observed counts
+      aes(label = Significance, y = c(25,20,40)),  # Position asterisks above the bars
+      position = dodge,
+      size = 6
+  ) +
+  labs(title = "Comparison of Observed vs Randomized \n Fixed Variant Sharedness per Environment",
+      x = "\nSharedness group",
+      y = paste0(category," variant count\n"),
+      fill = "Dataset") +
+  scale_fill_manual(labels = c("Observed", "Randomized"), values = c("#038331", "#ffdf50")) +
+  custom_plot_theme(application = "publication")
 
 
 # save figure
