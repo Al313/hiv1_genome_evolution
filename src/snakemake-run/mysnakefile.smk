@@ -19,8 +19,9 @@ EXP,LINES,SAMPLES = glob_wildcards(f"{wd}/data/freezed-raw-data/fastq/{{experime
 rule all:
     input:
        #expand(f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.csv.gz", experiment=set(EXP))
-       expand(f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.vcf.gz", experiment=set(EXP))
+       #expand(f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.vcf.gz", experiment=set(EXP))
        #expand(f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.ann.vcf.gz", experiment=set(EXP))
+       expand(f"{wd}/results/tables/pipeline-outputs/{{experiment}}_annotated_variants.tsv.gz", experiment=set(EXP))
        #f"{wd}/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
        #expand(f"{wd}/results/tables/pipeline-outputs/qc/{{experiment}}_{{line}}_multiqc_report.html", zip, experiment=EXP, line=LINES),
        #expand(f"{wd}/data/processed-data/fastqc-reports/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}_R1_001_fastqc.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
@@ -182,7 +183,7 @@ rule variant_to_vcf:
     output:
         f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.vcf.gz"
     shell:
-        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/variant_to_vcf.R && gzip /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}_variants.vcf"
+        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/variant_to_vcf.R {wildcards.experiment} && gzip /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}_variants.vcf"
 
 
 
@@ -211,12 +212,12 @@ rule prep_feature_list:
 rule extract_annotation:
     input:
         f"{wd}/results/tables/pipeline-outputs/cds_feature_list.tsv",
-        f"{wd}/results/tables/pipeline-outputs/all_variants.ann.vcf.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.ann.vcf.gz"
     output:
-        f"{wd}/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_annotated_variants.tsv.gz"
     resources:
         mem_mb=50000
     shell:
-        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/aa_change.R && Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/add_mut_context.R"
+        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/aa_change.R {wildcards.experiment} && Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/add_mut_context.R {wildcards.experiment}"
 
 ### !

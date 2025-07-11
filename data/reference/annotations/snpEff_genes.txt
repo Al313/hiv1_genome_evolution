@@ -1,11 +1,12 @@
 # The following table is formatted as tab separated values. 
-#GeneName	GeneId	TranscriptId	BioType	variants_impact_HIGH	variants_impact_LOW	variants_impact_MODERATE	variants_impact_MODIFIER	variants_effect_conservative_inframe_deletion	variants_effect_conservative_inframe_insertion	variants_effect_disruptive_inframe_deletion	variants_effect_disruptive_inframe_insertion	variants_effect_downstream_gene_variant	variants_effect_frameshift_variant	variants_effect_initiator_codon_variant	variants_effect_missense_variant	variants_effect_splice_region_variant	variants_effect_start_lost	variants_effect_stop_gained	variants_effect_stop_lost	variants_effect_stop_retained_variant	variants_effect_synonymous_variant	variants_effect_upstream_gene_variant
-Gene_2084_5095	Gene_2084_5095	AAK08484.2	protein_coding	152241	21806	46461	222260	2905	608	4086	878	0	147290	0	38081	0	0	6975	0	0	21806	222260
-Gene_5040_5618	Gene_5040_5618	AAK08482.1	protein_coding	0	0	0	440396	0	0	0	0	0	0	0	0	0	0	0	0	0	0	440396
-Gene_5558_5848	Gene_5558_5848	AAK08485.1	protein_coding	0	0	0	402085	0	0	0	0	0	0	0	0	0	0	0	0	0	0	402085
-Gene_5829_8413	Gene_5829_8413	AAK08486.1	protein_coding	0	0	0	344356	0	0	0	0	0	0	0	0	0	0	0	0	0	0	344356
-Gene_5968_8642	Gene_5968_8642	AAK08487.1	protein_coding	0	0	0	326484	0	0	0	0	0	0	0	0	0	0	0	0	0	0	326484
-Gene_6060_6305	Gene_6060_6305	AAK08488.1	protein_coding	0	0	0	319146	0	0	0	0	0	0	0	0	0	0	0	0	0	0	319146
-Gene_6220_8784	Gene_6220_8784	AAK08489.2	protein_coding	0	0	0	301984	0	0	0	0	0	0	0	0	0	0	0	0	0	0	301984
-Gene_789_2291	Gene_789_2291	AAK08483.1	protein_coding	102519	18331	33522	287832	1265	326	3439	878	196205	100594	1	27813	379	685	2410	373	2	18328	91627
-Gene_8786_9406	Gene_8786_9406	AAK08490.1	protein_coding	0	0	0	25044	0	0	0	0	0	0	0	0	0	0	0	0	0	0	25044
+#GeneName	GeneId	TranscriptId	BioType	variants_impact_HIGH	variants_impact_LOW	variants_impact_MODERATE	variants_impact_MODIFIER	variants_effect_conservative_inframe_deletion	variants_effect_conservative_inframe_insertion	variants_effect_disruptive_inframe_deletion	variants_effect_disruptive_inframe_insertion	variants_effect_downstream_gene_variant	variants_effect_exon_loss_variant	variants_effect_frameshift_variant	variants_effect_initiator_codon_variant	variants_effect_intron_variant	variants_effect_missense_variant	variants_effect_splice_acceptor_variant	variants_effect_splice_donor_variant	variants_effect_splice_region_variant	variants_effect_start_lost	variants_effect_stop_gained	variants_effect_stop_lost	variants_effect_stop_retained_variant	variants_effect_synonymous_variant	variants_effect_upstream_gene_variant
+Gene_12278_13138	Gene_12278_13138	AAK08491.1	protein_coding	0	0	0	548258	0	0	0	0	546838	0	0	0	0	0	0	0	0	0	0	0	0	0	1420
+Gene_2084_5095	Gene_2084_5095	AAK08484.2	protein_coding	329880	103410	166856	1336247	10091	1498	16241	2729	997956	0	319286	0	0	136740	0	0	515	0	15145	359	125	103285	338291
+Gene_5040_5618	Gene_5040_5618	AAK08482.1	protein_coding	51077	17633	34483	1830110	1441	124	2426	359	903430	0	48196	0	0	30339	0	0	800	526	3052	557	191	17442	926680
+Gene_5558_5848	Gene_5558_5848	AAK08485.1	protein_coding	37969	9812	26432	1801881	1274	117	2508	311	845217	0	34645	1	0	22647	0	0	696	527	3506	550	115	9696	956664
+Gene_5829_8413	Gene_5829_8413	AAK08486.1	protein_coding	25005	9801	14660	1752231	909	120	1340	192	281377	3	23286	0	523051	12546	308	413	4347	507	873	756	277	7420	950628
+Gene_5968_8642	Gene_5968_8642	AAK08487.1	protein_coding	36975	15813	28578	1692314	1540	145	3002	413	226499	6	35289	0	523051	23869	308	413	4077	374	1098	533	213	13496	945589
+Gene_6060_6305	Gene_6060_6305	AAK08488.1	protein_coding	31828	7812	23225	1698888	3050	296	2526	379	748812	0	30335	0	0	17335	0	0	991	801	1271	727	228	7584	950076
+Gene_6220_8784	Gene_6220_8784	AAK08489.2	protein_coding	308346	90710	186101	1147310	14522	1582	28291	2949	187987	0	294329	0	0	139743	0	0	866	441	17828	783	75	90635	959323
+Gene_789_2291	Gene_789_2291	AAK08483.1	protein_coding	133912	52486	66660	1143697	2603	1546	6819	4601	1017458	0	130159	0	0	52462	0	0	610	859	4633	582	19	52467	126239
+Gene_8786_9406	Gene_8786_9406	AAK08490.1	protein_coding	72845	19688	53137	1112507	2202	1124	5630	1631	42278	0	68600	11	0	43046	0	0	724	1241	4864	596	113	19564	1070229
