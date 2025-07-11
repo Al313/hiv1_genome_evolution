@@ -27,7 +27,7 @@ args <- commandArgs(trailingOnly = TRUE)
 exp <- args[1]
 
 # read in the variant file
-variants <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/", exp, "_variants.csv.gz"), sep = ",", stringsAsFactors = F, header = T)
+variants <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/", exp, "/", exp, "_variants.csv.gz"), sep = ",", stringsAsFactors = F, header = T)
 
 # remove the large deletion variations
 variants<-variants[variants$mut_type!= "LD",]
@@ -95,7 +95,7 @@ vcf_header <- '##fileformat=VCFv4.3
 
 colnames(vcf_variants)[1] <- paste0("#",colnames(vcf_variants)[1])
 
-cat(vcf_header, file = paste0(wd,"results/tables/pipeline-outputs/", exp, "_variants.vcf"), sep = "\n")
-write.table(vcf_variants, file = paste0(wd, "results/tables/pipeline-outputs/", exp, "_variants.vcf"), sep = "\t", row.names = F, quote = F, append = T)  
+cat(vcf_header, file = paste0(wd,"results/tables/pipeline-outputs/", exp, "/", exp, "_variants.vcf"), sep = "\n")
+write.table(vcf_variants, file = paste0(wd, "results/tables/pipeline-outputs/", exp, "/", exp, "_variants.vcf"), sep = "\t", row.names = F, quote = F, append = T)  
 
 

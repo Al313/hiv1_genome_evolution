@@ -12,7 +12,7 @@ args <- commandArgs(trailingOnly = TRUE)
 exp <- args[1]
 
 
-variants_ann <- read.table(file = paste0("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/", exp, "_annotated_variants.tsv.gz"), 
+variants_ann <- read.table(file = paste0("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/", exp, "/", exp, "_annotated_variants.tsv.gz"), 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 
@@ -47,4 +47,4 @@ variants_ann$mut_5_context <- apply(variants_ann,1,get_mut_5_context, sequence)
 
 # save results
 write.table(variants_ann, 
-    file = gzfile(paste0("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/", exp, "_annotated_variants.tsv.gz")), sep = "\t", row.names = F, quote = F)
+    file = gzfile(paste0("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/", exp, "/", exp, "_annotated_variants.tsv.gz")), sep = "\t", row.names = F, quote = F)

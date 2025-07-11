@@ -30,7 +30,7 @@ features_cds <- read.table(file = paste0(wd,"results/tables/pipeline-outputs/cds
 
 # read in annotated variants in vcf format to extract the INFO filed
 
-ann_var_vcf <- read.vcfR(file = paste0(wd,"results/tables/pipeline-outputs/", exp, "_variants.ann.vcf.gz"))
+ann_var_vcf <- read.vcfR(file = paste0(wd,"results/tables/pipeline-outputs/", exp, "/", exp, "_variants.ann.vcf.gz"))
 ann_var_info <- vcfR::INFO2df(ann_var_vcf)
 #ann_var_info <- ann_var_info[,-(6:7)]
 #head(ann_var_info[ann_var_info$AF>= 0.9,], n = 1)
@@ -38,7 +38,7 @@ ann_var_info <- vcfR::INFO2df(ann_var_vcf)
 
 # read in the variant table
 
-ann_var_df <- read.table(file = paste0(wd,"results/tables/pipeline-outputs/", exp, "_variants.ann.vcf.gz"), header = F,
+ann_var_df <- read.table(file = paste0(wd,"results/tables/pipeline-outputs/", exp, "/", exp, "_variants.ann.vcf.gz"), header = F,
                           sep = "\t", stringsAsFactors = F)
 colnames(ann_var_df) <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
 ann_var_df <- ann_var_df[,1:5]
@@ -136,7 +136,7 @@ ann_var_processed <- ann_var_processed[order(ann_var_processed$genomic_pos,ann_v
 ann_var_processed[,1] <- "NL43_ann_wk0virusPassRef_plasmid"
 
 # save the data frame
-write.table(ann_var_processed, file = gzfile(paste0("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/", exp, "_annotated_variants.tsv.gz")),
+write.table(ann_var_processed, file = gzfile(paste0("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/", exp, "/", exp, "_annotated_variants.tsv.gz")),
     sep = "\t", quote = F, row.names = F)
 
 

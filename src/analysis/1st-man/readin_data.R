@@ -14,24 +14,22 @@ if (file.exists("/home/amovas/")){
 `%notin%` <- Negate(`%in%`)
 
 # load data
-variants_ann <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
+variants_ann_expiii <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/iii/iii_annotated_variants.tsv.gz"), 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 
 # correct for the switched experimental lines
-variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
-variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
+variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == 15 & variants_ann_expiii$passage > 360] <- "A"
+variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == 16 & variants_ann_expiii$passage > 360] <- "B"
 
-variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
-variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
+variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == "A"] <- "16"
+variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == "B"] <- "15"
 
 # determine what data to be included
 
-exp <- "EXPIII"
 end_psg <- 500
 
-variants_ann_expiii <- variants_ann %>% filter(exp_line %in% 13:16,
-        passage <= end_psg) %>%
+variants_ann_expiii <- variants_ann %>% filter(passage <= end_psg) %>%
         mutate(feature = ifelse(feature == "envelope", "env", feature)) # correct the feature name
 
 

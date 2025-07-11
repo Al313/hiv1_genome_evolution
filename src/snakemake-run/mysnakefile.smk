@@ -169,7 +169,7 @@ rule collect_mutations:
     input:
         get_samples_for_experiment
     output:
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.csv.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.csv.gz"
     shell:
         "python /home/amovas/data/genome-evo-proj/src/snakemake-run/python-scripts/my_collect_mutations.py {input}"
 
@@ -179,22 +179,22 @@ rule collect_mutations:
 
 rule variant_to_vcf:
     input:
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.csv.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.csv.gz"
     output:
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.vcf.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.vcf.gz"
     shell:
-        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/variant_to_vcf.R {wildcards.experiment} && gzip /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}_variants.vcf"
+        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/variant_to_vcf.R {wildcards.experiment} && gzip /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}/{wildcards.experiment}_variants.vcf"
 
 
 
 rule annotate_vcf:
     input:
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.vcf.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.vcf.gz"
     output:
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.ann.vcf.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.ann.vcf.gz"
     shell:
-        "cd /home/amovas/data/genome-evo-proj/data/reference/annotations && snpEff -v hiv_plasmid_ref_genome /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}_variants.vcf.gz > /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}_variants.ann.vcf \
-	&& gzip /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}_variants.ann.vcf"
+        "cd /home/amovas/data/genome-evo-proj/data/reference/annotations && snpEff -v hiv_plasmid_ref_genome /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}/{wildcards.experiment}_variants.vcf.gz > /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}/{wildcards.experiment}_variants.ann.vcf \
+	&& gzip /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{wildcards.experiment}/{wildcards.experiment}_variants.ann.vcf"
 
 ### !
 
@@ -212,9 +212,9 @@ rule prep_feature_list:
 rule extract_annotation:
     input:
         f"{wd}/results/tables/pipeline-outputs/cds_feature_list.tsv",
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_variants.ann.vcf.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.ann.vcf.gz"
     output:
-        f"{wd}/results/tables/pipeline-outputs/{{experiment}}_annotated_variants.tsv.gz"
+        f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_annotated_variants.tsv.gz"
     resources:
         mem_mb=50000
     shell:
