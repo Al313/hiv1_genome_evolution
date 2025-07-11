@@ -28,7 +28,7 @@ fi
 echo "#!/bin/bash
 #SBATCH --cpus-per-task=1
 #SBATCH --time=24:00:00
-#SBATCH --mem=10G
+#SBATCH --mem=11G
 #SBATCH --output=${output_dir}/snakemake.out
 
 source activate ha_proj

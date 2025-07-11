@@ -10,6 +10,8 @@ import gzip
 from pandas.api.types import is_string_dtype
 from pandas.api.types import is_numeric_dtype
 
+
+
 # define functions 
 
 def flatten(l):
@@ -57,24 +59,11 @@ def read_files(filename,lines=None,passage=None):
         print(lines,filename[filename.find('VP')+2:filename.find('.')],3)
     return deletions,insertions,mutations
 
-def get_experiment_from_path(sample_path):
-    """Extract experiment name from the sample path"""
-    # Extract experiment from path like: /path/to/mutations/pipeline-outputs/iv/20/sample.csv
-    path_parts = sample_path.split('/')
-    for i, part in enumerate(path_parts):
-        if part == 'pipeline-outputs' and i + 1 < len(path_parts):
-            return path_parts[i + 1]  # Return the experiment name (e.g., 'iv', 'iii')
-    return None
 
 if __name__ == "__main__":
     
     variants = []
     
-    # Get experiment name from the first sample path
-    if len(sys.argv) > 1:
-        experiment = get_experiment_from_path(sys.argv[1])
-    else:
-        experiment = "unknown"
     
     for sample_path in sys.argv[1:]:
         print(sample_path)
@@ -88,19 +77,11 @@ if __name__ == "__main__":
         
     variants = pd.DataFrame(flatten(variants),columns=['start','end','ref','alt','mut_type','fraction','reads','coverage','line','passage'])
     variants.sort_values(by='fraction',ascending=False,inplace=True)
-    
-    # Use experiment-specific output paths
-    pkl_output = f'/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{experiment}_variants.pkl.gz'
-    csv_output = f'/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/{experiment}_variants.csv.gz'
-    
-    # Create output directory if it doesn't exist
-    os.makedirs(os.path.dirname(pkl_output), exist_ok=True)
-    
-    variants.to_pickle(pkl_output, protocol=2, compression='gzip')
+    variants.to_pickle('/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.pkl.gz',protocol=2, compression='gzip')
 
     # convert the pkl object to csv for further downstream analyses
-    with gzip.open(pkl_output, "rb") as f:
+    with gzip.open("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.pkl.gz", "rb") as f:
         object = pkl.load(f)
         
     df = pd.DataFrame(object)
-    df.to_csv(csv_output, index=False, compression='gzip')
+    df.to_csv("/home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/all_variants.csv.gz", index=False, compression='gzip')
