@@ -34,7 +34,6 @@ echo "#!/bin/bash
 source activate ha_proj
 
 snakemake \
-        -s mysnakefile.smk \
 	--rerun-incomplete \
 	--jobs 225 \
         --default-resource mem_mb=20000 \

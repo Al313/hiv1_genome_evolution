@@ -5,7 +5,7 @@ snakemake -s snakefile.smk --cores x
 # force-run from a specific rule
 snakemake -s snakefile.smk --cores x -R xxx
 # visualize the dag
-snakemake -s mysnakefile.smk --rulegraph all | dot -Tpdf > /home/amovas/data/genome-evo-proj/results/figs/publication/supp/dag.pdf
+snakemake -s mysnakefile.smk --rulegraph | dot -Tpdf > ../../results/tables/pipeline-outputs/rulegraph.pdf
 # to get 50th interval of consensus sequences from the collected files:
 ## on Linux
 cat all_consensus_gagpol.fasta | grep --no-group-separator -A 1 -E ">(13|14|15|16).*VP(10|50|100|150|200|250|300|350|400|450|500|550|570)[^0-9+\-]" > 50th_consensus_ggpol.fasta

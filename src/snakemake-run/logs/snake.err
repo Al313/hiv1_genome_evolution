@@ -5,52 +5,12 @@ Rules claiming more threads will be scaled down.
 Provided resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954
 Select jobs to execute...
 
-[Fri Jul 11 14:02:01 2025]
+[Fri Jul 11 16:23:50 2025]
 rule extract_annotation:
-    input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iv_variants.ann.vcf.gz
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iv_annotated_variants.tsv.gz
+    input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iii/iii_variants.ann.vcf.gz
+    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iii/iii_annotated_variants.tsv.gz
     jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iv_annotated_variants.tsv.gz
-    wildcards: experiment=iv
-    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
-
-
-   *****       ***   vcfR   ***       *****
-   This is vcfR 1.14.0 
-     browseVignettes('vcfR') # Documentation
-     citation('vcfR') # Citation
-   *****       *****      *****       *****
-
-Warning message:
-package ‘vcfR’ was built under R version 4.2.3 
-
-Attaching package: ‘dplyr’
-
-The following objects are masked from ‘package:stats’:
-
-    filter, lag
-
-The following objects are masked from ‘package:base’:
-
-    intersect, setdiff, setequal, union
-
-Warning message:
-package ‘dplyr’ was built under R version 4.2.3 
-Warning message:
-package ‘stringr’ was built under R version 4.2.3 
-Building DAG of jobs...
-Using shell: /usr/bin/bash
-Provided cores: 1 (use --cores to define parallelism)
-Rules claiming more threads will be scaled down.
-Provided resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954
-Select jobs to execute...
-
-[Fri Jul 11 14:02:10 2025]
-rule extract_annotation:
-    input: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/cds_feature_list.tsv, /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iii_variants.ann.vcf.gz
-    output: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iii_annotated_variants.tsv.gz
-    jobid: 0
-    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iii_annotated_variants.tsv.gz
+    reason: Missing output files: /home/amovas/data/genome-evo-proj/results/tables/pipeline-outputs/iii/iii_annotated_variants.tsv.gz
     wildcards: experiment=iii
     resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=/sctmp/amovas
 
@@ -122,7 +82,7 @@ Warning messages:
 5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
 Warning message:
 package ‘stringr’ was built under R version 4.2.3 
-[Fri Jul 11 14:24:52 2025]
+[Fri Jul 11 16:43:36 2025]
 Finished job 0.
 1 of 1 steps (100%) done
 Loading required package: BiocGenerics
@@ -169,6 +129,6 @@ Warning messages:
 5: package ‘GenomeInfoDb’ was built under R version 4.2.3 
 Warning message:
 package ‘stringr’ was built under R version 4.2.3 
-[Fri Jul 11 14:47:15 2025]
+[Fri Jul 11 17:05:21 2025]
 Finished job 0.
 1 of 1 steps (100%) done
