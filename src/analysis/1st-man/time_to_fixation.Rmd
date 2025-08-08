@@ -75,7 +75,7 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.r"))
 ```{r category thresholds}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Minority"){
     min_threshold <- 0.01
