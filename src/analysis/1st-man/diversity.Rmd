@@ -52,14 +52,13 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 ```
 
 ```{r load visualization settings}
-# Visual settings
 
+# Visual settings
 source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 
@@ -75,7 +74,7 @@ diversity_df <- data.frame()
 
 
 for (line in lines){
-    diversity_df <- rbind(diversity_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
+    diversity_df <- rbind(diversity_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/diversity/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
 }
 
 # set the correct viral line names and  add host info
@@ -112,30 +111,97 @@ custom_plot_save(fig, "shannon_per_sample_mean.pdf", height = 14, width = 14)
 ```
 
 
-```{r visualization2: mean heterozygosity per sample}
+
+```{r diversity for simulations}
 
 
-het_measure <- diversity_df %>% group_by(host_line,exp_line,passage) %>%
-  summarise (sum_het = sum(heterozygosity, na.rm = T), 
-    mean_het = mean(heterozygosity, na.rm = T), 
+# simulated data (own simulation)
+bottleneck_freq <- 2
+sim_data <- readRDS(paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
+
+# define function to calculate Shannon entropy
+shannon <- function(x, seq_err = 0.01){
+    if(x >= seq_err) {-x*log2(x)} else (0)
+}
+
+
+
+# create a dataframe to store diversity results
+sim_diversity_df <- data.frame()
+
+
+for (line in exp_line_factor){
+  for (psg in seq(10,500,10)){
+    print(psg)
+    sim_data_sub <- sim_data[sim_data$exp_line == line & sim_data$passage == psg & sim_data$pos >= 454 & sim_data$pos <= 9625,] 
+    for (i in sim_data_sub$pos){
+      ss <- sim_data_sub[sim_data_sub$pos == i,]
+      
+      # get shannon
+      alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
+      ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
+      total_shannon <- alt_shannon + ref_shannon
+
+      sim_diversity_df <- rbind(sim_diversity_df, c(line, psg, i, total_shannon))
+    }
+  }
+}
+
+colnames(sim_diversity_df) <- c("exp_line", "passage", "genomic_position","shannon_entropy")
+
+
+sim_diversity_df %<>% mutate_at(2:4, as.numeric)
+
+
+# If you want all positions including zeros (i.e., positions with no variants), create full grid
+all_positions <- expand.grid(
+  exp_line = exp_line_factor,
+  passage = seq(10, 500, 10),
+  genomic_position = 454:9625,
+  stringsAsFactors = FALSE
+)
+
+
+sim_diversity_df <- all_positions %>%
+  left_join(sim_diversity_df, by = c("exp_line", "passage", "genomic_position")) %>%
+  mutate(shannon_entropy = replace_na(shannon_entropy, 0))
+
+
+
+shannon_measure_sim <- sim_diversity_df %>% group_by(exp_line,passage) %>%
+  summarise (sum_ent = sum(shannon_entropy, na.rm = T), 
+    mean_ent = mean(shannon_entropy, na.rm = T), 
     .groups = 'drop') %>%
   mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
 
 
-# visualize
-fig <- ggplot(het_measure, aes(x = passage, y = mean_het, color = exp_line)) +
-  geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Mean heterozygosity\n", color = "Lineage", title = paste0("Mean of Heterozygosity per Sample \n")) +
-  scale_color_manual(values = line_col_palette) +
-  custom_plot_theme(application = "publication")
-
-
-
-# save figure
-custom_plot_save(fig, "heterozygosity_per_sample_mean.pdf", height = 14, width = 14)
 
 ```
 
+
+```{r}
+
+shannon_measure$data <- "Observed"
+shannon_measure <- shannon_measure[,-1]
+shannon_measure_sim$data <- "Simulated"
+
+shannon_measure_all <- rbind(shannon_measure, shannon_measure_sim)
+
+
+
+# visualize 
+fig <- ggplot(shannon_measure_all, aes(x = passage, y = mean_ent, color = exp_line, linetype = data)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Mean entropy\n", color = "Lineage", linetype = "Dataset", title = "") +
+  scale_color_manual(values = line_col_palette) +
+  scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
+  custom_plot_theme(application = "publication")
+
+
+# save figure
+custom_plot_save(fig, "shannon_per_sample_mean_plus_simulated.pdf", height = 14, width = 14)
+
+```
 
 ####!!!!
 ####!!!!
