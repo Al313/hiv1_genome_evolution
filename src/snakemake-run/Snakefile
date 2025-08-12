@@ -11,6 +11,7 @@ include: "modules/6_vcf_generation.smk"
 include: "modules/7_variant_table_prep.smk"
 include: "modules/8_consensus_seq.smk"
 include: "modules/9_phylo_tree_inference.smk"
+include: "modules/10_diversity_calc.smk"
 
 
 
@@ -21,4 +22,5 @@ rule all:
        f"{wd}/results/tables/pipeline-outputs/qc/all_quals.tsv.gz",
        expand(f"{wd}/results/tables/pipeline-outputs/qc/{{experiment}}_{{line}}_multiqc_report.html", zip, experiment=EXP, line=LINES),
        expand(f"{wd_shared}/data/processed-data/mappings/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}_sorted_stats/qualimapReport.html", zip,experiment=EXP, line=LINES, sample=SAMPLES),
-       f"{wd}/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree"
+       f"{wd}/data/processed-data/consensus/pipeline-outputs/full/tree/all_consensus_full_msa2.fasta.iqtree",
+       expand(f"{wd}/results/tables/misc/diversity/{{experiment}}/{{line}}_diversity_measures.tsv", zip, experiment=EXP, line=LINES)
