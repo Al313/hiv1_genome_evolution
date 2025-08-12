@@ -26,13 +26,13 @@ for (exp_line in exp_lines){
   print(exp_line)
   mut_count <- c()
   for (i in seq(1,50)){
-    file_path_init <- paste0(wd, "results/tables/misc/neutral-seq-sim/sequences/", bottleneck_freq, "/", exp_line, "/init_population.npy")
+    file_path_init <- paste0(wd, "results/tables/neutral-seq-sim/sequences/", bottleneck_freq, "/", exp_line, "/init_population.npy")
 
     init_pop <- np$load(file_path_init)
     init_pop <- init_pop[1,]
 
     # print(i)
-    file_path <- paste0(wd, "results/tables/misc/neutral-seq-sim/sequences/", bottleneck_freq, "/", exp_line, "/", i, ".npy")
+    file_path <- paste0(wd, "results/tables/neutral-seq-sim/sequences/", bottleneck_freq, "/", exp_line, "/", i, ".npy")
 
 
     pop <- np$load(file_path)
@@ -91,7 +91,7 @@ for (exp_line in exp_lines){
 }
 
 
-saveRDS(long_df_all, paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
-saveRDS(mut_count_all, paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
+saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
+saveRDS(mut_count_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
 
 

@@ -80,8 +80,8 @@ seq_sampling_freq = int(seq_sampling_freq)
 
 
 # Define path and filename
-folder_path_population = f"{wd}results/tables/misc/neutral-seq-sim/populations/{bottleneck_intervals}/{exp_line}"
-folder_path_sequence = f"{wd}results/tables/misc/neutral-seq-sim/sequences/{bottleneck_intervals}/{exp_line}"
+folder_path_population = f"{wd}results/tables/neutral-seq-sim/populations/{bottleneck_intervals}/{exp_line}"
+folder_path_sequence = f"{wd}results/tables/neutral-seq-sim/sequences/{bottleneck_intervals}/{exp_line}"
 # Ensure the directory exists
 os.makedirs(folder_path_population, exist_ok=True)
 os.makedirs(folder_path_sequence, exist_ok=True)

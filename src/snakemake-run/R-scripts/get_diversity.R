@@ -135,6 +135,6 @@ diversity_df <- all_pos %>%
 
 
 
-write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/diversity/", exp, "/", cl_line,"_diversity_measures.tsv"), quote = F, row.names = F, sep = "\t")
+write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/diversity/", exp, "/", cl_line,"_diversity_measures.tsv"), quote = F, row.names = F, sep = "\t")
 
 

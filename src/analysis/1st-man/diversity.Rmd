@@ -74,7 +74,7 @@ diversity_df <- data.frame()
 
 
 for (line in lines){
-  diversity_df <- rbind(diversity_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/diversity/iii/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
+  diversity_df <- rbind(diversity_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/diversity/iii/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
 }
 
 # set the correct viral line names and  add host info
