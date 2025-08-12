@@ -15,7 +15,7 @@ mkdir -p ${job_dir}
 
 echo "#!/bin/bash
 
-#SBATCH -J entropy_calc
+#SBATCH -J diversity_calc
 #SBATCH --array=13-20
 #SBATCH -c 1
 #SBATCH --time=3-00:00:00

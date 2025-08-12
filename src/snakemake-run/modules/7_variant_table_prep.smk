@@ -15,8 +15,6 @@ rule extractAnnotation:
         f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_annotated_variants.tsv.gz"
     resources:
         mem_mb=50000
-    params:
-        wd = wd
     shell:
         "Rscript {wd}/src/snakemake-run/R-scripts/aa_change.R {wildcards.experiment} && Rscript {wd}/src/snakemake-run/R-scripts/add_mut_context.R {wildcards.experiment}"
 

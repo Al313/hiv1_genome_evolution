@@ -15,8 +15,6 @@ rule getCoverage:
     output:
         f"{wd}/data/processed-data/coverage-assessment/pipeline-outputs/coverage-plots/{{experiment}}-{{line}}-{{sample}}.png",
         f"{wd}/data/processed-data/coverage-assessment/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}.quals"
-    params:
-        wd = wd
     script:
         "{wd}/src/snakemake-run/python-scripts/quality_control_mapping.py"
 

@@ -17,7 +17,11 @@ if (length(args) == 0){
     cl_line <- args[1]
 }
 
-
+if (cl_line %in% 13:16){
+	exp <- "iii"
+} else {
+	exp <- "iv"
+}
 
 print(cl_line)
 
@@ -31,7 +35,7 @@ if (dir.exists("/Users/alimos313")){
 
 
 # read in the variant data
-variants_ann <- read.table(file = paste0(main_wd, "genome-evo-proj/results/tables/pipeline-outputs/all_annotated_variants.tsv.gz"), 
+variants_ann <- read.table(file = paste0(main_wd, "genome-evo-proj/results/tables/pipeline-outputs/", exp, "/", exp, "_annotated_variants.tsv.gz"), 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 
@@ -93,9 +97,7 @@ square <- function(x, seq_err = 0.01){
 diversity_df <- data.frame()
 
 
-
-line <- cl_line
-variants_sub <- variants[variants$exp_line == line,]
+variants_sub <- variants[variants$exp_line == cl_line,]
 
 for (psg in sort(unique(variants_sub$passage))){
 
@@ -105,7 +107,7 @@ for (psg in sort(unique(variants_sub$passage))){
     for (i in seq(454,9625)){ 
         if (i %in% variants_sub2$genomic_pos){
             print(i)
-	        ss <- variants[variants$exp_line == line & variants$passage == psg & variants$genomic_pos == i,]
+	        ss <- variants[variants$exp_line == cl_line & variants$passage == psg & variants$genomic_pos == i,]
             # get shannon
             alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
             ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
@@ -122,7 +124,7 @@ for (psg in sort(unique(variants_sub$passage))){
             polymorphic <- F
         }
         
-        diversity_df <- rbind(diversity_df, c(line, psg, i, polymorphic, heterozygosity, total_shannon))
+        diversity_df <- rbind(diversity_df, c(cl_line, psg, i, polymorphic, heterozygosity, total_shannon))
     }
 
 }

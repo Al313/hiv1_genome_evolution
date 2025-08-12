@@ -4,8 +4,6 @@ rule callMutation:
         bai=f"{wd_shared}/data/processed-data/mappings/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}_sorted.bam.bai"
     output:
         f"{wd}/data/processed-data/mutations/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}.csv"
-    params:
-        wd = wd
     shell:
         "python {wd}/src/snakemake-run/python-scripts/call_mutations.py {input.bam} {wd}/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta NL43_ann_wk0virusPassRef_plasmid > {output}"
 
@@ -24,8 +22,6 @@ rule collectMutation:
         get_samples_for_experiment
     output:
         f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.csv.gz"
-    params:
-        wd = wd
     shell:
         "python {wd}/src/snakemake-run/python-scripts/collect_mutations.py {input}"
 

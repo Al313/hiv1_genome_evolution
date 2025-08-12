@@ -5,8 +5,6 @@ rule getSeqQual:
     output:
         f"{wd}/data/processed-data/fastqc-reports/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}_R1_001_fastqc.html",
         f"{wd}/data/processed-data/fastqc-reports/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}_R2_001_fastqc.html"
-    params:
-        wd = wd
     shell:
         "fastqc {input.read1} -o {wd}/data/processed-data/fastqc-reports/pipeline-outputs/{wildcards.experiment}/{wildcards.line} && fastqc {input.read2} -o {wd}/data/processed-data/fastqc-reports/pipeline-outputs/{wildcards.experiment}/{wildcards.line}"
 
