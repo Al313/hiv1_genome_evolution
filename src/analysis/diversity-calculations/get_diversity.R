@@ -74,15 +74,14 @@ variants <- variants_ann %>% filter(!duplicated(variant_id))
 
 
 
-# define function to calculate Shannon entropy
-shannon <- function(x, seq_err = 0.01){
-    if(x >= seq_err) {-x*log2(x)} else (0)
+# vectorized Shannon entropy
+shannon <- function(x, seq_err = 0.01) {
+    ifelse(x >= seq_err, -x * log2(x), 0)
 }
 
-# define function to determine polymorphism
-
-polymorph <- function(x){
-    ifelse(any(x >= 0.01), T, F)
+# vectorized heterozygosity helper
+square <- function(x, seq_err = 0.01) {
+    ifelse(x >= seq_err, x^2, 0)
 }
 
 # define function to determine heterozygosity
@@ -93,48 +92,49 @@ square <- function(x, seq_err = 0.01){
 
 
 
-# create a dataframe to store diversity results
-diversity_df <- data.frame()
+# subset data
+variants_sub <- variants[variants$exp_line == cl_line & variants$genomic_pos >= 454 & variants$genomic_pos <= 9625,]
 
 
-variants_sub <- variants[variants$exp_line == cl_line,]
-
-for (psg in sort(unique(variants_sub$passage))){
-
-    variants_sub2 <- variants_sub[variants_sub$passage == psg,]
-    variants_sub2 <- variants_sub2[variants_sub2$genomic_pos >= 454 & variants_sub2$genomic_pos <= 9625,] 
-
-    for (i in seq(454,9625)){ 
-        if (i %in% variants_sub2$genomic_pos){
-            print(i)
-	        ss <- variants[variants$exp_line == cl_line & variants$passage == psg & variants$genomic_pos == i,]
-            # get shannon
-            alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
-            ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
-            total_shannon <- alt_shannon + ref_shannon
-            # get heterozygosity
-            alt_hetero <- sum(sapply(as.numeric(ss$allele_freq), FUN = square))
-            ref_hetero <- square(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
-            heterozygosity <- 1 - ref_hetero - alt_hetero
-            # get polymorphic site
-            polymorphic <- polymorph(ss$allele_freq)
-        } else {
-            total_shannon <- 0
-            heterozygosity <- 0
-            polymorphic <- F
-        }
-        
-        diversity_df <- rbind(diversity_df, c(cl_line, psg, i, polymorphic, heterozygosity, total_shannon))
-    }
-
-}
+# Compute metrics only for positions that exist
+diversity_df <- variants_sub %>%
+    filter(allele_freq >= 0.01) %>%
+    group_by(exp_line, passage, genomic_pos) %>%
+    summarise(
+        alt_shannon = sum(shannon(as.numeric(allele_freq))),
+        ref_shannon = shannon(1 - sum(allele_freq)),
+        alt_hetero  = sum(square(as.numeric(allele_freq))),
+        ref_hetero  = square(1 - sum(allele_freq)),
+        polymorphic = polymorph(allele_freq),
+        .groups = "drop"
+    ) %>%
+    mutate(
+        shannon_entropy = alt_shannon + ref_shannon,
+        heterozygosity  = 1 - ref_hetero - alt_hetero
+    ) %>%
+    select(exp_line, passage, genomic_position = genomic_pos, polymorphic, heterozygosity, shannon_entropy)
 
 
 
+# Add missing positions back in
+all_pos <- expand.grid(
+    exp_line = as.character(unique(variants_sub$exp_line)),
+    passage = sort(unique(variants_sub$passage)),
+    genomic_position = 454:9625
+)
+
+
+diversity_df <- all_pos %>%
+    left_join(diversity_df, by = c("exp_line", "passage", "genomic_position")) %>%
+    mutate(
+        polymorphic = replace_na(polymorphic, FALSE),
+        heterozygosity = replace_na(heterozygosity, 0),
+        shannon_entropy = replace_na(shannon_entropy, 0)
+    ) %>%
+    arrange(passage, genomic_position)
 
 
 
-colnames(diversity_df) <- c("exp_line", "passage", "genomic_position", "polymorphic", "heterozygosity","shannon_entropy")
 
 
 write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/misc/diversity/", cl_line,"_diversity_measures.tsv"), quote = F, row.names = F, sep = "\t")
