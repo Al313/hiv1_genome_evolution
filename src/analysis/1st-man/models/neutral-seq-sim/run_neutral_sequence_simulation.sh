@@ -32,7 +32,7 @@ cat > "${job_file}" <<EOF
 
 #SBATCH --cpus-per-task=4
 #SBATCH --time=24:00:00
-#SBATCH --mem="7GB"
+#SBATCH --mem="50GB"
 #SBATCH --output=${output_dir}/neutral_seq_sim.out
 
 # Load R module (assuming the cluster has R installed as a module)
@@ -41,11 +41,11 @@ source activate ha_proj
 
 # parameters
 
-bottleneck_freq=2
+bottleneck_freq=3
 tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
-exp_line="MT-2_1"
+exp_line="MT-4_2"
 
 
 
