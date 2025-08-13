@@ -17,7 +17,7 @@ if (file.exists("/home/amovas/")){
 
 
 exp_lines <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
-bottleneck_freq <- 2
+bottleneck_freq <- 3
 min_af <- 0.99
 mut_count_all <- list()
 long_df_all <- data.frame()
