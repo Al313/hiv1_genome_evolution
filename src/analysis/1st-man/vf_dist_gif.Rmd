@@ -52,22 +52,21 @@ library("ggrepel")
 
 
 if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
 # load data
-
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 ```
 
 ```{r load visualization settings}
-# Visual settings
 
+# Visual settings
 source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 
 
@@ -108,7 +107,7 @@ gg_fig <- ggplot(variants_expiii_subset, aes(x=allele_freq)) +
     geom_density(aes(y = ..count.. * .01), alpha=.3, fill="#FF6666") +
     facet_wrap(~exp_line, ncol = 2) +
     transition_states(passage, transition_length = 1, state_length = 1, wrap = TRUE) + # to create animation 
-    labs(title = "Variant Freq. Distribution \n(Transfer : {closest_state})", x = "Variant Freq.", y = "Count") +
+    labs(title = "Mutation Freq. Distribution \n(Transfer : {closest_state})", x = "Frequency", y = "Count") +
     theme_bw() +
     theme(
     plot.title = element_text(size = 25, hjust = 0.5),
@@ -127,7 +126,8 @@ fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
 ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 anim_save(gg_fig, file = paste0(fig_dir, "allele-freq-accumulation3.gif"))
 
-
+# save for lteeviz
+fig_dir <- "/Users/alimos313/Documents/studies/phd/hpc-research/lte-viz/src/misc/www/"
 
 ```
 

@@ -107,7 +107,7 @@ counts$group <- "Observed"
 
 # simulated data (own simulation)
 bottleneck_freq <- 2
-sim_data <- readRDS(paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
 
 # Convert to data frame
 sim_data_long_df <- purrr::imap_dfr(sim_data, ~ {
@@ -121,11 +121,6 @@ sim_data_long_df <- purrr::imap_dfr(sim_data, ~ {
 
 counts_all <- rbind(counts, sim_data_long_df)
 counts_all$group <- factor(counts_all$group, levels = c("Observed", "Simulated"))
-
-# simulated data (virolution simulation)
-# /Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/src/analysis/neutral-sim/processor.Rmd
-# counts_all <- rbind(counts, fixed_count_df_long)
-# counts_all$group <- factor(counts_all$group, levels = c("Observed", "Simulation"))
 
 ```
 
