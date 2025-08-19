@@ -6,7 +6,7 @@ library(dplyr)
 library(GenomicRanges)
 library(parallel)
 library(pbapply)
-
+pboptions(type="txt")
 
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
@@ -20,13 +20,13 @@ if (file.exists("/home/amovas/")){
 #=============================
 # Inputs
 #=============================
-bam_file <- "/Users/alimos313/Desktop/scrap/bam-portal/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
+bam_file <- "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
 
 # load variant data
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 variants <- variants_expiii %>%
-  filter(exp_line == "MT-2_1" & passage == 100 & allele_freq >= 0.01) %>%
+  filter(exp_line == "MT-2_1" & passage == 100 & allele_freq >= 0.01 & genomic_pos <= 1000) %>%
   select(genomic_pos, ref_allele, alt_allele)
 
 max_dist <- 400   # maximum distance between SNPs to consider
@@ -130,10 +130,13 @@ variant_pairs <- Filter(function(pair) {
 #=============================
 # Parallel computation with progress
 #=============================
-n_cores <- detectCores() - 1
+n_cores <- 29 # detectCores() - 1
+print(paste0("Cores available are ", n_cores))
 cl <- makeCluster(n_cores)
 clusterExport(cl, c("variants", "bam_file", "compute_ld", "get_haplotype", "get_count"))
 clusterEvalQ(cl, {library(Rsamtools); library(GenomicRanges)})
+
+print("starting ...")
 
 # Use pbapply::pblapply to wrap parLapply with progress
 ld_results <- pbapply::pblapply(variant_pairs, cl=cl, FUN=function(pair) {
@@ -155,7 +158,7 @@ ld_df <- do.call(rbind, ld_results)
 # Save output
 #=============================
 
-write.table(ld_df, paste0(wd, "results/tables/ld/100.tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(ld_df, paste0(wd, "results/tables/ld/100_1000.tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
 # ld_df2 <- read.table(paste0(wd, "results/tables/ld/100.tsv"), sep = "\t", header = TRUE)
