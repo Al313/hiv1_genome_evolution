@@ -21,7 +21,7 @@ if (file.exists("/home/amovas/")){
 # Inputs
 #=============================
 bam_file <- "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
-
+# "/Users/alimos313/Desktop/scrap/bam-portal/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
 # load variant data
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
@@ -130,7 +130,7 @@ variant_pairs <- Filter(function(pair) {
 #=============================
 # Parallel computation with progress
 #=============================
-n_cores <- 29 # detectCores() - 1
+n_cores <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK")) - 1  # detectCores() - 1
 print(paste0("Cores available are ", n_cores))
 cl <- makeCluster(n_cores)
 clusterExport(cl, c("variants", "bam_file", "compute_ld", "get_haplotype", "get_count"))
