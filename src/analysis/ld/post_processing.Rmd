@@ -1,0 +1,92 @@
+
+
+```{r}
+
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
+ld_df <- read.table(paste0(wd, "results/tables/ld/100_1000.tsv"), sep = "\t", header = TRUE)
+View(ld_df)
+
+```
+
+
+````{r}
+
+# How many pairs are in strong LD? (e.g., r2 > 0.8)
+strong_ld <- sum(ld_df$r2 > 0.8, na.rm = TRUE)
+total_pairs <- sum(!is.na(ld_df$r2))
+prop_strong_ld <- strong_ld / total_pairs
+prop_strong_ld
+
+
+```
+
+```{r}
+
+# summarize by distance between SNPs
+
+ld_df$distance <- abs(ld_df$pos2 - ld_df$pos1)
+
+# Average r2 per distance bin (e.g., every 50 bp)
+library(dplyr)
+ld_summary <- ld_df %>%
+    filter(!is.na(r2)) %>%
+    mutate(bin = cut(distance, breaks = seq(0, max(distance), by = 50))) %>%
+    group_by(bin) %>%
+    summarise(mean_r2 = mean(r2), median_r2 = median(r2), n_pairs = n())
+
+
+```
+
+```{r}
+# r² vs distance
+
+library(ggplot2)
+
+ggplot(ld_df, aes(x = distance, y = r2)) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "loess", color = "blue") +
+    theme_minimal() +
+    labs(x = "Distance between SNPs (bp)",
+        y = expression(r^2),
+        title = "Linkage Disequilibrium decay with distance")
+
+```
+
+```{r}
+
+# Heatmap of LD
+
+library(reshape2)
+
+# make matrix
+ld_mat <- reshape2::acast(ld_df, pos1 ~ pos2, value.var = "r2")
+
+# visualize
+library(pheatmap)
+pheatmap(ld_mat, cluster_rows = FALSE, cluster_cols = FALSE,
+            color = colorRampPalette(c("white", "red"))(50),
+            main = "LD Heatmap (r²)")
+
+```
+
+
+```{r}
+
+# Histogram of r²
+
+ggplot(ld_df, aes(x = r2)) +
+    geom_histogram(bins = 50, fill = "steelblue", color = "black") +
+    theme_minimal() +
+    labs(x = expression(r^2),
+        y = "Number of SNP pairs",
+        title = "Distribution of LD across SNP pairs")
+
+```

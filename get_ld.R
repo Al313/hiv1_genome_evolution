@@ -161,5 +161,3 @@ ld_df <- do.call(rbind, ld_results)
 write.table(ld_df, paste0(wd, "results/tables/ld/100_1000.tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
-# ld_df2 <- read.table(paste0(wd, "results/tables/ld/100.tsv"), sep = "\t", header = TRUE)
-
