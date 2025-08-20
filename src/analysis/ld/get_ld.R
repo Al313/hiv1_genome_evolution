@@ -23,13 +23,18 @@ if (file.exists("/home/amovas/")){
 
 # take command line variables
 args <- commandArgs(trailingOnly = TRUE)
-psg <- args[1]
-print(psg)
+# psg <- args[1]
 
-bam_file <- "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
-# "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP200seq10102019_S2_L001_sorted.bam"
-# "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
-# "/Users/alimos313/Desktop/scrap/bam-portal/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
+
+bam_file <- args[1] 
+# "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
+
+sample_name <- basename(bam_file)
+exp <- str_split(bam_f  ile, "/")[[1]][10]
+exp_line <- str_split(sample_name, "MT")[[1]][1]
+psg <- sub(".*VP([0-9]+).*", "\\1", sample_name)
+
+print(paste0(sample_name, " | ", exp, " | ", exp_line, " | ", psg))
 
 # load variant data
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
@@ -155,8 +160,8 @@ ld_results <- pbapply::pblapply(variant_pairs, cl=cl, FUN=function(pair) {
   var2 <- variants[pair[2], ]
   r2 <- compute_ld(var1, var2, bam_file)
   data.frame(pos1 = var1$genomic_pos,
-             pos2 = var2$genomic_pos,
-             r2   = r2)
+            pos2 = var2$genomic_pos,
+            r2   = r2)
 })
 
 stopCluster(cl)
@@ -169,6 +174,6 @@ ld_df <- do.call(rbind, ld_results)
 # Save output
 #=============================
 
-write.table(ld_df, paste0(wd, "results/tables/ld/", psg, "_4.tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(ld_df, paste0(wd, "results/tables/ld/", exp, "/", exp_line, "/", psg, ".tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 

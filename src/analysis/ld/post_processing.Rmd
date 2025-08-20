@@ -11,7 +11,8 @@ if (file.exists("/home/amovas/")){
 }
 
 
-ld_df <- read.table(paste0(wd, "results/tables/ld/100_1000.tsv"), sep = "\t", header = TRUE)
+ld_df <- read.table(paste0(wd, "results/tables/ld/300.tsv"), sep = "\t", header = TRUE)
+ld_df <- ld_df[!is.na(ld_df$r2), ]  # remove rows with NA r2 values
 View(ld_df)
 
 ```
@@ -21,6 +22,7 @@ View(ld_df)
 
 # How many pairs are in strong LD? (e.g., r2 > 0.8)
 strong_ld <- sum(ld_df$r2 > 0.8, na.rm = TRUE)
+ld_df[ld_df$r2 > 0.8,]
 total_pairs <- sum(!is.na(ld_df$r2))
 prop_strong_ld <- strong_ld / total_pairs
 prop_strong_ld
