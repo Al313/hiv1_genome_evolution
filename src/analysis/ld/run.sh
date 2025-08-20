@@ -26,9 +26,9 @@ cat > "${job_file}" <<EOF
 #!/bin/bash
 
 
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=10
 #SBATCH --time=24:00:00
-#SBATCH --mem=36G
+#SBATCH --mem=48G
 #SBATCH --output=${output_dir}/ld_calc.out
 
 # Load R module (assuming the cluster has R installed as a module)
@@ -37,7 +37,7 @@ source activate ha_proj
 
 # parameters
 
-passage=100
+passage=300
 
 
 Rscript /home/amovas/data/genome-evo-proj/src/analysis/ld/get_ld.R \${passage}

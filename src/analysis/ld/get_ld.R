@@ -26,9 +26,9 @@ args <- commandArgs(trailingOnly = TRUE)
 psg <- args[1]
 print(psg)
 
-bam_file <- # "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
+bam_file <- "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
 # "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP200seq10102019_S2_L001_sorted.bam"
-"/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
+# "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
 # "/Users/alimos313/Desktop/scrap/bam-portal/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
 
 # load variant data
@@ -169,6 +169,6 @@ ld_df <- do.call(rbind, ld_results)
 # Save output
 #=============================
 
-write.table(ld_df, paste0(wd, "results/tables/ld/", psg, ".tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(ld_df, paste0(wd, "results/tables/ld/", psg, "_4.tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
