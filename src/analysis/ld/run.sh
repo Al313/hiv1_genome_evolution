@@ -11,7 +11,6 @@ if [ ! -d ${job_dir} ]; then
   mkdir -p ${job_dir};
 fi
 
-job_file=${job_dir}/neutral_seq_sim_main.job
 
 
 output_dir="/home/amovas/scratch/.slurm/outs/${timestamp}"
@@ -22,28 +21,44 @@ fi
 
 
 
-cat > "${job_file}" <<EOF
+exps=(iii)
+exp_lines=(13 14 15 16)
+
+count=0
+max=2
+
+for exp in "${exps[@]}"; do
+ for exp_line in "${exp_lines[@]}"; do
+  for item in /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/${exp}/${exp_line}/*.bam; do
+  item="/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
+  job_file=${job_dir}/${count}.job
+  echo "$item"
+  ((count++))
+
+  if [ "$count" -ge "$max" ]; then
+   exit 0
+  fi
+
+  cat > "${job_file}" <<EOF
 #!/bin/bash
 
 
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=30
 #SBATCH --time=24:00:00
-#SBATCH --mem=48G
-#SBATCH --output=${output_dir}/ld_calc.out
+#SBATCH --mem=30G
+#SBATCH --output=${output_dir}/ld_calc_${count}.out
 
 # Load R module (assuming the cluster has R installed as a module)
 source activate ha_proj
 
 
-# parameters
-
-passage=300
-
-
-Rscript /home/amovas/data/genome-evo-proj/src/analysis/ld/get_ld.R \${passage}
+Rscript /home/amovas/data/genome-evo-proj/src/analysis/ld/get_ld.R ${item}
 
 EOF
 
-sbatch ${job_file}
+  sbatch ${job_file}
 
+  done
+ done
+done
 

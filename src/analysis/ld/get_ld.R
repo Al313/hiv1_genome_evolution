@@ -3,6 +3,7 @@
 #=============================
 library(Rsamtools)
 library(dplyr)
+library(stringr)
 library(GenomicRanges)
 library(parallel)
 library(pbapply)
@@ -30,7 +31,7 @@ bam_file <- args[1]
 # "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
 
 sample_name <- basename(bam_file)
-exp <- str_split(bam_f  ile, "/")[[1]][10]
+exp <- str_split(bam_file, "/")[[1]][10]
 exp_line <- str_split(sample_name, "MT")[[1]][1]
 psg <- sub(".*VP([0-9]+).*", "\\1", sample_name)
 
