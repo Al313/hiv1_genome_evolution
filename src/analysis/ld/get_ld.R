@@ -20,14 +20,25 @@ if (file.exists("/home/amovas/")){
 #=============================
 # Inputs
 #=============================
-bam_file <- "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
+
+# take command line variables
+args <- commandArgs(trailingOnly = TRUE)
+psg <- args[1]
+print(psg)
+
+bam_file <- # "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
+# "/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP200seq10102019_S2_L001_sorted.bam"
+"/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
 # "/Users/alimos313/Desktop/scrap/bam-portal/13/13MT2EXPIIIVP100seq07062018_S4_L001_sorted.bam"
+
 # load variant data
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 variants <- variants_expiii %>%
-  filter(exp_line == "MT-2_1" & passage == 100 & allele_freq >= 0.01 & genomic_pos <= 1000) %>%
+  filter(exp_line == "MT-2_1" & passage == psg & allele_freq >= 0.01 & genomic_pos <= 1000) %>%
   select(genomic_pos, ref_allele, alt_allele)
+
+print(head(variants))
 
 max_dist <- 400   # maximum distance between SNPs to consider
 
@@ -158,6 +169,6 @@ ld_df <- do.call(rbind, ld_results)
 # Save output
 #=============================
 
-write.table(ld_df, paste0(wd, "results/tables/ld/100_1000.tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(ld_df, paste0(wd, "results/tables/ld/", psg, ".tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 
 
