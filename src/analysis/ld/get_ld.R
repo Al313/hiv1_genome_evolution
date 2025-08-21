@@ -32,17 +32,26 @@ bam_file <- args[1]
 
 sample_name <- basename(bam_file)
 exp <- str_split(bam_file, "/")[[1]][10]
-exp_line <- str_split(sample_name, "MT")[[1]][1]
+line <- str_split(sample_name, "MT")[[1]][1]
 psg <- sub(".*VP([0-9]+).*", "\\1", sample_name)
 
-print(paste0(sample_name, " | ", exp, " | ", exp_line, " | ", psg))
+if (line == "15" & as.numeric(psg) > 360) {
+  line <- "16"
+} else if (line == "16" & as.numeric(psg) > 360) {
+  line <- "15"
+}
+
+print(paste0(sample_name, " | ", exp, " | ", line, " | ", psg))
 
 # load variant data
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
+
 variants <- variants_expiii %>%
-  filter(exp_line == "MT-2_1" & passage == psg & allele_freq >= 0.05) %>%
+  filter(exp_line == line & passage == psg & allele_freq >= 0.05) %>%
   select(genomic_pos, ref_allele, alt_allele)
+
+
 
 print(head(variants))
 
@@ -175,7 +184,7 @@ ld_df <- do.call(rbind, ld_results)
 # Save output
 #=============================
 
-write.table(ld_df, paste0(wd, "results/tables/ld/", exp, "/", exp_line, "/", psg, ".tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write.table(ld_df, paste0(wd, "results/tables/ld/", exp, "/", line, "/", psg, ".tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
 write(bam_file, file = paste0(wd, "results/tables/ld/log.txt"), append = TRUE)
 
 

@@ -10,10 +10,19 @@ if (file.exists("/home/amovas/")){
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
+```
 
-ld_df <- read.table(paste0(wd, "results/tables/ld/300.tsv"), sep = "\t", header = TRUE)
+# -------------------------------------------------------------------
+# Single sample LD analysis
+# -------------------------------------------------------------------
+
+```{r}
+
+
+ld_df <- read.table(paste0(wd, "results/tables/ld/iii/13/300.tsv"), sep = "\t", header = TRUE)
 ld_df <- ld_df[!is.na(ld_df$r2), ]  # remove rows with NA r2 values
 View(ld_df)
+
 
 ```
 
@@ -90,5 +99,61 @@ ggplot(ld_df, aes(x = r2)) +
     labs(x = expression(r^2),
         y = "Number of SNP pairs",
         title = "Distribution of LD across SNP pairs")
+
+```
+
+# -------------------------------------------------------------------
+# Dataset LD analysis
+# -------------------------------------------------------------------
+
+
+
+```{r}
+
+all_ld <- data.frame()
+
+for (exp_line in 13:16) {
+    for (psg in seq(10,500,10)){
+        ld_df <- read.table(paste0(wd, "results/tables/ld/iii/", exp_line, "/", psg, ".tsv"), sep = "\t", header = TRUE)
+        # ld_df <- ld_df[!is.na(ld_df$r2), ]  # remove rows with NA r2 values
+        ld_df$exp_line <- exp_line
+        ld_df$psg <- psg
+        all_ld <- rbind(all_ld, ld_df)
+    }
+}
+
+View(all_ld[all_ld$exp_line == 13 & all_ld$psg == 300, ])
+nrow(all_ld[all_ld$exp_line == 13 & all_ld$psg == 300, ])
+nrow(all_ld[all_ld$exp_line == 13 & all_ld$psg == 30, ])
+View(all_ld[all_ld$exp_line == 15 & all_ld$psg == 300, ])
+nrow(all_ld[all_ld$exp_line == 15 & all_ld$psg == 300, ])
+nrow(all_ld[all_ld$exp_line == 15 & all_ld$psg == 30, ])
+nrow(all_ld[all_ld$exp_line == 16 & all_ld$psg == 30, ])
+
+all_ld_summary <- all_ld %>% group_by(exp_line, psg) %>%
+    filter(r2 >= 0.01) %>%
+    summarise(mean_r2 = mean(r2, na.rm = TRUE), 
+    median_r2 = median(r2, na.rm = TRUE), 
+    n_pairs = n(),
+    prop_high = mean(r2 > 0.5, na.rm = TRUE)) %>%
+    arrange(exp_line, psg)
+
+head(all_ld_summary)
+```
+
+
+```{r}
+
+all_ld_summary %>% ggplot(aes(x = psg, y = prop_high, color = as.factor(exp_line))) +
+    geom_line() +
+    geom_point() +
+    theme_minimal() +
+    labs(x = "PSG (per site per generation)",
+        y = expression(mean(r^2)),
+        title = "Mean LD across PSGs and Experimental Lines",
+        color = "Experimental Line") +
+    scale_color_brewer(palette = "Set1")
+
+
 
 ```
