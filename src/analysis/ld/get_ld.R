@@ -41,7 +41,7 @@ print(paste0(sample_name, " | ", exp, " | ", exp_line, " | ", psg))
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 variants <- variants_expiii %>%
-  filter(exp_line == "MT-2_1" & passage == psg & allele_freq >= 0.01 & genomic_pos <= 1000) %>%
+  filter(exp_line == "MT-2_1" & passage == psg & allele_freq >= 0.05) %>%
   select(genomic_pos, ref_allele, alt_allele)
 
 print(head(variants))
@@ -176,5 +176,6 @@ ld_df <- do.call(rbind, ld_results)
 #=============================
 
 write.table(ld_df, paste0(wd, "results/tables/ld/", exp, "/", exp_line, "/", psg, ".tsv"), sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE)
+write(bam_file, file = paste0(wd, "results/tables/ld/log.txt"), append = TRUE)
 
 

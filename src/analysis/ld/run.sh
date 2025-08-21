@@ -25,12 +25,12 @@ exps=(iii)
 exp_lines=(13 14 15 16)
 
 count=0
-max=2
+max=200000
 
 for exp in "${exps[@]}"; do
  for exp_line in "${exp_lines[@]}"; do
   for item in /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/${exp}/${exp_line}/*.bam; do
-  item="/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/13/13MT2EXPIIIVP300seq20082020-CL_S6_L001_sorted.bam"
+ 
   job_file=${job_dir}/${count}.job
   echo "$item"
   ((count++))
@@ -43,9 +43,9 @@ for exp in "${exps[@]}"; do
 #!/bin/bash
 
 
-#SBATCH --cpus-per-task=30
+#SBATCH --cpus-per-task=20
 #SBATCH --time=24:00:00
-#SBATCH --mem=30G
+#SBATCH --mem=20G
 #SBATCH --output=${output_dir}/ld_calc_${count}.out
 
 # Load R module (assuming the cluster has R installed as a module)
