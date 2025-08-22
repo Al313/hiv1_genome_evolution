@@ -334,7 +334,7 @@ custom_plot_save(moi__fig, "moi_cleaned.pdf", height = 14, width = 14)
 mean(result$MOI[result$exp_line %in% c("MT-2_1","MT-2_2")])
 mean(result$MOI[result$exp_line %in% c("MT-4_1","MT-4_2")])
 quantile(result$btk_size[result$exp_line %in% c("MT-2_1","MT-2_2")], probs = c(0.25,0.5,0.75))
-
+quantile(result$btk_size[result$exp_line %in% c("MT-4_1","MT-4_2")], probs = c(0.25,0.5,0.75))
 ```
 
 ```{r compare MOI levels between lines}
