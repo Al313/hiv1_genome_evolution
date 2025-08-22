@@ -24,7 +24,7 @@ if (file.exists("/home/amovas/")){
 
 # take command line variables
 args <- commandArgs(trailingOnly = TRUE)
-# psg <- args[1]
+
 
 
 bam_file <- args[1] 
@@ -41,6 +41,10 @@ if (line == "15" & as.numeric(psg) > 360) {
   line <- "15"
 }
 
+line_conversion <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+names(line_conversion) <- c(13, 14, 15, 16)
+
+
 print(paste0(sample_name, " | ", exp, " | ", line, " | ", psg))
 
 # load variant data
@@ -48,7 +52,7 @@ source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 
 variants <- variants_expiii %>%
-  filter(exp_line == line & passage == psg & allele_freq >= 0.05) %>%
+  filter(exp_line == as.character(line_conversion[line]) & passage == psg & allele_freq >= 0.05) %>%
   select(genomic_pos, ref_allele, alt_allele)
 
 

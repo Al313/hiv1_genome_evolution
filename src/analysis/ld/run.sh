@@ -22,7 +22,7 @@ fi
 
 
 exps=(iii)
-exp_lines=(13 14 15 16)
+exp_lines=(14 15 16)
 
 count=0
 max=200000
@@ -43,9 +43,9 @@ for exp in "${exps[@]}"; do
 #!/bin/bash
 
 
-#SBATCH --cpus-per-task=20
+#SBATCH --cpus-per-task=30
 #SBATCH --time=24:00:00
-#SBATCH --mem=20G
+#SBATCH --mem=50G
 #SBATCH --output=${output_dir}/ld_calc_${count}.out
 
 # Load R module (assuming the cluster has R installed as a module)
