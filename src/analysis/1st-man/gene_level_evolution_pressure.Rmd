@@ -94,7 +94,7 @@ if (category == "Minority"){
 # prepare variant data for visualization
 counts <- variants_ann_expiii %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
-            filter(allele_freq >= min_threshold & passage <= end_psg) %>%
+            filter(allele_freq >= min_threshold) %>%
             mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
             mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
             filter(effect_simplified != "U") %>%
@@ -105,6 +105,7 @@ counts <- variants_ann_expiii %>%
             group_by(exp_line, effect_simplified, feature, .drop = FALSE) %>%
             summarise(count = n()) %>%
             pivot_wider(names_from = effect_simplified, values_from = count)
+
 
 # read in the gene summary data
 gene_summary <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/gene_summary_table.tsv", sep = "\t", header = T)
@@ -149,7 +150,7 @@ merged_df <- merge(counts, gene_summary[,c("gene", "gene_length", "nonsynonymous
 
 merged_df %<>% mutate(S = ifelse(S == 0, 1, S)) %>%
             mutate(dnds = (N/nonsynonymous_count)/(S/synonymous_count),
-            mut_count_normalized = (N+S)/(gene_length*3))
+            mut_count_normalized = (N+S)/(gene_length))
 
 merged_df$bind <- paste0(counts$exp_line, counts$feature)
 
@@ -165,8 +166,8 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             geom_point(size = 8) +
             geom_smooth(method = "lm", se = T)+
             scale_shape_manual(values = c(15, 16,17,18)) +
-            scale_x_continuous(limits = c(0.05,0.35), breaks = seq(0,1,0.1)) +
-            scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
+            # scale_x_continuous(limits = c(0.05,0.35), breaks = seq(0,1,0.1)) +
+            # scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
             geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.1, y = 1.15, color = "black", size = 9) +
             labs(x="\nMinority variant per site", y= "dN/dS\n",  color = "Gene", shape = "Lineage",
             title = "")+

@@ -28,15 +28,12 @@ library("ggplot2")
 library("ggpubr")
 library("plotly")
 library("RColorBrewer")
-library("hrbrthemes")
-library("DT")
 library("dplyr")
 library("tidyr")
 library("Biostrings")
 library("stringr")
 library("magrittr")
 library("rstatix")
-library("gtools")
 library("effsize")
 library("purrr")
 
@@ -47,23 +44,22 @@ library("purrr")
 ```{r read-in variant data}
 
 if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
 
 # load data
-
 source(paste0(wd, "src/analysis/1st-man/readin_data.r"))
 
 ```
 
 ```{r load visualization settings}
-# Visual settings
 
+# Visual settings
 source(paste0(wd, "src/analysis/1st-man/plot_custom.r"))
 
 
@@ -228,33 +224,19 @@ wilcox.test(df$time_to_fixation[df$host_line == "MT-2"], df$time_to_fixation[df$
 ```
 
 
-```{r visualization11: time-to-fixation over time}
-
-# time_to_fixation distributions per function of appearance time
-
-fig <- t_2_f %>% ggplot(aes(x = appearance, y = time_to_fixation, color = exp_line, shape = effect_simplified)) +
-                    facet_wrap(~exp_line, ncol = 2) +
-                    geom_point() +
-                    geom_hline(yintercept = 100) +
-                    scale_color_manual(labels = exp_line_factor, values = line_col_palette)
-
-fig
-
-```
-
 ```{r distribution of rapidly fixating mutations over time}
 
 
 
 t_2_f <- t_2_f %>%
-  group_by(exp_line) %>%
-  mutate(p10 = quantile(time_to_fixation, 0.10)) %>%
-  mutate(p90 = quantile(time_to_fixation, 0.90)) %>%
-  ungroup()
+    group_by(exp_line) %>%
+    mutate(p10 = quantile(time_to_fixation, 0.10)) %>%
+    mutate(p90 = quantile(time_to_fixation, 0.90)) %>%
+    ungroup()
 
 labels_with_p10 <- with(t_2_f, setNames(
-  paste0(exp_line, "(", round(p10, 1), ")"),
-  exp_line
+    paste0(exp_line, "(", round(p10, 1), ")"),
+    exp_line
 ))
 
 t_2_f %<>% mutate(labels = labels_with_p10)
@@ -302,22 +284,27 @@ for (exp_line in exp_line_factor){
         variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
         appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
+        disappearance_vec <- as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq < 0.5]))
+        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
         translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
-        t_2_f <- rbind(t_2_f, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+        t_2_f <- rbind(t_2_f, c(exp_line, mut, translational_impact, appearance, fixation, disappearance, fixation-appearance))
     }
 }
 
 
 # set column names and right data types
-t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
-        mutate_at(4:6, as.integer) %>%
+t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
+        mutate_at(c(4,5,7), as.integer) %>%
         mutate(exp_line = factor(exp_line, levels = exp_line_factor),
         effect_simplified = factor(effect_simplified, levels = translational_impacts))
 
+t_2_f[!is.na(t_2_f$disappearance),]
+aa <- t_2_f$mut_info[!is.na(t_2_f$disappearance)]
 
 # average time to fixation for fixated mutations based on how many times they are repeated
 
 fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
+fix_count_table[aa]
 
 
 
@@ -325,6 +312,8 @@ fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
     "3" = fix_count_table[fix_count_table==3],
     "2" = fix_count_table[fix_count_table==2],
     "1" = fix_count_table[fix_count_table==1])
+
+sum(fix_count_table_list[[4]]) + sum(fix_count_table_list[[3]]) + sum(fix_count_table_list[[2]]) + sum(fix_count_table_list[[1]])
 
 
 
@@ -678,6 +667,49 @@ fig <- fig +
     geom_smooth(data = dff, aes(x = Occurrence, y = time_to_fixation), method = "lm", se = FALSE, color = "orange")
 
 
+
+```
+
+```{r fixed throughout the experiment}
+
+
+fix_count_table2 <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99], variants_expiii$exp_line[variants_expiii$allele_freq >= 0.99])
+fix_count_table2[fix_count_table2 != 0] <- 1
+fix_count_table2 <- rowSums(fix_count_table2)
+
+
+
+fix_count_table_list2 <- list("4" = fix_count_table2[fix_count_table2==4],
+    "3" = fix_count_table2[fix_count_table2==3],
+    "2" = fix_count_table2[fix_count_table2==2],
+    "1" = fix_count_table2[fix_count_table2==1])
+
+sum(fix_count_table_list2[[4]]) + sum(fix_count_table_list2[[3]]) + sum(fix_count_table_list2[[2]]) + sum(fix_count_table_list2[[1]])
+
+
+
+
+
+
+all_names <- union(names(fix_count_table2), names(fix_count_table))
+`%notin%` <- Negate(`%in%`)
+fix_count_table[all_names[all_names %notin% names(fix_count_table)]] <- 0
+
+
+result <- (fix_count_table2[all_names] %>% replace(is.na(.), 0)) - 
+        (fix_count_table[all_names] %>% replace(is.na(.), 0))
+
+result <- result[result != 0]
+
+names1 <- rep(names(result), times = result)
+
+ss <- c()
+for (i in 1:length(names1)){
+    s <- variants_expiii$effect_simplified[variants_expiii$mut_info %in% names1[i]] %>% unique()
+    ss <- append(ss, s)
+}
+
+table(ss)
 
 ```
 

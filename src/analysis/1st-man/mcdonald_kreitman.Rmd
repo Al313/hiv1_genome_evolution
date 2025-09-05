@@ -20,44 +20,43 @@ output:
 
 ```{r}
 
+# set the wd paths
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("ggvenn")
-library("hrbrthemes")
-library("DT")
+# library("ggplot2")
+# library("ggpubr")
+# library("plotly")
+# library("ggvenn")
+# library("hrbrthemes")
+# library("DT")
 library("dplyr")
 library("tidyr")
-library("Biostrings")
+# library("Biostrings")
 library("stringr")
 library("magrittr")
-library("rstatix")
+# library("rstatix")
 
 ```
 
 ```{r read-in variant data}
 
-
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
-} else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-}
-
 # load data
-
 source(paste0(wd, "src/analysis/1st-man/readin_data.R"))
 
 ```
 
 ```{r load visualization settings}
+
 # Visual settings
-
 source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
-
 
 ```
 
@@ -67,20 +66,25 @@ source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
 ```{r McDonald-Kreitman test}
 
 
-
 df <- data.frame()
 
-for (exp_line in exp_line_factor){
-    for (gene in c("gag", "pol","envelope", "nef")){
-        variants_expiii_subset <- variants_expiii[variants_expiii$passage == end_psg & variants_expiii$exp_line == exp_line & variants_expiii$feature == gene,]
 
-        P_S <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "S" & variants_expiii_subset$allele_freq >= 0.01,])
-        D_S <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "S" & variants_expiii_subset$allele_freq >= 0.99,])
+for (expline in exp_line_factor){
+    for (gene in c("gag", "pol","env", "nef")){
+        variants_expiii_subset <- variants_expiii %>% 
+            mutate(passage = as.numeric(as.character(passage))) %>%
+            filter(exp_line == expline & passage == end_psg & feature == gene)
 
-        P_N <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "N" & variants_expiii_subset$allele_freq >= 0.01,])
-        D_N <- nrow(variants_expiii_subset[variants_expiii_subset$effect_simplified == "N" & variants_expiii_subset$allele_freq >= 0.99,])
+
+        P_S <- nrow(variants_expiii_subset %>% filter(effect_simplified == "S" & allele_freq >= 0.05 & allele_freq < 0.99) %>% distinct(mut_info))
+        D_S <- nrow(variants_expiii_subset %>% filter(effect_simplified == "S" & allele_freq >= 0.99) %>% distinct(mut_info))
+
+        P_N <- nrow(variants_expiii_subset %>% filter(effect_simplified == "N" & allele_freq >= 0.05 & allele_freq < 0.99) %>% distinct(mut_info))
+        D_N <- nrow(variants_expiii_subset %>% filter(effect_simplified == "N" & allele_freq >= 0.99) %>% distinct(mut_info))
+
         # Calculate Neutrality Index
         NI <- (P_N / P_S) / (D_N / D_S)
+
         # Create a contingency table
         MK_table <- matrix(c(D_N, D_S, P_N, P_S), nrow = 2, byrow = TRUE,
                         dimnames = list(c("Fixed", "Polymorphic"),
@@ -89,8 +93,11 @@ for (exp_line in exp_line_factor){
         # Perform Fisher's Exact Test
         MK_result <- fisher.test(MK_table)
         MK_result$p.value
-        df <- rbind(df, c(exp_line, gene, P_S, D_S, P_N, D_N, NI, MK_result$p.value))
-
+        df <- rbind(df, c(expline, gene, P_S, D_S, P_N, D_N, NI, MK_result$p.value))
     }
+    colnames(df) <- c("exp_line", "gene", "P_S", "D_S", "P_N", "D_N", "NI", "p_value")
 }
+
+
+
 ```

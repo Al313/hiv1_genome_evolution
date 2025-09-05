@@ -5,7 +5,6 @@ library(stringr)
 library(magrittr)
 
 # determine the server path
-
 if (file.exists("/home/amovas/")){
   wd <- "/home/amovas/data/genome-evo-proj/"
 } else {

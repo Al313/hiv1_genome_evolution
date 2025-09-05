@@ -111,7 +111,7 @@ df2 <- df %>% set_colnames(c("exp_line", "mut_info", "appearance_psg", "freq_app
 
 
 
-saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
+saveRDS(df2, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
 
 
 
@@ -127,7 +127,7 @@ saveRDS(df, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-e
 ```{r initila relative fitness per relative order}
 
 
-
+df <- readRDS("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
 
 # df from ## Method 2 in time_to_fixation.Rmd
 merged <- merge(t_2_f, df2[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
@@ -141,7 +141,7 @@ for (i in 1:nrow(df1)) {
 }
 
 
-
+# saveRDS(df1, file = "/Users/alimos313/Documents/studies/phd/hpc-research/lte-viz/data/initial_relative_fitness_triple_quadruple.rds")
 
 df1$line_label <- df1$exp_line  # or paste shape/linetype if different
 

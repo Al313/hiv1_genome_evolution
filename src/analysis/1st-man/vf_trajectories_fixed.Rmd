@@ -51,11 +51,11 @@ library("ggrepel")
 
 # determine the server path
 if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
 # load data
@@ -167,7 +167,6 @@ fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group
         guides(linewidth = "none",
         color = guide_legend(override.aes = list(linewidth = 8)))
 
-fig
 
 # save figure
 custom_plot_save(fig, paste0("frequency_dynamics_per_repeated_", category, ".pdf"), height = 21, width = 42)
