@@ -16,6 +16,7 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(stringr)
+library(pheatmap)
 
 # Visual settings
 source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
@@ -31,8 +32,10 @@ names(line_col_palette) <- exp_line_factor
 ```{r}
 
 
-ld_df <- read.table(paste0(wd, "results/tables/ld/iii/13/300.tsv"), sep = "\t", header = TRUE)
+ld_df <- read.table(paste0(wd, "results/tables/ld/iii/15/360.tsv"), sep = "\t", header = TRUE)
 ld_df <- ld_df[!is.na(ld_df$r2), ]  # remove rows with NA r2 values
+
+
 View(ld_df)
 
 
@@ -43,6 +46,7 @@ View(ld_df)
 
 # How many pairs are in strong LD? (e.g., r2 > 0.8)
 strong_ld <- sum(ld_df$r2 > 0.8, na.rm = TRUE)
+ld_df[ld_df$pos2 == 8973,]
 ld_df[ld_df$r2 > 0.8,]
 total_pairs <- sum(!is.na(ld_df$r2))
 prop_strong_ld <- strong_ld / total_pairs
@@ -58,7 +62,7 @@ prop_strong_ld
 ld_df$distance <- abs(ld_df$pos2 - ld_df$pos1)
 
 # Average r2 per distance bin (e.g., every 50 bp)
-library(dplyr)
+
 ld_summary <- ld_df %>%
     filter(!is.na(r2)) %>%
     mutate(bin = cut(distance, breaks = seq(0, max(distance), by = 50))) %>%
@@ -71,7 +75,6 @@ ld_summary <- ld_df %>%
 ```{r}
 # r² vs distance
 
-library(ggplot2)
 
 ggplot(ld_df, aes(x = distance, y = r2)) +
     geom_point(alpha = 0.3) +
@@ -87,13 +90,11 @@ ggplot(ld_df, aes(x = distance, y = r2)) +
 
 # Heatmap of LD
 
-library(reshape2)
-
 # make matrix
 ld_mat <- reshape2::acast(ld_df, pos1 ~ pos2, value.var = "r2")
 
 # visualize
-library(pheatmap)
+
 pheatmap(ld_mat, cluster_rows = FALSE, cluster_cols = FALSE,
             color = colorRampPalette(c("white", "red"))(50),
             main = "LD Heatmap (r²)")
@@ -134,13 +135,10 @@ for (exp_line in 13:16) {
     }
 }
 
-all_ld %<>% mutate(all_ld$distance <- abs(all_ld$pos2 - all_ld$pos1),
-    all_ld$mid_pos <- (all_ld$pos1 + all_ld$pos2) / 2,
+all_ld %<>% mutate(distance = abs(all_ld$pos2 - all_ld$pos1),
+    mid_pos = (all_ld$pos1 + all_ld$pos2) / 2,
     exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
 )
-
-
-
 
 
 
@@ -149,9 +147,9 @@ all_ld %<>% mutate(all_ld$distance <- abs(all_ld$pos2 - all_ld$pos1),
 
 ```{r}
 
-
+View(all_ld_summary)
 all_ld_summary <- all_ld %>% group_by(exp_line, psg) %>%
-    filter(distance <= 50) %>%
+    filter(r2 >= 0.01) %>%
     summarise(mean_r2 = mean(r2, na.rm = TRUE), 
     median_r2 = median(r2, na.rm = TRUE), 
     n_pairs = n(),
