@@ -22,14 +22,14 @@ fi
 
 
 exps=(iii)
-exp_lines=(14 15 16)
+exp_lines=(15)
 
 count=0
 max=200000
 
 for exp in "${exps[@]}"; do
  for exp_line in "${exp_lines[@]}"; do
-  for item in /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/${exp}/${exp_line}/*.bam; do
+  for item in /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/${exp}/${exp_line}/15MT4EXPIIIVP390seq18062021_S18_L001_sorted.bam; do
  
   job_file=${job_dir}/${count}.job
   echo "$item"

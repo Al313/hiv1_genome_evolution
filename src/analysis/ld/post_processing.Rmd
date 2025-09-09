@@ -250,10 +250,12 @@ all_ld_summary <- all_ld %>% group_by(exp_line, distance) %>%
     pop_size_est = case_when(exp_line== "MT-2_1" ~ 10^4.37, exp_line== "MT-2_2" ~ 10^4.37, exp_line== "MT-4_1" ~ 10^5.06, exp_line== "MT-4_2" ~ 10^5.06)) # update exp line labels
 
 
+model_formula <- as.formula("mean_r2 ~ 1 / (1 + (2* r * pop_size_est * (distance)^(0.7)))")
+
 # Fit the Hill–Weir function with nls()
 
 fit_hw <- nls(
-  mean_r2 ~ 1 / (1 + 2 * pop_size_est * r * distance),
+  model_formula,
     data = all_ld_summary[all_ld_summary$host == "MT2", ],
     start = list(r = 1e-4)  # reasonable starting guess
 )
@@ -266,7 +268,7 @@ model_sum <- summary(fit_hw)
 # Function to fit Hill–Weir and return predicted values
 fit_hw_fun <- function(df) {
     fit <- tryCatch(
-        nls(mean_r2 ~ 1 / (1 + 2 * pop_size_est * r * distance),
+        nls(model_formula,
             data = df,
             start = list(r = 1e-4)),
         error = function(e) NULL
@@ -289,7 +291,6 @@ all_ld_fits <- all_ld_summary %>%
     ungroup()
 
 
-all_ld_fits[all_ld_fits$host == "MT2" & all_ld_fits$distance == 5,]
 
 ggplot(all_ld_fits, aes(x = distance, y = mean_r2, color = host)) +
     geom_point(alpha = 0.5) +
@@ -322,7 +323,7 @@ fit_results <- all_ld_summary %>%
     mutate(host = factor(host, levels = c("MT2", "MT4"))) %>%
     group_by(host) %>%
     group_map(~ {
-        fit <- nls(mean_r2 ~ 1 / (1 + 2 * pop_size_est * r * distance),
+        fit <- nls(model_formula,
                 data = .x,
                 start = list(r = 1e-4))
         get_fit_stats(fit, .x)

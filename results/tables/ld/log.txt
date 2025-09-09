@@ -346,3 +346,6 @@
 /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/16/16MT4EXPIIIVP480seq08122022_S9_L001_sorted.bam
 /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/16/16MT4EXPIIIVP470seq20052022_S26_L001_sorted.bam
 /home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/16/16MT4EXPIIIVP330seq15102020_S12_L001_sorted.bam
+/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/16/16MT4EXPIIIVP390seq18062021_S24_L001_sorted.bam
+/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/15/15MT4EXPIIIVP360seq18062021_S15_L001_sorted.bam
+/home/amovas/shared/genome-evo-proj/data/processed-data/mappings/pipeline-outputs/iii/15/15MT4EXPIIIVP390seq18062021_S18_L001_sorted.bam
