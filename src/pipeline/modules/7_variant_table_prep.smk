@@ -4,7 +4,7 @@ rule prepareFeatureList:
     output:
         f"{wd}/results/tables/pipeline-outputs/cds_feature_list.tsv"
     script:
-        f"{wd}/src/snakemake-run/R-scripts/prep_feature_list.R"
+        f"{wd}/src/pipeline/R-scripts/prep_feature_list.R"
 
 
 rule extractAnnotation:
@@ -16,5 +16,5 @@ rule extractAnnotation:
     resources:
         mem_mb=50000
     shell:
-        "Rscript {wd}/src/snakemake-run/R-scripts/aa_change.R {wildcards.experiment} && Rscript {wd}/src/snakemake-run/R-scripts/add_mut_context.R {wildcards.experiment}"
+        "Rscript {wd}/src/pipeline/R-scripts/aa_change.R {wildcards.experiment} && Rscript {wd}/src/pipeline/R-scripts/add_mut_context.R {wildcards.experiment}"
 

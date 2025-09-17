@@ -5,7 +5,7 @@ rule callMutation:
     output:
         f"{wd}/data/processed-data/mutations/pipeline-outputs/{{experiment}}/{{line}}/{{sample}}.csv"
     shell:
-        "python {wd}/src/snakemake-run/python-scripts/call_mutations.py {input.bam} {wd}/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta NL43_ann_wk0virusPassRef_plasmid > {output}"
+        "python {wd}/src/pipeline/python-scripts/call_mutations.py {input.bam} {wd}/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta NL43_ann_wk0virusPassRef_plasmid > {output}"
 
 
 # Helper function to get samples for a specific experiment
@@ -23,6 +23,6 @@ rule collectMutation:
     output:
         f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.csv.gz"
     shell:
-        "python {wd}/src/snakemake-run/python-scripts/collect_mutations.py {input}"
+        "python {wd}/src/pipeline/python-scripts/collect_mutations.py {input}"
 
 

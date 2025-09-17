@@ -6,4 +6,4 @@ rule calculateDiversity:
     output:
         f"{wd}/results/tables/diversity/{{experiment}}/{{line}}_diversity_measures.tsv"
     shell:
-        "Rscript /home/amovas/data/genome-evo-proj/src/snakemake-run/R-scripts/get_diversity.R {wildcards.line}"
+        "Rscript /home/amovas/data/genome-evo-proj/src/pipeline/R-scripts/get_diversity.R {wildcards.line}"

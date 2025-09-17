@@ -4,7 +4,7 @@ rule generateVCF:
     output:
         f"{wd}/results/tables/pipeline-outputs/{{experiment}}/{{experiment}}_variants.vcf.gz"
     shell:
-        "Rscript {wd}/src/snakemake-run/R-scripts/variant_to_vcf.R {wildcards.experiment} && gzip {wd}/results/tables/pipeline-outputs/{wildcards.experiment}/{wildcards.experiment}_variants.vcf"
+        "Rscript {wd}/src/pipeline/R-scripts/variant_to_vcf.R {wildcards.experiment} && gzip {wd}/results/tables/pipeline-outputs/{wildcards.experiment}/{wildcards.experiment}_variants.vcf"
 
 
 
