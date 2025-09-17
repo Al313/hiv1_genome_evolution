@@ -38,6 +38,7 @@ library("magrittr")
 library("rstatix")
 library("gtools")
 library("effsize")
+library(purrr)
 
 
 ```
@@ -130,7 +131,7 @@ saveRDS(df2, file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-
 df <- readRDS("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
 
 # df from ## Method 2 in time_to_fixation.Rmd
-merged <- merge(t_2_f, df2[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
+merged <- merge(t_2_f, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
 
 
 df1 <- merged[merged$Occurrence %in% c("Triple", "Quadruple"),]
@@ -200,6 +201,8 @@ ggplot(merged, aes(x = init_rel_fit, y = predicted_prob)) +
 
 ```{r probability of fixation per line}
 
+library(pscl)
+library(pROC)
 
 # Fit model per exp_line
 models_df <- merged %>%
@@ -229,6 +232,29 @@ fig <- ggplot(models_df, aes(x = init_rel_fit, y = predicted_prob, color = exp_l
 # save figure
 custom_plot_save(fig, "probability_of_fixation.pdf", height = 14, width = 14)
 
+
+### model assessment
+
+
+models_df <- merged %>%
+    group_by(exp_line) %>%
+    nest() %>%
+    mutate(
+        model = map(data, ~ glm(fixed ~ init_rel_fit, data = ., family = binomial)),
+        preds = map2(data, model, ~ mutate(.x, predicted_prob = predict(.y, newdata = .x, type = "response"))),
+        # goodness-of-fit
+        logLik = map_dbl(model, logLik),
+        AIC = map_dbl(model, AIC),
+        pseudoR2 = map(model, ~ pscl::pR2(.x)),
+        auc = map2_dbl(data, model, ~ {
+        roc_obj <- pROC::roc(.x$fixed, predict(.y, newdata = .x, type = "response"))
+        pROC::auc(roc_obj)
+        })
+    )
+
+models_df %>%
+    mutate(pseudoR2 = map(pseudoR2, tibble::as_tibble_row)) %>%
+    unnest(pseudoR2)
 
 
 ```

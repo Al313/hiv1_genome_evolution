@@ -145,9 +145,9 @@ all_ld %<>% mutate(distance = abs(all_ld$pos2 - all_ld$pos1),
 ```
 
 
-```{r}
+```{r LD over time}
 
-View(all_ld_summary)
+
 all_ld_summary <- all_ld %>% group_by(exp_line, psg) %>%
     filter(r2 >= 0.01) %>%
     summarise(mean_r2 = mean(r2, na.rm = TRUE), 
@@ -178,7 +178,7 @@ t.test(all_ld_summary$mean_r2[all_ld_summary$exp_line == 13 & all_ld_summary$psg
 
 ```
 
-```{r}
+```{r LD decay loess}
 
 
 
@@ -222,153 +222,7 @@ t.test(wide_ld$line_13, wide_ld$line_14, paired = TRUE)
 
 
 
-Hill and Weir (1988) that describes the relationship between 
-linkage disequilibrium (LD) (measured as r² or other correlation coefficients) and
-the physical or genetic distance between loci, often observed in a population. 
-This model is used to predict how LD decays as the distance between loci increases,
-reflecting the influence of genetic drift and recombination. 
-The Hill-Weir model typically uses a non-linear regression to fit the observed LD decay, 
-which can then be used to infer population parameters like effective population size (Ne). 
-
-
-
-
-
-
-```{r}
-
-
-all_ld_summary <- all_ld %>% group_by(exp_line, distance) %>%
-    filter(!is.na(r2)) %>%
-    summarise(mean_r2 = mean(r2, na.rm = TRUE), 
-    median_r2 = median(r2, na.rm = TRUE), 
-    n_pairs = n(),
-    prop_high = mean(r2 > 0.5, na.rm = TRUE)) %>%
-    arrange(exp_line, psg) %>%
-    mutate(
-    host = ifelse(exp_line %in% c("MT-2_1","MT-2_2"), "MT2", "MT4"),
-    pop_size_est = case_when(exp_line== "MT-2_1" ~ 10^4.37, exp_line== "MT-2_2" ~ 10^4.37, exp_line== "MT-4_1" ~ 10^5.06, exp_line== "MT-4_2" ~ 10^5.06)) # update exp line labels
-
-
-model_formula <- as.formula("mean_r2 ~ 1 / (1 + (2* r * pop_size_est * (distance)^(0.7)))")
-
-# Fit the Hill–Weir function with nls()
-
-fit_hw <- nls(
-  model_formula,
-    data = all_ld_summary[all_ld_summary$host == "MT2", ],
-    start = list(r = 1e-4)  # reasonable starting guess
-)
-
-model_sum <- summary(fit_hw)
-
-
-
-
-# Function to fit Hill–Weir and return predicted values
-fit_hw_fun <- function(df) {
-    fit <- tryCatch(
-        nls(model_formula,
-            data = df,
-            start = list(r = 1e-4)),
-        error = function(e) NULL
-    )
-    
-    if (!is.null(fit)) {
-        df$fit_r2 <- predict(fit, newdata = df)
-        df$r_est  <- coef(fit)["r"]
-    } else {
-        df$fit_r2 <- NA
-        df$r_est  <- NA
-    }
-    return(df)
-}
-
-# Apply per host
-all_ld_fits <- all_ld_summary %>%
-    group_by(host) %>%
-    group_modify(~ fit_hw_fun(.x)) %>%
-    ungroup()
-
-
-
-ggplot(all_ld_fits, aes(x = distance, y = mean_r2, color = host)) +
-    geom_point(alpha = 0.5) +
-    geom_line(aes(y = fit_r2), size = 1.2) +   # fitted Hill–Weir curve
-    labs(x = "\nDistance between SNPs (bp)",
-        y = expression(mean(r^2)),
-        title = "LD decay with Hill–Weir model fit",
-        color = "Host") +
-    scale_color_manual(values = c("#ff8b08", "#00bbff")) +
-    custom_plot_theme(application = "publication")
-
-get_fit_stats <- function(fit, df) {
-    preds <- predict(fit, newdata = df)
-    obs   <- df$mean_r2
-    
-    ss_res <- sum((obs - preds)^2, na.rm = TRUE)   # residual sum of squares
-    ss_tot <- sum((obs - mean(obs, na.rm = TRUE))^2, na.rm = TRUE)  # total sum of squares
-    
-    r2 <- 1 - (ss_res / ss_tot)
-    
-    data.frame(
-        r2 = r2,
-        RMSE = sqrt(mean((obs - preds)^2, na.rm = TRUE)),
-        AIC = AIC(fit),
-        r_est = coef(fit)[["r"]]
-    )
-}
-
-fit_results <- all_ld_summary %>%
-    mutate(host = factor(host, levels = c("MT2", "MT4"))) %>%
-    group_by(host) %>%
-    group_map(~ {
-        fit <- nls(model_formula,
-                data = .x,
-                start = list(r = 1e-4))
-        get_fit_stats(fit, .x)
-    }) %>%
-    bind_rows(.id = "host")
-
-fit_results %<>% mutate(host = case_when(host == "1" ~ "MT2", host == "2" ~ "MT4"))
-
-# format labels
-fit_results <- fit_results %>%
-    mutate(
-        label = paste0(
-                    "\n Est. recombination rate \n per nucl. per gen. = ", signif(r_est, 3),
-                    "\n Goodness of fit (R²) = ", round(r2, 2))
-    )
-
-# choose annotation positions (adjust as needed)
-fit_results <- fit_results %>%
-    mutate(xpos = 150,   # distance value where label appears
-            ypos = c(0.15, 0.10))  # y position for MT2 / MT4 separately
-
-
-fig <- all_ld_summary %>% ggplot(aes(x = distance, y = mean_r2, color = host)) +
-    geom_point() +
-    geom_smooth(se = FALSE, method = "loess", span = 0.3) +  # loess smoothing
-    geom_text(data = fit_results,
-        aes(x = xpos, y = ypos, label = label, color = host),
-        inherit.aes = FALSE,
-        hjust = 0, size = 8, fontface = "bold", show.legend = FALSE ) +
-    labs(x = "\n Distance between SNPs (bp)",
-        y = expression(mean(r^2)),
-        title = "Mean LD decay with distance across Experimental Lines",
-        color = "Line") +
-    scale_color_manual(values = c("#ff8b08", "#00bbff"),) +
-    custom_plot_theme(application = "publication")
-
-# save figure
-custom_plot_save(fig, "ld_decay_per_distance_model.pdf", height = 14, width = 14)
-
-
-```
-
-
-
-```{r}
+```{r LD over genome}
 
 
 
@@ -398,3 +252,124 @@ custom_plot_save(fig, "ld_over_genome.pdf", height = 14, width = 14)
 
 
 ```
+
+
+
+Hill and Weir (1988) that describes the relationship between 
+linkage disequilibrium (LD) (measured as r² or other correlation coefficients) and
+the physical or genetic distance between loci, often observed in a population. 
+This model is used to predict how LD decays as the distance between loci increases,
+reflecting the influence of genetic drift and recombination. 
+The Hill-Weir model typically uses a non-linear regression to fit the observed LD decay, 
+which can then be used to infer population parameters like effective population size (Ne). 
+
+
+
+
+
+
+```{r LD decay basic model}
+
+# bring data into suitable format
+
+all_ld_summary <- all_ld %>% group_by(exp_line, distance) %>%
+    filter(!is.na(r2)) %>%
+    summarise(mean_r2 = mean(r2, na.rm = TRUE), 
+    median_r2 = median(r2, na.rm = TRUE), 
+    n_pairs = n(),
+    prop_high = mean(r2 > 0.5, na.rm = TRUE)) %>%
+    arrange(exp_line, psg) %>%
+    mutate(
+    host = ifelse(exp_line %in% c("MT-2_1","MT-2_2"), "MT2", "MT4"),
+    pop_size_est = case_when(exp_line== "MT-2_1" ~ 10^4.37, exp_line== "MT-2_2" ~ 10^4.37, exp_line== "MT-4_1" ~ 10^5.06, exp_line== "MT-4_2" ~ 10^5.06)) # update exp line labels
+
+
+# Define the Hill-Weir model formula
+model_formula <- as.formula("mean_r2 ~ 1 / (1 + (2* r * pop_size_est * (distance)^(0.7)))")
+
+
+
+
+# Function to fit Hill–Weir and return predicted values
+fit_hw_fun <- function(df) {
+    fit <- tryCatch(
+        nls(model_formula,
+            data = df,
+            start = list(r = 1e-4)),
+        error = function(e) NULL
+    )
+    
+    if (!is.null(fit)) {
+        df$fit_r2 <- predict(fit, newdata = df)
+        df$r_est  <- coef(fit)["r"]
+    } else {
+        df$fit_r2 <- NA
+        df$r_est  <- NA
+    }
+    return(df)
+}
+
+# define function to extract fit statistics
+get_fit_stats <- function(fit, df) {
+    preds <- predict(fit, newdata = df)
+    obs   <- df$mean_r2
+    
+    ss_res <- sum((obs - preds)^2, na.rm = TRUE)   # residual sum of squares
+    ss_tot <- sum((obs - mean(obs, na.rm = TRUE))^2, na.rm = TRUE)  # total sum of squares
+    
+    r2 <- 1 - (ss_res / ss_tot)
+    
+    data.frame(
+        r2 = r2,
+        RMSE = sqrt(mean((obs - preds)^2, na.rm = TRUE)),
+        AIC = AIC(fit),
+        r_est = coef(fit)[["r"]]
+    )
+}
+
+
+# get the modelling results
+fit_results <- all_ld_summary %>%
+    mutate(host = factor(host, levels = c("MT2", "MT4"))) %>%
+    group_by(host) %>%
+    group_map(~ {
+        fit <- nls(model_formula,
+                data = .x,
+                start = list(r = 1e-4))
+        get_fit_stats(fit, .x)
+    }) %>%
+    bind_rows(.id = "host") %>% 
+    mutate(host = case_when(host == "1" ~ "MT2", host == "2" ~ "MT4"),
+        label = paste0(
+            "\n Est. recombination rate \n per nucl. per gen. = ", signif(r_est, 3),
+            "\n Goodness of fit (R²) = ", round(r2, 2)
+        )
+    ) 
+
+
+
+# choose annotation positions (adjust as needed)
+fit_results <- fit_results %>%
+    mutate(xpos = 150,   # distance value where label appears
+            ypos = c(0.15, 0.10))  # y position for MT2 / MT4 separately
+
+# make the figure
+fig <- ggplot(all_ld_fits, aes(x = distance, y = mean_r2, color = host)) +
+    geom_point(alpha = 0.5) +
+    geom_line(aes(y = fit_r2), size = 1.2) + 
+    geom_text(data = fit_results,
+        aes(x = xpos, y = ypos, label = label, color = host),
+        inherit.aes = FALSE,
+        hjust = 0, size = 8, fontface = "bold", show.legend = FALSE ) +
+    labs(x = "\n Distance between SNPs (bp)",
+        y = expression(mean(r^2)),
+        title = "Mean LD decay with distance across Experimental Lines",
+        color = "Line") +
+    scale_color_manual(values = c("#ff8b08", "#00bbff"),) +
+    custom_plot_theme(application = "publication")
+
+# save the figure
+custom_plot_save(fig, "ld_decay_per_distance_model.pdf", height = 14, width = 14)
+
+```
+

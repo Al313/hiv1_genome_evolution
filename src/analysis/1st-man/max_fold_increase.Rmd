@@ -149,7 +149,6 @@ max_fold_summary$max_psg_lower <- max_fold_summary$max_psg_lower + 10
 
 fig <- max_fold_summary %>% 
     ggplot(aes(x = max_psg_lower, y = log2(Mean), color = exp_line)) +
-    # facet_wrap(~exp_line) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE) +  # Add regression line without confidence interval
     scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
@@ -167,7 +166,7 @@ custom_plot_save(fig, "fixed_max_fold_change_occurrence_trend.pdf", height = 14,
 
 ```{r max-fold-increase figure 2}
 
-max_fold %<>% mutate(host_line = ifelse(exp_line %in% c("MT-2_1", "MT-2_2"), "MT-2", "MT-4")) %>% 
+max_fold %<>% mutate(host_line = ifelse(exp_line %in% c("MT-2_1", "MT-2_2"), "MT2", "MT4")) %>% 
             mutate(host_line = factor(host_line, levels = host_factor))
 
 # axis text label data frame
@@ -200,28 +199,21 @@ fig <- max_fold %>%
 
 ```{r}
 
-# significant trends over time for exp lines
+# are the regression slopes significantly different from 0?
+options(scipen = 999) # to avoid scientific notation
 
-modell <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-2_1",])
-summary(modell)
+library(broom)
 
-# significant trend over time for MT-4 lines
-model_mt2 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$host_line == "MT-2",])
-model_mt4 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$host_line == "MT-4",])
-summary(model_mt4)
+lm_results <- max_fold_summary %>%
+  group_by(exp_line) %>%
+  do(tidy(lm(log2(Mean) ~ max_psg_lower, data = .)))
 
-# significant trend over time per line
+as.data.frame(lm_results)
 
-model_mt21 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-2_1",])
-model_mt22 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-2_2",])
-model_mt41 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-4_1",])
-model_mt42 <- lm(log10(max_fold_change)~as.numeric(max_psg_lower), data = max_fold[max_fold$exp_line == "MT-4_2",])
+```
 
 
-summary(model_mt42)
-
-
-
+```{r}
 
 # significant higher max fold increase in MT-2 compared to MT-4
 mean(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-2_1","MT-2_2")])/mean(max_fold$max_fold_change[max_fold$exp_line %in% c("MT-4_1","MT-4_2")])
