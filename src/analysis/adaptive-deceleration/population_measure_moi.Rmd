@@ -1,0 +1,466 @@
+---
+title:  
+    "TCID50"
+date: 
+    "May 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+
+# load libraries
+library(readxl)
+library(stringr)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+
+# define functions
+
+`%notin%` <- Negate(`%in%`)
+
+# Visual settings
+
+source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
+
+
+logarithmic_mean_vector <- function(x) {
+  if (length(x) < 2) {
+    stop("Input vector must contain at least two numbers.")
+  }
+  
+  # Remove zeros to avoid log issues
+  x <- x[x > 0]
+  
+  if (length(x) < 2) {
+    stop("Vector must contain at least two positive numbers.")
+  }
+  
+  # Compute pairwise logarithmic mean
+  L <- x[1]
+  for (i in 2:length(x)) {
+    if (L == x[i]) {
+      next  # Skip if both numbers are the same
+    }
+    L <- (L - x[i]) / (log(L) - log(x[i]))
+  }
+  
+  return(L)
+}
+
+harmonic_mean <- function(x) {
+  return(length(x) / sum(1 / x))
+}
+
+
+
+
+moi_cal <- function(tcid50, inoculum_volume=0.002, cell_number=400000) {
+    return(-log(1-tcid50*inoculum_volume/(cell_number)))
+}
+
+```
+
+```{r tcid data}
+
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
+
+line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+line_labels <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
+
+
+
+# tcid data to plot MOIs
+
+data <- as.data.frame(read_excel(paste0(wd, "data/titration/tcid50.xlsx")))
+
+
+
+data$passage <- sapply(strsplit(data$Sample_ID, "p"), "[", 2)
+data$passage[is.na(data$passage)] <- 0
+data$lines <- substring(data$Sample_ID, 8,9)
+data$lines[data$lines == ""] <- "ancestral"
+
+# correct for the switched experimental lines
+data$lines[data$lines == 15 & data$passage > 360] <- "A"
+data$lines[data$lines == 16 & data$passage > 360] <- "B"
+
+data$lines[data$lines == "A"] <- "16"
+data$lines[data$lines == "B"] <- "15"
+
+
+data %<>% mutate(exp_line = case_when(lines==13 ~ "MT-2_1", lines==14 ~ "MT-2_2", lines==15 ~ "MT-4_1", lines==16 ~ "MT-4_2")) # update exp line labels
+
+
+
+data_sub <- data[data$Source_abv %in% c("2022_rfc_i","2022_rfc_ii", "2018_christine","2024_christine"),]
+data_sub <- data_sub[data_sub$passage != "NL4_3",]
+
+data_sub$passage <- as.numeric(data_sub$passage)
+data_sub$lines <- factor(data_sub$exp_line, levels = line_labels)
+data_sub$Source_abv <- factor(data_sub$Source_abv, levels = c("2024_christine","2018_christine","2022_rfc_i","2022_rfc_ii"))
+
+data_sub %<>% filter(Sample_ID != "NL4_3")
+
+
+result <- data_sub %>%
+  group_by(exp_line, passage) %>%
+  summarise(value = ifelse(n() > 1, mean(MOI), unique(MOI)), .groups = 'drop')
+
+
+
+
+moi__fig <- data_sub %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line(aes(linetype=Source_abv)) +
+                geom_point() +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi") +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+
+
+```
+
+
+
+```{r }
+
+# produce the MOI figure by taking the average of values for dates where there are more than one data point available.
+
+
+
+  
+# Check if all values are positive
+if (any((as.numeric(table(values)) >= 2))) {
+  return(values[1])
+}
+
+# Calculate the logarithmic mean
+n <- length(values)
+log_mean <- mean(sapply(1:(n-1), function(i) {
+  a <- values[i]
+  b <- values[i+1]
+  (b - a) / (log(b) - log(a))
+}))
+
+return(log_mean)
+
+
+
+result <- data_sub %>%
+    group_by(exp_line, passage) %>%
+    summarise(MOI = ifelse(n() > 1, logarithmic_mean(MOI), unique(MOI)), .groups = 'drop') %>%
+    filter(passage %notin% c(10,30,50,70, 90))
+
+
+
+# fit linear models for each group and extract p-values
+model_A <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[1], ])
+model_B <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[2], ])
+model_C <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[3], ])
+model_D <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+
+
+moi_fig <- result %>% ggplot(aes(x = passage, y = log10(MOI), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line() +
+                geom_point() +
+                geom_smooth(method = "lm", se = FALSE) +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi") +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "moi_cleaned.pdf"), height = 14, width = 14)
+moi_fig
+dev.off()
+pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/moi_cleaned.pdf"), height = 14, width = 14)
+moi_fig
+dev.off()
+
+```
+
+```{r in text measures}
+
+# The MOI levels for none of the cell lines is statistically difference from one another
+
+pairwise.t.test(data$MOI, data$exp_line, p.adjust.method = "none")
+
+
+
+# define a function to calculate the CI
+confidence_interval <- function(data, conf.level = 0.95) {
+    n <- length(data)
+    mean_value <- mean(data)
+    sd_value <- sd(data)
+    
+    # Calculate standard error
+    se <- sd_value / sqrt(n)
+    
+    # Calculate margin of error
+    error_margin <- qt(1 - (1 - conf.level) / 2, df = n - 1) * se
+    
+    # Calculate confidence interval
+    ci_lower <- mean_value - error_margin
+    ci_upper <- mean_value + error_margin
+    
+    return(c(lower = ci_lower, upper = ci_upper))
+}
+
+mean(result$MOI)
+confidence_interval(result$MOI)
+
+median(result$MOI)
+quantile(result$MOI, probs = c(0.25,0.5,0.75))
+IQR(result$MOI)
+
+
+```
+
+
+```{r }
+
+# produce the MOI figure by not considering the 2024 results
+
+result <- data_sub %>%
+    filter(Source_abv != "2024_christine") %>%
+    # filter(passage %notin% c(10)) %>%
+    group_by(exp_line, passage) %>%
+    summarise(MOI = ifelse(n() > 1, logarithmic_mean_vector(MOI), unique(MOI)), .groups = 'drop')
+
+
+
+# fit linear models for each group and extract p-values
+model_A <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[1], ])
+model_B <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[2], ])
+model_C <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[3], ])
+model_D <- lm(MOI ~ passage, data = result[result$exp_line == line_labels[4], ])
+
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+scale_factor <- 400000
+result$btk_size <- result$MOI*scale_factor
+
+# save results for estimating transfer_size in simulation of neutral sequence evolution
+# saveRDS(result, file = paste0(wd, "results/tables/moi_cleaned.rds"))
+
+
+moi__fig <- result %>% ggplot(aes(x = passage)) +
+                facet_wrap(~ exp_line) +
+                geom_line(aes(y = log10(MOI), color = exp_line)) +
+                geom_point(aes(y = log10(MOI), color = exp_line)) +
+                geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
+                scale_y_continuous(
+                sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per inoculum")) +
+                labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Lineage") +
+                scale_color_manual(values = line_col_palette) +
+                custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(moi__fig, "moi_cleaned.pdf", height = 14, width = 14)
+
+```
+
+```{r in-text measures}
+
+mean(result$MOI[result$exp_line %in% c("MT-2_1","MT-2_2")])
+mean(result$MOI[result$exp_line %in% c("MT-4_1","MT-4_2")])
+quantile(result$btk_size[result$exp_line %in% c("MT-2_1","MT-2_2")], probs = c(0.25,0.5,0.75))
+quantile(result$btk_size[result$exp_line %in% c("MT-4_1","MT-4_2")], probs = c(0.25,0.5,0.75))
+```
+
+```{r compare MOI levels between lines}
+
+
+
+a <- data_sub %>% 
+    filter(passage >= 300 & exp_line %in% c("MT-2_1", "MT-2_2")) %>%
+    select(MOI)
+
+median(a$MOI)*400000
+quantile(a$MOI, probs = c(0.25,0.5,0.75))*400000
+
+b <- data_sub %>% 
+    filter(passage >= 300 & exp_line == c("MT-4_1", "MT-4_2")) %>%
+    select(MOI)
+
+median(b$MOI)*400000
+quantile(b$MOI, probs = c(0.25,0.5,0.75))*400000
+
+
+wilcox.test(a$MOI,b$MOI)
+
+result %>%
+    filter(passage >= 200) %>%
+    group_by(exp_line) %>%
+    summarise(val = mean(MOI))
+
+median(result$MOI)
+
+quantile(result$MOI, probs = c(0.25,0.5,0.75))
+IQR(result$MOI)
+
+
+
+harmonic_mean <- function(x) {
+  return(length(x) / sum(1 / x))
+}
+
+vec <- c(716.8*12, 716.8*12^2, 716.8*12^3)
+vec2 <- c(3465*12, 3465*12^2, 3465*12^3)
+mean(vec)
+log10(harmonic_mean(vec))
+log10(harmonic_mean(vec2))
+harmonic_mean(vec2)/harmonic_mean(vec)
+
+
+
+vec <- c(716.8*44, 716.8*44^2)
+vec2 <- c(3465*44, 3465*44^2)
+mean(vec)
+log10(harmonic_mean(vec))
+log10(harmonic_mean(vec2))
+harmonic_mean(vec2)/harmonic_mean(vec)
+
+
+```
+
+
+
+
+
+```{r crossed TCID50 values}
+
+
+# are tcid50 values different on the other line?
+
+result <- data_sub %>%
+    filter(Source_abv != "2018_christine") %>%
+    mutate(moi_on_mt2 = moi_cal(`TCID50/ml_MT2`), moi_on_mt4 = moi_cal(`TCID50/ml_MT4`)) %>%
+    select(Source_abv,passage,exp_line,moi_on_mt2,moi_on_mt4) %>%
+    pivot_longer(
+        cols = starts_with("moi_on"),   # Specify columns to pivot
+        names_to = "host",            # Name of the new column that will contain the old column names
+        values_to = "moi"                  # Name of the new column that will contain the values
+    ) %>%
+    group_by(exp_line, passage, host) %>%
+    summarise(value = ifelse(n() > 1, mean(moi), unique(moi)), .groups = 'drop')
+
+# fit linear models for each group and extract p-values
+test_A <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[1]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[1]], paired = TRUE)
+test_B <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[2]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[2]], paired = TRUE)
+test_C <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[3]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[3]], paired = TRUE)
+test_D <- t.test(result$value[result$host == "moi_on_mt2" & result$exp_line == line_labels[4]],result$value[result$host == "moi_on_mt4" & result$exp_line == line_labels[4]], paired = TRUE)
+
+
+# extract the p-values
+p_value_A <- test_A$p.value
+p_value_B <- test_B$p.value
+p_value_C <- test_C$p.value
+p_value_D <- test_D$p.value
+
+# create a data.frame for annotation
+p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B, p_value_C, p_value_D))
+
+
+
+
+moi__fig <- result %>% ggplot(aes(x = passage, y = log10(value), color = exp_line)) +
+                facet_wrap(~ exp_line) +
+                geom_line(aes(linetype=host)) +
+                geom_point() +
+                #ylim(c(1000000,40000000)) +
+                labs(title = "moi on different lines") +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P.value = ", round(p_val, 3))),
+                hjust = 2.1, vjust = 2, size = 5, inherit.aes = FALSE) +
+                scale_color_manual(values = line_col_palette) +
+                theme_bw() +
+                theme(plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+                axis.title.x = element_text(size = 25),
+                axis.title.y = element_text(size = 25),
+                axis.text = element_text(size = 15))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "moi_cleaned_on_respective_hosts.pdf"), height = 14, width = 14)
+moi__fig
+dev.off()
+
+
+
+
+
+```
+
+

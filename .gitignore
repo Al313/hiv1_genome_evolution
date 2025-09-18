@@ -28,8 +28,9 @@ results/tables/2-p/all_annotated_variants.tsv
 src/r-processing-scripts/phylogenetics/manuals/
 
 
-src/analysis/mut-sig/MutationalPatterns/
+# src/analysis/mut-sig/MutationalPatterns/
+# src/analysis/neutral-sim/**/samples/
 
-src/analysis/neutral-sim/**/samples/
+src/analysis/misc/
 
 results/tables/misc/neutral-seq-sim/populations/

@@ -1,0 +1,455 @@
+---
+title:  
+    "Diversity measures"
+date: 
+    "May 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("ggplot2")
+library("ggpubr")
+library("plotly") 
+library("patchwork")
+library("reshape2")
+library("hrbrthemes")
+library("DT")
+library("dplyr")
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("rstatix")
+
+
+```
+
+
+```{r read-in variant data}
+
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+source(paste0(wd, "src/analysis/adaptive-deceleration/readin_data.R"))
+
+```
+
+```{r load visualization settings}
+
+# Visual settings
+source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
+
+
+```
+
+
+```{r read in diversity data}
+
+
+lines <- c(13:16)
+
+diversity_df <- data.frame()
+
+
+for (line in lines){
+  diversity_df <- rbind(diversity_df, read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/diversity/iii/", line, "_diversity_measures.tsv"), sep = "\t", header = T)) #"_shannon_entropy"
+}
+
+# set the correct viral line names and  add host info
+diversity_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4")) %>% # add a field containing pos, ref, and alt info of muts
+                mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2")) %>%
+                filter(passage <= end_psg)
+
+```
+
+
+```{r visualization1: mean shannon entropy per sample}
+
+
+shannon_measure <- diversity_df %>% group_by(host_line,exp_line,passage) %>%
+  summarise (sum_ent = sum(shannon_entropy, na.rm = T), 
+    mean_ent = mean(shannon_entropy, na.rm = T), 
+    .groups = 'drop') %>%
+  mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+# visualize 
+fig <- ggplot(shannon_measure, aes(x = passage, y = mean_ent, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Mean entropy\n", color = "Lineage", title = paste0("Mean of Entropy per Sample")) +
+  scale_color_manual(values = line_col_palette) +
+  scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
+  custom_plot_theme(application = "publication")
+
+
+# save figure
+custom_plot_save(fig, "shannon_per_sample_mean.pdf", height = 14, width = 14)
+
+```
+
+
+
+```{r diversity for simulations}
+
+
+# simulated data (own simulation)
+bottleneck_freq <- 2
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
+
+# define function to calculate Shannon entropy
+shannon <- function(x, seq_err = 0.01){
+    if(x >= seq_err) {-x*log2(x)} else (0)
+}
+
+
+
+# create a dataframe to store diversity results
+sim_diversity_df <- data.frame()
+
+
+for (line in exp_line_factor){
+  for (psg in seq(10,500,10)){
+    print(psg)
+    sim_data_sub <- sim_data[sim_data$exp_line == line & sim_data$passage == psg & sim_data$pos >= 454 & sim_data$pos <= 9625,] 
+    for (i in sim_data_sub$pos){
+      if (is.na(i)) {
+        break
+      }
+      ss <- sim_data_sub[sim_data_sub$pos == i,]
+      
+      # get shannon
+      alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
+      ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
+      total_shannon <- alt_shannon + ref_shannon
+
+      sim_diversity_df <- rbind(sim_diversity_df, c(line, psg, i, total_shannon))
+    }
+  }
+}
+
+colnames(sim_diversity_df) <- c("exp_line", "passage", "genomic_position","shannon_entropy")
+
+
+sim_diversity_df %<>% mutate_at(2:4, as.numeric)
+
+
+# If you want all positions including zeros (i.e., positions with no variants), create full grid
+all_positions <- expand.grid(
+  exp_line = exp_line_factor,
+  passage = seq(10, 500, 10),
+  genomic_position = 454:9625,
+  stringsAsFactors = FALSE
+)
+
+
+sim_diversity_df <- all_positions %>%
+  left_join(sim_diversity_df, by = c("exp_line", "passage", "genomic_position")) %>%
+  mutate(shannon_entropy = replace_na(shannon_entropy, 0))
+
+
+
+shannon_measure_sim <- sim_diversity_df %>% group_by(exp_line,passage) %>%
+  summarise (sum_ent = sum(shannon_entropy, na.rm = T), 
+    mean_ent = mean(shannon_entropy, na.rm = T), 
+    .groups = 'drop') %>%
+  mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+```
+
+
+```{r}
+
+shannon_measure$data <- "Observed"
+shannon_measure <- shannon_measure[,-1]
+shannon_measure_sim$data <- "Simulated"
+
+shannon_measure_all <- rbind(shannon_measure, shannon_measure_sim)
+
+
+
+# visualize 
+fig <- ggplot(shannon_measure_all, aes(x = passage, y = mean_ent, color = exp_line, linetype = data)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Mean entropy\n", color = "Lineage", linetype = "Dataset", title = "") +
+  scale_color_manual(values = line_col_palette) +
+  scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
+  custom_plot_theme(application = "publication")
+
+
+# save figure
+custom_plot_save(fig, "shannon_per_sample_mean_plus_simulated.pdf", height = 14, width = 14)
+
+```
+
+####!!!!
+####!!!!
+
+
+```{r entropy per position}
+
+dd <- shannon_df %>% group_by(host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), var_ent = var(shannon_entropy, na.rm = T),.groups = 'drop')
+
+
+
+fig <- ggplot(dd[dd$mean_ent !=0,], aes(x=exp_line, y = mean_ent)) +
+    geom_boxplot() +
+    labs(x="\nPosition", y= "Entropy Mean \n", title = paste0("Mean of Entropy per Genomic Position")) +
+    theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        axis.title = element_text(size = 15),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10))
+
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_mean.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+```
+
+```{r}
+
+t.test(dd$mean_ent[dd$exp_line == "MT-4_2"], dd$mean_ent[dd$exp_line == "MT-4_1"], paired = T)
+t.test(dd$mean_ent[dd$exp_line == "MT-2_2"], dd$mean_ent[dd$exp_line == "MT-2_1"], paired = T)
+
+```
+
+
+```{r entropy change per position, results=TRUE}
+
+
+dd <- shannon_df %>% group_by(host_line,exp_line,genomic_position) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(abs(diff(shannon_entropy)), na.rm = T), var_ent = var(abs(diff(shannon_entropy)), na.rm = T),.groups = 'drop')
+
+dd %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+fig <- ggplot(dd, aes(x=genomic_position, y = mean_ent)) + facet_wrap(~exp_line, ncol=4) +
+    geom_point() +
+    labs(x="\nPosition", y= "Mean of Entropy Difference\n", title = paste0("Mean of Entropy Difference per Genomic Position")) +
+    theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15),
+        strip.text = element_text(size = 20))
+
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_change_mean.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+fig <- ggplot(dd, aes(x=genomic_position, y = var_ent)) + facet_wrap(~exp_line, ncol=4) +
+    geom_point() +
+    labs(x="\nPosition", y= "Variance of Entropy Difference\n", title = paste0("Variance of Entropy Difference per Genomic Position")) +
+    theme_bw() +
+        theme(plot.title = element_text(size = 20, hjust = 0.5),
+        axis.title = element_text(size = 15),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_change_variance.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+
+```
+
+What can be observed from these data is that overall the rate of entropy change for 3 and 5 prime untranslated regions is higher.
+
+```{r distribution of mean entropy difference, results=TRUE}
+
+
+fig <- dd %>% ggplot(aes(x=mean_ent)) +
+        facet_wrap(~exp_line) +
+        geom_histogram(aes(y = (..count..)/sum(..count..)), binwidth=0.01) +
+        scale_y_continuous(labels = scales::percent) +
+        labs(x="\nMean Entropy Difference", y= "Percentage\n", title = "Distribution of Mean Entropy Difference for MT-2_1") +
+        theme_bw() +
+                theme(plot.title = element_text(size = 20, hjust = 0.5),
+                axis.title = element_text(size = 15),
+                axis.text.x = element_text(size = 10, angle = 90),
+                axis.text.y = element_text(size = 10))
+
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_distribution.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+```{r}
+
+
+
+
+cor_coefs <- data.frame()
+for (i in levels(dd$exp_line)){
+  for (j in levels(dd$exp_line)[levels(dd$exp_line) != i]){
+    cor_res <- cor.test(dd$var_ent[dd$exp_line == i], dd$var_ent[dd$exp_line == j], method = 'spearman', exact = FALSE)
+    cor_coefs <- rbind(cor_coefs, c(i , j, cor_res$estimate))
+    print(paste0("Spearman's Rho between ", i, " and ", j, " is ", cor_res$estimate, " and p.value is ", cor_res$p.value))
+  }
+}
+
+
+cor_coefs <- as.data.frame(cor_coefs) %>% 
+                        `colnames<-`(c("line1", "line2", "Rho")) %>%
+                        mutate(line1 = factor(line1, levels = names(line_col_palette))) %>%
+                        mutate(line2 = factor(line2, levels = names(line_col_palette))) %>%
+                        mutate(Rho = round(as.numeric(Rho), 2))
+
+
+
+
+fig <- ggplot(data = as.data.frame(cor_coefs), aes(x=line1, y=line2, fill=Rho)) + 
+        geom_tile() +
+        geom_text(aes(line1, line2, label = Rho), color = "black", size = 4) +
+        labs(title = "Correlation for Variance of Change of Positional Entropy") +
+        scale_fill_gradient2(low = "blue", high = "red", 
+        midpoint = 0, limit = c(-1,1), space = "Lab", 
+        name="Spearman's Rho") +
+        theme(
+        axis.title = element_blank(),
+        plot.title = element_text(size = 20, hjust = 0.5)
+        )
+
+fig
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "shannon_per_position_correlation_coefficient.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+```
+
+
+
+```{r}
+
+### calculate number of polymorphic sites
+### definition of polymorphic sites: any position where the allele frequency of none of the bases is above a certain cutoff, in our case: 99%
+
+
+
+d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (polymorphic_count = sum(polymorphic, na.rm = T), .groups = 'drop')
+
+d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+# nr of polymorphic sites per sample
+
+fig <- ggplot(d, aes(x = passage, y = polymorphic_count, color = exp_line)) +
+  geom_line(linewidth=2) + 
+  labs(x="\nTransfer", y= "Nr. Polymorphic Site\n", color = "Virus Line", title = paste0("Polymorphism")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15))
+
+ggplotly(fig)
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "polymorphic_site_per_sample.pdf"), height = 14, width = 14)
+fig
+dev.off()
+
+
+
+```
+
+
+
+
+```{r combine mean ent and polymorphic site count}
+
+
+
+d <- shannon_df %>% group_by(host_line,exp_line,passage) %>% summarise (sum_ent = sum(shannon_entropy, na.rm = T), mean_ent = mean(shannon_entropy, na.rm = T), polymorphic_count = sum(polymorphic, na.rm = T), .groups = 'drop')
+
+d %<>% mutate(exp_line = factor(exp_line, levels = names(line_col_palette)))
+
+
+
+# mean entropy and nr of polymorphic sites per sample
+
+figs <- ggplot(d, aes(x = passage, color = exp_line)) +
+  geom_line(aes(y = mean_ent), linewidth=2) + 
+  geom_line(aes(y = polymorphic_count/30000), linewidth=2, linetype = "dashed") +
+  facet_wrap(~exp_line, ncol = 2) +
+  scale_y_continuous(name = "Mean Entropy \n",
+    sec.axis = sec_axis(~.*30000, name="Nr. Polymorphic Site \n")) +
+  labs(x="\nTransfer", color = "Virus Line", title = paste0("Polymorphism")) +
+  scale_color_manual(values = line_col_palette) +
+  theme_bw() +
+        theme(plot.title = element_text(size = 25, hjust = 0.5),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(size = 15, angle = 90),
+        axis.text.y = element_text(size = 15))
+
+# save figure
+date <- str_split(Sys.time(), pattern = " ")[[1]][1]
+fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
+ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
+pdf(file = paste0(fig_dir, "mean_entropy_and_polymorphic_site_per_sample.pdf"), height = 14, width = 14)
+figs
+dev.off()
+
+```
