@@ -208,7 +208,7 @@ lm_results <- max_fold_summary %>%
   group_by(exp_line) %>%
   do(tidy(lm(log2(Mean) ~ max_psg_lower, data = .)))
 
-as.data.frame(lm_results)
+as.data.frame(lm_results[lm_results$term == "max_psg_lower",])
 
 ```
 
@@ -323,7 +323,7 @@ custom_plot_save(fig, "triple_quadruple_max_fold_inc_vs_relative_order.pdf", hei
 # Fit a linear model for each experimental line
 models <- df1 %>%
   group_by(exp_line) %>%
-  do(tidy(lm(log2(max_fold_change) ~ relative_order, data = .)))
+  do(tidy(lm(max_fold_change ~ relative_order, data = .)))
 
 # View the p-values
 models %>%
@@ -339,7 +339,7 @@ for (i in 1:nrow(df2)) {
 }
 
 fig <- df2 %>%
-    ggplot(aes(x = relative_order, y = max_fold_change, color = exp_line)) +
+    ggplot(aes(x = relative_order, y = log2(max_fold_change), color = exp_line)) +
     geom_point(, size = 3) +
     geom_smooth(aes(group = exp_line), method = "lm", se = FALSE) +
     labs(title = "", y = "Max. fold inc. in VF\n", x = "Relative order \n (single-occurrence)", color = "Lineage", linetype = "Lineage") +

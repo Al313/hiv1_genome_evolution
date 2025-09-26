@@ -159,7 +159,7 @@ head(variants_expiii_subset)
 fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info2, linewidth = linewidth)) +
     geom_line() +
     facet_wrap(~exp_line, ncol = 2) +
-    labs(title = "Variant Frequency Trajectories \n", y = "Frequency \n", x = "\n Transfer", color = "Fixed variant") +
+    labs(title = "Variant Frequency Trajectories \n", y = "Frequency", x = "\n Transfer", color = "Fixed mutation") +
     scale_color_manual(values = custom_colors) +
     scale_x_continuous(breaks = seq(0,500, 50))+
     scale_linewidth(range = c(2, 3)) +

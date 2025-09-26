@@ -19,7 +19,7 @@ library(stringr)
 library(pheatmap)
 
 # Visual settings
-source(paste0(wd, "src/analysis/1st-man/plot_custom.R"))
+source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
 names(line_col_palette) <- exp_line_factor
@@ -162,9 +162,9 @@ fig <- all_ld_summary %>% ggplot(aes(x = psg, y = mean_r2, color = as.factor(exp
     geom_point() +
     theme_minimal() +
     labs(x = "\nTransfer",
-        y = expression(mean(r^2)),
+        y = expression(Mean(r^2)),
         title = "Mean LD across PSGs and Experimental Lines",
-        color = "Lineage") +
+        color = "Line") +
     scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
     custom_plot_theme(application = "publication")
 

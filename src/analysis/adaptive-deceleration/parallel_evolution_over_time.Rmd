@@ -155,6 +155,9 @@ effect_list <- list(Syn = "S", Non_Syn = "N", Untranslated = "U", All = c("S", "
 #     }
 # }
 
+```
+
+```{r}
 k <- 4
 effect <- effect_list[k]
 df <- read.table(file = paste0("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/",names(effect),"_parallelism_temporal_simulation.tsv"), sep = "\t", header = T)
@@ -193,7 +196,7 @@ fig <- df_long %>%
         values = c("#ff8b08", "#00bbff"),
         guide = "none"  # Hides the legend for `fill`
     ) +
-    labs(title = "", y = "Shared(%)\n", x = "\nTransfer") +
+    labs(title = "", y = "Parallelism (%)", x = "\nTransfer") +
     scale_linetype_discrete(name = "Dataset",  # Change the legend title here
                     labels = c("Observed", "Randomized"))+
     custom_plot_theme(application = "publication")
@@ -202,4 +205,69 @@ fig <- df_long %>%
 
 # save figure
 custom_plot_save(fig, "parallel_over_time.pdf", height = 14, width = 14)
+
+
+## in text numbers
+
+df_long <- df_long[!is.na(df_long$shared_all),]
+
+df_long[df_long$group2 == "Observed" & df_long$shared_all == max(df_long$shared_all[df_long$Pair == "MT-2_1vsMT-2_2"], na.rm = TRUE),]
+df_long[df_long$group2 == "Observed" & df_long$Pair == "MT-2_1vsMT-2_2" & df_long$passage == 500,]
+
+df_long[df_long$group2 == "Observed" & df_long$shared_all == max(df_long$shared_all[df_long$Pair == "MT-4_1vsMT-4_2"], na.rm = TRUE),]
+df_long[df_long$group2 == "Observed" & df_long$Pair == "MT-4_1vsMT-4_2" & df_long$passage == 500,]
+
+
+df_long[df_long$group2 == "Randomized" & df_long$shared_all == max(df_long$shared_all[df_long$group2 == "Randomized"& df_long$Pair == "MT-4_1vsMT-4_2"], na.rm = TRUE),]
+
+```
+
+
+
+```{r}
+
+
+library(ggh4x)
+
+t_2_f <- t_2_f %>% mutate(host = case_when(exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2", exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"),
+                        group = case_when(Occurrence %in% c("Single") ~ "Line-specific", Occurrence %in% c("Triple", "Quadruple") ~ "Highly-parallel")) %>%
+                        filter(!is.na(group))
+
+bins <- seq(0,500, 100)
+
+nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel" & t_2_f$fixation <= 200,])/
+nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel",])
+
+nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel" & t_2_f$fixation <= 200,])/
+nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel",])
+
+
+t_2_f_summary <- t_2_f %>%
+        mutate(bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE)) %>%
+        group_by(group, host) %>%
+        count(bin, .drop = FALSE)
+
+
+t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
+
+
+
+fig <- ggplot(t_2_f_summary, aes(x = host, y = n, fill = bin)) +
+  facet_wrap(~group, ncol = 1, scales = "free_y") +
+  geom_bar(stat = "identity", position = "dodge") +
+  facetted_pos_scales(
+    y = list(
+      group == "Highly-parallel" ~ scale_y_continuous(breaks = seq(0, 7, 1)),
+      group == "Line-specific"   ~ scale_y_continuous(breaks = seq(0, 60, 5))
+    )
+  ) +
+  labs(title = "", x = "\nHost", y = "Count", fill = "Fixation period") +
+  scale_fill_viridis_d(option = "C", direction = 1) +
+  custom_plot_theme() +
+  theme(axis.text.x = element_text(angle = 0))
+
+# save figure
+custom_plot_save(fig, "parallel_muts_over_time.pdf", height = 28, width = 14)
+
+
 ```

@@ -72,10 +72,11 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 
 
 
-```{r bertels cases}
+```{r arbitrary cases}
 
-cases <- c("9412_G_A", "9528_T_G", "618_G_A")
-case <- cases[3]
+bertels_cases <- c("9412_G_A", "9528_T_G", "618_G_A")
+case <- bertels_cases[3]
+case <- "484_T_C"
 
 fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
     geom_line() +
@@ -153,14 +154,10 @@ fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in
     facet_grid(rows = vars(exp_line), switch = "y") +
     scale_alpha_manual(values = c(0.1,1)) +
     scale_size_manual(values = c(1,1.5)) +
-    labs(title = "Linked variants", y = "Frequency \n", x = "\n Transfer") +
+    labs(title = "Linked variants", y = "Frequency", x = "\n Transfer") +
     scale_color_manual(values = color_mapping, name = "Variant") +
-    theme_bw() +
-    theme(plot.title = element_text(size = 50, hjust = 0.5),
-        axis.title = element_text(size = 45),
-        axis.text.x = element_text(size = 30, color = "black", angle = 90),
-        axis.text.y = element_text(size = 30, color = "black"),
-        strip.text.y = element_text(size = 35, angle=0),
+    custom_plot_theme(application = "publication") + 
+    theme(strip.text.y = element_text(size = 35, angle=0),
         legend.position = "none")
 
 
@@ -214,15 +211,11 @@ fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_mu
     geom_line() +
     facet_grid(rows = vars(exp_line), switch = "y") +
     scale_alpha_manual(values = c(0.1,1)) +
-    labs(title = paste0(case, " variant"), y = "Frequency \n", x = "\n Transfer") + #title = paste0(case, "\n")
+    labs(title = paste0(case, " variant"), y = "Frequency", x = "\n Transfer") + #title = paste0(case, "\n")
     scale_color_manual(values = color_palette) +
     scale_linewidth(range = c(1, 3)) +
-    theme_bw() +
-    theme(plot.title = element_text(size = 50, hjust = 0.5),
-        axis.title = element_text(size = 45),
-        axis.text.x = element_text(size = 30, color = "black", angle = 90),
-        axis.text.y = element_text(size = 30, color = "black"),
-        strip.text.y = element_text(size = 35, angle=0),
+    custom_plot_theme(application = "publication") +
+    theme(strip.text.y = element_text(size = 35, angle=0),
         legend.position="none")
 
 fig
@@ -231,6 +224,115 @@ fig
 # save figure
 custom_plot_save(fig, paste0("frequency_dynamics_",case, ".pdf"), height = 14, width = 14)
 
+# average time to fixation
+mean(t_2_f$time_to_fixation)
+mean(t_2_f$time_to_fixation[t_2_f$mut_info == case])
+t.test(t_2_f$time_to_fixation[t_2_f$mut_info != case], t_2_f$time_to_fixation[t_2_f$mut_info == case])
+
 ```
 
 
+```{r draft cases}
+
+
+
+
+variants_expiii_subset <- variants_expiii %>%
+                                filter(exp_line == "MT-2_1" & allele_freq >= 0.01) %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
+
+muts <- unique(variants_expiii_subset$mut_info)
+doubled <- c()
+for (mut in muts){
+    freq1 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 270]
+    freq2 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 310]
+    # skip if missing or empty
+    if (length(freq1) == 0 || length(freq2) == 0) next
+    if (is.na(freq1) || is.na(freq2)) next
+    
+    if (freq2 >= 2 * freq1) {
+        doubled <- append(doubled, mut)
+    }
+}
+
+length(doubled)
+fixed_muts <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.99 & variants_expiii_subset$passage == 500])
+sum(doubled %in% fixed_muts)
+doubled_fixed <- doubled[doubled %in% fixed_muts]
+
+View(variants_expiii_subset[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 270,])
+
+table(variants_expiii_subset$effect_simplified[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500])
+
+doubled_fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
+doubled_fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
+doubled_fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
+
+fix_count_table[names(fix_count_table) %in% doubled_fixed_syn]
+fix_count_table[names(fix_count_table) %in% doubled_fixed_nonsyn]
+fix_count_table[names(fix_count_table) %in% doubled_fixed_un]
+
+fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
+fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
+fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
+
+table(fix_count_table[names(fix_count_table) %in% fixed_syn])
+table(fix_count_table[names(fix_count_table) %in% fixed_nonsyn])
+table(fix_count_table[names(fix_count_table) %in% fixed_un])
+fisher.test(matrix(c(5, 2, 29, 7), byrow = TRUE, nrow = 2))
+fisher.test(matrix(c(52, 18, 11, 4), byrow = TRUE, nrow = 2))
+
+```
+
+
+```{r draft cases mt-2_2}
+
+
+
+
+variants_expiii_subset <- variants_expiii %>%
+                                filter(exp_line == "MT-2_2" & allele_freq >= 0.01) %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
+
+muts <- unique(variants_expiii_subset$mut_info)
+doubled <- c()
+for (mut in muts){
+    freq1 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 160]
+    freq2 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 200]
+    # skip if missing or empty
+    if (length(freq1) == 0 || length(freq2) == 0) next
+    if (is.na(freq1) || is.na(freq2)) next
+    
+    if (freq2 >= 2 * freq1) {
+        doubled <- append(doubled, mut)
+    }
+}
+
+length(doubled)
+fixed_muts <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.99 & variants_expiii_subset$passage == 300])
+sum(doubled %in% fixed_muts)
+doubled_fixed <- doubled[doubled %in% fixed_muts]
+
+View(variants_expiii_subset[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 270,])
+
+table(variants_expiii_subset$effect_simplified[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500])
+
+doubled_fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
+doubled_fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
+doubled_fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
+
+fix_count_table[names(fix_count_table) %in% doubled_fixed_syn]
+fix_count_table[names(fix_count_table) %in% doubled_fixed_nonsyn]
+fix_count_table[names(fix_count_table) %in% doubled_fixed_un]
+
+fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
+fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
+fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
+
+table(fix_count_table[names(fix_count_table) %in% fixed_syn])
+table(fix_count_table[names(fix_count_table) %in% fixed_nonsyn])
+table(fix_count_table[names(fix_count_table) %in% fixed_un])
+fisher.test(matrix(c(5, 2, 29, 7), byrow = TRUE, nrow = 2))
+fisher.test(matrix(c(52, 18, 11, 4), byrow = TRUE, nrow = 2))

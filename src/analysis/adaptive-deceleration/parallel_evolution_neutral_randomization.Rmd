@@ -74,7 +74,7 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 ```{r category thresholds}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Minority"){
     min_threshold <- 0.01

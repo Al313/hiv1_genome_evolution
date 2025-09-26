@@ -96,7 +96,7 @@ t_2_f <- data.frame()
 
 for (exp_line in exp_line_factor){
     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
     for (mut in fixed_muts){
         variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
@@ -279,7 +279,7 @@ t_2_f <- data.frame()
 
 for (exp_line in exp_line_factor){
     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
     for (mut in fixed_muts){
         variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
@@ -343,7 +343,7 @@ my_col_pal <- c(alpha("grey"), "green", "blue", "red")
 
 ```{r average time to fixation of neutral sequence simulations}
 bottleneck_freq <- 2
-sim_data <- readRDS(paste0(wd, "results/tables/misc/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.Rds"))
 
 sim_data$mut_info <- paste0(sim_data$pos, "_", sim_data$base_allele, "_", sim_data$alt_allele)
 

@@ -146,15 +146,16 @@ for (i in 1:nrow(df1)) {
 
 df1$line_label <- df1$exp_line  # or paste shape/linetype if different
 
-
+head(df1)
 fig <- df1 %>%
     ggplot(aes(x = relative_order, y = log2(init_rel_fit), color = exp_line)) +
     geom_point(aes(), size = 3) +
     geom_smooth(aes(group = exp_line), method = "lm", se = FALSE) +
-    labs(title = "", y = "log2(initial relative fitness)\n", x = "Relative order \n(No. of prior triple/quadruple-occurrence)", color = "Lineage", linetype = "Lineage") +
+    labs(title = "", y = "log2 (initial relative fitness)", x = "\nRelative order of fixation", color = "Line", linetype = "Line") +
     scale_color_manual(values = line_col_palette) +
     scale_x_continuous(breaks = seq(0,13, 1))+
-    custom_plot_theme(application = "publication") 
+    custom_plot_theme(application = "publication") +
+    theme(axis.text.x = element_text(angle = 0))
 
 # save figure
 custom_plot_save(fig, "triple_quadruple_init_rel_fitness_vs_relative_order.pdf", height = 14, width = 14)
@@ -166,12 +167,14 @@ custom_plot_save(fig, "triple_quadruple_init_rel_fitness_vs_relative_order.pdf",
 # Fit a linear model for each experimental line
 models <- df1 %>%
     group_by(exp_line) %>%
-    do(tidy(lm(log2(init_rel_fit) ~ relative_order, data = .)))
+    do(tidy(lm(init_rel_fit ~ relative_order, data = .)))
 
 # View the p-values
 models %>%
     filter(term == "relative_order") %>%
-    select(exp_line, estimate, std.error, statistic, p.value)
+    select(exp_line, estimate, std.error, statistic, p.value) %>%
+    ungroup() %>% 
+    mutate(p.adjusted = p.adjust(p.value, method = "BH"))
 
 ```
 
@@ -204,8 +207,9 @@ ggplot(merged, aes(x = init_rel_fit, y = predicted_prob)) +
 library(pscl)
 library(pROC)
 
+
 # Fit model per exp_line
-models_df <- merged %>%
+models_df <- merged[merged$Occurrence %in% c("Triple", "Quadruple", "NA")] %>%
     group_by(exp_line) %>%
     nest() %>%
     mutate(
@@ -223,9 +227,9 @@ fig <- ggplot(models_df, aes(x = init_rel_fit, y = predicted_prob, color = exp_l
     ) +  # shift each lineage slightly in y
     labs(
         title = "",
-        x = "Initial relative fitness",
-        y = "Probability of fixation\n",
-        color = "Lineage"
+        x = "\nInitial relative fitness",
+        y = "Probability of fixation",
+        color = "Line"
     ) +
     custom_plot_theme(application = "publication")
 
@@ -266,7 +270,7 @@ df2 <- merged[merged$Occurrence %in% c("Single"),]
 
 
 for (i in 1:nrow(df2)) {
-  df2$relative_order[i] <- nrow(df2[df2$exp_line == df2$exp_line[i] & df2$fixation < df2$fixation[i],])
+    df2$relative_order[i] <- nrow(df2[df2$exp_line == df2$exp_line[i] & df2$fixation < df2$fixation[i],])
 }
 
 fig <- df2 %>%
@@ -295,4 +299,13 @@ models %>%
 
 
 
+```
+
+```{r}
+
+mean(df2$init_rel_fit)
+mean(df1$init_rel_fit)
+mean(merged$init_rel_fit[merged$fixed == FALSE])
+
+wilcox.test(df1$init_rel_fit[df1$exp_line == "MT-2_1"], df2$init_rel_fit[df2$exp_line == "MT-2_1"])
 ```

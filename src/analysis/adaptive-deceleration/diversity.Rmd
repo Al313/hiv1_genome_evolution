@@ -195,10 +195,14 @@ shannon_measure_all <- rbind(shannon_measure, shannon_measure_sim)
 # visualize 
 fig <- ggplot(shannon_measure_all, aes(x = passage, y = mean_ent, color = exp_line, linetype = data)) +
   geom_line(linewidth=2) + 
-  labs(x="\nTransfer", y= "Mean entropy\n", color = "Lineage", linetype = "Dataset", title = "") +
+  labs(x="\nTransfer", y= "Mean entropy", color = "Line", linetype = "Dataset", title = "") +
   scale_color_manual(values = line_col_palette) +
   scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
-  custom_plot_theme(application = "publication")
+  custom_plot_theme(application = "publication") +
+  guides(
+    color = guide_legend(order = 1),     # Line legend first
+    linetype = guide_legend(order = 2)   # Dataset legend second
+  )
 
 
 # save figure

@@ -174,7 +174,7 @@ fig <- ggplot(df_jittered, aes(x = fixation, y = exp_line, group = mut_info3, co
     scale_color_manual(values = custom_colors) +
     scale_size_manual(values = c("1" = 0.5, "2" = 1, "3" = 3, "4" = 3)) +  # Adjust line thickness here
     labs(title = "Mutation Fixation Timeline",
-        x = "\nFixation transfer", y = "Lineage\n", color = "Fixed variant") +
+        x = "\nTransfer of fixation", y = "Line\n", color = "Fixed mutation") +
     xlim(0, 500) +
     custom_plot_theme(application = "publication", scale = 1.8) +
     guides(
@@ -184,5 +184,32 @@ fig <- ggplot(df_jittered, aes(x = fixation, y = exp_line, group = mut_info3, co
 
 # save figure
 custom_plot_save(fig, "fixation_timeline.pdf", height = 21, width = 42)
+
+```
+
+```{r}
+
+
+df_jittered[df_jittered$mut_info == "9412_G_A",]
+df_jittered[df_jittered$mut_info == "9416_T_C",]
+
+variants_expiii[variants_expiii$exp_line == "MT-4_2" & variants_expiii$mut_info == "9412_G_A" & variants_expiii$passage == 70,]
+variants_expiii[variants_expiii$exp_line == "MT-4_2" & variants_expiii$mut_info == "9416_T_C" & variants_expiii$passage == 70,]
+
+
+df_jittered[df_jittered$mut_info == "2058_G_A",]
+
+bam <- c()
+i <- 0
+for (mut in unique(df_jittered$mut_info[df_jittered$Occurrence %in% 3])){
+    i <- i + 1
+    print(paste(as.character(df_jittered$exp_line[df_jittered$mut_info == mut]), collapse = ", "))
+    bam <- append(bam, mut)
+    names(bam)[i] <- paste(as.character(df_jittered$exp_line[df_jittered$mut_info == mut]), collapse = ", ")
+}
+
+
+table(names(bam))
+View(df_jittered[df_jittered$mut_info %in% as.vector(bam[names(bam) == "MT-2_2, MT-4_1, MT-4_2"]),])
 
 ```
