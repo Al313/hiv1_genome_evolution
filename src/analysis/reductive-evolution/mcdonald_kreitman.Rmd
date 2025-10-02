@@ -66,20 +66,14 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 ```{r McDonald-Kreitman test}
 
 
-
 df <- data.frame()
-genes <- c("gag", "pol","env", "nef")
 
-psg <- 130
-expline <- ""
+
 for (expline in exp_line_factor){
-    print(expline)
-    for (psg in seq(10,700,10)){
-        print(psg)
-        
+    for (gene in c("gag", "pol","env", "nef")){
         variants_expiii_subset <- variants_expiii %>% 
             mutate(passage = as.numeric(as.character(passage))) %>%
-            filter(exp_line == expline & passage == psg & feature %in% genes)
+            filter(exp_line == expline & passage == end_psg & feature == gene)
 
 
         P_S <- nrow(variants_expiii_subset %>% filter(effect_simplified == "S" & allele_freq >= 0.05 & allele_freq < 0.99) %>% distinct(mut_info))
@@ -99,28 +93,11 @@ for (expline in exp_line_factor){
         # Perform Fisher's Exact Test
         MK_result <- fisher.test(MK_table)
         MK_result$p.value
-        df <- rbind(df, c(expline, psg, P_S, D_S, P_N, D_N, NI, MK_result$p.value))
-    
-        
+        df <- rbind(df, c(expline, gene, P_S, D_S, P_N, D_N, NI, MK_result$p.value))
     }
+    colnames(df) <- c("exp_line", "gene", "P_S", "D_S", "P_N", "D_N", "NI", "p_value")
 }
 
-colnames(df) <- c("exp_line", "passage", "P_S", "D_S", "P_N", "D_N", "NI", "p_value")
-df %<>% mutate_at(2:8, as.numeric)
-df$NI <- as.numeric(as.character(df$NI))
-df$passage <- as.integer(as.character(df$passage))
-str(df)
 
-ggplot(df, aes(x=passage, y=(D_N/D_S)/(P_N/P_S), color=exp_line)) +
-    geom_line() +
-    geom_point() +
-    scale_y_log10() +
-    labs(title="McDonald-Kreitman Neutrality Index over Passages",
-         x="Passage",
-         y="Neutrality Index (NI)") +
-    theme_minimal() +
-    theme(legend.title=element_blank())
-
-df[df$passage == 690,]
 
 ```

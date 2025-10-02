@@ -90,7 +90,7 @@ if (category == "Minority"){
 
 ```{r calculate time to fixation}
 
-# record at what passages the fixed mutations first appeared and reached fixation (continuously) (AF above 0.99)
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
 t_2_f <- data.frame()
 
 
@@ -101,19 +101,49 @@ for (exp_line in exp_line_factor){
         variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
         appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
+        disappearance_vec <- as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq < 0.5]))
+        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
         translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
-        t_2_f <- rbind(t_2_f, c(exp_line, mut, translational_impact, appearance, fixation, fixation-appearance))
+        t_2_f <- rbind(t_2_f, c(exp_line, mut, translational_impact, appearance, fixation, disappearance, fixation-appearance))
     }
 }
 
 
 # set column names and right data types
-t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "time_to_fixation")) %>% 
-        mutate_at(4:6, as.integer) %>%
+t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
+        mutate_at(c(4,5,7), as.integer) %>%
         mutate(exp_line = factor(exp_line, levels = exp_line_factor),
-        mut_info = paste(exp_line, mut_info, sep = "_"),
         host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"),
         effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+t_2_f[!is.na(t_2_f$disappearance),]
+aa <- t_2_f$mut_info[!is.na(t_2_f$disappearance)]
+
+# average time to fixation for fixated mutations based on how many times they are repeated
+
+fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
+
+
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+sum(fix_count_table_list[[4]]) + sum(fix_count_table_list[[3]]) + sum(fix_count_table_list[[2]]) + sum(fix_count_table_list[[1]])
+
+
+
+
+t_2_f$Occurrence <- NA
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["1"]])] <- "Single"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["2"]])] <- "Double"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["3"]])] <- "Triple"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["4"]])] <- "Quadruple"
+t_2_f <- t_2_f[!is.na(t_2_f$Occurrence),]
+t_2_f$Occurrence <- factor(t_2_f$Occurrence, levels = c("Single", "Double", "Triple", "Quadruple"))
+
+saveRDS(t_2_f, paste0(wd, "results/tables/time_to_fixation.Rds"))
 
 ```
 
@@ -272,61 +302,6 @@ custom_plot_save(fig, "rapidly_fixating_variants_over_time.pdf", height = 14, wi
 
 ```{r calculate fixation time based on number of recurrence}
 
-## Method 2
-# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
-t_2_f <- data.frame()
-
-
-for (exp_line in exp_line_factor){
-    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
-    for (mut in fixed_muts){
-        variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
-        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
-        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
-        disappearance_vec <- as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq < 0.5]))
-        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
-        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
-        t_2_f <- rbind(t_2_f, c(exp_line, mut, translational_impact, appearance, fixation, disappearance, fixation-appearance))
-    }
-}
-
-
-# set column names and right data types
-t_2_f %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
-        mutate_at(c(4,5,7), as.integer) %>%
-        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
-        effect_simplified = factor(effect_simplified, levels = translational_impacts))
-
-t_2_f[!is.na(t_2_f$disappearance),]
-aa <- t_2_f$mut_info[!is.na(t_2_f$disappearance)]
-
-# average time to fixation for fixated mutations based on how many times they are repeated
-
-fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
-fix_count_table[aa]
-
-
-
-fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
-    "3" = fix_count_table[fix_count_table==3],
-    "2" = fix_count_table[fix_count_table==2],
-    "1" = fix_count_table[fix_count_table==1])
-
-sum(fix_count_table_list[[4]]) + sum(fix_count_table_list[[3]]) + sum(fix_count_table_list[[2]]) + sum(fix_count_table_list[[1]])
-
-
-
-
-t_2_f$Occurrence <- NA
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["1"]])] <- "Single"
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["2"]])] <- "Double"
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["3"]])] <- "Triple"
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["4"]])] <- "Quadruple"
-t_2_f <- t_2_f[!is.na(t_2_f$Occurrence),]
-t_2_f$Occurrence <- factor(t_2_f$Occurrence, levels = c("Single", "Double", "Triple", "Quadruple"))
-
-
 comparisons <- list(
   c("Quadruple", "Triple"),
   c("Quadruple", "Double"),
@@ -406,7 +381,7 @@ t_2_f <- data.frame()
 
 for (exp_line in exp_line_factor){
     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99])
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
     for (mut in fixed_muts){
         variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
         fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))

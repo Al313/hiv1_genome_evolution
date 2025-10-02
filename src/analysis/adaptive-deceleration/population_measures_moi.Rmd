@@ -38,6 +38,17 @@ library(tidyr)
 
 `%notin%` <- Negate(`%in%`)
 
+# determine the server path
+
+if (file.exists("/home/amovas/")){
+  print("Remote HPC Connection!")
+  wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+  print("Local PC Connection!")
+  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
 # Visual settings
 
 source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
@@ -82,15 +93,6 @@ moi_cal <- function(tcid50, inoculum_volume=0.002, cell_number=400000) {
 
 ```{r tcid data}
 
-# determine the server path
-
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
-} else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-}
 
 
 
@@ -310,7 +312,7 @@ scale_factor <- 400000
 result$btk_size <- result$MOI*scale_factor
 
 # save results for estimating transfer_size in simulation of neutral sequence evolution
-# saveRDS(result, file = paste0(wd, "results/tables/moi_cleaned.rds"))
+# saveRDS(result, file = paste0(wd, "results/tables/moi_cleaned.Rds"))
 
 
 moi__fig <- result %>% ggplot(aes(x = passage)) +
@@ -320,7 +322,7 @@ moi__fig <- result %>% ggplot(aes(x = passage)) +
                 geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
                 scale_y_continuous(
                 sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per inoculum")) +
-                labs(title = "MOI\n", x = "\nTransfer", y = "Log10(MOI)\n", color = "Lineage") +
+                labs(title = "MOI\n", x = "\nTransfer", y = "Log10 (MOI)", color = "Line") +
                 scale_color_manual(values = line_col_palette) +
                 custom_plot_theme(application = "publication")
 

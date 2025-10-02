@@ -48,7 +48,7 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-source(paste0(wd, "src/analysis/strict-btk/readin_data.r"))
+source(paste0(wd, "src/analysis/strict-btk/readin_data.R"))
 
 ```
 

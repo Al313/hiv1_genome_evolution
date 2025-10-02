@@ -162,7 +162,7 @@ fig <- all_ld_summary %>% ggplot(aes(x = psg, y = mean_r2, color = as.factor(exp
     geom_point() +
     theme_minimal() +
     labs(x = "\nTransfer",
-        y = expression(Mean(r^2)),
+        y = expression("Mean "~(r^2)),
         title = "Mean LD across PSGs and Experimental Lines",
         color = "Line") +
     scale_color_manual(labels = exp_line_factor, values = line_col_palette) +

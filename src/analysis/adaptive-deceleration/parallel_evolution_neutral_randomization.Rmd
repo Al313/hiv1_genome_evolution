@@ -251,7 +251,7 @@ for (k in 1:4){
             labs(title = paste0("Pairwise Overlap Among ", category, " Variants \nat Passage #", end_psg)) +
             scale_fill_gradient2(low = "white", high = "red", 
             midpoint = 1, limit = c(0,100), space = "Lab", 
-            name="Shared(%)") +
+            name="Parallel (%)") +
             custom_plot_theme() +
             theme(axis.title = element_blank())+
             coord_fixed()
@@ -273,7 +273,7 @@ for (k in 1:4){
     test_res <- t.test(obs, exp)
 
 
-    cohen_d <- cohen.d(obs, exp, paired=TRUE)
+    cohen_d <- cohen.d(obs, exp)
     ratio <- mean(obs)/ mean(exp)
 
 
@@ -302,11 +302,14 @@ overall_df %<>% mutate_at(3:7, as.numeric)
 fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
     geom_col(position = "dodge") +
     geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = position_dodge(width = 0.9),width = 0.2) +
-    labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Shared(%)\n", x = "\nTranslational impact") +
+    labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Parallel (%)", x = "\nTranslational impact") +
+    scale_x_discrete(
+            labels = c("All" = "All", "Syn" = "Synonymous", "Non_Syn" = "Nonsynonymous")
+    ) +
     scale_fill_manual(name = "Dataset",  # Change the legend title here
         values = c("#038331", "#ffdf50"),
         labels = c("Observed", "Randomized"))+
-    custom_plot_theme()
+    custom_plot_theme(application = "publication")
 
 # save figure
 custom_plot_save(fig, "parallel_summary_barplot_translational_impact.pdf", height = 14, width = 14)

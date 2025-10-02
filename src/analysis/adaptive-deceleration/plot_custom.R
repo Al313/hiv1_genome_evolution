@@ -45,6 +45,7 @@ custom_plot_theme <- function(application = "publication", scale = 1) {
         axis.text.x = element_text(size = size_set[[application]]["axis_text"], color = "black", angle = 90),
         axis.text.y = element_text(size = size_set[[application]]["axis_text"], color = "black"),
         strip.text.x = element_text(size = 50, angle=0),
+        strip.text.y = element_text(size = 50, angle=270),
         legend.title = element_text(size = size_set[[application]]["legend_title"]),
         legend.text = element_text(size = size_set[[application]]["legend_text"])
     )
@@ -61,7 +62,7 @@ custom_plot_save <- function(fig, name, width = 14, height = 14) {
     print(fig)
     dev.off()
     ## 2
-    fig_dir2 <- "/Users/alimos313/Documents/studies/phd/research/manuscripts/adaptive-deceleration/figures/"
+    fig_dir2 <- "/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/figures/"
     pdf(file = paste0(fig_dir2, name), height = height, width = width)
     print(fig)
     dev.off()

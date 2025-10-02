@@ -229,6 +229,8 @@ df_long[df_long$group2 == "Randomized" & df_long$shared_all == max(df_long$share
 
 library(ggh4x)
 
+t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
+
 t_2_f <- t_2_f %>% mutate(host = case_when(exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2", exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"),
                         group = case_when(Occurrence %in% c("Single") ~ "Line-specific", Occurrence %in% c("Triple", "Quadruple") ~ "Highly-parallel")) %>%
                         filter(!is.na(group))
@@ -238,7 +240,13 @@ bins <- seq(0,500, 100)
 nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel" & t_2_f$fixation <= 200,])/
 nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel",])
 
+nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel" & t_2_f$fixation >= 400,])/
+nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel",])
+
 nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel" & t_2_f$fixation <= 200,])/
+nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel",])
+
+nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel" & t_2_f$fixation >= 400,])/
 nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel",])
 
 
@@ -252,19 +260,36 @@ t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
 
 
 
-fig <- ggplot(t_2_f_summary, aes(x = host, y = n, fill = bin)) +
-  facet_wrap(~group, ncol = 1, scales = "free_y") +
-  geom_bar(stat = "identity", position = "dodge") +
-  facetted_pos_scales(
-    y = list(
-      group == "Highly-parallel" ~ scale_y_continuous(breaks = seq(0, 7, 1)),
-      group == "Line-specific"   ~ scale_y_continuous(breaks = seq(0, 60, 5))
-    )
-  ) +
-  labs(title = "", x = "\nHost", y = "Count", fill = "Fixation period") +
-  scale_fill_viridis_d(option = "C", direction = 1) +
-  custom_plot_theme() +
-  theme(axis.text.x = element_text(angle = 0))
+# fig <- ggplot(t_2_f_summary, aes(x = host, y = n, fill = bin)) +
+#     facet_wrap(~group, ncol = 1, scales = "free_y") +
+#     geom_bar(stat = "identity", position = "dodge", color = "white") +
+#     facetted_pos_scales(
+#         y = list(
+#         group == "Highly-parallel" ~ scale_y_continuous(breaks = seq(0, 7, 1)),
+#         group == "Line-specific"   ~ scale_y_continuous(breaks = seq(0, 60, 5))
+#         )
+#     ) +
+#     labs(title = "", x = "\nHost", y = "Count", fill = "Fixation period") +
+#     scale_fill_manual(values = rep("#737373", 5)) +
+#     custom_plot_theme() +
+#     theme(axis.text.x = element_text(angle = 90),
+#     legend.position = "none")
+
+fig <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = host)) +
+    facet_grid(group ~ host, scales = "free_y") +
+    geom_bar(stat = "identity", position = "dodge", color = "white") +
+    facetted_pos_scales(
+        y = list(
+        group == "Highly-parallel" ~ scale_y_continuous(breaks = seq(0, 7, 1)),
+        group == "Line-specific"   ~ scale_y_continuous(breaks = seq(0, 60, 5))
+        )
+    ) +
+    scale_fill_manual(values = c("#ff8b08", "#00bbff")
+    ) +
+    labs(title = "", x = "\nFixation period", y = "Count") +
+    custom_plot_theme() +
+    theme(axis.text.x = element_text(angle = 90),
+        legend.position = "none")
 
 # save figure
 custom_plot_save(fig, "parallel_muts_over_time.pdf", height = 28, width = 14)

@@ -261,4 +261,11 @@ custom_plot_save(fig, "environment_randomized_parallel.pdf", height = 14, width 
 
 ```
 
+```{r in-text numbers}
+d <- as.matrix(table(variants_expiii$exp_line[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg], variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg]))
+
+sum(colSums(d[1:2,]) == 2)
+
+
+```
 
