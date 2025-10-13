@@ -38,21 +38,31 @@ library("stringr")
 library("magrittr")
 library("rstatix")
 library("effsize")
+library(lme4)
+library(MASS)
+library(ggh4x)
+
 
 
 ```
 
 ```{r read-in variant data}
 
-# load data
+# determine the server path
+if (file.exists("/home/amovas/")){
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
 
+# load data
 source(paste0(wd, "src/analysis/adaptive-deceleration/readin_data.R"))
 
 ```
 
 ```{r load visualization settings}
-# Visual settings
 
+# Visual settings
 source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 
 
@@ -62,7 +72,7 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 ```{r category thresholds}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed"
 
 if (category == "Minority"){
     min_threshold <- 0.01
@@ -227,7 +237,9 @@ df_long[df_long$group2 == "Randomized" & df_long$shared_all == max(df_long$share
 ```{r}
 
 
-library(ggh4x)
+
+t_2_f %>% filter(group == "Highly-parallel") %>% dplyr::select(c(mut_info, effect_simplified, Occurrence)) %>% distinct()
+
 
 t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
 
@@ -251,48 +263,414 @@ nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel",])
 
 
 t_2_f_summary <- t_2_f %>%
-        mutate(bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE)) %>%
-        group_by(group, host) %>%
+        mutate(group = factor(group, levels = c("Line-specific", "Highly-parallel")), 
+            bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE)) %>%
+        group_by(group, exp_line, host) %>%
         count(bin, .drop = FALSE)
 
 
 t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
+```
+
+
+# per host
+Do we observe a significantly different time trend between line-specific and highly-parallel mutations in each host?
+- choice #1: time trend -> treat time (bin) as continuous variable (bin midpoint, scaled)
+- choice #2: time trend BETWEEN mutation groups -> interaction term between time and mutation group
+- choice #3: in each host -> perform two separate tests for each host
+- choice #4: do not treat each replicate as a random effect
 
 
 
-# fig <- ggplot(t_2_f_summary, aes(x = host, y = n, fill = bin)) +
-#     facet_wrap(~group, ncol = 1, scales = "free_y") +
-#     geom_bar(stat = "identity", position = "dodge", color = "white") +
-#     facetted_pos_scales(
-#         y = list(
-#         group == "Highly-parallel" ~ scale_y_continuous(breaks = seq(0, 7, 1)),
-#         group == "Line-specific"   ~ scale_y_continuous(breaks = seq(0, 60, 5))
-#         )
-#     ) +
-#     labs(title = "", x = "\nHost", y = "Count", fill = "Fixation period") +
-#     scale_fill_manual(values = rep("#737373", 5)) +
-#     custom_plot_theme() +
-#     theme(axis.text.x = element_text(angle = 90),
-#     legend.position = "none")
 
-fig <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = host)) +
+```{r}
+
+
+
+# # generalized linear mixed effect model with exp_line as random effect with poisson distribution
+
+# model_trend1 <- glmer(
+#     n ~ bin_mid_scaled * group + (1 | exp_line),
+#     data = t_2_f_summary[t_2_f_summary$host == "MT-2", ],
+#     family = poisson(link = "log")
+# )
+
+# summary(model_trend1)
+# Anova(model_trend1, type = 3)
+
+
+# model_trend2 <- glmer(
+#     n ~ bin_mid_scaled * group + (1 | exp_line),
+#     data = t_2_f_summary[t_2_f_summary$host == "MT-4", ],
+#     family = poisson(link = "log")
+# )
+
+# summary(model_trend2)
+# Anova(model_trend2, type = 3)
+
+# # generalized linear mixed effect model with host as random effect with NB distribution
+# model_trend_nb1 <- glmer.nb(
+#     n ~ bin_mid_scaled * group + (1 | exp_line),
+#     data = t_2_f_summary[t_2_f_summary$host == "MT-2", ],
+# )
+
+# summary(model_trend_nb1)
+# Anova(model_trend_nb1, type = 3)
+
+
+# model_trend_nb2 <- glmer.nb(
+#     n ~ bin_mid_scaled * group + (1 | exp_line),
+#     data = t_2_f_summary[t_2_f_summary$host == "MT-4", ],
+# )
+
+# summary(model_trend_nb2)
+# Anova(model_trend_nb2, type = 3)
+
+# ## choice between poisson and NB
+
+# overdisp_fun <- function(model) {
+#   rdf <- df.residual(model)
+#   rp <- residuals(model, type = "pearson")
+#   Pearson.chisq <- sum(rp^2)
+#   prat <- Pearson.chisq / rdf
+#   pval <- pchisq(Pearson.chisq, df = rdf, lower.tail = FALSE)
+#   c(chisq = Pearson.chisq, ratio = prat, rdf = rdf, p = pval)
+# }
+
+# overdisp_fun(model_trend1)
+```
+
+
+## Comparing your two models
+
+for MT-2 model: negative binomial model better than Poisson (less AIC 112 compared to 122, finite dispersion parameter)
+for MT-4 model: negative binomial model worse than Poisson (higher AIC 86 compared to 84, infinite dispersion parameter)
+Verdict: use Poisson because p.val from significance tests are generally lower, tho in both case significant
+
+don’t treat each replicate as a random effect (only 2 levels, 
+variance almost estimated as 0, AIC slightly better in model without random effect 
+110 compared to 112)
+
+```{r}
+
+# treat bin as continuous (time trend test) and scale it for numerical stability improves
+t_2_f_summary <- t_2_f_summary %>%
+    mutate(bin_mid = as.numeric(sub("\\D*(\\d+),.*", "\\1", bin)) + 50) %>%
+    mutate(bin_mid_scaled = scale(bin_mid, center = TRUE, scale = TRUE))
+
+
+model_trend1 <- glmer.nb(
+    n ~ bin_mid_scaled * group + (1 | exp_line),
+    data = t_2_f_summary[t_2_f_summary$host == "MT-2", ]
+)
+
+summary(model_trend1)
+
+
+
+model_trend2 <- glmer.nb(
+    n ~ bin_mid_scaled * group + (1 | exp_line),
+    data = t_2_f_summary[t_2_f_summary$host == "MT-4", ]
+)
+
+summary(model_trend2)
+
+
+
+```
+
+```{r}
+
+# Load required packages
+library(lme4)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+# Close any open graphics devices first
+while (!is.null(dev.list())) {
+  dev.off()
+}
+# Function to extract model information
+extract_model_info <- function(model, model_name) {
+  
+  # Get fixed effects
+  fixed_effects <- summary(model)$coefficients
+  
+  # Create data frame for fixed effects
+  fixed_df <- data.frame(
+    Model = model_name,
+    Term = rownames(fixed_effects),
+    Estimate = sprintf("%.4f", fixed_effects[, "Estimate"]),
+    SE = sprintf("%.4f", fixed_effects[, "Std. Error"]),
+    z_value = sprintf("%.3f", fixed_effects[, "z value"]),
+    p_value = format.pval(fixed_effects[, "Pr(>|z|)"], digits = 3, eps = 0.001),
+    Sig = case_when(
+      fixed_effects[, "Pr(>|z|)"] < 0.001 ~ "***",
+      fixed_effects[, "Pr(>|z|)"] < 0.01 ~ "**",
+      fixed_effects[, "Pr(>|z|)"] < 0.05 ~ "*",
+      fixed_effects[, "Pr(>|z|)"] < 0.1 ~ ".",
+      TRUE ~ ""
+    ),
+    stringsAsFactors = FALSE
+  )
+  
+  return(fixed_df)
+}
+
+# Function to extract model fit statistics
+extract_fit_stats <- function(model, model_name) {
+  summ <- summary(model)
+  
+  data.frame(
+    Model = model_name,
+    AIC = sprintf("%.1f", AIC(model)),
+    BIC = sprintf("%.1f", BIC(model)),
+    logLik = sprintf("%.1f", logLik(model)),
+    Deviance = sprintf("%.1f", deviance(model)),
+    N_obs = nobs(model),
+    N_groups = summary(model)$ngrps,
+    Theta = sprintf("%.4f", getME(model, "glmer.nb.theta")),
+    stringsAsFactors = FALSE
+  )
+}
+
+# Assuming your models are named model_trend1 and model_trend2
+# Extract information from both models
+fixed_effects_comparison <- bind_rows(
+  extract_model_info(model_trend1, "MT-2"),
+  extract_model_info(model_trend2, "MT-4")
+)
+
+fit_stats_comparison <- bind_rows(
+  extract_fit_stats(model_trend1, "MT-2"),
+  extract_fit_stats(model_trend2, "MT-4")
+)
+
+# Create the comparison tables
+cat("\n=== FIXED EFFECTS COMPARISON ===\n\n")
+
+fixed_table <- fixed_effects_comparison %>%
+  kable("latex", 
+        booktabs = TRUE,
+        caption = "Fixed Effects Comparison: MT-2 vs MT-4 Models",
+        col.names = c("Model", "Term", "Estimate", "SE", "z-value", "p-value", "Sig."),
+        align = c("l", "l", "r", "r", "r", "r", "c")) %>%
+  kable_styling(latex_options = c("striped", "hold_position", "scale_down"),
+                font_size = 10) %>%
+  column_spec(1, bold = TRUE) %>%
+  pack_rows("MT-2 Model", 1, 4) %>%
+  pack_rows("MT-4 Model", 5, 8) %>%
+  footnote(general = "Significance codes: *** p<0.001, ** p<0.01, * p<0.05, . p<0.1",
+           general_title = "",
+           footnote_as_chunk = TRUE)
+
+cat("\n=== MODEL FIT STATISTICS ===\n\n")
+
+fit_table <- fit_stats_comparison %>%
+  kable("latex",
+        booktabs = TRUE,
+        caption = "Model Fit Statistics Comparison",
+        col.names = c("Model", "AIC", "BIC", "logLik", "Deviance", "N obs", "N groups", "Theta"),
+        align = c("l", "r", "r", "r", "r", "r", "r", "r")) %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                font_size = 10) %>%
+  column_spec(1, bold = TRUE)
+
+# Save to PDF
+pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/reports/glmer_model_comparison.pdf", width = 11, height = 8.5)
+
+# Create a more detailed comparison table
+par(mar = c(1, 1, 1, 1))
+plot.new()
+text(0.5, 0.95, "GLMER Model Comparison: MT-2 vs MT-4", 
+     cex = 1.8, font = 2)
+text(0.5, 0.90, "Negative Binomial Mixed Effects Models", 
+     cex = 1.2, font = 3)
+
+# Create text summary
+mt2_text <- paste0(
+  "MT-2 Model:\n",
+  "Formula: n ~ bin_mid_scaled * group + (1 | exp_line)\n",
+  "Family: Negative Binomial (θ = 7.16)\n",
+  "AIC: 112.0, BIC: 118.0\n",
+  "Observations: 20, Groups: 2\n",
+  "Convergence: OK (boundary/singular fit)\n\n",
+  "Fixed Effects:\n",
+  "  Intercept: 2.79 (SE=0.14, p<0.001***)\n",
+  "  bin_mid_scaled: 0.45 (SE=0.18, p=0.013*)\n",
+  "  groupHighly-parallel: -2.22 (SE=0.31, p<0.001***)\n",
+  "  Interaction: -1.00 (SE=0.36, p=0.005**)"
+)
+
+mt4_text <- paste0(
+  "MT-4 Model:\n",
+  "Formula: n ~ bin_mid_scaled * group + (1 | exp_line)\n",
+  "Family: Negative Binomial (θ = 106169.4)\n",
+  "AIC: 86.1, BIC: 92.1\n",
+  "Observations: 20, Groups: 2\n",
+  "Convergence: OK (boundary/singular fit, iteration limit)\n\n",
+  "Fixed Effects:\n",
+  "  Intercept: 1.43 (SE=0.17, p<0.001***)\n",
+  "  bin_mid_scaled: 0.64 (SE=0.18, p<0.001***)\n",
+  "  groupHighly-parallel: -0.75 (SE=0.29, p=0.009**)\n",
+  "  Interaction: -1.16 (SE=0.31, p<0.001***)"
+)
+
+text(0.05, 0.75, mt2_text, adj = c(0, 1), cex = 0.9, family = "mono")
+text(0.05, 0.35, mt4_text, adj = c(0, 1), cex = 0.9, family = "mono")
+
+text(0.5, 0.05, "Note: Both models show boundary/singular fits (random effect variance near zero)", 
+     cex = 0.8, font = 3, col = "red")
+
+dev.off()
+
+cat("\nPDF saved as: glmer_model_comparison.pdf\n")
+
+# Alternative: Save as a cleaner table using gridExtra
+library(gridExtra)
+library(grid)
+
+pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/reports/glmer_comparison_detailed.pdf", width = 11, height = 8.5)
+
+# Title
+grid.text("GLMER Model Summary for MT-2 and MT-4", 
+          x = 0.5, y = 0.95, 
+          gp = gpar(fontsize = 18, fontface = "bold"))
+
+grid.text("Negative Binomial Mixed Effects Models", 
+          x = 0.5, y = 0.91, 
+          gp = gpar(fontsize = 12, fontface = "italic"))
+
+# Fixed effects table
+pushViewport(viewport(x = 0.5, y = 0.60, width = 0.9, height = 0.5))
+grid.table(fixed_effects_comparison, rows = NULL)
+popViewport()
+
+# Fit statistics table
+pushViewport(viewport(x = 0.5, y = 0.15, width = 0.9, height = 0.2))
+grid.table(fit_stats_comparison, rows = NULL)
+popViewport()
+
+# Footer note
+grid.text("Note: Both models exhibit boundary/singular fits (random effect variance ≈ 0)", 
+          x = 0.5, y = 0.02, 
+          gp = gpar(fontsize = 9, fontface = "italic", col = "red"))
+
+dev.off()
+
+cat("\nDetailed PDF saved as: glmer_comparison_detailed.pdf\n")
+
+# Print tables to console
+print("=== FIXED EFFECTS ===")
+print(fixed_effects_comparison)
+print("\n=== FIT STATISTICS ===")
+print(fit_stats_comparison)
+
+```
+
+
+
+```{r}
+
+# Get predictions with standard errors
+pred_mt2 <- predict(model_trend1, 
+                    newdata = t_2_f_summary[t_2_f_summary$host == "MT-2", ],
+                    type = "link", se.fit = TRUE)
+
+pred_mt4 <- predict(model_trend2, 
+                    newdata = t_2_f_summary[t_2_f_summary$host == "MT-4", ],
+                    type = "link", se.fit = TRUE)
+
+# Add to dataframe
+t_2_f_summary$fit_link <- NA
+t_2_f_summary$se_link <- NA
+
+t_2_f_summary$fit_link[t_2_f_summary$host == "MT-2"] <- pred_mt2$fit
+t_2_f_summary$se_link[t_2_f_summary$host == "MT-2"] <- pred_mt2$se.fit
+
+t_2_f_summary$fit_link[t_2_f_summary$host == "MT-4"] <- pred_mt4$fit
+t_2_f_summary$se_link[t_2_f_summary$host == "MT-4"] <- pred_mt4$se.fit
+
+# Compute 95% CI on the response scale
+t_2_f_summary <- t_2_f_summary %>%
+    mutate(pred = exp(fit_link),
+         pred_low = exp(fit_link - 1.96 * se_link),
+         pred_high = exp(fit_link + 1.96 * se_link))
+
+# Plot observed bars + predicted trends
+fig_pred <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = exp_line)) +
     facet_grid(group ~ host, scales = "free_y") +
-    geom_bar(stat = "identity", position = "dodge", color = "white") +
+    geom_bar(stat = "identity", color = "white") +
+    geom_ribbon(aes(ymin = pred_low, ymax = pred_high, fill = "grey", group = group),
+            alpha = 0.5) +
+    geom_line(aes(y = pred, color = host, group = group), size = 3) +
+    # Dashed lines for confidence intervals
+    geom_line(aes(y = pred_low, color = host, group = group),
+                linetype = "dashed", size = 1.5) +
+    geom_line(aes(y = pred_high, color = host, group = group),
+                linetype = "dashed", size = 1.5) +
     facetted_pos_scales(
         y = list(
         group == "Highly-parallel" ~ scale_y_continuous(breaks = seq(0, 7, 1)),
         group == "Line-specific"   ~ scale_y_continuous(breaks = seq(0, 60, 5))
         )
     ) +
-    scale_fill_manual(values = c("#ff8b08", "#00bbff")
-    ) +
+    scale_fill_manual(labels = exp_line_factor, values = line_col_palette) +
+    scale_color_manual(values = c("MT-2" = "#E69F00", "MT-4" = "#56B4E9")) +
+    labs(x = "\nFixation period", y = "Count", title = "Observed and predicted fixation counts") +
+    custom_plot_theme() +
+    theme(axis.text.x = element_text(angle = 90),
+            legend.position = "none")
+
+# save figure
+custom_plot_save(fig_pred, "highly-parallel_vs_line-specific_time-trend_glm.pdf", height = 28, width = 14)
+
+```
+
+# per whole experiment
+
+Do we observe a significantly different time trend between line-specific and highly-parallel mutations in the experiment?
+- choice #1: ditto
+- choice #2: ditto
+- choice #3: in the experiment -> perform a single test for whole experiment
+- choice #4: treat each experiment line as a random effect 
+
+```{r}
+
+
+fig <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = exp_line)) +
+    facet_grid(~group, scales = "free_y") +
+    geom_bar(stat = "identity", position = "stack", color = "white") +
+    scale_fill_manual(labels = exp_line_factor, values = line_col_palette) +
     labs(title = "", x = "\nFixation period", y = "Count") +
     custom_plot_theme() +
     theme(axis.text.x = element_text(angle = 90),
         legend.position = "none")
 
-# save figure
-custom_plot_save(fig, "parallel_muts_over_time.pdf", height = 28, width = 14)
 
 
 ```
+
+```{r}
+
+
+
+# generalized linear mixed effect model with host as random effect with NB distribution
+model_trend_nb22 <- glmer.nb(
+    n ~ bin_mid_scaled * group + (1 | exp_line),
+    data = t_2_f_summary)
+
+summary(model_trend_nb22)
+
+ggplot(t_2_f_summary,
+        aes(x = bin_mid, y = n, color = group)) +
+    geom_point() +
+    geom_smooth(method = "glm", method.args = list(family = "poisson"), se = TRUE) +
+    theme_bw()
+
+```
+
+
+
+
+

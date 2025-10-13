@@ -1,0 +1,146 @@
+---
+title:  
+    "Evolutionary pressure per gene "
+date: 
+    "May 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library("ggplot2")
+library("ggpubr")
+library("plotly")
+library("hrbrthemes")
+library("DT")
+library("dplyr")
+library("zoo") # estimate na's if any 
+library("tidyr")
+library("Biostrings")
+library("stringr")
+library("magrittr")
+library("rstatix")
+library("RColorBrewer")
+
+
+```
+
+
+
+```{r read-in variant data}
+
+# set working directory
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
+
+variants_ann_expiii <- variants_ann_expiii %>% mutate(passage = as.numeric(as.character(passage)))
+end_psg <- 500
+
+```
+
+```{r load visualization settings}
+
+# load visual settings
+source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
+
+
+```
+
+
+```{r other genes}
+unique(variants_ann_expiii$feature)
+variants_ann_expiii[variants_ann_expiii$feature %in% c("gag", "pol", "tat", "rav", "vpu", "env", "vif") & 
+    variants_ann_expiii$impact == "HIGH" & 
+    variants_ann_expiii$allele_freq >= 0.1 & 
+    variants_ann_expiii$passage <= end_psg, ]
+
+
+```
+
+```{r vpr}
+
+nrow(variants_ann_expiii[variants_ann_expiii$feature == "vpr" & 
+    variants_ann_expiii$impact == "HIGH" & 
+    variants_ann_expiii$allele_freq >= 0.1 & 
+    variants_ann_expiii$passage == end_psg, ])
+
+unique(variants_ann_expiii[variants_ann_expiii$feature == "vpr" & 
+    variants_ann_expiii$impact == "HIGH" & 
+    variants_ann_expiii$allele_freq >= 0.1 & 
+    variants_ann_expiii$passage == end_psg,"mut_info"])
+
+# mt-2_1
+
+
+variants_ann_expiii[variants_ann_expiii$feature == "vpr" & 
+    nchar(variants_ann_expiii$ref_allele) >= 20 & 
+    variants_ann_expiii$allele_freq >= 0.5 & 
+    variants_ann_expiii$passage == 700, ]
+
+variants_ann_expiii[variants_ann_expiii$mut_info == "5652_AGACATTTTCCTAGGATATGGCTCCATAACTTAG_A" & 
+    variants_ann_expiii$allele_freq >= 0.5 & 
+    variants_ann_expiii$exp_line == "MT-4_1", ]
+
+
+
+
+variants_ann_expiii[variants_ann_expiii$feature == "vpr" & 
+    variants_ann_expiii$impact == "HIGH" & 
+    variants_ann_expiii$allele_freq >= 0.5 & 
+    variants_ann_expiii$passage == 500, ]
+
+
+```
+
+```{r nef}
+
+nef_var <- variants_ann_expiii[variants_ann_expiii$feature == "nef" & 
+    variants_ann_expiii$impact == "HIGH" & 
+    variants_ann_expiii$allele_freq >= 0.1 & 
+    variants_ann_expiii$passage == end_psg, ]
+
+nrow(nef_var)
+
+unique(nef_var$mut_info)
+
+
+variants_ann_expiii[variants_ann_expiii$feature == "nef" & 
+    variants_ann_expiii$impact == "HIGH" & 
+    variants_ann_expiii$allele_freq >= 0.1 & 
+    variants_ann_expiii$passage == 690, ]
+
+
+```
+
+```{r}
+
+nef_var <- variants_ann_expiii[variants_ann_expiii$feature == "nef" & 
+    variants_ann_expiii$exp_line == "MT-4_2" & 
+    variants_ann_expiii$allele_freq >= 0.1 & 
+    variants_ann_expiii$passage == end_psg, ]
+
+```

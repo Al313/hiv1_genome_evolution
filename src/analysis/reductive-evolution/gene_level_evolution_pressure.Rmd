@@ -93,7 +93,7 @@ if (category == "Minority"){
 # prepare variant data for visualization
 counts <- variants_ann_expiii %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
-            filter(allele_freq >= min_threshold) %>%
+            filter(passage <= end_psg & allele_freq >= min_threshold) %>%
             mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
             mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
             filter(effect_simplified != "U") %>%
@@ -165,9 +165,9 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             geom_point(size = 8) +
             geom_smooth(method = "lm", se = T)+
             scale_shape_manual(values = c(15, 16,17,18)) +
-            # scale_x_continuous(limits = c(0.05,0.35), breaks = seq(0,1,0.1)) +
-            # scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
-            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.1, y = 1.15, color = "black", size = 9) +
+            # scale_x_continuous(limits = c(0.25,0.65), breaks = seq(0,1,0.1)) +
+            scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
+            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
             labs(x="\nMinority variant per site", y= "dN/dS\n",  color = "Gene", shape = "Lineage",
             title = "")+
             scale_color_manual(values = brewer.pal(name = "Set1", n = 9)) +
