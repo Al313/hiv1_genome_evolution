@@ -74,9 +74,9 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 
 ```{r arbitrary cases}
 
-bertels_cases <- c("5671_G_A", "9528_T_G", "618_G_A")
+bertels_cases <- c("G5671A", "T9528G", "G618A")
 case <- bertels_cases[3]
-case <- "7383_TGTTTAATAGTACTTG_T" # ONLY ADAPTIVE INDEL
+case <- "TGTTTAATAGTACTTG7383T" # ONLY ADAPTIVE INDEL
 
 fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
     geom_line() +
@@ -119,7 +119,7 @@ intersect(variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$p
 variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$passage == 280 & variants_expiii_subset_mt21$allele_freq <= 0.14 ])
 
 
-case <- c("972_G_A" , "973_G_A" , "974_G_C")
+case <- c("G972A" , "G973A" , "G974C")
 
 variants_expiii_subset_mt21$tracking_group <- "No"
 variants_expiii_subset_mt21$tracking_group[variants_expiii_subset_mt21$mut_info %in% case] <- "Yes"
@@ -134,15 +134,15 @@ variants_expiii_subset_mt21 <- variants_expiii_subset_mt21 %>%
 variants_expiii_subset_mt21$passage <- as.numeric(as.character(variants_expiii_subset_mt21$passage))
 
 
-s <- variants_expiii_subset %>% filter(mut_info_line %in% fixed_muts) %>% select(exp_line, mut_info) %>% distinct()
+s <- variants_expiii_subset %>% filter(mut_info_line %in% fixed_muts) %>% dplyr::select(exp_line, mut_info) %>% distinct()
 
 
 
 
-variants_expiii_subset_mt21$color <- line_col_palette[1]
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[1]] <- "#25880b"
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[2]] <- "#0b74a2"
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[3]] <- "#621295"
+variants_expiii_subset_mt21$color <- "grey"# line_col_palette[1]
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[1]] <- "#7C8F00"
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[2]] <- "#00588F"
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[3]] <- "#8F0002"
 
 color_mapping <- setNames(variants_expiii_subset_mt21$color, variants_expiii_subset_mt21$mut_info)
 
@@ -152,9 +152,10 @@ fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in
     ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info, alpha = tracking_group, size = tracking_group)) +
     geom_line() +
     facet_grid(rows = vars(exp_line), switch = "y") +
-    scale_alpha_manual(values = c(0.1,1)) +
+    scale_x_continuous(breaks = seq(0, 500, by = 50)) +
+    scale_alpha_manual(values = c(0.2,1)) +
     scale_size_manual(values = c(1,1.5)) +
-    labs(title = "Linked variants", y = "Frequency", x = "\n Transfer") +
+    labs(title = "Linked variants", y = "Frequency", x = "Transfer") +
     scale_color_manual(values = color_mapping, name = "Variant") +
     custom_plot_theme(application = "publication") + 
     theme(strip.text.y = element_text(size = 35, angle=0),
@@ -165,7 +166,7 @@ fig <- fig + geom_text_repel(
     data = . %>% filter(tracking_group == "Yes" & passage == 180),
     aes(label = mut_info, y = c(0.08, 0.06, 0.17), x = c(330, 330, 180)), # Adjust y position to avoid overlap
     size = 10,       # Adjust label text size
-    color = c("#25880b", "#0b74a2", "#621295") # Optional: set label color
+    color = c("#7C8F00", "#00588F", "#8F0002") # Optional: set label color
 )
 
 fig
@@ -183,7 +184,7 @@ custom_plot_save(fig, "frequency_dynamics_linkage_cases.pdf", height = 14, width
 
 
 # 566_G_A  678_G_A 7854_A_G 
-case <- c("566_G_A")
+case <- c("G566A")
 
 variants_expiii$tracking_group <- "No"
 variants_expiii$tracking_group[variants_expiii$mut_info %in% case] <- "Yes"
@@ -197,10 +198,10 @@ variants_expiii_subset$color_group <- as.character(variants_expiii_subset$exp_li
 variants_expiii_subset$color_group[variants_expiii_subset$mut_info == case[1]] <- "special_case_1"
 
 color_palette <- c(
-  "MT-2_1" = unname(line_col_palette[1]),
-  "MT-2_2" = unname(line_col_palette[2]),
-  "MT-4_1" = unname(line_col_palette[3]),
-  "MT-4_2" = unname(line_col_palette[4]),
+  "MT-2_1" = "grey", # unname(line_col_palette[1]),
+  "MT-2_2" = "grey", # unname(line_col_palette[2]),
+  "MT-4_1" = "grey", # unname(line_col_palette[3]),
+  "MT-4_2" = "grey", # unname(line_col_palette[4]),
   "special_case_1" = brewer.pal(5, "Reds")[3]
 )
 
@@ -210,8 +211,9 @@ fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_mu
     ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = color_group, alpha = tracking_group, linewidth = linewidth)) +
     geom_line() +
     facet_grid(rows = vars(exp_line), switch = "y") +
+    scale_x_continuous(breaks = seq(0, 500, by = 50)) +
     scale_alpha_manual(values = c(0.1,1)) +
-    labs(title = paste0(case, " variant"), y = "Frequency", x = "\n Transfer") + #title = paste0(case, "\n")
+    labs(title = paste0(case, " variant"), y = "Frequency", x = "Transfer") + #title = paste0(case, "\n")
     scale_color_manual(values = color_palette) +
     scale_linewidth(range = c(1, 3)) +
     custom_plot_theme(application = "publication") +

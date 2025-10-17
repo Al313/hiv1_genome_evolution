@@ -109,10 +109,9 @@ muts_list <- lapply(split(muts, names(muts)), unname)
 
 
 # visualization
-fig <- ggvenn(muts_list, text_size = 9, fill_color = c("#ff00ff", "#ff2400", "#6600cc", "#0000ff"), set_name_size = 10) +
+fig <- ggvenn(muts_list, text_size = 9, fill_color = c("#ff00ff", "#ff2400", "#6600cc", "#0000ff"), set_name_size = 11) +
         # labs(title = paste0(category, " Mutations at Transfer #", end_psg, "\n"))+
-        scale_fill_manual(labels = exp_line_factor, values = unname(line_col_palette)) +
-        theme(plot.title = element_text(size = 40, hjust = 0.5))
+        scale_fill_manual(labels = exp_line_factor, values = unname(line_col_palette))
 
 
 # save figure

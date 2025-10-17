@@ -39,6 +39,7 @@ library("magrittr")
 library("rstatix")
 library("effsize")
 library("coda")
+library(ggpattern)
 
 
 ```
@@ -253,7 +254,8 @@ for (k in 1:4){
             midpoint = 1, limit = c(0,100), space = "Lab", 
             name="Parallel (%)") +
             custom_plot_theme() +
-            theme(axis.title = element_blank())+
+            theme(axis.title.x = element_blank(),
+                    axis.title.y = element_blank())+
             coord_fixed()
 
 
@@ -299,18 +301,55 @@ overall_df$group <- factor(overall_df$group, levels = c("Observed", "Simulated")
 overall_df %<>% mutate_at(3:7, as.numeric)
 
 
-fig <- ggplot(overall_df, aes(x = Translation_impact, y = mean, fill = group)) +
-    geom_col(position = "dodge") +
-    geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = position_dodge(width = 0.9),width = 0.2) +
-    labs(title = paste0("Summary of Parallelism at Tranfer #", end_psg), y = "Parallel (%)", x = "\nTranslational impact") +
-    scale_x_discrete(
-            labels = c("All" = "All", "Syn" = "Synonymous", "Non_Syn" = "Nonsynonymous")
-    ) +
-    scale_fill_manual(name = "Dataset",  # Change the legend title here
-        values = c("#038331", "#ffdf50"),
-        labels = c("Observed", "Randomized"))+
-    custom_plot_theme(application = "publication")
 
+fig <- ggplot(overall_df, 
+              aes(x = Translation_impact, y = mean, pattern = group)) +
+  geom_col_pattern(
+    position = position_dodge(width = 0.9),
+    color = "black",                # outline of bars
+    fill = "white",                 # white background
+    pattern_fill = "black",         # pattern color (stripes/dots in black)
+    pattern_density = 0.3,
+    pattern_spacing = 0.03,
+    pattern_key_scale_factor = 0.6,
+    width = 0.8
+  ) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
+                position = position_dodge(width = 0.9),
+                width = 0.3, color = "black", size = 1.5) +
+  labs(
+    title = paste0("Summary of Parallelism at Transfer #", end_psg),
+    y = "Parallel (%)",
+    x = "\nTranslational impact"
+  ) +
+  scale_x_discrete(
+    labels = c("All" = "All", "Syn" = "Synonymous", "Non_Syn" = "Nonsynonymous")
+  ) +
+  scale_pattern_manual(
+    name = "Dataset",
+    values = c("Observed" = "stripe", "Randomized" = "circle"),
+    labels = c("Observed", "Randomized")
+  ) +
+  scale_pattern_fill_manual(
+    values = c("Observed" = "black", "Randomized" = "black"),
+    guide = "none"
+  ) +
+  guides(
+    fill = "none",
+    pattern = guide_legend(
+      override.aes = list(
+        pattern_fill = "black",
+        fill = "white",
+        color = "black"
+      )
+    )
+  ) +
+  custom_plot_theme(application = "publication") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.title.x = element_blank()
+  )
+  
 # save figure
 custom_plot_save(fig, "parallel_summary_barplot_translational_impact.pdf", height = 14, width = 14)
 

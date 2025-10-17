@@ -134,7 +134,7 @@ df <- readRDS("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-pr
 merged <- merge(t_2_f, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
 
 
-df1 <- merged[merged$Occurrence %in% c("Triple", "Quadruple"),]
+df1 <- merged[merged$Occurrence %in% c("3 out of 4", "4 out of 4"),]
 
 
 for (i in 1:nrow(df1)) {
@@ -146,14 +146,15 @@ for (i in 1:nrow(df1)) {
 
 df1$line_label <- df1$exp_line  # or paste shape/linetype if different
 
-head(df1)
+
 fig <- df1 %>%
     ggplot(aes(x = relative_order, y = log2(init_rel_fit), color = exp_line)) +
     geom_point(aes(), size = 3) +
     geom_smooth(aes(group = exp_line), method = "lm", se = FALSE) +
-    labs(title = "", y = "log2 (initial relative fitness)", x = "\nRelative order of fixation", color = "Line", linetype = "Line") +
+    labs(title = "", y = "log2 (initial relative fitness)", x = "Relative order of fixation", color = "Population") +
     scale_color_manual(values = line_col_palette) +
     scale_x_continuous(breaks = seq(0,13, 1))+
+    scale_y_continuous(breaks = seq(-8,0,1))+
     custom_plot_theme(application = "publication") +
     theme(axis.text.x = element_text(angle = 0))
 

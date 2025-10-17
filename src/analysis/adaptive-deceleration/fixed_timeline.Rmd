@@ -171,11 +171,11 @@ fig <- ggplot(df_jittered, aes(x = fixation, y = exp_line, group = mut_info3, co
     geom_line(aes(y = y_jittered, size = Occurrence), alpha = 1) +
     geom_point(aes(y = y_jittered), size = 4) +
     scale_y_continuous(breaks = 1:4, labels = rev(exp_line_factor)) +
+    scale_x_continuous(breaks = seq(0, 500, by = 50)) +
     scale_color_manual(values = custom_colors) +
     scale_size_manual(values = c("1" = 0.5, "2" = 1, "3" = 3, "4" = 3)) +  # Adjust line thickness here
     labs(title = "Mutation Fixation Timeline",
-        x = "\nTransfer of fixation", y = "Line\n", color = "Fixed mutation") +
-    xlim(0, 500) +
+        x = "Transfer of fixation", y = "Line", color = "Fixed mutation") +
     custom_plot_theme(application = "publication", scale = 1.8) +
     guides(
         color = guide_legend(override.aes = list(size = 8)),  # change legend point size

@@ -136,17 +136,17 @@ names(quad) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep
 
 
 variants_expiii_subset %<>%
-    mutate(mut_info2 = case_when(rep == 1 ~ "Single-occurrence",
-                                rep == 2 ~ "Double-occurrence",
+    mutate(mut_info2 = case_when(rep == 1 ~ "1 out of 4",
+                                rep == 2 ~ "2 out of 4",
                                 rep == 3 ~ mut_info,
                                 rep == 4 ~ mut_info)) %>%
-    mutate(mut_info2 = factor(mut_info2, levels = c("Single-occurrence", "Double-occurrence", names(triples), names(quad))))
+    mutate(mut_info2 = factor(mut_info2, levels = c("1 out of 4", "2 out of 4", names(triples), names(quad))))
 
 
 
 custom_colors <- c(
-    "Single-occurrence" = alpha("grey", 0.3),
-    "Double-occurrence" = alpha("green", 0.6)
+    "1 out of 4" = alpha("grey", 0.3),
+    "2 out of 4" = alpha("green", 0.6)
 )
 custom_colors <- c(custom_colors, triples, quad)
 
@@ -159,7 +159,7 @@ head(variants_expiii_subset)
 fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info2, linewidth = linewidth)) +
     geom_line() +
     facet_wrap(~exp_line, ncol = 2) +
-    labs(title = "Variant Frequency Trajectories \n", y = "Frequency", x = "\n Transfer", color = "Fixed mutation") +
+    labs(title = "Variant Frequency Trajectories", y = "Frequency", x = "Transfer", color = "Fixed mutation") +
     scale_color_manual(values = custom_colors) +
     scale_x_continuous(breaks = seq(0,500, 50))+
     scale_linewidth(range = c(2, 3)) +

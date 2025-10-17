@@ -183,7 +183,7 @@ df_long %<>%
     CI_lower = round(100*CI_lower, digits = 2),
     CI_upper = round(100*CI_upper, digits = 2)) %>%
     mutate(group2 = case_when(group == "pct_shared" ~ "Observed", group == "expected_pct_shared" ~ "Randomized")) %>%
-    select(c(Pair, passage, group2, CI_lower,CI_upper, shared_all, total_unique)) %>%
+    dplyr::select(c(Pair, passage, group2, CI_lower,CI_upper, shared_all, total_unique)) %>%
     mutate_at(c(1), as.factor) %>%
     mutate(group2 = factor(group2, levels = c("Observed", "Randomized")))
 
@@ -206,7 +206,8 @@ fig <- df_long %>%
         values = c("#ff8b08", "#00bbff"),
         guide = "none"  # Hides the legend for `fill`
     ) +
-    labs(title = "", y = "Parallelism (%)", x = "\nTransfer") +
+    labs(title = "", y = "Parallelism (%)", x = "Transfer") +
+    scale_x_continuous(breaks = seq(0,500,50)) +
     scale_linetype_discrete(name = "Dataset",  # Change the legend title here
                     labels = c("Observed", "Randomized"))+
     custom_plot_theme(application = "publication")
@@ -237,15 +238,14 @@ df_long[df_long$group2 == "Randomized" & df_long$shared_all == max(df_long$share
 ```{r}
 
 
-
-t_2_f %>% filter(group == "Highly-parallel") %>% dplyr::select(c(mut_info, effect_simplified, Occurrence)) %>% distinct()
-
-
 t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
 
 t_2_f <- t_2_f %>% mutate(host = case_when(exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2", exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"),
-                        group = case_when(Occurrence %in% c("Single") ~ "Line-specific", Occurrence %in% c("Triple", "Quadruple") ~ "Highly-parallel")) %>%
+                        group = case_when(Occurrence %in% c("1 out of 4") ~ "Line-specific", Occurrence %in% c("3 out of 4", "4 out of 4") ~ "Highly-parallel")) %>%
                         filter(!is.na(group))
+
+t_2_f %>% filter(group == "Highly-parallel") %>% dplyr::select(c(mut_info, effect_simplified, Occurrence)) %>% distinct()
+
 
 bins <- seq(0,500, 100)
 
@@ -617,13 +617,13 @@ fig_pred <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = exp_line)) +
     ) +
     scale_fill_manual(labels = exp_line_factor, values = line_col_palette) +
     scale_color_manual(values = c("MT-2" = "#E69F00", "MT-4" = "#56B4E9")) +
-    labs(x = "\nFixation period", y = "Count", title = "Observed and predicted fixation counts") +
-    custom_plot_theme() +
+    labs(x = "Fixation period", y = "Count", title = "Observed and predicted fixation counts") +
+    custom_plot_theme(scale = 1.5) +
     theme(axis.text.x = element_text(angle = 90),
             legend.position = "none")
 
 # save figure
-custom_plot_save(fig_pred, "highly-parallel_vs_line-specific_time-trend_glm.pdf", height = 28, width = 14)
+custom_plot_save(fig_pred, "highly-parallel_vs_line-specific_time-trend_glm.pdf", height = 31.5, width = 21)
 
 ```
 

@@ -136,12 +136,12 @@ sum(fix_count_table_list[[4]]) + sum(fix_count_table_list[[3]]) + sum(fix_count_
 
 
 t_2_f$Occurrence <- NA
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["1"]])] <- "Single"
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["2"]])] <- "Double"
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["3"]])] <- "Triple"
-t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["4"]])] <- "Quadruple"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["1"]])] <- "1 out of 4"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["2"]])] <- "2 out of 4"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["3"]])] <- "3 out of 4"
+t_2_f$Occurrence[t_2_f$mut_info %in% names(fix_count_table_list[["4"]])] <- "4 out of 4"
 t_2_f <- t_2_f[!is.na(t_2_f$Occurrence),]
-t_2_f$Occurrence <- factor(t_2_f$Occurrence, levels = c("Single", "Double", "Triple", "Quadruple"))
+t_2_f$Occurrence <- factor(t_2_f$Occurrence, levels = c("1 out of 4", "2 out of 4", "3 out of 4", "4 out of 4"))
 
 saveRDS(t_2_f, paste0(wd, "results/tables/time_to_fixation.Rds"))
 
@@ -303,12 +303,12 @@ custom_plot_save(fig, "rapidly_fixating_variants_over_time.pdf", height = 14, wi
 ```{r calculate fixation time based on number of recurrence}
 
 comparisons <- list(
-  c("Quadruple", "Triple"),
-  c("Quadruple", "Double"),
-  c("Quadruple", "Single"),
-  c("Triple", "Double"),
-  c("Triple", "Single"),
-  c("Double", "Single")
+  c("4 out of 4", "3 out of 4"),
+  c("4 out of 4", "2 out of 4"),
+  c("4 out of 4", "1 out of 4"),
+  c("3 out of 4", "2 out of 4"),
+  c("3 out of 4", "1 out of 4"),
+  c("2 out of 4", "1 out of 4")
 )
 
 
@@ -359,9 +359,10 @@ fig <- ggplot(t_2_f, aes(x = Occurrence, y=time_to_fixation, fill = Occurrence))
     scale_y_continuous(limits = c(0, 800), breaks = seq(0, 500, by = 50)) +
     scale_fill_manual(values = my_col_pal) +
     scale_color_manual(values = my_col_pal) +
-    labs(fill = "Occurrence", x= "Occurrence", y = "Time to fixation\n", title = "") + # Label for the legend
+    labs(fill = "Fixed in", x= "Occurrence", y = "Time to fixation", title = "") + # Label for the legend
     custom_plot_theme() +
-    theme(axis.title.x = element_blank())
+    theme(axis.title.x = element_blank(), axis.text.x = element_blank()) +
+    guides(color = "none")
 
 
 # save figure

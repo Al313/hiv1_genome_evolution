@@ -65,7 +65,7 @@ feature_df$feature <- factor(feature_df$feature, levels = c("5R","5UTR", "5LTRLS
 variants_ann_expiii <- variants_ann_expiii %>%
                             mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", "MT4"), # set host cell line info
                             exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==15 ~ "MT-4_1", exp_line==16 ~ "MT-4_2"), # update exp line labels
-                            mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
+                            mut_info = paste(ref_allele, genomic_pos, alt_allele, sep = "")) %>% 
                             mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
                             mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
                             mutate(passage = as.factor(passage),
