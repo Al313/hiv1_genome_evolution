@@ -154,37 +154,24 @@ load(paste0(wd,"results/tables/misc/variance_effective_size_nef.RData")) # or al
 
 
 # plot Ne
-fig <- df[df$effect_simplified == "ALL",] %>% ggplot(aes(x = psg, y = log2(Ne), col = exp_line)) +
+fig <- df[df$effect_simplified == "ALL",] %>% ggplot(aes(x = psg, y = log10(Ne), col = exp_line)) +
         # facet_wrap(~ exp_line) +
         geom_line() +
-        scale_y_continuous(breaks = seq(4,15,1),limits = c(4,15))+
+        scale_y_continuous(breaks = seq(1,4,0.5),limits = c(1,4))+
         scale_x_continuous(breaks = seq(0,500,50),limits = c(0,500))+
         scale_color_manual(values = line_col_palette) +
         geom_smooth(method = "loess", se = FALSE) +
-        labs(x= "\n Transfer", y = "Log2(Ne) \n", title = "Variance Effective Population Size (nef Variants) \n", color = "Virus Line") + # Label for the legend
-        theme_minimal() + # Optional: use a minimal theme
-        theme(
-            plot.title = element_text(size = 30, hjust = 0.5),
-            strip.text = element_text(size = 25),
-            axis.title = element_text(size = 25),
-            axis.text.x = element_text(size = 20, angle = 90),
-            axis.text.y = element_text(size = 20),
-            legend.title = element_text(size=20),
-            legend.text = element_text(size = 15)) 
+        labs(x= "Transfer", y = "Log10(Ne)", title = "Variance Effective Population Size (nef Variants) \n", color = "Population") + # Label for the legend
+        custom_plot_theme(application = "publication")
 
 
 
 
 # save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "variance_ne.pdf"), height = 14, width = 14)
-fig
-dev.off()
-pdf(file = paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/variance_ne.pdf"), height = 14, width = 14)
-fig
-dev.off()
+
+custom_plot_save(fig, "variance_ne.pdf", height = 14, width = 14)
+
+
 
 ```
 

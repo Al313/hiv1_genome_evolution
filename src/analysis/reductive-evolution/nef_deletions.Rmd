@@ -22,6 +22,32 @@ output:
 ```{r}
 
 library(RColorBrewer)
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+```
+
+```{r read-in variant data}
+
+# set working directory
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
+
+```
+
+```{r load visualization settings}
+
+# load visual settings
+source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 
 
 ```
@@ -29,16 +55,17 @@ library(RColorBrewer)
 ```{r}
 
 
-nef_deletions <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/nef_deletions.tsv", sep = "", header = T)
+nef_deletions <- read.table(file = paste0(wd,"results/tables/misc/nef_deletions.tsv"), sep = "", header = T)
 
-
+head(nef_deletions)
 
 nef_deletions %<>% 
-    mutate(length = end - start,
+    mutate(length = end - start + 1,
     right_vf = 1 - coverage_after_start/coverage_before_start,
-    left_vf = 1 - coverage_before_end/coverage_after_end) %>%
+    left_vf = 1 - coverage_before_end/coverage_after_end,
+    deletion_id = paste0(exp_line, ":", deletion_id)) %>%
     mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
-    deletion_id = paste0(deletion_id, "_", start, ":", end),
+    deletion_name = paste0(length, ":", start, "_", end),
     deletion_id = as.factor(deletion_id)) 
 
 
@@ -69,20 +96,30 @@ for (del in levels(nef_deletions$deletion_id)){
 
 nef_deletions$line_type <- factor(nef_deletions$line_type, levels = c("solid", "dashed"))
 
+nef_deletions$deletion_name[nef_deletions$deletion_id == levels(nef_deletions$deletion_id)]
 
-fig <- nef_deletions %>% 
-    ggplot(aes(x = passage, y = consensus_vf, color = deletion_id, linetype = line_type)) + 
+vec <- nef_deletions$deletion_name
+names(vec) <- nef_deletions$deletion_id
+vec <- vec[!duplicated(vec)]
+
+
+nef_deletions$deletion_name <- factor(nef_deletions$deletion_name, levels = as.character(vec))
+
+fig <- nef_deletions %>%
+    ggplot(aes(x = passage, y = consensus_vf, color = deletion_name, linetype = line_type)) + 
+    facet_wrap(~exp_line, ncol = 1) +
     labs(x="\nTransfer", y= "Deletion frequency\n",  color = "Deletion ID") +
     ggtitle("Frequency of nef Large Deletions in MT-2_1") +
-    scale_color_manual(values=brewer.pal(5, "Dark2")) +
     geom_line(size = 2) +
     custom_plot_theme(application = "publication") +
     guides(linetype = "none")
 
 
 
+
+
 # save figure
-custom_plot_save(fig,  "MT-2_1_nef_deletion.pdf", height = 14, width = 14)
+custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 14)
 ```
 
 

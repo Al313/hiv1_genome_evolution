@@ -61,7 +61,7 @@ custom_plot_save <- function(fig, name, width = 14, height = 14) {
     print(fig)
     dev.off()
     ## 2
-    fig_dir2 <- "/Users/alimos313/Documents/studies/phd/research/manuscripts/exp-2e-update-manuscript/figures/"
+    fig_dir2 <- "/Users/alimos313/Documents/studies/phd/research/manuscripts/reductive-evolution/figures/"
     pdf(file = paste0(fig_dir2, name), height = height, width = width)
     print(fig)
     dev.off()

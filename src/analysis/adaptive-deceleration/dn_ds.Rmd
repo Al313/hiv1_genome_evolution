@@ -70,7 +70,7 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
 ```{r text numbers}
 
 # set parameters
-category <- "Fixed"
+category <- "Majority"
 
 if (category == "Minority"){
     min_threshold <- 0.01
@@ -193,12 +193,12 @@ counts_wide$dnds <- counts_wide$dN/counts_wide$dS
 
 
 fig <- counts_wide %>%  ggplot(aes(x=passage, y = dnds, color = exp_line)) +
-        geom_line(linewidth=1) +
+        # geom_line(linewidth=1) +
         geom_smooth(method = "gam", se = FALSE) +
-        labs(x="\nTransfer", y= "dN/dS\n",  color = "Lineage",
+        labs(x="\nTransfer", y= "dN/dS\n",  color = "Population",
         title = paste0(category, " dN/dS over Time"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
-        #scale_y_continuous(limits = c(0,max(counts_wide$dnds, na.rm = T)+0.1),breaks = seq(0,max(counts_wide$dnds, na.rm = T)+0.1,0.1)) +
+        scale_y_continuous(limits = c(0,max(counts_wide$dnds, na.rm = T)+0.1),breaks = seq(0,max(counts_wide$dnds, na.rm = T)+0.1,0.25)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication")
 

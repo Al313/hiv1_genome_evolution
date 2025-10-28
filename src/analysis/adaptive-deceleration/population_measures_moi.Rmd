@@ -322,7 +322,7 @@ moi__fig <- result %>% ggplot(aes(x = passage)) +
                 geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
                 scale_y_continuous(
                 sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per inoculum")) +
-                labs(title = "MOI\n", x = "\nTransfer", y = "Log10 (MOI)", color = "Line") +
+                labs(title = "MOI\n", x = "Transfer", y = "Log10 (MOI)", color = "Population") +
                 scale_color_manual(values = line_col_palette) +
                 custom_plot_theme(application = "publication")
 
