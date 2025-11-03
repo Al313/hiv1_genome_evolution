@@ -19,7 +19,7 @@ library(stringr)
 library(pheatmap)
 
 # Visual settings
-source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
+source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
 names(line_col_palette) <- exp_line_factor

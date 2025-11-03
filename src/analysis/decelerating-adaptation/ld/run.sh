@@ -52,7 +52,7 @@ for exp in "${exps[@]}"; do
 source activate ha_proj
 
 
-Rscript /home/amovas/data/genome-evo-proj/src/analysis/adaptive-deceleration/ld/get_ld.R ${item}
+Rscript /home/amovas/data/genome-evo-proj/src/analysis/decelerating-adaptation/ld/get_ld.R ${item}
 
 EOF
 

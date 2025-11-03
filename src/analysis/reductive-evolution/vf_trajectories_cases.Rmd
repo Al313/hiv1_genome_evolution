@@ -65,7 +65,7 @@ source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
 ```{r load visualization settings}
 
 # source visual settings
-source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
+source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 
 ```

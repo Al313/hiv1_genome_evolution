@@ -51,7 +51,7 @@ if (file.exists("/home/amovas/")){
 
 # Visual settings
 
-source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
+source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 
 logarithmic_mean_vector <- function(x) {

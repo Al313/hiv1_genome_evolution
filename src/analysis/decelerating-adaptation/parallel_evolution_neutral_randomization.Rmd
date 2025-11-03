@@ -57,7 +57,7 @@ if (file.exists("/home/amovas/")){
 }
 
 # load data
-source(paste0(wd, "src/analysis/adaptive-deceleration/readin_data.R"))
+source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
 
 ```
 
@@ -65,7 +65,7 @@ source(paste0(wd, "src/analysis/adaptive-deceleration/readin_data.R"))
 ```{r load visualization settings}
 
 # Visual settings
-source(paste0(wd, "src/analysis/adaptive-deceleration/plot_custom.R"))
+source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 
 ```
