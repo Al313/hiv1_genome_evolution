@@ -24,45 +24,37 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("zoo") # estimate na's if any 
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("rstatix")
+library(dplyr)
+library(magrittr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(ggrepel)
+
 
 
 ```
 
 
 
-```{r read-in variant data}
 
+```{r set paths and load data}
 
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    # Running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
-
-```
-
-```{r load visualization settings}
-
-# Visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
-
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```
 
@@ -111,12 +103,12 @@ sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_fre
 
 # Convert to data frame
 sim_data_long_df <- purrr::imap_dfr(sim_data, ~ {
-  tibble(
-    exp_line = .y,
-    passage = seq_along(.x) * 10,     # multiply by 10 as per your example
-    mut_count = .x,
-    group = "Simulated"
-  )
+    tibble(
+        exp_line = .y,
+        passage = seq_along(.x) * 10,     # multiply by 10 as per your example
+        mut_count = .x,
+        group = "Simulated"
+    )
 })
 
 counts_all <- rbind(counts, sim_data_long_df)
@@ -166,7 +158,6 @@ df_lm_mt4$group <- "Observed"
 ```{r visualization1: fixed accumulation + regression + simulated data}
 
 # visualize
-
 fig <- counts_all %>%  ggplot(aes(x=passage, y = mut_count, linetype = group, color = exp_line)) +
         geom_line(linewidth=2) +
         geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2)+
@@ -177,8 +168,8 @@ fig <- counts_all %>%  ggplot(aes(x=passage, y = mut_count, linetype = group, co
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication") +
         guides(
-          color = guide_legend(order = 1),     # Line legend first
-          linetype = guide_legend(order = 2)   # Dataset legend second
+            color = guide_legend(order = 1),     # Line legend first
+            linetype = guide_legend(order = 2)   # Dataset legend second
         )
 
 # save figure
@@ -228,19 +219,16 @@ counts$effect_simplified2 <- factor(
 
 
 # visualize
-
-
 fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
         geom_line(linewidth=1) +
         labs(title = paste0("Normalized ",category, " Mutation Accumulation \n (Coding vs Non-Coding)"),
-        x="\nTransfer", y=paste0("Count of fixed mutation per site (%)"), color = "Line", linetype = "Region")+
+        x="Transfer", y=paste0("Percentage of sites with fixed mutation (%)"), color = "Population", linetype = "Region")+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication")
-  
-# save figure
 
+# save figure
 custom_plot_save(fig, paste0(tolower(category), "_mut_accumulation_coding_vs_noncoding.pdf"), height = 14, width = 14)
 
 ```

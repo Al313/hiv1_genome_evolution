@@ -24,52 +24,35 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("reshape2")
-library("ggvenn")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("rstatix")
-library("effsize")
-library("coda")
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(reshape2)
 library(ggpattern)
+library(effsize)
 
 
 ```
 
 
-```{r read-in variant data}
+```{r set paths and load data}
 
-# determine the server path
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    # Running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```
-
-
-```{r load visualization settings}
-
-# Visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
-
-
-```
-
 
 
 ```{r category thresholds}
@@ -230,8 +213,6 @@ for (k in 1:4){
     melted_cormat$value <- round(melted_cormat$value, digits = 1)
 
     # merge simulation data
-
-
     melted_cormat <- merge(melted_cormat, df[,c(1,2,6,7)], by = c("Var1", "Var2"))
     melted_cormat <- melted_cormat %>%
         mutate(p.val = as.numeric(p.val)) %>%
@@ -246,6 +227,7 @@ for (k in 1:4){
     melted_cormat$`expected_%shared`[melted_cormat$val == 100] <- 100
     melted_cormat$p_value_category[melted_cormat$val == 100] <- ""
 
+    # generate heatmap
     fig <- ggplot(data = as.data.frame(melted_cormat), aes(x=Var1, y=Var2, fill=value)) + 
             geom_tile(color = "white") +
             geom_text(aes(Var1, Var2, label = paste0(value, "(", `expected_%shared`,")\n", p_value_category)), color = "black", size = 13) +
@@ -301,55 +283,55 @@ overall_df$group <- factor(overall_df$group, levels = c("Observed", "Simulated")
 overall_df %<>% mutate_at(3:7, as.numeric)
 
 
-
+# generate barplot
 fig <- ggplot(overall_df, 
-              aes(x = Translation_impact, y = mean, pattern = group)) +
-  geom_col_pattern(
-    position = position_dodge(width = 0.9),
-    color = "black",                # outline of bars
-    fill = "white",                 # white background
-    pattern_fill = "black",         # pattern color (stripes/dots in black)
-    pattern_density = 0.3,
-    pattern_spacing = 0.03,
-    pattern_key_scale_factor = 0.6,
-    width = 0.8
-  ) +
-  geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
-                position = position_dodge(width = 0.9),
-                width = 0.3, color = "black", size = 1.5) +
-  labs(
-    title = paste0("Summary of Parallelism at Transfer #", end_psg),
-    y = "Parallel (%)",
-    x = "\nTranslational impact"
-  ) +
-  scale_x_discrete(
-    labels = c("All" = "All", "Syn" = "Synonymous", "Non_Syn" = "Nonsynonymous")
-  ) +
-  scale_pattern_manual(
-    name = "Dataset",
-    values = c("Observed" = "stripe", "Randomized" = "circle"),
-    labels = c("Observed", "Randomized")
-  ) +
-  scale_pattern_fill_manual(
-    values = c("Observed" = "black", "Randomized" = "black"),
-    guide = "none"
-  ) +
-  guides(
-    fill = "none",
-    pattern = guide_legend(
-      override.aes = list(
-        pattern_fill = "black",
+            aes(x = Translation_impact, y = mean, pattern = group)) +
+    geom_col_pattern(
+        position = position_dodge(width = 0.9),
+        color = "black",
         fill = "white",
-        color = "black"
-      )
+        pattern_fill = "black",
+        pattern_density = 0.3,
+        pattern_spacing = 0.03,
+        pattern_key_scale_factor = 0.6,
+        width = 0.8
+    ) +
+    geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
+        position = position_dodge(width = 0.9),
+        width = 0.3, color = "black", size = 1.5) +
+    labs(
+        title = paste0("Summary of Parallelism at Transfer #", end_psg),
+        y = "Parallel (%)",
+        x = "\nTranslational impact"
+    ) +
+    scale_x_discrete(
+        labels = c("All" = "All", "Syn" = "Synonymous", "Non_Syn" = "Nonsynonymous")
+    ) +
+    scale_pattern_manual(
+        name = "Dataset",
+        values = c("Observed" = "stripe", "Randomized" = "circle"),
+        labels = c("Observed", "Randomized")
+    ) +
+    scale_pattern_fill_manual(
+        values = c("Observed" = "black", "Randomized" = "black"),
+        guide = "none"
+    ) +
+    guides(
+        fill = "none",
+        pattern = guide_legend(
+        override.aes = list(
+            pattern_fill = "black",
+            fill = "white",
+            color = "black"
+        )
+        )
+    ) +
+    custom_plot_theme(application = "publication") +
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()
     )
-  ) +
-  custom_plot_theme(application = "publication") +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    axis.title.x = element_blank()
-  )
-  
+
 # save figure
 custom_plot_save(fig, "parallel_summary_barplot_translational_impact.pdf", height = 14, width = 14)
 

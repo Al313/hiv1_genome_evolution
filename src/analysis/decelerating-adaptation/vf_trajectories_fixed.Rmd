@@ -24,51 +24,34 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("plotly")
-library("gganimate")
-library("DT")
-library("dplyr")
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("purrr")
-library("magrittr")
-library("hrbrthemes")
-library("RColorBrewer")
-library("ggrepel")
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(stringr)
+library(RColorBrewer)
+library(ggrepel)
 
 
 ```
 
 
-```{r functions and operators}
-`%notin%` <- Negate(`%in%`)
-```
 
+```{r set paths and load data}
 
-```{r read-in variant data}
-
-# determine the server path
-if (file.exists("/home/amovas/")){
-    print("Remote HPC Connection!")
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
     wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-    print("Local PC Connection!")
+    # Running locally
+    message("Local PC Connection!")
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
-
-```
-
-
-```{r load visualization settings}
-
-# Visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
-
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```
 

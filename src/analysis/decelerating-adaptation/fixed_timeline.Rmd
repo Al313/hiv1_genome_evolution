@@ -24,45 +24,34 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("ggvenn")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("rstatix")
-library("RColorBrewer")
+library(dplyr)
+library(magrittr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(RColorBrewer)
+library(ggrepel)
 
 
 ```
 
-```{r read-in variant data}
 
-# determine the server path
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+```{r set paths and load data}
+
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    # Running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
-
-```
-
-
-```{r load visualization settings}
-
-# Visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
-
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```
 
@@ -94,9 +83,11 @@ if (category == "Sporadic"){
 
 ```{r}
 
+# set seed for reproducibility
 set.seed(2)
-df <- data.frame()
 
+# obtain fixation parameters
+df <- data.frame()
 for (exp_line in exp_line_factor){
     variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
     fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
@@ -127,13 +118,14 @@ df %<>% group_by(mut_info) %>%
     ungroup()
 
 
+# add jitter to y values for better visualization
 df_jittered <- df %>%
     mutate(y_jittered = exp_line_number + runif(n(), min = -0.1, max = 0.1))  # Add jitter to y values
 
 
 
 
-
+# define colors for mutations based on occurrence
 blues_colors <- c("#A4DDED", "#A3C1AD", "#CCCCFF", "#00CCFF", "#15f4ee", 
 "#0071c5", "#5A4FCF", "#004687", "#0000CD", "#191970")
 triples <- blues_colors
@@ -161,7 +153,6 @@ custom_colors <- c(
 custom_colors <- c(custom_colors, triples, quad)
 
 # update mut_info so that double-occurrence cases are not connected by lines
-
 df_jittered$mut_info3[df_jittered$mut_info2 == "Double-occurrence"] <- paste0(df_jittered$mut_info[df_jittered$mut_info2 == "Double-occurrence"], rnorm(sum(df_jittered$mut_info2 == "Double-occurrence")))
 df_jittered$mut_info3[df_jittered$mut_info2 != "Double-occurrence"] <- df_jittered$mut_info[df_jittered$mut_info2 != "Double-occurrence"]
 
@@ -187,7 +178,11 @@ custom_plot_save(fig, "fixation_timeline.pdf", height = 21, width = 42)
 
 ```
 
-```{r}
+####!!!!
+Extra analysis
+####!!!!
+
+```{r case by case mutation order}
 
 
 df_jittered[df_jittered$mut_info == "9412_G_A",]

@@ -24,50 +24,38 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("reshape2")
-library("ggvenn")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("rstatix")
-library("effsize")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 library(lme4)
-library(MASS)
+library(knitr)
+library(kableExtra)
+library(gridExtra)
+library(grid)
+library(magrittr)
 library(ggh4x)
 
 
-
 ```
 
-```{r read-in variant data}
+```{r set paths and load data}
 
-# determine the server path
-if (file.exists("/home/amovas/")){
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
     wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
+    # Running locally
+    message("Local PC Connection!")
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```
-
-```{r load visualization settings}
-
-# Visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
-
-
-```
-
 
 ```{r category thresholds}
 
@@ -189,6 +177,7 @@ df_long %<>%
 
 df_long$group2 <- factor(df_long$group2, levels = c("Observed", "Randomized"))
 
+# generate figure
 fig <- df_long %>% 
     ggplot(aes(x = passage, y = shared_all, group = interaction(Pair,group2), color = Pair, linetype = group2)) +
     geom_line(size = 2) +
@@ -217,8 +206,10 @@ fig <- df_long %>%
 # save figure
 custom_plot_save(fig, "parallel_over_time.pdf", height = 14, width = 14)
 
+```
 
-## in text numbers
+```{r in text numbers}
+
 
 df_long <- df_long[!is.na(df_long$shared_all),]
 
@@ -235,7 +226,7 @@ df_long[df_long$group2 == "Randomized" & df_long$shared_all == max(df_long$share
 
 
 
-```{r}
+```{r counts per bins}
 
 
 t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
@@ -283,7 +274,7 @@ Do we observe a significantly different time trend between line-specific and hig
 
 
 
-```{r}
+```{r making choices and fitting models}
 
 
 
@@ -341,17 +332,18 @@ Do we observe a significantly different time trend between line-specific and hig
 ```
 
 
-## Comparing your two models
+## Conclusions from comparing different models
 
 for MT-2 model: negative binomial model better than Poisson (less AIC 112 compared to 122, finite dispersion parameter)
 for MT-4 model: negative binomial model worse than Poisson (higher AIC 86 compared to 84, infinite dispersion parameter)
-Verdict: use Poisson because p.val from significance tests are generally lower, tho in both case significant
+Verdict: use negative binomial model because it performs better in one model and is less stric in its assumptions compared to Poisson
 
-don’t treat each replicate as a random effect (only 2 levels, 
-variance almost estimated as 0, AIC slightly better in model without random effect 
-110 compared to 112)
+Treating replicate as a random effect does not affect the model as there are 
+only 2 levels and variance cannot be estimated (approximated to 0)!
+AIC slightly better in model without random effect but not significantly (110 compared to 112)
+Regard replicate as a random effect since it conceptually makes more sense!
 
-```{r}
+```{r fitting the final model}
 
 # treat bin as continuous (time trend test) and scale it for numerical stability improves
 t_2_f_summary <- t_2_f_summary %>%
@@ -376,16 +368,12 @@ model_trend2 <- glmer.nb(
 summary(model_trend2)
 
 
-
 ```
 
-```{r}
 
-# Load required packages
-library(lme4)
-library(knitr)
-library(kableExtra)
-library(dplyr)
+```{r summary table of model result and performance}
+
+
 # Close any open graphics devices first
 while (!is.null(dev.list())) {
   dev.off()
@@ -461,8 +449,8 @@ fixed_table <- fixed_effects_comparison %>%
   pack_rows("MT-2 Model", 1, 4) %>%
   pack_rows("MT-4 Model", 5, 8) %>%
   footnote(general = "Significance codes: *** p<0.001, ** p<0.01, * p<0.05, . p<0.1",
-           general_title = "",
-           footnote_as_chunk = TRUE)
+          general_title = "",
+          footnote_as_chunk = TRUE)
 
 cat("\n=== MODEL FIT STATISTICS ===\n\n")
 
@@ -483,9 +471,9 @@ pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-ad
 par(mar = c(1, 1, 1, 1))
 plot.new()
 text(0.5, 0.95, "GLMER Model Comparison: MT-2 vs MT-4", 
-     cex = 1.8, font = 2)
+    cex = 1.8, font = 2)
 text(0.5, 0.90, "Negative Binomial Mixed Effects Models", 
-     cex = 1.2, font = 3)
+    cex = 1.2, font = 3)
 
 # Create text summary
 mt2_text <- paste0(
@@ -520,15 +508,12 @@ text(0.05, 0.75, mt2_text, adj = c(0, 1), cex = 0.9, family = "mono")
 text(0.05, 0.35, mt4_text, adj = c(0, 1), cex = 0.9, family = "mono")
 
 text(0.5, 0.05, "Note: Both models show boundary/singular fits (random effect variance near zero)", 
-     cex = 0.8, font = 3, col = "red")
+    cex = 0.8, font = 3, col = "red")
 
 dev.off()
 
 cat("\nPDF saved as: glmer_model_comparison.pdf\n")
 
-# Alternative: Save as a cleaner table using gridExtra
-library(gridExtra)
-library(grid)
 
 pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/reports/glmer_comparison_detailed.pdf", width = 11, height = 8.5)
 
@@ -570,7 +555,7 @@ print(fit_stats_comparison)
 
 
 
-```{r}
+```{r barplot with predictions}
 
 # Get predictions with standard errors
 pred_mt2 <- predict(model_trend1, 
@@ -626,6 +611,11 @@ fig_pred <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = exp_line)) +
 custom_plot_save(fig_pred, "highly-parallel_vs_line-specific_time-trend_glm.pdf", height = 31.5, width = 21)
 
 ```
+
+
+####!!!!
+Extra analysis
+####!!!!
 
 # per whole experiment
 

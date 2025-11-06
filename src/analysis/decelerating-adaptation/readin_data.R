@@ -4,15 +4,9 @@ library(tidyr)
 library(stringr)
 library(magrittr)
 
-# determine the server path
-if (file.exists("/home/amovas/")){
-  wd <- "/home/amovas/data/genome-evo-proj/"
-} else {
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
-}
+
 
 # define functions
-
 `%notin%` <- Negate(`%in%`)
 
 # load data

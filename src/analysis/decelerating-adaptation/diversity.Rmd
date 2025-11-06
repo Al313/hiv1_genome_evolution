@@ -22,47 +22,36 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly") 
-library("patchwork")
-library("reshape2")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("rstatix")
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+library(plotly)
 
 
 ```
 
 
-```{r read-in variant data}
+```{r set paths and load data}
 
-
-if (file.exists("/home/amovas/")){
-  print("Remote HPC Connection!")
-  wd <- "/home/amovas/data/genome-evo-proj/"
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-  print("Local PC Connection!")
-  wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+    # Running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-source(paste0(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```
 
-```{r load visualization settings}
-
-# Visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
-
-
-```
 
 
 ```{r read in diversity data}
@@ -85,7 +74,7 @@ diversity_df %<>% mutate(host_line = ifelse(exp_line %in% c("13", "14"), "MT2", 
 ```
 
 
-```{r visualization1: mean shannon entropy per sample}
+```{r mean shannon entropy per sample}
 
 
 shannon_measure <- diversity_df %>% group_by(host_line,exp_line,passage) %>%
@@ -112,11 +101,11 @@ custom_plot_save(fig, "shannon_per_sample_mean.pdf", height = 14, width = 14)
 
 
 
-```{r diversity for simulations}
+```{r read in simulated diversity}
 
 
 # simulated data (own simulation)
-bottleneck_freq <- 2
+bottleneck_freq <- 3
 sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
 
 # define function to calculate Shannon entropy
@@ -156,7 +145,7 @@ colnames(sim_diversity_df) <- c("exp_line", "passage", "genomic_position","shann
 sim_diversity_df %<>% mutate_at(2:4, as.numeric)
 
 
-# If you want all positions including zeros (i.e., positions with no variants), create full grid
+# create full grid to include all positions including zeros (i.e., positions with no variants)
 all_positions <- expand.grid(
   exp_line = exp_line_factor,
   passage = seq(10, 500, 10),
@@ -164,13 +153,13 @@ all_positions <- expand.grid(
   stringsAsFactors = FALSE
 )
 
-
+# merge to have full dataset
 sim_diversity_df <- all_positions %>%
   left_join(sim_diversity_df, by = c("exp_line", "passage", "genomic_position")) %>%
   mutate(shannon_entropy = replace_na(shannon_entropy, 0))
 
 
-
+# summarize shannon measures per sample
 shannon_measure_sim <- sim_diversity_df %>% group_by(exp_line,passage) %>%
   summarise (sum_ent = sum(shannon_entropy, na.rm = T), 
     mean_ent = mean(shannon_entropy, na.rm = T), 
@@ -182,8 +171,9 @@ shannon_measure_sim <- sim_diversity_df %>% group_by(exp_line,passage) %>%
 ```
 
 
-```{r}
+```{r merge observed and simulated data}
 
+# combine observed and simulated data
 shannon_measure$data <- "Observed"
 shannon_measure <- shannon_measure[,-1]
 shannon_measure_sim$data <- "Simulated"
@@ -211,7 +201,9 @@ custom_plot_save(fig, "shannon_per_sample_mean_plus_simulated.pdf", height = 14,
 
 ```
 
+
 ####!!!!
+Extra analysis
 ####!!!!
 
 
