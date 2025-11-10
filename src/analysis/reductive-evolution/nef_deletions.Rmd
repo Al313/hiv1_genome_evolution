@@ -40,7 +40,8 @@ if (file.exists("/home/amovas/")){
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-
+# load variant data
+source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
 
 ```
 
@@ -121,6 +122,91 @@ fig <- nef_deletions %>%
 # save figure
 custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 14)
 ```
+
+
+```{r time to fixation}
+
+
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+t_2_m <- data.frame()
+
+for (exp_line in exp_line_factor){
+    nef_deletions_sub <- nef_deletions[nef_deletions$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    deletion_ids <- unique(nef_deletions_sub$deletion_id[nef_deletions_sub$consensus_vf >= 0.5 & nef_deletions_sub$passage == 500])
+    for (id in deletion_ids){
+        nef_deletions_sub2 <- nef_deletions_sub[nef_deletions_sub$deletion_id == id,]
+        majority <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.5])))
+        appearance <- max(setdiff(seq(0,majority,10), as.numeric(as.vector(unique(nef_deletions_sub2$passage[(nef_deletions_sub2$deletion_id == id & nef_deletions_sub2$consensus_vf >= 0.01)]))))) + 10
+        disappearance_vec <- as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf < 0.05]))
+        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > majority]) == 0, NA, min(disappearance_vec[disappearance_vec > majority]))
+        length <- unique(nef_deletions_sub2$length)
+        t_2_m <- rbind(t_2_m, c(exp_line, id, length, appearance, majority, disappearance, majority-appearance))
+    }
+}
+
+
+# set column names and right data types
+t_2_m %<>% set_colnames(c("exp_line", "deletion_id", "length", "appearance", "majority", "disappearance","time_to_majority")) %>% 
+        mutate_at(c(3,4,5,7), as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
+
+
+fig <- ggplot(t_2_m, aes(x = time_to_majority, y = length, color = exp_line)) +
+    geom_point(size = 2) +
+    geom_text(aes(label=deletion_id), vjust=-1, size=4) +
+    scale_color_manual(values = line_col_palette) +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig,  "nef_del_length_vs_time_to_maj.pdf", height = 14, width = 14)
+
+```
+
+
+```{r time to fixation}
+
+
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+t_2_f <- data.frame()
+
+for (exp_line in exp_line_factor){
+    nef_deletions_sub <- nef_deletions[nef_deletions$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    deletion_ids <- unique(nef_deletions_sub$deletion_id[nef_deletions_sub$consensus_vf >= 0.95 & nef_deletions_sub$passage == 500])
+    for (id in deletion_ids){
+        nef_deletions_sub2 <- nef_deletions_sub[nef_deletions_sub$deletion_id == id,]
+        fixation <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.95])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(nef_deletions_sub2$passage[(nef_deletions_sub2$deletion_id == id & nef_deletions_sub2$consensus_vf >= 0.01)]))))) + 10
+        disappearance_vec <- as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf < 0.05]))
+        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
+        length <- unique(nef_deletions_sub2$length)
+        t_2_f <- rbind(t_2_f, c(exp_line, id, length, appearance, fixation, disappearance, fixation-appearance))
+    }
+}
+
+
+# set column names and right data types
+t_2_f %<>% set_colnames(c("exp_line", "deletion_id", "length", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
+        mutate_at(c(3,4,5,7), as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
+
+fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
+    geom_boxplot(outlier.shape = NA, width = 0.2) +
+    geom_hline(yintercept = 150, linetype = "dashed") +
+    geom_hline(yintercept = 160, linetype = "solid") +
+    # geom_text(aes(label=deletion_id), vjust=-1, size=8) +
+    geom_jitter(width = 0.1, size = 2, alpha = 0.7, color = "darkblue") +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 14)
+
+
+```
+
+
+
 
 
 ```{r}
