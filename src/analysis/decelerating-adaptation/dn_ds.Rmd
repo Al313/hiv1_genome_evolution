@@ -116,7 +116,7 @@ counts$effect_simplified <- factor(
 # visualize
 fig <- counts %>%  ggplot(aes(x=passage, y = normalized_rate, color = exp_line, linetype = effect_simplified)) +
         geom_line(linewidth=1) +
-        labs(x="Transfer", y= "Percentage of sites with fixed mutation (%)",  color = "Population", linetype = "Sites",
+        labs(x="Transfer", y= "Sites with fixed mutation (%)",  color = "Population", linetype = "Sites",
         title = paste0(category, " Mutation Accumulation \n (Syn vs Non-Syn)"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$normalized_rate)+0.1),breaks = seq(0,max(counts$normalized_rate)+0.1,0.1)) +

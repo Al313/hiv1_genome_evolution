@@ -98,7 +98,7 @@ counts <- counts[,-4]
 counts$group <- "Observed"
 
 # simulated data (own simulation)
-bottleneck_freq <- 2
+bottleneck_freq <- 3
 sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
 
 # Convert to data frame
@@ -222,7 +222,7 @@ counts$effect_simplified2 <- factor(
 fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
         geom_line(linewidth=1) +
         labs(title = paste0("Normalized ",category, " Mutation Accumulation \n (Coding vs Non-Coding)"),
-        x="Transfer", y=paste0("Percentage of sites with fixed mutation (%)"), color = "Population", linetype = "Region")+
+        x="Transfer", y=paste0("Sites with fixed mutation (%)"), color = "Population", linetype = "Region")+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +

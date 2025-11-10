@@ -94,47 +94,6 @@ b_mt2/b_mt4
 ```
 
 
-```{r visualization of nr mutable positions}
-
-# plot number of unique positions that have been mutated (minority) 
-
-
-variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & mut_type == "P")
-
-
-# prepare dataset
-
-variants_expiii_subset$passage <- as.integer(as.character(variants_expiii_subset$passage))
-
-
-counts <- data.frame()
-for (psg in seq(10,end_psg,10)){
-    d <- variants_expiii_subset[variants_expiii_subset$passage <= psg,]
-    dd <- d %>% dplyr::select(genomic_pos, exp_line) %>% distinct() %>% group_by(exp_line) %>% summarise(count = n())
-    dd$passage <- psg
-    counts <- rbind(counts, dd)
-}
-counts[counts$passage == 500,]
-
-# counts <- counts[counts$exp_line != "All",]
-
-fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
-        geom_line(linewidth=2) +
-        labs(x="Transfer", y= "Cumulative count of mutated positions", color = "Population", title = paste0("Cumulative Number of Uniquely Mutated Positions (", category,")"))+
-        scale_x_continuous(breaks = seq(0,end_psg,50)) +
-        scale_y_continuous(limits = c(0,max(counts$count)+20),breaks = seq(0,max(counts$count)+20,100)) +
-        scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
-        custom_plot_theme(application = "publication")
-
-
-# save figure
-custom_plot_save(fig, paste0(tolower(category), "_cumulative_mutated_pos.pdf"), height = 14, width = 14)
-
-
-
-```
-
 ```{r with all group}
 
 
@@ -179,7 +138,7 @@ variants_expiii_subset <- variants_expiii %>% mutate(passage = as.numeric(as.cha
 
 for (exp_line in exp_line_factor){
     for (passage in seq(10,end_psg, 10)){
-        count <- length(unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.05 & variants_expiii_subset$passage <= passage & variants_expiii_subset$exp_line == exp_line & variants_expiii_subset$mut_type == "P"]))
+        count <- length(unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$allele_freq >= 0.05 & variants_expiii_subset$passage <= passage & variants_expiii_subset$exp_line == exp_line & variants_expiii_subset$mut_type == "P"]))
         df <- rbind(df, c(exp_line, passage, count))
     }
 }
@@ -191,9 +150,11 @@ df %<>% set_colnames(c("exp_line", "passage", "count")) %>%
 
 fig <- df %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         geom_line(linewidth=2) +
-        labs(x="\nTransfer", y= "Cumulative number of mutated positions", color = "Line", title = paste0("Number of unique point mutations (",category,")"))+
+        labs(x="Transfer", y= "Cumulative number of mutated positions (> 0.05)", color = "Population", title = paste0("Number of unique point mutations (",category,")"))+
+        geom_hline(yintercept = mean(df$count[df$passage == 500 & df$exp_line %in% c("MT-2_1","MT-2_2")], na.rm = TRUE), linetype = "dashed", linewidth = 2, color = "#ff8b08") +
+        geom_hline(yintercept = mean(df$count[df$passage == 500 & df$exp_line %in% c("MT-4_1","MT-4_2")], na.rm = TRUE), linetype = "dashed", linewidth = 2, color = "#00bbff") +
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
-        scale_y_continuous(limits = c(0,max(df$count)+20),breaks = seq(0,max(df$count)+20,50)) +
+        scale_y_continuous(limits = c(0,max(df$count)+20),breaks = seq(0,max(df$count)+20,100)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication")
 

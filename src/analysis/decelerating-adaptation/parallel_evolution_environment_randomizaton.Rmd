@@ -30,6 +30,7 @@ library(tidyr)
 library(stringr)
 library(magrittr)
 library(coda)
+library(ggpattern)
 
 
 ```
@@ -219,10 +220,17 @@ comparison_df$Significance <- c(significance_labels, rep(NA, 3))  # Only add for
 ```{r visualization 1}
 
 # Step 4: Plot with HPD Interval
-dodge <- position_dodge(width=0.5)
+dodge <- position_dodge(width=0.9)
 
-fig <- ggplot(comparison_df, aes(x = Category, y = Count, fill = Type, group = Type)) +
-  geom_bar(stat = "identity", position = dodge, width = 0.5) +  # Increased dodge width
+fig <- ggplot(comparison_df, aes(x = Category, y = Count, pattern = Type, group = Type)) +
+  geom_col_pattern(position = position_dodge(width = 0.9),
+        color = "black",
+        fill = "white",
+        pattern_fill = "black",
+        pattern_density = 0.3,
+        pattern_spacing = 0.03,
+        pattern_key_scale_factor = 0.6,
+        width = 0.8) +  # Increased dodge width
   geom_errorbar( 
       aes(ymin = HPD_Lower, ymax = HPD_Upper), # Count - SE, ymax = Count + SE
       width = 0.2,  # Narrower error bars
@@ -232,13 +240,27 @@ fig <- ggplot(comparison_df, aes(x = Category, y = Count, fill = Type, group = T
       data = subset(comparison_df, Type == "Original"),  # Only for observed counts
       aes(label = Significance, y = c(25,20,40)),  # Position asterisks above the bars
       position = dodge,
-      size = 6
+      size = 9
   ) +
   labs(title = "Comparison of Observed vs Randomized \n Fixed Variant Sharedness per Environment",
-      x = "\nSharedness group",
-      y = paste0(category," variant count\n"),
+      x = "",
+      y = paste0(category," mutation count"),
       fill = "Dataset") +
-  scale_fill_manual(labels = c("Observed", "Randomized"), values = c("#038331", "#ffdf50")) +
+  scale_pattern_manual(
+        name = "Dataset",
+        values = c("Original" = "stripe", "Simulated" = "none"),
+        labels = c("Observed", "Randomized")
+    ) +
+  guides(
+      fill = "none",
+      pattern = guide_legend(
+      override.aes = list(
+          pattern_fill = "black",
+          fill = "white",
+          color = "black"
+      )
+      )
+  ) +
   custom_plot_theme(application = "publication")
 
 

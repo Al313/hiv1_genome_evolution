@@ -161,10 +161,10 @@ fig <- all_ld_summary %>% ggplot(aes(x = psg, y = mean_r2, color = as.factor(exp
     geom_line() +
     geom_point() +
     theme_minimal() +
-    labs(x = "\nTransfer",
+    labs(x = "Transfer",
         y = expression("Mean "~(r^2)),
         title = "Mean LD across PSGs and Experimental Lines",
-        color = "Line") +
+        color = "Population") +
     scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
     custom_plot_theme(application = "publication")
 
@@ -193,10 +193,10 @@ all_ld_summary <- all_ld %>% group_by(exp_line, distance) %>%
 fig <- all_ld_summary %>% ggplot(aes(x = distance, y = mean_r2, color = as.factor(exp_line))) +
     geom_point() +
     geom_smooth(se = FALSE, method = "loess", span = 0.3) +  # loess smoothing
-    labs(x = "\n Distance between SNPs (bp)",
+    labs(x = "Distance between SNPs (bp)",
         y = expression(mean(r^2)),
         title = "Mean LD decay with distance across Experimental Lines",
-        color = "Line") +
+        color = "Population") +
     scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
     custom_plot_theme(application = "publication")
 

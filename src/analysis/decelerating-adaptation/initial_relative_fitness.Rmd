@@ -207,9 +207,9 @@ fig <- ggplot(models_df, aes(x = init_rel_fit, y = predicted_prob, color = exp_l
     ) +  # shift each lineage slightly in y
     labs(
         title = "",
-        x = "\nInitial relative fitness",
+        x = "Initial relative fitness",
         y = "Probability of fixation",
-        color = "Line"
+        color = "Population"
     ) +
     custom_plot_theme(application = "publication")
 

@@ -112,7 +112,7 @@ job_id=\$(echo \${job_submission_output} | awk '{print \$4}')
 touch \${output_dir}/\${job_id}
 
 # Path to the file youre waiting for
-FILE="/home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/\${sample_nr}.npy"
+FILE="/home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/\${sample_nr}.1npy"
 
 while [ ! -f "\$FILE" ]; do
 echo "Waiting for \$FILE to be created..."
