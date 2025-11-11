@@ -88,7 +88,7 @@ os.makedirs(folder_path_sequence, exist_ok=True)
 
 
 # Create and save initial ancestral population and read previous populations
-np.random.seed(sample_nr)
+np.random.seed(sample_nr+1)
 
 if sample_nr == 1:
     init_population = np.tile(np.random.choice([1, 2, 3, 4], neutral_pos, replace=True).astype(np.uint8), (initial_population, 1))

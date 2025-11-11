@@ -91,7 +91,7 @@ for (exp_line in exp_lines){
 }
 
 
-saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
-saveRDS(mut_count_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
+saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all1.rds"))
+saveRDS(mut_count_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all1.rds"))
 
 
