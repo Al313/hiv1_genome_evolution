@@ -106,7 +106,7 @@ custom_plot_save(fig, "shannon_per_sample_mean.pdf", height = 14, width = 14)
 
 # simulated data (own simulation)
 bottleneck_freq <- 3
-sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.rds"))
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all1.rds"))
 
 # define function to calculate Shannon entropy
 shannon <- function(x, seq_err = 0.01){

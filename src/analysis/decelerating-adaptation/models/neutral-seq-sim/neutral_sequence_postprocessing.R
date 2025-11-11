@@ -21,7 +21,8 @@ bottleneck_freq <- 3
 min_af <- 0.99
 mut_count_all <- list()
 long_df_all <- data.frame()
-
+exp_line <- "MT-4_2"
+i <- 1
 for (exp_line in exp_lines){
   print(exp_line)
   mut_count <- c()
@@ -61,11 +62,14 @@ for (exp_line in exp_lines){
 
 
     # View the proportion matrix
-    prop_mat_processed <- prop_mat[,apply(prop_mat, 2, function(col) any(col > 0.01))]
+    prop_mat_processed <- prop_mat[,apply(prop_mat, 2, function(col) any(col > 0.01)), drop = FALSE]
 
     prop_df_processed <- as.data.frame(prop_mat_processed)
     prop_df_processed[,"alt_allele"] <- rownames(prop_df_processed)
 
+    if (ncol(prop_df_processed) == 1){
+      next
+    }
 
     long_df <- pivot_longer(
       data = prop_df_processed,
