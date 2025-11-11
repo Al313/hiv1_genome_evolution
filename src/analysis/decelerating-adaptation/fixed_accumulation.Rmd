@@ -99,7 +99,7 @@ counts$group <- "Observed"
 
 # simulated data (own simulation)
 bottleneck_freq <- 3
-sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all1.rds"))
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
 
 # Convert to data frame
 sim_data_long_df <- purrr::imap_dfr(sim_data, ~ {
