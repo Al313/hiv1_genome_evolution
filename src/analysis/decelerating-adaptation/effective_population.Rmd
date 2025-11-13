@@ -21,6 +21,23 @@ output:
 
 
 
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(dplyr)
+library(magrittr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(ggrepel)
+
+
+```
+
+
+
+
 ```{r set paths and load data}
 
 # Set working directory
