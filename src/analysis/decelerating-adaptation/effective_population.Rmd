@@ -69,12 +69,10 @@ for (exp_line in names(line_col_palette)){
         } else {
             variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$effect_simplified == trans_effect,]
         }
-        if (str_detect(exp_line, pattern = "MT-2")){
-            gen_nr <- 30
-        } else {
-            gen_nr <- 30
-        }
-        print(gen_nr)
+        
+        # set generation number between time points
+        gen_nr <- 30
+
         for (pres_psg in seq(20,570,10)){
             print(pres_psg)
             prev_psg <- pres_psg - 10
@@ -122,7 +120,6 @@ df %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "i
 
 
 # save data on disk
-
 save(df, file = paste0(wd,"results/tables/misc/variance_effective_size_nef.RData"))
 
 ```

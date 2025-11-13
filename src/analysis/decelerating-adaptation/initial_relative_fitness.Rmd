@@ -126,7 +126,7 @@ for (i in 1:nrow(df1)) {
 }
 
 
-# saveRDS(df1, file = "/Users/alimos313/Documents/studies/phd/hpc-research/lte-viz/data/initial_relative_fitness_triple_quadruple.rds")
+
 
 df1$line_label <- df1$exp_line  # or paste shape/linetype if different
 
@@ -143,7 +143,7 @@ fig <- df1 %>%
     theme(axis.text.x = element_text(angle = 0))
 
 # save figure
-custom_plot_save(fig, "triple_quadruple_init_rel_fitness_vs_relative_order.pdf", height = 14, width = 14)
+custom_plot_save(fig, "init_rel_fitness_vs_relative_order.pdf", height = 14, width = 14)
 
 ```
 
