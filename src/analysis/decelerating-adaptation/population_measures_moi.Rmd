@@ -34,12 +34,8 @@ library(tidyr)
 
 
 
-# define functions
-
-`%notin%` <- Negate(`%in%`)
 
 # determine the server path
-
 if (file.exists("/home/amovas/")){
   print("Remote HPC Connection!")
   wd <- "/home/amovas/data/genome-evo-proj/"
@@ -50,8 +46,12 @@ if (file.exists("/home/amovas/")){
 
 
 # Visual settings
-
 source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
+
+
+
+# define functions
+`%notin%` <- Negate(`%in%`)
 
 
 logarithmic_mean_vector <- function(x) {
@@ -244,7 +244,6 @@ dev.off()
 ```{r in text measures}
 
 # The MOI levels for none of the cell lines is statistically difference from one another
-
 pairwise.t.test(data$MOI, data$exp_line, p.adjust.method = "none")
 
 
@@ -320,11 +319,13 @@ moi__fig <- result %>% ggplot(aes(x = passage)) +
                 geom_line(aes(y = log10(MOI), color = exp_line)) +
                 geom_point(aes(y = log10(MOI), color = exp_line)) +
                 geom_smooth(aes(y = log10(MOI), color = exp_line), method = "loess", se = FALSE) +
+                scale_x_continuous(breaks = seq(0, 500, by = 50)) +
                 scale_y_continuous(
                 sec.axis = sec_axis(~ (10^.) * scale_factor, breaks = c(40, 400, 4000), name = "IU per inoculum")) +
                 labs(title = "MOI\n", x = "Transfer", y = "Log10 (MOI)", color = "Population") +
                 scale_color_manual(values = line_col_palette) +
-                custom_plot_theme(application = "publication")
+                custom_plot_theme(application = "publication") +
+                theme(legend.position = "top")
 
 # save figure
 custom_plot_save(moi__fig, "moi_cleaned.pdf", height = 14, width = 14)

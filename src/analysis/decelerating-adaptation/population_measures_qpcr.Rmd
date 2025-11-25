@@ -35,7 +35,6 @@ library(tidyr)
 
 
 # define functions
-
 `%notin%` <- Negate(`%in%`)
 
 ```
@@ -174,7 +173,8 @@ qpcr_fig <- data_cleaned %>% ggplot(aes(x = passage, y = log10(mean_quantity_per
                 labs(title = "qPCR result", x = "Transfer", y = "Log10 (RNA copy/ml)", color = "Population") +
                 #ylim(c(1000000,40000000)) +
                 scale_color_manual(values = line_col_palette) +
-                custom_plot_theme(application = "publication")
+                custom_plot_theme(application = "publication") +
+                theme(legend.position = "top")
 
 
 

@@ -2,6 +2,15 @@
 
 ```{r}
 
+# load libraries
+library(magrittr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(pheatmap)
+
+# determine the server path
 if (file.exists("/home/amovas/")){
     print("Remote HPC Connection!")
     wd <- "/home/amovas/data/genome-evo-proj/"
@@ -10,13 +19,7 @@ if (file.exists("/home/amovas/")){
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load libraries
-library(magrittr)
-library(tidyr)
-library(dplyr)
-library(ggplot2)
-library(stringr)
-library(pheatmap)
+
 
 # Visual settings
 source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
@@ -161,6 +164,7 @@ fig <- all_ld_summary %>% ggplot(aes(x = psg, y = mean_r2, color = as.factor(exp
     geom_line() +
     geom_point() +
     theme_minimal() +
+    scale_x_continuous(breaks = seq(0, 500, by = 50)) +
     labs(x = "Transfer",
         y = expression("Mean "~(r^2)),
         title = "Mean LD across PSGs and Experimental Lines",

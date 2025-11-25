@@ -33,7 +33,7 @@ library(purrr)
 library(broom)
 library(pscl)
 library(pROC)
-
+library(scales)
 ```
 
 
@@ -118,32 +118,135 @@ t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
 merged <- merge(t_2_f, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
 
 
-df1 <- merged[merged$Occurrence %in% c("3 out of 4", "4 out of 4"),]
+
+# get relative order of fixation per experimental line
+adaptive_df <- merged %>%
+    filter(Occurrence %in% c("3 out of 4", "4 out of 4")) %>%
+    group_by(exp_line) %>%
+    arrange(fixation, appearance, .by_group = TRUE) %>%
+    mutate(relative_order = row_number()) %>%
+    ungroup()
 
 
-for (i in 1:nrow(df1)) {
-    df1$relative_order[i] <- nrow(df1[df1$exp_line == df1$exp_line[i] & df1$fixation < df1$fixation[i],])
-}
 
 
-
-
-df1$line_label <- df1$exp_line  # or paste shape/linetype if different
-
-
-fig <- df1 %>%
-    ggplot(aes(x = relative_order, y = log2(init_rel_fit), color = exp_line)) +
-    geom_point(aes(), size = 3) +
+fig <- adaptive_df %>%
+    ggplot(aes(x = relative_order, y = init_rel_fit, color = exp_line)) +
+    geom_point(size = 3) +
     geom_smooth(aes(group = exp_line), method = "lm", se = FALSE) +
-    labs(title = "", y = "log2 (initial relative fitness)", x = "Relative order of fixation", color = "Population") +
+    labs(
+        title = "",
+        y = "Initial relative fitness",
+        x = "Relative order of fixation",
+        color = "Population"
+    ) +
     scale_color_manual(values = line_col_palette) +
-    scale_x_continuous(breaks = seq(0,13, 1))+
-    scale_y_continuous(breaks = seq(-8,0,1))+
+    scale_x_continuous(breaks = seq(0, 13, 1)) +
+    scale_y_continuous(trans = log10_trans(),
+    breaks = c(3*10^-1, 10^-1, 5*10^-2, 10^-2, 5*10^-3),
+    labels = scales::label_number(accuracy = 0.001)) +
     custom_plot_theme(application = "publication") +
-    theme(axis.text.x = element_text(angle = 0))
+    theme(axis.text.x = element_text(angle = 0)) +
+    annotation_logticks(sides = "l", 
+        outside = TRUE, 
+        short = unit(.6,"mm"), 
+        mid = unit(1.2,"mm"), 
+        long = unit(2.4,"mm"),
+        linewidth = 1) +
+    theme(
+        axis.text.y = element_text(margin = margin(r = 8))
+    ) +
+    coord_cartesian(clip = "off")
+
 
 # save figure
 custom_plot_save(fig, "init_rel_fitness_vs_relative_order.pdf", height = 14, width = 14)
+
+```
+
+```{r cumulative fitness gain per relative order}
+
+
+for (exp_line in names(line_col_palette)){
+    for (rel_order in sort(unique(adaptive_df$relative_order[adaptive_df$exp_line == exp_line]))){
+        print(rel_order)
+        if (rel_order == 1){
+            adaptive_df$cum_fit_gain[adaptive_df$exp_line == exp_line & adaptive_df$relative_order == rel_order] <- 1 + adaptive_df$init_rel_fit[adaptive_df$exp_line == exp_line & adaptive_df$relative_order == rel_order]
+        } else {
+            adaptive_df$cum_fit_gain[adaptive_df$exp_line == exp_line & adaptive_df$relative_order == rel_order] <- adaptive_df$cum_fit_gain[adaptive_df$exp_line == exp_line & adaptive_df$relative_order == rel_order -1] + adaptive_df$init_rel_fit[adaptive_df$exp_line == exp_line & adaptive_df$relative_order == rel_order]
+        }
+        
+    }
+}
+
+# adaptive_df$cum_fit_gain[adaptive_df$host_line == "MT-4"] <- adaptive_df$cum_fit_gain[adaptive_df$host_line == "MT-4"] * log(3600)/log(600)
+
+adaptive_df <- rbind(adaptive_df, c("MT-2_1", NA, NA, NA, NA, NA, NA, NA, NA, 0, 0, 1),
+                    c("MT-2_2", NA, NA, NA, NA, NA, NA, NA, NA, 0, 0, 1),
+                    c("MT-4_1", NA, NA, NA, NA, NA, NA, NA, NA, 0, 0, 1),
+                    c("MT-4_2", NA, NA, NA, NA, NA, NA, NA, NA, 0, 0, 1))
+
+adaptive_df %<>% mutate_at(c("relative_order", "cum_fit_gain"), as.numeric)
+
+midpoints <- adaptive_df %>%
+    group_by(exp_line) %>%
+    summarise(
+        max_y = max(cum_fit_gain),
+        y_mid = 1 + (max_y - 1) * 0.9,
+        x_mid = approx(x = cum_fit_gain,
+                    y = relative_order,
+                    xout = y_mid)$y,
+        # Get the curve's y value at that x_mid (interpolated)
+        curve_y = approx(x = relative_order,
+                        y = cum_fit_gain,
+                        xout = x_mid)$y
+    )
+
+fig <- ggplot(adaptive_df, aes(x = relative_order,
+                                y = cum_fit_gain,
+                                color = exp_line)) +
+    geom_point(size = 3) +
+    geom_line(aes(group = exp_line), size = 1) +
+    # Horizontal dashed line up to x_mid
+    geom_segment(
+        data = midpoints,
+        aes(x = -Inf, xend = x_mid,
+            y = y_mid, yend = y_mid,
+            color = exp_line),
+        linetype = "dashed",
+        linewidth = 1.4,
+        inherit.aes = FALSE
+    ) +
+    # Vertical connecting line from curve to horizontal line
+    geom_segment(
+        data = midpoints,
+        aes(x = x_mid, xend = x_mid,
+            y = 1, yend = y_mid,
+            color = exp_line),
+        linetype = "dashed",
+        linewidth = 1.4,
+        inherit.aes = FALSE
+    ) +
+
+    scale_color_manual(values = line_col_palette) +
+    scale_x_continuous(breaks = seq(0, 13, 1)) +
+    labs(
+        y = "Fitness",
+        x = "Relative order of fixation",
+        color = "Population"
+    ) +
+    custom_plot_theme(application = "publication") +
+    theme(axis.text.x = element_text(angle = 0))
+
+
+# save figure
+custom_plot_save(fig, "cumulative_fitness.pdf", height = 14, width = 14)
+
+# in-text numbers
+adaptive_df[adaptive_df$exp_line == "MT-2_1" & adaptive_df$relative_order == 6, ]
+adaptive_df[adaptive_df$exp_line == "MT-2_2" & adaptive_df$relative_order == 7, ]
+adaptive_df[adaptive_df$exp_line == "MT-4_1" & adaptive_df$relative_order == 9, ]
+adaptive_df[adaptive_df$exp_line == "MT-4_2" & adaptive_df$relative_order == 7, ]
 
 ```
 
@@ -152,7 +255,7 @@ custom_plot_save(fig, "init_rel_fitness_vs_relative_order.pdf", height = 14, wid
 # Fit a linear model for each experimental line
 models <- df1 %>%
     group_by(exp_line) %>%
-    do(tidy(lm(init_rel_fit ~ relative_order, data = .)))
+    do(tidy(lm(log10(init_rel_fit) ~ relative_order, data = .)))
 
 # View the p-values
 models %>%
@@ -160,6 +263,10 @@ models %>%
     select(exp_line, estimate, std.error, statistic, p.value) %>%
     ungroup() %>% 
     mutate(p.adjusted = p.adjust(p.value, method = "BH"))
+
+
+1 - 10^mean(c(-0.140, -0.133))
+1 - 10^mean(c(-0.0866, -0.0729))
 
 ```
 
@@ -240,6 +347,74 @@ models_df <- merged %>%
 models_df %>%
     mutate(pseudoR2 = map(pseudoR2, tibble::as_tibble_row)) %>%
     unnest(pseudoR2)
+
+
+```
+
+```{r init_rel_fitness_ratio_same_adaptive_mutation}
+
+
+for (i in 1:nrow(df1)) {
+    df1$relative_order[i] <- nrow(df1[df1$exp_line == df1$exp_line[i] & df1$fixation < df1$fixation[i],])
+}
+
+
+dff <- data.frame()
+for (host in c("MT-2", "MT-4")){
+    df1_subset <- df1[df1$host == host,]
+    for (mut_info in unique(df1_subset$mut_info)) {
+        if (nrow(df1_subset[df1_subset$mut_info == mut_info,]) == 1) {
+            df1_subset <- df1_subset[df1_subset$mut_info != mut_info,]
+            print(mut_info)
+        }
+    }
+    for (mut_info in unique(df1_subset$mut_info)) {
+        early_line1 <- as.character(df1_subset$exp_line[df1_subset$mut_info == mut_info][which.min(df1_subset$fixation[df1_subset$mut_info == mut_info])])
+        late_line1 <- as.character(df1_subset$exp_line[df1_subset$mut_info == mut_info][which.max(df1_subset$fixation[df1_subset$mut_info == mut_info])])
+        delta_time <- abs(diff(df1_subset$fixation[df1_subset$mut_info == mut_info]))
+        initial_rel_ratio1 <- df1_subset$init_rel_fit[df1_subset$mut_info == mut_info & df1_subset$exp_line == early_line1] / df1_subset$init_rel_fit[df1_subset$mut_info == mut_info & df1_subset$exp_line == late_line1]
+        time_to_fixation1 <- df1_subset$time_to_fixation[df1_subset$mut_info == mut_info & df1_subset$exp_line == late_line1] - df1_subset$time_to_fixation[df1_subset$mut_info == mut_info & df1_subset$exp_line == early_line1]
+        early_line2 <- as.character(df1_subset$exp_line[df1_subset$mut_info == mut_info][which.min(df1_subset$relative_order[df1_subset$mut_info == mut_info])])
+        late_line2 <- as.character(df1_subset$exp_line[df1_subset$mut_info == mut_info][which.max(df1_subset$relative_order[df1_subset$mut_info == mut_info])])
+        delta_order <- abs(diff(df1_subset$relative_order[df1_subset$mut_info == mut_info]))
+        initial_rel_ratio2 <- df1_subset$init_rel_fit[df1_subset$mut_info == mut_info & df1_subset$exp_line == early_line2] / df1_subset$init_rel_fit[df1_subset$mut_info == mut_info & df1_subset$exp_line == late_line2]
+        time_to_fixation2 <- df1_subset$time_to_fixation[df1_subset$mut_info == mut_info & df1_subset$exp_line == late_line2] - df1_subset$time_to_fixation[df1_subset$mut_info == mut_info & df1_subset$exp_line == early_line2]
+        dff <- rbind(dff, c(host, mut_info, delta_time, initial_rel_ratio1, time_to_fixation1, delta_order, initial_rel_ratio2, time_to_fixation2))
+    }
+}
+
+colnames(dff) <- c("host", "mut_info", "delta_f", "initial_rel_ratio_f", "time_to_fixation_f", "delta_o", "initial_rel_ratio_o", "time_to_fixation_o")
+dff %<>% mutate_at(c("delta_f", "initial_rel_ratio_f", "time_to_fixation_f", "delta_o", "initial_rel_ratio_o", "time_to_fixation_o"), as.numeric)
+
+# from vf_trajectories_fixed.Rmd script
+all <- c(triples, quad)
+
+dff$mut_info <- factor(dff$mut_info, levels = names(all))
+dff$color <- all[as.character(dff$mut_info)]
+
+
+fig <- dff %>% ggplot(aes(x = "", y = log2(initial_rel_ratio_o))) +
+    geom_boxplot(outliers = FALSE, linewidth = 2) +
+    geom_jitter(aes(color = mut_info, shape = host), width = 0.2, size = 5) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_manual(values = all) +
+    labs(
+        title = "",
+        x = "",
+        y = "log2 (initial relative fitness ratio\nfor early vs late replicate)",
+        color = "Adaptive mutation",
+        shape = "Host"
+    ) +
+    custom_plot_theme(application = "publication")
+
+
+# save figure
+custom_plot_save(fig, "init_rel_fitness_ratio_same_adaptive_mutation.pdf", height = 14, width = 14)
+
+# in-text statistics
+wilcox.test(log2(dff$initial_rel_ratio_o), mu = 0)
+median_ratio <- median(dff$initial_rel_ratio_o)
+
 
 
 ```

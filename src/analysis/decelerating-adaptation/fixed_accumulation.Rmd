@@ -238,3 +238,53 @@ custom_plot_save(fig, paste0(tolower(category), "_mut_accumulation_coding_vs_non
 # In dn_ds.Rmd 
 
 ```
+
+```{r visualization4: gif of mutated sites over time per min_threshold}
+
+
+# df <- data.frame()
+# variants_expiii_subset <- variants_expiii %>% mutate(passage = as.numeric(as.character(passage)))
+
+# for (exp_line in exp_line_factor){
+#     for (min_threshold in seq(0.01,0.99, by=0.01)){
+#         for (passage in seq(10,end_psg, 10)){
+#             print(passage)
+#             count <- length(unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$allele_freq >= min_threshold & variants_expiii_subset$passage == passage & variants_expiii_subset$exp_line == exp_line & variants_expiii_subset$mut_type == "P"]))
+#             df <- rbind(df, c(exp_line, min_threshold, passage, count))
+#         }
+#     }
+# }
+
+# df %<>% set_colnames(c("exp_line", "min_threshold", "passage", "count")) %>%
+#             mutate_at(2:4, as.numeric)
+
+# saveRDS(df, file = paste0(wd, "results/tables/misc/mutated_sites_over_time_per_min-threshold.rds"))
+
+df <- readRDS(file = paste0(wd, "results/tables/misc/mutated_sites_over_time_per_min-threshold.rds"))
+
+gg_fig <- ggplot(df, aes(x=passage, y = count)) + 
+    geom_line(aes(color=exp_line), linewidth=1) +
+    scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
+    transition_states(min_threshold, transition_length = 100, state_length = 1, wrap = TRUE) + # to create animation 
+    view_follow(fixed_y = FALSE) +
+    labs(title = "min_threshold = {closest_state}", x = "Passage", y = "Count") +
+    theme_bw() +
+    theme(
+    plot.title = element_text(size = 25, hjust = 0.5),
+    axis.title = element_text(size = 20),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    strip.text.x = element_text(size = 25),
+    legend.title = element_text(size=15),
+    legend.text = element_text(size = 10),
+    plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+# save for lteeviz
+fig_dir <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/gif/"
+anim_save(gg_fig, file = paste0(fig_dir, "mutated_sites_over_time_per_min-threshold.gif"))
+
+
+```
+```

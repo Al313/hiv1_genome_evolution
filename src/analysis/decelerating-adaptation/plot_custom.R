@@ -9,9 +9,9 @@ breaks_step <- 50
 # define functions
 
 multiply_nested_list <- function(nested_list, multiplier) {
-  lapply(nested_list, function(inner) {
-    lapply(inner, function(x) x * multiplier)
-  })
+    lapply(nested_list, function(inner) {
+        lapply(inner, function(x) x * multiplier)
+    })
 }
 
 

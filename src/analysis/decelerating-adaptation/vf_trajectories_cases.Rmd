@@ -60,7 +60,7 @@ source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 cases <- c("G5671A", "T9528G", "G618A", "TGTTTAATAGTACTTG7383T")
 case <- cases[4]
-
+case <- "G5127A"
 
 fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
     geom_line() +
@@ -103,12 +103,12 @@ intersect(variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$p
 variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$passage == 280 & variants_expiii_subset_mt21$allele_freq <= 0.14 ])
 
 
-case <- c("G972A" , "G973A" , "G974C")
+case <- c("G973A" , "G974C", "G5127A", "C8667T") # G972A
 
 variants_expiii_subset_mt21$tracking_group <- "No"
 variants_expiii_subset_mt21$tracking_group[variants_expiii_subset_mt21$mut_info %in% case] <- "Yes"
 
-variants_expiii_subset_mt21[variants_expiii_subset_mt21$tracking_group == "Yes",]
+
 
 variants_expiii_subset_mt21 <- variants_expiii_subset_mt21 %>%
                                 mutate(mut_info_line = paste0(exp_line, "_", mut_info))
@@ -125,8 +125,9 @@ s <- variants_expiii_subset %>% filter(mut_info_line %in% fixed_muts) %>% dplyr:
 
 variants_expiii_subset_mt21$color <- "grey"# line_col_palette[1]
 variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[1]] <- "#7C8F00"
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[2]] <- "#00588F"
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[3]] <- "#8F0002"
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[2]] <- "#8F0002"
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[3]] <- "#15f4ee" #B3A102
+variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[4]] <- "#4A90E2" #B37202
 
 color_mapping <- setNames(variants_expiii_subset_mt21$color, variants_expiii_subset_mt21$mut_info)
 
@@ -147,13 +148,13 @@ fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in
 
 
 fig <- fig + geom_text_repel(
-    data = . %>% filter(tracking_group == "Yes" & passage == 180),
-    aes(label = mut_info, y = c(0.08, 0.06, 0.17), x = c(330, 330, 180)), # Adjust y position to avoid overlap
+    data = . %>% filter(tracking_group == "Yes" & passage == 240),
+    aes(label = mut_info, y = c(0.06, 0.16, 0.15, 0.2), x = c(330, 180, 340, 200)), # Adjust y position to avoid overlap
     size = 10,       # Adjust label text size
-    color = c("#7C8F00", "#00588F", "#8F0002") # Optional: set label color
+    color = c("#7C8F00", "#8F0002", "#15f4ee", "#4A90E2") # Optional: set label color
 )
 
-
+variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in% fixed_muts,] %>% filter(tracking_group == "Yes" & passage == 240)
 
 # save figure
 custom_plot_save(fig, "frequency_dynamics_linkage_cases.pdf", height = 14, width = 14)
@@ -243,6 +244,8 @@ sum(doubled %in% fixed_muts)
 doubled_fixed <- doubled[doubled %in% fixed_muts]
 
 View(variants_expiii_subset[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 270,])
+
+View(variants_expiii_subset[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 270 & variants_expiii_subset$effect_simplified != "S",])
 
 table(variants_expiii_subset$effect_simplified[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500])
 

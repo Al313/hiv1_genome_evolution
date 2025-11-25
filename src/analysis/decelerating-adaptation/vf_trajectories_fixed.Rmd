@@ -106,11 +106,11 @@ for (i in 1:nrow(variants_expiii_subset)){
 
 
 
-blues_colors <- c("#A4DDED", "#A3C1AD", "#CCCCFF", "#00CCFF", "#15f4ee", 
-"#0071c5", "#5A4FCF", "#004687", "#0000CD", "#191970")
+blues_colors <- c("#86d8ef", "#15f4ee", "#6ea9a9", "#b3b3ff","#4A90E2",
+"#0066CC", "#5A4FCF", "#610087", "#0000CD", "#191970")
 
 triples <- blues_colors
-names(triples) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"])[order(unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"]))]
+names(triples) <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"])[order(substr(unique(variants_expiii_subset$mut_info[variants_expiii_subset$rep == "3"]), 2, 5))]
 
 reds_colors <- brewer.pal(5, "Reds")[3:5]
 quad <- reds_colors
@@ -136,7 +136,7 @@ custom_colors <- c(custom_colors, triples, quad)
 
 variants_expiii_subset$linewidth[variants_expiii_subset$rep %in% 3:4] <- 3
 variants_expiii_subset$linewidth[is.na(variants_expiii_subset$linewidth)] <- 2
-head(variants_expiii_subset)
+
 
 
 fig <- variants_expiii_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info2, linewidth = linewidth)) +

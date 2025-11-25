@@ -25,7 +25,9 @@ output:
 library(ggplot2)
 library(stringr)
 library(tidyr)
+library(dplyr)
 library(magrittr)
+
 
 
 ```
@@ -33,6 +35,9 @@ library(magrittr)
 
 
 ```{r read-in the data}
+
+# load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 # Set working directory
 if (file.exists("/home/amovas/")) {
@@ -99,14 +104,15 @@ quals_gathered$average_depth <- log10(quals_gathered$average_depth)
 # box plot
 quals_gathered_iii <- quals_gathered %>% filter(virus_line_no %in% 13:16) %>%
         mutate(virus_line_no = case_when(virus_line_no==13 ~ "MT-2_1", virus_line_no==14 ~ "MT-2_2", virus_line_no==15 ~ "MT-4_1", virus_line_no==16 ~ "MT-4_2")) %>%
-        mutate(virus_line_no = factor(virus_line_no, levels = exp_line_factor))
+        mutate(virus_line_no = factor(virus_line_no, levels = names(line_col_palette)))
 
 depth_summary <- ggplot(data=quals_gathered_iii, aes(x = amplicon, y = average_depth,fill=virus_line_no))+
     geom_boxplot()+
     scale_fill_manual(values = line_col_palette) +
     labs(title = "Sequencing Depth", x = "Amplicons", y = "Average sequencing depth (log10)", fill = "Population") +
-    scale_x_discrete(labels = c("Amp-A", "Amp_A","Amp_B","Amp_C","Amp_D","Amp_E", "Amp-E")) +
+    scale_x_discrete(labels = c("5'UTR", "Amp_A","Amp_B","Amp_C","Amp_D","Amp_E", "3'UTR")) +
     scale_y_continuous(limit = c(-0.5,5), breaks = c(1,2,log10(200),3,4,5), labels = c("1", "2", "~2.3", "3", "4", "5")) +
+    geom_hline(yintercept = mean(quals_gathered_iii$average_depth), linetype="solid") +
     geom_hline(yintercept = log10(200), linetype="dashed") +
     custom_plot_theme(application = "publication")
 

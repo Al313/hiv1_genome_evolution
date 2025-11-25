@@ -78,15 +78,19 @@ if (category == "Minority"){
 
 # get numbers for in-text reporting
 variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & allele_freq < max_threshold) #& mut_type == "P"
+                                filter(allele_freq >= 0.05 & allele_freq < max_threshold & mut_type == "P")
 
-
+nrow(variants_expiii_subset)
 
 
 variants_expiii_subset_mt2 <- variants_expiii_subset[variants_expiii_subset$host_line == "MT2",]
 variants_expiii_subset_mt4 <- variants_expiii_subset[variants_expiii_subset$host_line == "MT4",]
-b_mt2 <- length(unique(variants_expiii_subset_mt2$mut_info))
-b_mt4 <- length(unique(variants_expiii_subset_mt4$mut_info))
+b_mt2_1 <- length(unique(variants_expiii_subset_mt2$genomic_pos[variants_expiii_subset_mt2$exp_line == "MT-2_1"]))
+b_mt2_2 <- length(unique(variants_expiii_subset_mt2$genomic_pos[variants_expiii_subset_mt2$exp_line == "MT-2_2"]))
+b_mt2 <- length(unique(variants_expiii_subset_mt2$genomic_pos))
+b_mt4_1 <- length(unique(variants_expiii_subset_mt4$genomic_pos[variants_expiii_subset_mt4$exp_line == "MT-4_1"]))
+b_mt4_2 <- length(unique(variants_expiii_subset_mt4$genomic_pos[variants_expiii_subset_mt4$exp_line == "MT-4_2"]))
+b_mt4 <- length(unique(variants_expiii_subset_mt4$genomic_pos))
 b_mt2/b_mt4
 
 
@@ -147,10 +151,9 @@ df %<>% set_colnames(c("exp_line", "passage", "count")) %>%
             mutate_at(2:3, as.numeric)
 
 # visualize 
-
 fig <- df %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         geom_line(linewidth=2) +
-        labs(x="Transfer", y= "Cumulative number of mutated positions (> 0.05)", color = "Population", title = paste0("Number of unique point mutations (",category,")"))+
+        labs(x="Transfer", y= "Cumulative number of mutated positions", color = "Population", title = paste0("Number of unique point mutations (",category,")"))+
         geom_hline(yintercept = mean(df$count[df$passage == 500 & df$exp_line %in% c("MT-2_1","MT-2_2")], na.rm = TRUE), linetype = "dashed", linewidth = 2, color = "#ff8b08") +
         geom_hline(yintercept = mean(df$count[df$passage == 500 & df$exp_line %in% c("MT-4_1","MT-4_2")], na.rm = TRUE), linetype = "dashed", linewidth = 2, color = "#00bbff") +
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
@@ -283,3 +286,52 @@ custom_plot_save(fig, paste0(tolower(category),"_disappearance.pdf"), height = 1
 
 
 
+```{r gif of cumulative mutated sites over time per min_threshold}
+
+# df <- data.frame()
+# variants_expiii_subset <- variants_expiii %>% mutate(passage = as.numeric(as.character(passage)))
+
+# for (exp_line in exp_line_factor){
+#     for (min_threshold in seq(0.01,0.99, by=0.01)){
+#         for (passage in seq(10,end_psg, 10)){
+#             print(passage)
+#             count <- length(unique(variants_expiii_subset$genomic_pos[variants_expiii_subset$allele_freq >= min_threshold & variants_expiii_subset$passage <= passage & variants_expiii_subset$exp_line == exp_line & variants_expiii_subset$mut_type == "P"]))
+#             df <- rbind(df, c(exp_line, min_threshold, passage, count))
+#         }
+#     }
+# }
+
+
+
+# df %<>% set_colnames(c("exp_line", "min_threshold", "passage", "count")) %>%
+#             mutate_at(2:4, as.numeric)
+
+# saveRDS(df, file = paste0(wd, "results/tables/misc/cumulative_mutated_sites_over_time_per_min-threshold.rds"))
+
+df <- readRDS(file = paste0(wd, "results/tables/misc/cumulative_mutated_sites_over_time_per_min-threshold.rds"))
+
+gg_fig <- ggplot(df, aes(x=passage, y = count)) + 
+    geom_line(aes(color=exp_line), linewidth=1) +
+    scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
+    transition_states(min_threshold, transition_length = 1, state_length = 1, wrap = TRUE) + # to create animation 
+    view_follow(fixed_y = FALSE) +
+    labs(title = "min_threshold = {closest_state}", x = "Passage", y = "Count") +
+    theme_bw() +
+    theme(
+    plot.title = element_text(size = 25, hjust = 0.5),
+    axis.title = element_text(size = 20),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    strip.text.x = element_text(size = 25),
+    legend.title = element_text(size=15),
+    legend.text = element_text(size = 10),
+    plot.margin = unit(c(1,1,1,1), "cm"))
+
+
+
+# save for lteeviz
+fig_dir <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/figs/gif/"
+anim_save(gg_fig, file = paste0(fig_dir, "cumulative_mutated_sites_over_time_per_min-threshold.gif"))
+
+
+```

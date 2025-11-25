@@ -35,6 +35,7 @@ library(gridExtra)
 library(grid)
 library(magrittr)
 library(ggh4x)
+library(performance)
 
 
 ```
@@ -190,6 +191,19 @@ model_trend1 <- glmer.nb(
 
 summary(model_trend1)
 
+# comparing the model performance with a simple linear model revealed that
+# a GLM with NB distribution is more appropriate due to count data nature (lower AIC and better R2)
+# model_trend1_lm <- lm(
+#   n ~ bin_mid_scaled * group,
+#   data = t_2_f_summary[t_2_f_summary$host == "MT-2", ]
+# )
+
+# summary(model_trend1_lm)
+
+
+# AIC(model_trend1, model_trend1_lm)
+# r2(model_trend1)
+# summary(model_trend1_lm)$r.squared
 
 
 model_trend2 <- glmer.nb(
@@ -199,8 +213,6 @@ model_trend2 <- glmer.nb(
 
 summary(model_trend2)
 
-
-library(performance)
 
 
 ```
@@ -361,7 +373,7 @@ cat("\nPDF saved as: glmer_model_comparison.pdf\n")
 # =====================================================
 # PDF with Tables (Detailed)
 # =====================================================
-pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/reports/glmer_comparison_detailed.pdf", width = 11, height = 8.5)
+pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/figures/glmer_comparison_detailed.pdf", width = 11, height = 8.5)
 
 grid.text("GLMER Model Summary for MT-2 and MT-4", 
           x = 0.5, y = 0.95, 
@@ -435,7 +447,11 @@ t_2_f_summary <- t_2_f_summary %>%
 
 # Plot observed bars + predicted trends
 fig_pred <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = exp_line)) +
-    facet_grid(group ~ host, scales = "free_y") +
+    facet_grid(group ~ host, 
+      scales = "free_y", 
+      labeller = labeller(group = c(
+      "Line-specific"   = "Neutral (line-specific)",
+      "Highly-parallel" = "Adaptive (highly-parallel)"))) +
     geom_bar(stat = "identity", color = "white") +
     geom_ribbon(aes(ymin = pred_low, ymax = pred_high, fill = "grey", group = group),
             alpha = 0.5) +
