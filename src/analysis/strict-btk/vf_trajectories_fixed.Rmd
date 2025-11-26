@@ -1,0 +1,163 @@
+---
+title:  
+    "variant freq. dynamics"
+date: 
+    "May 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(stringr)
+library(RColorBrewer)
+library(ggrepel)
+
+
+```
+
+
+
+```{r set paths and load data}
+
+# set working directory
+if (file.exists("/home/amovas/")) {
+    # running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    # running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load project-specific functions and data readers
+source(paste0(wd, "src/analysis/strict-btk/readin_data.R"))
+source(paste0(wd, "src/analysis/strict-btk/plot_custom.R"))
+
+```
+
+
+
+```{r category thresholds}
+
+# set parameters
+category <- "Fixed"
+
+if (category == "Minority"){
+    min_threshold <- 0.01
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
+```
+
+```{r trajectories of fixed variants}
+
+variants_2exp_subset0 %<>% filter(exp_dataset == "SB")
+
+fix_count_table <- table(variants_2exp_subset0$mut_info[variants_2exp_subset0$exp_dataset == "SB" & 
+    variants_2exp_subset0$allele_freq >= 0.99 & 
+    variants_2exp_subset0$passage == end_psg])
+
+fix_count_table_list <- list("6" = fix_count_table[fix_count_table==6],
+    "5" = fix_count_table[fix_count_table==5],
+    "4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+
+
+variants_2exp_subset <- variants_2exp_subset0 %>%
+                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
+                                passage = as.numeric(as.character(passage)))
+
+
+
+fixed_muts <- unique(variants_2exp_subset$mut_info_line[variants_2exp_subset$allele_freq >= 0.99])
+variants_2exp_subset <- variants_2exp_subset[variants_2exp_subset$mut_info_line %in% fixed_muts,]
+
+for (i in 1:nrow(variants_2exp_subset)){
+    matching_index <- which(sapply(fix_count_table_list, function(x) variants_2exp_subset$mut_info[i] %in% names(x)))
+    if (length(matching_index) == 0) {
+        variants_2exp_subset$rep[i] <- 1
+    } else {
+        variants_2exp_subset$rep[i] <- names(fix_count_table_list)[matching_index]
+    }
+    
+}
+
+
+
+blues_colors <- c("#86d8ef", "#15f4ee", "#6ea9a9", "#b3b3ff","#4A90E2",
+"#0066CC", "#5A4FCF", "#610087", "#0000CD", "#191970")
+
+triples <- blues_colors
+names(triples) <- unique(variants_2exp_subset$mut_info[variants_2exp_subset$rep == "3"])[order(substr(unique(variants_2exp_subset$mut_info[variants_2exp_subset$rep == "3"]), 2, 5))]
+
+reds_colors <- brewer.pal(5, "Reds")[3:5]
+quad <- reds_colors
+names(quad) <- unique(variants_2exp_subset$mut_info[variants_2exp_subset$rep == "4"])
+
+
+
+variants_2exp_subset %<>%
+    mutate(mut_info2 = case_when(rep == 1 ~ "1 out of 4",
+                                rep == 2 ~ "2 out of 4",
+                                rep == 3 ~ mut_info,
+                                rep == 4 ~ mut_info)) %>%
+    mutate(mut_info2 = factor(mut_info2, levels = c("1 out of 4", "2 out of 4", names(triples), names(quad))))
+
+
+
+custom_colors <- c(
+    "1 out of 4" = alpha("grey", 0.3),
+    "2 out of 4" = alpha("green", 0.6)
+)
+custom_colors <- c(custom_colors, triples, quad)
+
+
+variants_2exp_subset$linewidth[variants_2exp_subset$rep %in% 3:4] <- 3
+variants_2exp_subset$linewidth[is.na(variants_2exp_subset$linewidth)] <- 2
+
+
+
+fig <- variants_2exp_subset %>% ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = mut_info2, linewidth = linewidth)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 2) +
+    labs(title = "Variant Frequency Trajectories", y = "Frequency", x = "Transfer", color = "Fixed mutation") +
+    scale_color_manual(values = custom_colors) +
+    scale_x_continuous(breaks = seq(0,end_psg, 50))+
+    scale_linewidth(range = c(2, 3)) +
+    custom_plot_theme(application = "publication", scale = 1.5) +
+        guides(linewidth = "none",
+        color = guide_legend(override.aes = list(linewidth = 8)))
+
+
+# save figure
+custom_plot_save(fig, paste0("frequency_dynamics_per_repeated_", category, ".pdf"), height = 21, width = 42)
+
+```

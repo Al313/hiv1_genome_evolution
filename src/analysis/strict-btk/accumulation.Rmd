@@ -117,7 +117,7 @@ counts <- counts %>%
 
 fig <- counts %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
         geom_line(linewidth=2) +
-        labs(x="\nTransfer", y= paste0(category, " variant count\n"), color = "Lineage", title = "")+
+        labs(x="\nTransfer", y= paste0(category, " mutation count\n"), color = "Population", title = "")+
         scale_y_continuous(limits = c(0,max(counts$mut_count, na.rm = TRUE)+20),breaks = seq(0,max(counts$mut_count, na.rm = TRUE)+20,20)) +
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
@@ -133,15 +133,34 @@ custom_plot_save(fig, paste0(category, "_accumulation.pdf"), height = 14, width 
 
 ```{r in-text variables}
 
-# get numbers for in-text reporting
-variants_expiii_subset <- variants_expiii %>%
-                                filter(allele_freq >= min_threshold & allele_freq < max_threshold) #& mut_type == "P"
+# total number of unique fixed mutations per lineage at the end of experiment
+variants_2exp %>% 
+    filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+    filter(passage == end_psg) %>%
+    group_by(exp_line, exp_dataset) %>%
+    summarise(count = n()) %>%
+    ungroup() %>%
+    group_by(exp_dataset) %>%
+    summarise(overall = mean(count))
 
 
 
-# in-text numbers
-overall_fixed <- length(unique(paste0(variants_expiii_subset$exp_line,variants_expiii_subset$mut_info)))
-unique_fixed <- length(unique(variants_expiii_subset$mut_info))
+# total number of unique fixed mutations at the end of experiment
+variants_2exp %>% 
+    filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+    filter(passage == end_psg) %>%
+    select(mut_info) %>%
+    distinct() %>%
+    nrow()
+
+# total number of fixed mutation instances at the end of experiment
+variants_2exp %>% 
+    filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+    filter(passage == end_psg) %>%
+    select(mut_info) %>%
+    nrow()
+
+
 
 
 ```
@@ -178,23 +197,21 @@ counts <- counts %>%
 
 
 
-counts %<>% mutate(exp_dataset = ifelse(exp_line %in% c("MT-2_1", "MT-2_2"), "2E", "BTK")) %>%
+counts %<>% mutate(exp_dataset = ifelse(exp_line %in% c("MT-2_1", "MT-2_2"), "RB", "SB")) %>%
             mutate(exp_dataset = factor(exp_dataset, levels = exp_factor))
 
 # visualize
-
 fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
         geom_line(linewidth=1) +
         facet_wrap(~exp_dataset) +
         labs(title = paste0("Normalized ",category, " Mutation Accumulation \n (Coding vs Non-Coding)"),
-        x="\nTransfer", y=paste0("Normalized ", tolower(category), " variant count (%)\n"), color = "Lineage", linetype = "Region")+
+        x="\nTransfer", y=paste0("Normalized ", tolower(category), " variant count (%)\n"), color = "Population", linetype = "Region")+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$density, na.rm = TRUE)+1),breaks = seq(0,max(counts$density, na.rm = TRUE)+1,0.5)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication")
 
 # save figure
-
 custom_plot_save(fig, paste0(tolower(category), "_accumulation_coding_vs_noncoding.pdf"), height = 14, width = 14)
 
 ```

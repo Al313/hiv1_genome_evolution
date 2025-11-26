@@ -1,0 +1,85 @@
+---
+title:  
+    "variant freq. trajectories of certain cases of EXPIII"
+date: 
+    "May 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(stringr)
+library(RColorBrewer)
+library(ggrepel)
+
+
+```
+
+
+
+```{r set paths and load data}
+
+# set working directory
+if (file.exists("/home/amovas/")) {
+    # running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    # running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load project-specific functions and data readers
+source(paste0(wd, "src/analysis/strict-btk/readin_data.R"))
+source(paste0(wd, "src/analysis/strict-btk/plot_custom.R"))
+
+
+```
+
+
+
+
+```{r arbitrary cases}
+
+cases <- c("G5671A", "T9528G", "G618A", "TGTTTAATAGTACTTG7383T")
+case <- cases[4]
+case <- "9412_G_A"
+
+fig <- variants_2exp[variants_2exp$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
+    geom_line() +
+    facet_wrap(~exp_line, ncol = 1) +
+    scale_alpha_manual(values = c(0.1,1)) +
+    scale_y_continuous(breaks = c(0, -1, -2, -3), labels = c("1", "0.1", "0.01", "0.001")) +
+    labs(title = paste0(case, "\n"), y = "Frequency \n", x = "\n Transfer") +
+    # scale_color_manual(values = my_col_pal) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 55, hjust = 0.5),
+        axis.title = element_text(size = 45),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 30),
+        strip.text.x = element_text(size = 35, angle=0),
+        legend.position="none")
+
+fig
+
+```
+
+

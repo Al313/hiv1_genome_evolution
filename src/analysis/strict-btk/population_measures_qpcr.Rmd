@@ -1,0 +1,219 @@
+---
+title:  
+    "qpcr results"
+date: 
+    "May 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+
+# load libraries
+library(readxl)
+library(stringr)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+
+# define functions
+`%notin%` <- Negate(`%in%`)
+
+```
+
+```{r read-in qpcr data}
+
+
+# determine the server path
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+
+
+line_col_palette <- c("#ff00ff", "#ff2400", "#66ff66", "#00cc99", "#009900", "#558000")
+names(line_col_palette) <- exp_line_factor
+
+
+
+data <- read_excel(paste0(wd, "data/titration/SummaryMasterfile_qPCR_Titers.xlsx"), sheet = 1, skip = 1)
+
+# determine what data to be included
+end_psg <- 630
+
+data %<>% 
+        filter(exp_line %in% c(13:14, 17:20),
+        passage <= end_psg) 
+
+
+
+# correct for the switched experimental lines
+data$exp_line[data$exp_line == 18 & data$passage > 350] <- "A"
+data$exp_line[data$exp_line == 19 & data$passage > 350] <- "B"
+
+
+data$exp_line[data$exp_line == "A"] <- "19"
+data$exp_line[data$exp_line == "B"] <- "18"
+
+
+
+
+
+# remove duplicates
+data <- data[!(data$exp_line == 16 & data$passage == 340 & data$cDNA_Date == "1) 09.06.2021"),]
+data <- data[!(data$exp_line == 16 & data$passage == 360 & data$cDNA_Date == "3) 09.06.2021"),]
+
+data <- data[!(data$exp_line == 15 & data$passage == 370 & data$cDNA_Date == "4) 09.06.2021"),]
+data <- data[!(data$exp_line == 15 & data$passage == 380 & data$cDNA_Date == "5) 09.06.2021"),]
+data <- data[!(data$exp_line == 15 & data$passage == 390 & data$cDNA_Date == "6) 09.06.2021"),]
+
+# qPCR repeats for later time points
+data <- data[!(data$exp_line %in% 13:14 & str_detect(data$cDNA_Date, "25.02.2025")),]
+
+data %<>% mutate(exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv")) # update exp line labels
+
+
+
+
+```
+
+
+```{r dilution factor calculation}
+
+
+# exceptional case where 17 microliter of water added
+data[data$`ul-H2O-added-to-reach-17ul` == "17",]
+data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "17"] <- "16"
+
+# modify data to calculate dilution factor of later measurements 
+data$`ul-H2O-added-to-reach-17ul`[data$`ul-H2O-added-to-reach-17ul` == "1:10 Dilution!"] <- "15.3"
+
+# get the dilution factor
+dilution_factor <- (17 - as.numeric(data$`ul-H2O-added-to-reach-17ul`))/17
+
+
+# get the copy number per ml based on average quantity
+data$mean_quantity_per_ml_cell_culture_supernatant <- data$mean_quantity*70*dilution_factor^(-1)
+
+
+
+```
+
+```{r remove problematic data points}
+
+
+data_cleaned1 <- data[data$exp_line %in% c("MT-2_1", "MT-2_2"),] %>% filter(mean_quantity_per_ml_cell_culture_supernatant > 10^8)
+data_cleaned2 <- data[data$exp_line %in% c("MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv"),] %>% filter(mean_quantity_per_ml_cell_culture_supernatant > 10^5)
+data_cleaned <- rbind(data_cleaned1, data_cleaned2)
+```
+
+
+```{r plot qpcr result}
+
+
+
+data_cleaned$passage <- as.numeric(data_cleaned$passage)
+data_cleaned$exp_line <- factor(data_cleaned$exp_line, levels = names(line_col_palette))
+
+# data_cleaned$mean_quantity_per_ml_cell_culture_supernatant[data_cleaned$passage >= 580] <- data_cleaned$mean_quantity_per_ml_cell_culture_supernatant[data_cleaned$passage >= 580]/10
+
+# fit linear models for each group and extract p-values
+model_A <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == names(line_col_palette)[1], ])
+model_B <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == names(line_col_palette)[2], ])
+model_C <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == names(line_col_palette)[3], ])
+model_D <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == names(line_col_palette)[4], ])
+model_E <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == names(line_col_palette)[5], ])
+model_F <- lm(log10(mean_quantity_per_ml_cell_culture_supernatant) ~ passage, data = data_cleaned[data_cleaned$exp_line == names(line_col_palette)[6], ])
+
+# extract the p-values
+p_value_A <- summary(model_A)$coefficients[2, 4]  
+p_value_B <- summary(model_B)$coefficients[2, 4]
+p_value_C <- summary(model_C)$coefficients[2, 4]  
+p_value_D <- summary(model_D)$coefficients[2, 4]
+p_value_E <- summary(model_E)$coefficients[2, 4]
+p_value_F <- summary(model_F)$coefficients[2, 4]
+
+# create a data_cleaned.frame for annotation
+p_value_df <- data.frame(exp_line = names(line_col_palette), p_val = c(p_value_A, p_value_B, p_value_C, p_value_D, p_value_E, p_value_F))
+
+
+# make the ggplot object
+
+
+
+qpcr_fig <- data_cleaned %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
+                facet_wrap(~exp_line) +
+                geom_line() +
+                geom_point() +
+                geom_smooth(method = "lm", se = FALSE) +
+                scale_x_continuous(breaks = seq(0, 700, by = 50)) +
+                geom_text(data = p_value_df, aes(x = Inf, y = Inf, label = paste0("P value = ", round(p_val, 3))),
+                hjust = 1.1, vjust = 2, size = 7, inherit.aes = FALSE) +
+                labs(title = "qPCR result", x = "Transfer", y = "Log10 (RNA copy/ml)", color = "Population") +
+                #ylim(c(1000000,40000000)) +
+                scale_color_manual(values = line_col_palette) +
+                custom_plot_theme(application = "publication") +
+                theme(legend.position = "top")
+
+
+
+# save figure
+custom_plot_save(qpcr_fig, "qpcr.pdf", height = 14, width = 14)
+
+
+
+```
+
+```{r qPCR average estimates}
+
+library(boot)
+
+log10(mean(data_cleaned$mean_quantity_per_ml_cell_culture_supernatant))
+# Define a function to calculate the statistic of interest (e.g., mean)
+mean_stat <- function(data_cleaned, indices) {
+  return(mean(data_cleaned[indices]))
+}
+
+boot_results <- boot(data_cleaned$mean_quantity_per_ml_cell_culture_supernatant, statistic = mean_stat, R = 1000)
+
+ci <- boot.ci(boot_results, type = "perc")
+
+log10(ci$percent[4:5])
+
+
+
+
+```
+
+```{r}
+
+
+# The qPCR levels for none of the cell lines is statistically difference from one another
+
+pairwise.t.test(data_cleaned$mean_quantity_per_ml_cell_culture_supernatant, data_cleaned$exp_line, p.adjust.method = "none")
+
+
+
+```

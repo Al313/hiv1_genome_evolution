@@ -36,30 +36,22 @@ library("tidyr")
 
 ```{r read-in variant data}
 
-# determine the server path
-
-if (file.exists("/home/amovas/")){
-    print("Remote HPC Connection!")
+# set working directory
+if (file.exists("/home/amovas/")) {
+    # running on HPC
+    message("Remote HPC Connection!")
     wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-    print("Local PC Connection!")
+    # running locally
+    message("Local PC Connection!")
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
-
-source(paste0(wd, "src/analysis/strict-btk/readin_data.r"))
-
-```
-
-```{r load visualization settings}
-# Visual settings
-
-source(paste0(wd, "src/analysis/strict-btk/plot_custom.r"))
-
+# load project-specific functions and data readers
+source(paste0(wd, "src/analysis/strict-btk/readin_data.R"))
+source(paste0(wd, "src/analysis/strict-btk/plot_custom.R"))
 
 ```
-
 
 ```{r category thresholds}
 

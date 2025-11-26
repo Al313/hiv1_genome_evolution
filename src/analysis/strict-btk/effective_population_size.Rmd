@@ -1,0 +1,174 @@
+---
+title:  
+    "Effective population size of EXPIII"
+date: 
+    "Dec 18th, 2024"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(dplyr)
+library(magrittr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(purrr)
+library(ggrepel)
+
+
+```
+
+
+
+
+```{r set paths and load data}
+
+# set working directory
+if (file.exists("/home/amovas/")) {
+    # running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    # running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load project-specific functions and data readers
+source(paste0(wd, "src/analysis/strict-btk/readin_data.R"))
+source(paste0(wd, "src/analysis/strict-btk/plot_custom.R"))
+
+```
+
+
+
+
+
+## Effective population size
+
+```{r measure variance ne}
+
+## estimating the effective population size (Variance Effective Size) by this formula: Ne ≈ p(1−p)/Var(Δp)
+## if there are more than one generation between the time points: 1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/20)))
+
+df <- data.frame()
+
+
+# exp_line <- "MT-4_1"
+# pres_psg <- 130
+# trans_effect <- "S"
+
+# 8787 9408
+for (exp_line in names(line_col_palette)){
+    
+    print(exp_line)
+    
+    for (trans_effect in c("S", "ALL")) {
+        if (trans_effect == "ALL"){
+            variants_2exp_sub <- variants_2exp[variants_2exp$exp_line == exp_line & variants_2exp$genomic_pos >= 8787 & variants_2exp$genomic_pos <= 9408,]
+        } else {
+            variants_2exp_sub <- variants_2exp[variants_2exp$exp_line == exp_line & variants_2exp$effect_simplified == trans_effect,]
+        }
+        
+        # set generation number between time points
+        gen_nr <- 30
+
+        for (pres_psg in seq(20,630,10)){
+            print(pres_psg)
+            prev_psg <- pres_psg - 10
+            
+            pres_muts <- unique(variants_2exp_sub$mut_info[variants_2exp_sub$passage == pres_psg & variants_2exp_sub$allele_freq >= 0.01])
+            prev_muts <- unique(variants_2exp_sub$mut_info[variants_2exp_sub$passage == prev_psg & variants_2exp_sub$allele_freq >= 0.01])
+            union_muts <- union(pres_muts, prev_muts)
+            intersect_muts <- intersect(pres_muts, prev_muts)
+            
+            delta_afs <- c()
+            for (mut in intersect_muts){
+                if (mut %in% pres_muts){
+                    pres_mut_af <- variants_2exp_sub$allele_freq[variants_2exp_sub$passage == pres_psg & variants_2exp_sub$mut_info == mut]
+                } else {pre_mut_af <- 0}
+                if (mut %in% prev_muts){
+                    prev_mut_af <- variants_2exp_sub$allele_freq[variants_2exp_sub$passage == prev_psg & variants_2exp_sub$mut_info == mut]
+                } else {prev_mut_af <- 0}
+                
+                delta_af <- pres_mut_af - prev_mut_af
+                delta_afs <- append(delta_afs, delta_af)
+            }
+            
+            af_pres <- sum(variants_2exp_sub$allele_freq[variants_2exp_sub$passage == pres_psg & variants_2exp_sub$allele_freq >= 0.01])
+            af_prev <- sum(variants_2exp_sub$allele_freq[variants_2exp_sub$passage == prev_psg & variants_2exp_sub$allele_freq >= 0.01])
+            af_ave <- af_pres/length(pres_muts)
+            
+            Ne <- tryCatch({1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/gen_nr)))}, error = function(e){NA})
+            
+            df <- rbind(df, c(exp_line, trans_effect, pres_psg, length(union_muts), length(intersect_muts), af_ave, tryCatch({var(delta_afs)}, error = function(e){NA}), Ne))
+        }
+    }
+    
+}
+
+
+
+df %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "intersect_count", "average_allele_freq", "var_freq_change", "Ne")) %>%
+        mutate(
+            psg = as.numeric(psg),
+            var_freq_change = as.numeric(var_freq_change),
+            union_count = as.integer(union_count),
+            intersect_count = as.integer(intersect_count),
+            Ne = as.numeric(Ne))
+
+
+
+# save data on disk
+save(df, file = paste0(wd,"results/tables/misc/variance_effective_size.RData"))
+
+```
+
+
+```{r visualize variance ne}
+
+load(paste0(wd,"results/tables/misc/variance_effective_size.RData")) # or all of genome: variance_effective_size.RData
+
+
+
+df_subset <- df[df$effect_simplified == "S",]
+# plot Ne
+fig <- df_subset %>% ggplot(aes(x = psg, y = log10(Ne), col = exp_line)) +
+        # facet_wrap(~ exp_line) +
+        geom_line() +
+        geom_hline(yintercept = log10(median(df_subset$Ne[df_subset$exp_line %in% c("MT-2_1","MT-2_2")], na.rm = TRUE)), linetype = "dashed", linewidth = 2, color = "#ff8b08") +
+        geom_hline(yintercept = log10(median(df_subset$Ne[df_subset$exp_line %in% c("MT-2_i","MT-2_ii","MT-2_iii","MT-2_iv")], na.rm = TRUE)), linetype = "dashed", linewidth = 2, color = "green") +
+        scale_y_continuous(breaks = seq(1.5,4,0.5),limits = c(1.5,4))+
+        scale_x_continuous(breaks = seq(0,500,50),limits = c(0,500))+
+        scale_color_manual(values = line_col_palette) +
+        geom_smooth(method = "loess", se = FALSE) +
+        labs(x= "Transfer", y = "Log10(Ne)", title = "Variance Effective Population Size (nef Variants) \n", color = "Population") + # Label for the legend
+        custom_plot_theme(application = "publication")
+
+
+
+
+# save figure
+custom_plot_save(fig, "variance_ne_syn.pdf", height = 14, width = 14)
+
+log10(median(df_subset$Ne[df_subset$exp_line %in% c("MT-2_1","MT-2_2")], na.rm = TRUE))
+log10(median(df_subset$Ne[df_subset$exp_line %in% c("MT-2_i","MT-2_ii","MT-2_iii","MT-2_iv")], na.rm = TRUE))
+```
+

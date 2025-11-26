@@ -45,7 +45,7 @@ variants_ann_2exp <- rbind(variants_ann_expiii, variants_ann_expiv)
 
 # determine what data to be included
 
-end_psg <- 700
+end_psg <- 630
 
 variants_ann_2exp <- variants_ann_2exp %>% filter(passage <= end_psg) %>%
         mutate(feature = ifelse(feature == "envelope", "env", feature)) # correct the feature name
@@ -54,7 +54,7 @@ variants_ann_2exp <- variants_ann_2exp %>% filter(passage <= end_psg) %>%
 
 
 # facors
-exp_factor <- c("2E", "BTK")
+exp_factor <- c("RB", "SB")
 exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-2_i", "MT-2_ii", "MT-2_iii", "MT-2_iv")
 translational_impacts <- c("U", "S", "N")
 gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "env", "nef")
@@ -80,7 +80,7 @@ feature_df$feature <- factor(feature_df$feature, levels = c("5R","5UTR", "5LTRLS
 # format the dataframe
 variants_ann_2exp <- variants_ann_2exp %>%
                             filter(exp_line %in% c(13:14,17:20) & allele_freq >= 0.01) %>%
-                            mutate(exp_dataset = ifelse(exp_line %in% c("13", "14"), "2E", "BTK"), # set host cell line info
+                            mutate(exp_dataset = ifelse(exp_line %in% c("13", "14"), "RB", "SB"), # set host cell line info
                             exp_line = case_when(exp_line==13 ~ "MT-2_1", exp_line==14 ~ "MT-2_2", exp_line==17 ~ "MT-2_i", exp_line==18 ~ "MT-2_ii", exp_line==19 ~ "MT-2_iii", exp_line==20 ~ "MT-2_iv"), # update exp line labels
                             mut_info = paste(genomic_pos, ref_allele, alt_allele, sep = "_")) %>% 
                             mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
