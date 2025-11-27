@@ -133,25 +133,6 @@ fig <- counts %>%  ggplot(aes(x=passage, y = normalized_rate, color = exp_line, 
 custom_plot_save(fig, paste0(category, "_mut_accumulation_ds_vs_dn.pdf"), height = 14, width = 14)
 ```
 
-```{r in-text numbers}
-## compute effect sizes
-# Filter data for each condition
-ds_data <- counts$normalized_rate[counts$exp_line %in% c("MT-2_1","MT-2_2") & counts$effect_simplified == "dS"]
-dn_data <- counts$normalized_rate[counts$exp_line %in% c("MT-2_1","MT-2_2") & counts$effect_simplified == "dN"]
-
-# Perform the paired t-test
-t_test_result <- t.test(ds_data, dn_data, paired = TRUE)
-
-# Calculate the differences
-differences <- ds_data - dn_data
-
-# Compute Cohen's d
-mean_diff <- mean(differences)
-sd_diff <- sd(differences)
-cohen_d <- mean_diff / sd_diff
-
-
-```
 
 ```{r dn/ds over time}
 
