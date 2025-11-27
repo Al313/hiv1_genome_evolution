@@ -35,28 +35,41 @@ library("magrittr")
 ```
 
 
-
-```{r read-in variant data}
+```{r set paths and load data}
 
 # set working directory
-if (file.exists("/home/amovas/")){
-    print("Remote HPC Connection!")
+if (file.exists("/home/amovas/")) {
+    # running on HPC
+    message("Remote HPC Connection!")
     wd <- "/home/amovas/data/genome-evo-proj/"
 } else {
-    print("Local PC Connection!")
+    # running locally
+    message("Local PC Connection!")
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# load data
+# load project-specific functions and data readers
 source(paste0(wd, "src/analysis/strict-btk/readin_data.R"))
+source(paste0(wd, "src/analysis/strict-btk/plot_custom.R"))
+
 
 ```
 
-```{r load visualization settings}
+```{r category thresholds}
 
-# Visual settings
-source(paste0(wd, "src/analysis/strict-btk/plot_custom.r"))
+# set parameters
+category <- "Fixed"
 
+if (category == "Minority"){
+    min_threshold <- 0.01
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
 ```
 
 

@@ -25,6 +25,8 @@ output:
 
 # loading libraries
 library(dplyr)
+library(tidyr)
+library(magrittr)
 library(stringr)
 library(ggplot2)
 library(reshape2)
@@ -82,6 +84,7 @@ possible_muts <- c(0.22, 0.78, 1, 1)
 
 
 
+
 overall_df <- data.frame()
 
 for (k in 4){
@@ -101,40 +104,42 @@ for (k in 4){
     for (line1 in exp_line_factor){
         for (line2 in exp_line_factor){
             if (str_detect(line1, "MT-2_i")){
-                offset1 <- 140 # median(df$time_to_fixation[df$exp_line %in% c("MT-2_1","MT-2_2")])
+                offset1 <- 100 # median(df$time_to_fixation[df$exp_line %in% c("MT-2_1","MT-2_2")])
             } else {
                 offset1 <- 140 # median(df$time_to_fixation[df$exp_line %in% c("MT-4_1","MT-4_2")])
             }
 
             if (str_detect(line2, "MT-2_i")){
-                offset2 <- 140
+                offset2 <- 100
             } else {
                 offset2 <- 140
             }
 
             exp_all <- data.frame()
-            for (base in c("A", "C", "G", "T")){
-                variants_2exp_sub <- variants_2exp[variants_2exp$ref_allele == base & variants_2exp$genomic_pos %in% regions[[k]] & variants_2exp$mut_type == "P",]
-                minority1 <- length(unique(variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line1) & variants_2exp_sub$passage <= end_psg-offset1]))
-                minority2 <- length(unique(variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line2) & variants_2exp_sub$passage <= end_psg-offset2]))
-                shared_minority <- length(intersect(variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line1) & variants_2exp_sub$passage <= end_psg-offset1],variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line2) & variants_2exp_sub$passage <= end_psg-offset2]))
+            for (base1 in c("A", "C", "G", "T")){
+                for (base2 in setdiff(c("A", "C", "G", "T"), base1)){
+                    variants_2exp_sub <- variants_2exp[variants_2exp$ref_allele == base1 & variants_2exp$alt_allele == base2 & variants_2exp$genomic_pos %in% regions[[k]] & variants_2exp$mut_type == "P",]
+                    minority1 <- length(unique(variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line1) & variants_2exp_sub$passage <= end_psg-offset1]))
+                    minority2 <- length(unique(variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line2) & variants_2exp_sub$passage <= end_psg-offset2]))
+                    shared_minority <- length(intersect(variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line1) & variants_2exp_sub$passage <= end_psg-offset1],
+                        variants_2exp_sub$mut_info[variants_2exp_sub$allele_freq >= 0.05 & variants_2exp_sub$exp_line %in% c(line2) & variants_2exp_sub$passage <= end_psg-offset2]))
 
-                variants_2exp_sub2 <- variants_2exp[variants_2exp$ref_allele == base & variants_2exp$effect_simplified %in% effect[[1]] & variants_2exp$mut_type == "P",]
-                fixed1 <- length(unique(variants_2exp_sub2$mut_info[variants_2exp_sub2$allele_freq >= 0.99 & variants_2exp_sub2$exp_line %in% c(line1) & variants_2exp_sub2$passage == end_psg]))
-                fixed2 <- length(unique(variants_2exp_sub2$mut_info[variants_2exp_sub2$allele_freq >= 0.99 & variants_2exp_sub2$exp_line %in% c(line2) & variants_2exp_sub2$passage == end_psg]))
-                
-                
-                i <- 0
-                
-                exp_base <- integer()
-                while (i <= 1000){
-                    i <- i + 1
-                    j <- sample(1:round(minority1*effect_factor), size = fixed1, replace = F)
-                    z <- sample(1:round(minority2*effect_factor), size = fixed2, replace = F)
-                    exp_base <- c(exp_base,sum(intersect(j,z)<=shared_minority))
+                    variants_2exp_sub2 <- variants_2exp[variants_2exp$ref_allele == base1 & variants_2exp$alt_allele == base2 & variants_2exp$effect_simplified %in% effect[[1]] & variants_2exp$mut_type == "P",]
+                    fixed1 <- length(unique(variants_2exp_sub2$mut_info[variants_2exp_sub2$allele_freq >= 0.99 & variants_2exp_sub2$exp_line %in% c(line1) & variants_2exp_sub2$passage == end_psg]))
+                    fixed2 <- length(unique(variants_2exp_sub2$mut_info[variants_2exp_sub2$allele_freq >= 0.99 & variants_2exp_sub2$exp_line %in% c(line2) & variants_2exp_sub2$passage == end_psg]))
+                    
+                    
+                    i <- 0
+                    
+                    exp_base <- integer()
+                    while (i <= 1000){
+                        i <- i + 1
+                        j <- sample(1:max(round(minority1*effect_factor),fixed1) , size = fixed1, replace = F)
+                        z <- sample(1:max(round(minority2*effect_factor), fixed2), size = fixed2, replace = F)
+                        exp_base <- c(exp_base,sum(intersect(j,z)<=shared_minority))
+                    }
+                    exp_all <- rbind(exp_all, exp_base)
                 }
-
-                exp_all <- rbind(exp_all, exp_base)
             }
 
             
@@ -219,11 +224,12 @@ for (k in 4){
     melted_cormat <- merge(melted_cormat, df[,c(1,2,6,7)], by = c("Var1", "Var2"))
     melted_cormat <- melted_cormat %>%
         mutate(p.val = as.numeric(p.val)) %>%
+        mutate(p.adj = p.adjust(p.val, method = "bonferroni")) %>%
         mutate(p_value_category = case_when(
-            p.val >= 0.05 ~ "n.s.",
-            p.val >= 0.01 & p.val < 0.05 ~ "*",
-            p.val >= 0.001 & p.val < 0.01 ~ "**",
-            p.val < 0.001 ~ "***"
+            p.adj >= 0.05 ~ "n.s.",
+            p.adj >= 0.01 & p.adj < 0.05 ~ "*",
+            p.adj >= 0.001 & p.adj < 0.01 ~ "**",
+            p.adj < 0.001 ~ "***"
         ))
 
     melted_cormat$`expected_%shared` <- round(as.numeric(melted_cormat$`expected_%shared`)*100, digits = 1)
@@ -268,6 +274,7 @@ for (k in 4){
     overall_df <- rbind(overall_df, c(names(effect), "Simulated", mean_exp, se_exp, p_val, cohen_d$estimate, ratio))
 
 }
+
 
 
 ```
