@@ -109,7 +109,7 @@ nef_deletions$deletion_name <- factor(nef_deletions$deletion_name, levels = as.c
 fig <- nef_deletions %>%
     ggplot(aes(x = passage, y = consensus_vf, color = deletion_name, linetype = line_type)) + 
     facet_wrap(~exp_line, ncol = 1) +
-    labs(x="\nTransfer", y= "Deletion frequency\n",  color = "Deletion ID") +
+    labs(x="Transfer", y= "Deletion frequency",  color = "Deletion ID") +
     ggtitle("Frequency of nef Large Deletions in MT-2_1") +
     geom_line(size = 2) +
     custom_plot_theme(application = "publication") +
@@ -124,7 +124,7 @@ custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 14)
 ```
 
 
-```{r time to fixation}
+```{r time to maj and length}
 
 
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
@@ -151,15 +151,62 @@ t_2_m %<>% set_colnames(c("exp_line", "deletion_id", "length", "appearance", "ma
         mutate(exp_line = factor(exp_line, levels = exp_line_factor),
         host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
 
+t_2_m$deletion_id_nm <- str_split(t_2_m$deletion_id, pattern = ":", simplify = TRUE)[,2]
+
 
 fig <- ggplot(t_2_m, aes(x = time_to_majority, y = length, color = exp_line)) +
     geom_point(size = 2) +
+    geom_hline(yintercept = 50, linetype = "dashed") +
     geom_text(aes(label=deletion_id), vjust=-1, size=4) +
     scale_color_manual(values = line_col_palette) +
+    labs(x="Time to 0.5", y= "Deletion length",  color = "Population") +
     custom_plot_theme(application = "publication")
 
 # save figure
 custom_plot_save(fig,  "nef_del_length_vs_time_to_maj.pdf", height = 14, width = 14)
+
+
+t_2_m$group <- ifelse(t_2_m$length >= 30, "Long deletions", "Short deletions")
+
+
+
+# Run t-test
+tt <- t.test(
+    time_to_majority ~ group,
+    data = t_2_m
+)
+
+
+
+# Compute y position for annotation
+y_pos <- max(t_2_m$time_to_majority, na.rm = TRUE)
+
+fig <- ggplot(t_2_m, aes(x = group, y = time_to_majority, fill = group)) +
+    geom_violin(trim = FALSE, alpha = 0.6) +
+    geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
+    annotate(
+        "text",
+        x = 1.5,
+        y = y_pos,
+        label = paste0(
+        "t-test p = ", signif(tt$p.value, 3), "\n",
+        "mean(Long) = ", round(tt$estimate[1], 2), "\n",
+        "mean(Short) = ", round(tt$estimate[2], 2)
+        ),
+        size = 6
+    ) +
+    labs(
+        x = NULL,
+        y = "Time to majority",
+        title = "Time to majority by deletion length",
+        fill = "Group"
+    ) +
+    theme_classic() +
+    theme(legend.position = "none") +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig,  "nef_del_length_vs_time_to_maj_boxplot.pdf", height = 14, width = 14)
 
 ```
 
@@ -195,7 +242,7 @@ fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
     geom_boxplot(outlier.shape = NA, width = 0.2) +
     geom_hline(yintercept = 150, linetype = "dashed") +
     geom_hline(yintercept = 160, linetype = "solid") +
-    # geom_text(aes(label=deletion_id), vjust=-1, size=8) +
+    labs(x="", y= "Time to 0.5 freq.") +
     geom_jitter(width = 0.1, size = 2, alpha = 0.7, color = "darkblue") +
     custom_plot_theme(application = "publication")
 

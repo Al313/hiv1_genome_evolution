@@ -65,7 +65,7 @@ source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
 ```{r load visualization settings}
 
 # source visual settings
-source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
+source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 
 
 ```
@@ -74,9 +74,9 @@ source(paste0(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```{r arbitrary cases}
 
-bertels_cases <- c("5671_G_A", "9528_T_G", "618_G_A")
-case <- bertels_cases[3]
-case <- "7383_TGTTTAATAGTACTTG_T"
+cases <- c("5611_G_A", "5671_G_A", "5672_G_A", "5725_GA_G", "5784_TGTCGACATAGCA_T")
+case <- cases[2]
+
 
 fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
     geom_line() +
@@ -99,240 +99,64 @@ fig
 
 
 
-```{r linkage case}
+```{r high-impact cases}
 
-variants_expiii_subset <- variants_expiii %>%
+variants_expiii_subset <- variants_ann_expiii %>%
                                 mutate(mut_info_line = paste0(exp_line, "_", mut_info),
                                 passage = as.numeric(as.character(passage)))
 
-
-
-fixed_muts <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$allele_freq >= 0.99])
-variants_expiii_subset <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,]
-
-
-variants_expiii_subset_mt21 <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts & variants_expiii_subset$exp_line == "MT-2_1",]
+gene_of_interest <- c("nef")
 
 
 
-intersect(variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$passage == 270 & variants_expiii_subset_mt21$allele_freq >= 0.125],
-variants_expiii_subset_mt21$variant_info[variants_expiii_subset_mt21$passage == 280 & variants_expiii_subset_mt21$allele_freq <= 0.14 ])
+cases <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$feature %in% gene_of_interest & 
+    variants_expiii_subset$impact == "HIGH" & 
+    variants_expiii_subset$allele_freq >= 0.5])
+
+# cases <- c("5611_G_A", "5671_G_A", "5672_G_A", "5725_GA_G", "5784_TGTCGACATAGCA_T")
 
 
-case <- c("972_G_A" , "973_G_A" , "974_G_C")
+variants_expiii_subset <- variants_expiii_subset[variants_expiii_subset$mut_info %in% cases,]
 
-variants_expiii_subset_mt21$tracking_group <- "No"
-variants_expiii_subset_mt21$tracking_group[variants_expiii_subset_mt21$mut_info %in% case] <- "Yes"
-
-variants_expiii_subset_mt21[variants_expiii_subset_mt21$tracking_group == "Yes",]
-
-variants_expiii_subset_mt21 <- variants_expiii_subset_mt21 %>%
+variants_expiii_subset <- variants_expiii_subset %>%
                                 mutate(mut_info_line = paste0(exp_line, "_", mut_info))
 
 
 
-variants_expiii_subset_mt21$passage <- as.numeric(as.character(variants_expiii_subset_mt21$passage))
+
+if (gene_of_interest == "vpr"){
+
+    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[1]] <- "#25880b"
+    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[2]] <- "#0b74a2"
+    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[3]] <- "#621295"
+    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[4]] <- "#959112"
+    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[5]] <- "#951212"
+} else {
+    variants_expiii_subset$color <- "red"
+}
 
 
-s <- variants_expiii_subset %>% filter(mut_info_line %in% fixed_muts) %>% select(exp_line, mut_info) %>% distinct()
+color_mapping <- setNames(variants_expiii_subset$color, variants_expiii_subset$mut_info)
 
 
 
-
-variants_expiii_subset_mt21$color <- line_col_palette[1]
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[1]] <- "#25880b"
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[2]] <- "#0b74a2"
-variants_expiii_subset_mt21$color[variants_expiii_subset_mt21$mut_info == case[3]] <- "#621295"
-
-color_mapping <- setNames(variants_expiii_subset_mt21$color, variants_expiii_subset_mt21$mut_info)
-
-
-
-fig <- variants_expiii_subset_mt21[variants_expiii_subset_mt21$mut_info_line %in% fixed_muts,] %>%
-    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info, alpha = tracking_group, size = tracking_group)) +
-    geom_line() +
+fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>%
+    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info)) +
+    geom_line(size = 2) +
     facet_grid(rows = vars(exp_line), switch = "y") +
-    scale_alpha_manual(values = c(0.1,1)) +
-    scale_size_manual(values = c(1,1.5)) +
-    labs(title = "Linked variants", y = "Frequency", x = "\n Transfer") +
-    scale_color_manual(values = color_mapping, name = "Variant") +
+    labs(title = "", y = "Mutation Frequency", x = "Transfer") +
+    scale_color_manual(values = color_mapping, name = "Mutation") +
+    scale_x_continuous(breaks = seq(0, end_psg, by = 50)) +
     custom_plot_theme(application = "publication") + 
     theme(strip.text.y = element_text(size = 35, angle=0),
         legend.position = "none")
 
-
-fig <- fig + geom_text_repel(
-    data = . %>% filter(tracking_group == "Yes" & passage == 180),
-    aes(label = mut_info, y = c(0.08, 0.06, 0.17), x = c(330, 330, 180)), # Adjust y position to avoid overlap
-    size = 10,       # Adjust label text size
-    color = c("#25880b", "#0b74a2", "#621295") # Optional: set label color
-)
-
-fig
-
-
+ggplotly(fig)
 
 
 # save figure
-custom_plot_save(fig, "frequency_dynamics_linkage_cases.pdf", height = 14, width = 14)
+custom_plot_save(fig,  paste0("frequency_", gene_of_interest, "_stop_gained.pdf"), height = 14, width = 21)
 ```
 
 
 
-```{r clonal interference case, results=TRUE}
-
-
-# 566_G_A  678_G_A 7854_A_G 
-case <- c("566_G_A")
-
-variants_expiii$tracking_group <- "No"
-variants_expiii$tracking_group[variants_expiii$mut_info %in% case] <- "Yes"
-variants_expiii$linewidth[variants_expiii$tracking_group == "Yes"] <- 3
-variants_expiii$linewidth[variants_expiii$tracking_group == "No"] <- 1
-variants_expiii_subset <- variants_expiii %>%
-                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
-                                passage = as.numeric(as.character(passage)))
-
-variants_expiii_subset$color_group <- as.character(variants_expiii_subset$exp_line)
-variants_expiii_subset$color_group[variants_expiii_subset$mut_info == case[1]] <- "special_case_1"
-
-color_palette <- c(
-  "MT-2_1" = unname(line_col_palette[1]),
-  "MT-2_2" = unname(line_col_palette[2]),
-  "MT-4_1" = unname(line_col_palette[3]),
-  "MT-4_2" = unname(line_col_palette[4]),
-  "special_case_1" = brewer.pal(5, "Reds")[3]
-)
-
-
-
-fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% 
-    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = color_group, alpha = tracking_group, linewidth = linewidth)) +
-    geom_line() +
-    facet_grid(rows = vars(exp_line), switch = "y") +
-    scale_alpha_manual(values = c(0.1,1)) +
-    labs(title = paste0(case, " variant"), y = "Frequency", x = "\n Transfer") + #title = paste0(case, "\n")
-    scale_color_manual(values = color_palette) +
-    scale_linewidth(range = c(1, 3)) +
-    custom_plot_theme(application = "publication") +
-    theme(strip.text.y = element_text(size = 35, angle=0),
-        legend.position="none")
-
-fig
-
-
-# save figure
-custom_plot_save(fig, paste0("frequency_dynamics_",case, ".pdf"), height = 14, width = 14)
-
-# average time to fixation
-mean(t_2_f$time_to_fixation)
-mean(t_2_f$time_to_fixation[t_2_f$mut_info == case])
-t.test(t_2_f$time_to_fixation[t_2_f$mut_info != case], t_2_f$time_to_fixation[t_2_f$mut_info == case])
-
-```
-
-
-```{r draft cases}
-
-
-
-
-variants_expiii_subset <- variants_expiii %>%
-                                filter(exp_line == "MT-2_1" & allele_freq >= 0.01) %>%
-                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
-                                passage = as.numeric(as.character(passage)))
-
-muts <- unique(variants_expiii_subset$mut_info)
-doubled <- c()
-for (mut in muts){
-    freq1 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 270]
-    freq2 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 310]
-    # skip if missing or empty
-    if (length(freq1) == 0 || length(freq2) == 0) next
-    if (is.na(freq1) || is.na(freq2)) next
-    
-    if (freq2 >= 2 * freq1) {
-        doubled <- append(doubled, mut)
-    }
-}
-
-length(doubled)
-fixed_muts <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.99 & variants_expiii_subset$passage == 500])
-sum(doubled %in% fixed_muts)
-doubled_fixed <- doubled[doubled %in% fixed_muts]
-
-View(variants_expiii_subset[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 270,])
-
-table(variants_expiii_subset$effect_simplified[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500])
-
-doubled_fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
-doubled_fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
-doubled_fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
-
-fix_count_table[names(fix_count_table) %in% doubled_fixed_syn]
-fix_count_table[names(fix_count_table) %in% doubled_fixed_nonsyn]
-fix_count_table[names(fix_count_table) %in% doubled_fixed_un]
-
-fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
-fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
-fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
-
-table(fix_count_table[names(fix_count_table) %in% fixed_syn])
-table(fix_count_table[names(fix_count_table) %in% fixed_nonsyn])
-table(fix_count_table[names(fix_count_table) %in% fixed_un])
-fisher.test(matrix(c(5, 2, 29, 7), byrow = TRUE, nrow = 2))
-fisher.test(matrix(c(52, 18, 11, 4), byrow = TRUE, nrow = 2))
-
-```
-
-
-```{r draft cases mt-2_2}
-
-
-
-
-variants_expiii_subset <- variants_expiii %>%
-                                filter(exp_line == "MT-2_2" & allele_freq >= 0.01) %>%
-                                mutate(mut_info_line = paste0(exp_line, "_", mut_info),
-                                passage = as.numeric(as.character(passage)))
-
-muts <- unique(variants_expiii_subset$mut_info)
-doubled <- c()
-for (mut in muts){
-    freq1 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 160]
-    freq2 <- variants_expiii_subset$allele_freq[variants_expiii_subset$mut_info == mut & variants_expiii_subset$passage == 200]
-    # skip if missing or empty
-    if (length(freq1) == 0 || length(freq2) == 0) next
-    if (is.na(freq1) || is.na(freq2)) next
-    
-    if (freq2 >= 2 * freq1) {
-        doubled <- append(doubled, mut)
-    }
-}
-
-length(doubled)
-fixed_muts <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$allele_freq >= 0.99 & variants_expiii_subset$passage == 300])
-sum(doubled %in% fixed_muts)
-doubled_fixed <- doubled[doubled %in% fixed_muts]
-
-View(variants_expiii_subset[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 270,])
-
-table(variants_expiii_subset$effect_simplified[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500])
-
-doubled_fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
-doubled_fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
-doubled_fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% doubled_fixed & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
-
-fix_count_table[names(fix_count_table) %in% doubled_fixed_syn]
-fix_count_table[names(fix_count_table) %in% doubled_fixed_nonsyn]
-fix_count_table[names(fix_count_table) %in% doubled_fixed_un]
-
-fixed_syn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "S"]
-fixed_nonsyn <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "N"]
-fixed_un <- variants_expiii_subset$mut_info[variants_expiii_subset$mut_info %in% fixed_muts & variants_expiii_subset$passage == 500 & variants_expiii_subset$effect_simplified == "U"]
-
-table(fix_count_table[names(fix_count_table) %in% fixed_syn])
-table(fix_count_table[names(fix_count_table) %in% fixed_nonsyn])
-table(fix_count_table[names(fix_count_table) %in% fixed_un])
-fisher.test(matrix(c(5, 2, 29, 7), byrow = TRUE, nrow = 2))
-fisher.test(matrix(c(52, 18, 11, 4), byrow = TRUE, nrow = 2))

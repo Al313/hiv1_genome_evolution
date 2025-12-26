@@ -35,7 +35,6 @@ library("tidyr")
 library("Biostrings")
 library("stringr")
 library("magrittr")
-library("rstatix")
 library("RColorBrewer")
 
 
@@ -99,7 +98,7 @@ unique(variants_ann_expiii[variants_ann_expiii$feature == "vpr" &
 variants_ann_expiii[variants_ann_expiii$feature == "vpr" & 
     nchar(variants_ann_expiii$ref_allele) >= 20 & 
     variants_ann_expiii$allele_freq >= 0.5 & 
-    variants_ann_expiii$passage == 700, ]
+    variants_ann_expiii$passage == 500, ]
 
 variants_ann_expiii[variants_ann_expiii$mut_info == "5652_AGACATTTTCCTAGGATATGGCTCCATAACTTAG_A" & 
     variants_ann_expiii$allele_freq >= 0.5 & 

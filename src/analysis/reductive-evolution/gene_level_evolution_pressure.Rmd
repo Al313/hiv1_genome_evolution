@@ -167,7 +167,7 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             scale_shape_manual(values = c(15, 16,17,18)) +
             scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
             geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
-            labs(x="Minority variant per site", y= "dN/dS",  color = "Gene", shape = "Population",
+            labs(x="Diversity (% polymorphic site)", y= "dN/dS",  color = "Gene", shape = "Population",
             title = "")+
             scale_color_manual(values = brewer.pal(name = "Set1", n = 9)) +
             custom_plot_theme(application = "publication")

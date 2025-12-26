@@ -35,7 +35,7 @@ variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == "B"] <- "13"
 
 # determine what data to be included
 
-end_psg <- 700
+end_psg <- 630
 
 variants_ann_expiii <- variants_ann_expiii %>% filter(passage <= end_psg) %>%
         mutate(feature = ifelse(feature == "envelope", "env", feature)) # correct the feature name
