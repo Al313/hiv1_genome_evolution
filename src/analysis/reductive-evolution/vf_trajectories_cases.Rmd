@@ -102,56 +102,90 @@ fig
 ```{r high-impact cases}
 
 variants_expiii_subset <- variants_ann_expiii %>%
+                                filter(nchar(ref_allele) < 20 & nchar(alt_allele) < 20) %>%
                                 mutate(mut_info_line = paste0(exp_line, "_", mut_info),
                                 passage = as.numeric(as.character(passage)))
 
-gene_of_interest <- c("nef")
+
+gene_of_interest <- c("vpr")
 
 
 
-cases <- unique(variants_expiii_subset$mut_info[variants_expiii_subset$feature %in% gene_of_interest & 
+cases_10 <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$feature %in% gene_of_interest & 
+    variants_expiii_subset$impact == "HIGH" & 
+    variants_expiii_subset$allele_freq >= 0.1])
+
+cases_50 <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$feature %in% gene_of_interest & 
     variants_expiii_subset$impact == "HIGH" & 
     variants_expiii_subset$allele_freq >= 0.5])
 
-# cases <- c("5611_G_A", "5671_G_A", "5672_G_A", "5725_GA_G", "5784_TGTCGACATAGCA_T")
 
-
-variants_expiii_subset <- variants_expiii_subset[variants_expiii_subset$mut_info %in% cases,]
+variants_expiii_subset <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% cases_10,]
 
 variants_expiii_subset <- variants_expiii_subset %>%
                                 mutate(mut_info_line = paste0(exp_line, "_", mut_info))
 
 
+color_code_cases_50 <- unique(sapply(str_split(cases_50, "_"), "[[", 3))
 
 
+
+set.seed(4)
+
+color = grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
 if (gene_of_interest == "vpr"){
-
-    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[1]] <- "#25880b"
-    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[2]] <- "#0b74a2"
-    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[3]] <- "#621295"
-    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[4]] <- "#959112"
-    variants_expiii_subset$color[variants_expiii_subset$mut_info == cases[5]] <- "#951212"
+    sample_color_vpr <- sample(color, length(color_code_cases_50))
+    # Assign colors
+    variants_expiii_subset <- variants_expiii_subset %>%
+        mutate(
+            legend_label = ifelse(mut_info %in% color_code_cases_50, mut_info, "Other")
+    )
+    legend_colors <- c(
+        setNames(sample_color_vpr, color_code_cases_50),
+        Other = "gray70"
+    )
 } else {
-    variants_expiii_subset$color <- "red"
+    sample_color_vpr <- sample(color, 5)
+    color <- setdiff(color, sample_color_vpr)
+    sample_color_nef <- sample(color, length(color_code_cases_50))
+    # Assign colors
+    variants_expiii_subset <- variants_expiii_subset %>%
+        mutate(
+            legend_label = ifelse(mut_info %in% color_code_cases_50, mut_info, "Other")
+    )
+    legend_colors <- c(
+        setNames(sample_color_nef, color_code_cases_50),
+        Other = "gray70"
+    )
 }
 
 
-color_mapping <- setNames(variants_expiii_subset$color, variants_expiii_subset$mut_info)
+ordered_major_cases <- variants_expiii_subset %>%
+    filter(mut_info %in% color_code_cases_50) %>%
+    distinct(mut_info, genomic_pos) %>%
+    arrange(genomic_pos) %>%
+    pull(mut_info)
+
+legend_levels <- c(ordered_major_cases, "Other")
 
 
+variants_expiii_subset <- variants_expiii_subset %>%
+    mutate(
+        legend_label = factor(legend_label, levels = legend_levels)
+    )
 
-fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>%
-    ggplot(aes(x = passage, y = allele_freq, group = mut_info, color = mut_info)) +
+
+fig <- variants_expiii_subset %>%
+    ggplot(aes(x = passage, y = allele_freq, group = mut_info_line, color = legend_label)) +
     geom_line(size = 2) +
     facet_grid(rows = vars(exp_line), switch = "y") +
-    labs(title = "", y = "Mutation Frequency", x = "Transfer") +
-    scale_color_manual(values = color_mapping, name = "Mutation") +
-    scale_x_continuous(breaks = seq(0, end_psg, by = 50)) +
+    labs(title = "", y = "Frequency", x = "Transfer") +
+    scale_color_manual(values = legend_colors, name = paste0("LOF Mutations (", gene_of_interest, ")")) +
+    scale_x_continuous(breaks = c(seq(0, end_psg, by = 50), end_psg)) +
     custom_plot_theme(application = "publication") + 
     theme(strip.text.y = element_text(size = 35, angle=0),
-        legend.position = "none")
+        legend.position = "right")
 
-ggplotly(fig)
 
 
 # save figure

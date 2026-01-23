@@ -1,8 +1,8 @@
 ---
 title:  
-    "Evolutionary pressure per gene "
+    "Loss of function mutations"
 date: 
-    "May 26th, 2025"
+    "n 26th, 2025"
 author:  
     "Ali Movasati"  
 output:  
@@ -57,7 +57,7 @@ if (file.exists("/home/amovas/")){
 source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
 
 variants_ann_expiii <- variants_ann_expiii %>% mutate(passage = as.numeric(as.character(passage)))
-end_psg <- 500
+
 
 ```
 

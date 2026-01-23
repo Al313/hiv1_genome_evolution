@@ -1,8 +1,8 @@
 ---
 title:  
-    "Evolutionary pressure per gene "
+    "Evolutionary pressure per gene"
 date: 
-    "May 26th, 2025"
+    "Jan 16, 2026"
 author:  
     "Ali Movasati"  
 output:  
@@ -24,19 +24,20 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("zoo") # estimate na's if any 
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("rstatix")
-library("RColorBrewer")
+library(ggplot2)
+library(ggpubr)
+library(plotly)
+library(hrbrthemes)
+library(irr)
+library(dplyr)
+library(zoo) # estimate na's if any 
+library(tidyr)
+library(Biostrings)
+library(stringr)
+library(magrittr)
+library(rstatix)
+library(RColorBrewer)
+library(vegan)
 
 
 ```
@@ -72,7 +73,7 @@ source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 ```{r text numbers}
 
 # set parameters
-category <- "Minority"
+category <- "Fixed" 
 
 if (category == "Minority"){
     min_threshold <- 0.01
@@ -166,29 +167,105 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             geom_smooth(method = "lm", se = T)+
             scale_shape_manual(values = c(15, 16,17,18)) +
             scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
-            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
-            labs(x="Diversity (% polymorphic site)", y= "dN/dS",  color = "Gene", shape = "Population",
+            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.13, y = 1.15, color = "black", size = 9) +
+            labs(x="Fraction polymorphic site", y= "dN/dS",  color = "Gene", shape = "Population",
             title = "")+
-            scale_color_manual(values = brewer.pal(name = "Set1", n = 9)) +
+            scale_color_manual(values = set1) +
             custom_plot_theme(application = "publication")
 
 
 
 
 # save figure
-custom_plot_save(fig, "dn_ds_ratio_cor_diversity.pdf", height = 14, width = 14)
+custom_plot_save(fig, "dnds_diversity_cor_scatter_regression.pdf", height = 14, width = 14)
+
+
+```
+
+```{r compute icc for each variable separately}
+
+# Make a wide matrix: rows = genes, columns = replicates
+
+df_wide <- merged_df %>%
+    select(feature, exp_line, dnds) %>%
+    pivot_wider(names_from = exp_line, values_from = dnds)
+
+# Remove gene names column for ICC calculation
+dnds_matrix <- as.matrix(df_wide[,-1])
+
+# Compute ICC (one-way random)
+icc_result <- icc(dnds_matrix, model="oneway", type="consistency", unit="single")
+
+print(icc_result)
+
+# ========
+
+# Pivot data to wide format: rows = genes, columns = replicates
+div_wide <- merged_df %>%
+    select(feature, exp_line, mut_count_normalized) %>%
+    pivot_wider(names_from = exp_line, values_from = mut_count_normalized)
+
+# Convert to matrix (remove 'feature' column)
+div_matrix <- as.matrix(div_wide[,-1])
+
+# Compute ICC (one-way random, single measurement)
+icc_div <- icc(div_matrix, model = "oneway", type = "consistency", unit = "single")
+
+print(icc_div)
 
 
 ```
 
 
+```{r}
+
+# Prepare data
+# Response variables: dnds and mut_count_normalized
+response_matrix <- merged_df %>%
+    select(dnds, mut_count_normalized) %>%
+    as.matrix()
+
+# Grouping factor
+gene_group <- merged_df$feature
+
+# PERMANOVA
+permanova_res <- adonis2(response_matrix ~ gene_group, method = "euclidean", permutations = 999)
+
+print(permanova_res)
+
+```
+
+```{r ellipses for replicates}
+
+
+
+fig <- ggplot(merged_df, aes(x = mut_count_normalized, y = dnds, color = feature,shape = exp_line, group = feature)) +
+    geom_point(size = 8) +
+    stat_ellipse(level = 0.95, linewidth = 1.5) +  # 95% confidence ellipse per gene
+    scale_shape_manual(values = c(15, 16,17,18)) +
+    scale_y_continuous(limits = c(0,1.6), breaks = seq(0,1.6,0.2)) +
+    labs(x="Fraction polymorphic site", y= "dN/dS",  color = "Gene", shape = "Population",
+    title = "")+
+    scale_color_manual(values = set1) +
+    custom_plot_theme(application = "publication")
+
+
+# save figure
+custom_plot_save(fig, "dnds_diversity_cor_scatter_ellipses.pdf", height = 14, width = 14)
+
+```
+
 
 ```{r corrlation between dn_ds and diversity over time}
 
 
-cor_vec <- c()
+category <- "Minority"
 
-for (psg in seq(10,500,10)){
+cor_df <- data.frame()
+
+
+for (psg in seq(10,end_psg,10)){
+    cor_vec <- c()
     # prepare variant data for visualization
     counts <- variants_ann_expiii %>%
                 mutate(passage = as.numeric(as.character(passage))) %>%
@@ -245,18 +322,57 @@ for (psg in seq(10,500,10)){
     # merge the two datasets
     merged_df <- merge(counts, gene_summary[,c("gene", "gene_length", "nonsynonymous_count", "synonymous_count")], by.x = "feature", by.y = "gene")
 
-    merged_df %<>% mutate(S = ifelse(S == 0, 1, S)) %>%
-                mutate(dnds = (N/nonsynonymous_count)/(S/synonymous_count),
+
+    merged_df %<>% filter(N != 0 & S != 0)
+    if (nrow(merged_df) < 3){
+        cor_df <- rbind(cor_df, c(psg, rep(NA, 5)))
+        next
+    }
+
+    merged_df %<>% mutate(dnds = (N/nonsynonymous_count)/(S/synonymous_count),
                 mut_count_normalized = (N+S)/(gene_length*3))
 
-    merged_df$bind <- paste0(counts$exp_line, counts$feature)
+    merged_df$bind <- paste0(merged_df$exp_line, merged_df$feature)
 
 
     # get pearson r measure for the correlation
     pearson_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "pearson")
     cor_vec <- c(cor_vec, pearson_cor)
+    for (exp_line in exp_line_factor){
+        pearson_cor <- cor(merged_df$dnds[merged_df$exp_line == exp_line],merged_df$mut_count[merged_df$exp_line == exp_line], method = "pearson")
+        cor_vec <- c(cor_vec, pearson_cor)
+    }
+    cor_df <- rbind(cor_df, c(psg, cor_vec))
 }
 
+colnames(cor_df) <- c("passage", "All", exp_line_factor)
 
-plot(cor_vec)
+cor_df_long <- cor_df %>% tidyr::pivot_longer(cols = -passage, names_to = "exp_line", values_to = "pearson_r") %>%
+            mutate(exp_line = factor(exp_line, levels = c("All", exp_line_factor)))
+
+
+saveRDS(cor_df_long, paste0(wd, "results/tables/dnds_diversity_cor_over_time_", category,".rds"))
+
+
+cor_df_long <- readRDS(paste0(wd, "results/tables/dnds_diversity_cor_over_time_", category,".rds"))
+
+
+fig <- cor_df_long[!is.na(cor_df_long$pearson_r),] %>% ggplot(aes(x=passage, y=pearson_r, color=exp_line, linewidth = exp_line == "All", alpha = exp_line == "All")) +
+    geom_line() +
+    geom_point(size=5) +
+    labs(x="Transfer", y= "Pearson's r", color = "Population",
+    title = "") +
+    scale_x_continuous(breaks = c(seq(0, end_psg, 50), end_psg)) +
+    scale_y_continuous(limits = c(min(0, round(min(cor_df_long$pearson_r, na.rm = TRUE), digits = 0.1)),round(max(cor_df_long$pearson_r, na.rm = TRUE))),
+        breaks = seq(min(0, round(min(cor_df_long$pearson_r, na.rm = TRUE), digits = 0.1)), round(max(cor_df_long$pearson_r, na.rm = TRUE)), 0.1)) +
+    scale_color_manual(values = c("All"= "black", line_col_palette)) +
+    scale_linewidth_manual(values = c(`TRUE` = 2, `FALSE` = 0.8), guide = "none") +
+    scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = 0.5), guide = "none") +
+    custom_plot_theme(application = "publication")
+
+
+
+# save figure
+custom_plot_save(fig, paste0("dnds_diversity_cor_over_time_", category,".pdf"), height = 14, width = 14)
+
 ```

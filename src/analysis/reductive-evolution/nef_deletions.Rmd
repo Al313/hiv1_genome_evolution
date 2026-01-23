@@ -58,8 +58,6 @@ source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 
 nef_deletions <- read.table(file = paste0(wd,"results/tables/misc/nef_deletions.tsv"), sep = "", header = T)
 
-head(nef_deletions)
-
 nef_deletions %<>% 
     mutate(length = end - start + 1,
     right_vf = 1 - coverage_after_start/coverage_before_start,
@@ -105,6 +103,10 @@ vec <- vec[!duplicated(vec)]
 
 
 nef_deletions$deletion_name <- factor(nef_deletions$deletion_name, levels = as.character(vec))
+color = grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+set.seed(-2)
+legend_colors <- setNames(sample(color, length(levels(nef_deletions$deletion_name))), levels(nef_deletions$deletion_name))
+
 
 fig <- nef_deletions %>%
     ggplot(aes(x = passage, y = consensus_vf, color = deletion_name, linetype = line_type)) + 
@@ -112,6 +114,7 @@ fig <- nef_deletions %>%
     labs(x="Transfer", y= "Deletion frequency",  color = "Deletion ID") +
     ggtitle("Frequency of nef Large Deletions in MT-2_1") +
     geom_line(size = 2) +
+    scale_color_manual(values = legend_colors) +
     custom_plot_theme(application = "publication") +
     guides(linetype = "none")
 
@@ -120,7 +123,7 @@ fig <- nef_deletions %>%
 
 
 # save figure
-custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 14)
+custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 21)
 ```
 
 
@@ -166,7 +169,7 @@ fig <- ggplot(t_2_m, aes(x = time_to_majority, y = length, color = exp_line)) +
 custom_plot_save(fig,  "nef_del_length_vs_time_to_maj.pdf", height = 14, width = 14)
 
 
-t_2_m$group <- ifelse(t_2_m$length >= 30, "Long deletions", "Short deletions")
+t_2_m$group <- ifelse(t_2_m$length >= 50, "Long deletions", "Short deletions")
 
 
 
@@ -211,7 +214,7 @@ custom_plot_save(fig,  "nef_del_length_vs_time_to_maj_boxplot.pdf", height = 14,
 ```
 
 
-```{r time to fixation}
+```{r time to majority}
 
 
 # record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
@@ -227,27 +230,35 @@ for (exp_line in exp_line_factor){
         disappearance_vec <- as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf < 0.05]))
         disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
         length <- unique(nef_deletions_sub2$length)
-        t_2_f <- rbind(t_2_f, c(exp_line, id, length, appearance, fixation, disappearance, fixation-appearance))
+        deletion_name <- unique(as.character(nef_deletions_sub2$deletion_name))
+        t_2_f <- rbind(t_2_f, c(exp_line, id, deletion_name, length, appearance, fixation, disappearance, fixation-appearance))
     }
 }
 
 
 # set column names and right data types
-t_2_f %<>% set_colnames(c("exp_line", "deletion_id", "length", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
-        mutate_at(c(3,4,5,7), as.integer) %>%
+t_2_f %<>% set_colnames(c("exp_line", "deletion_id", "deletion_name", "length", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
+        mutate_at(c(4,5,6,8), as.integer) %>%
         mutate(exp_line = factor(exp_line, levels = exp_line_factor),
         host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
 
+jpos_points <- position_jitter(width = 0.2, height = 0)
+# jpos_text <- position_jitter(width = 0.4, height = 5)
+
+
 fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
-    geom_boxplot(outlier.shape = NA, width = 0.2) +
-    geom_hline(yintercept = 150, linetype = "dashed") +
-    geom_hline(yintercept = 160, linetype = "solid") +
-    labs(x="", y= "Time to 0.5 freq.") +
-    geom_jitter(width = 0.1, size = 2, alpha = 0.7, color = "darkblue") +
-    custom_plot_theme(application = "publication")
+    geom_boxplot(outlier.shape = NA, width = 0.3, linewidth = 1.5, size = 2) +
+    geom_hline(yintercept = 150, linetype = "dashed", linewidth = 1) +
+    geom_hline(yintercept = 160, linetype = "solid", linewidth = 1) +
+    labs(x="", y= "Time to fixation") +
+    geom_jitter(aes(color = deletion_name), position = jpos_points, size = 10, alpha = 1) +
+    # geom_text(aes(label=deletion_name, color = deletion_name), position = jpos_text, vjust=-1, size=10) +
+    scale_color_manual(values = legend_colors) +
+    custom_plot_theme(application = "publication") +
+    theme(legend.position = "none")
 
 # save figure
-custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 14)
+custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 10.5)
 
 
 ```
