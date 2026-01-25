@@ -1,0 +1,62 @@
+
+
+
+
+---
+title:  
+    "Divergence coding vs noncoding"
+date: 
+    "Jan 25, 2026"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+```{r}
+
+# prepare data for visualization
+counts <- variants_ann_expiii %>% 
+            filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
+            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+            mutate(effect_simplified2 = ifelse(effect_simplified %in% c("S","N"), "Coding", "Non-coding")) %>%
+            group_by(exp_line, passage, effect_simplified2) %>%
+            summarise(count = n()) %>%
+            mutate_at(4, as.numeric) %>%
+            mutate(passage = as.numeric(as.character(passage))) %>%
+            mutate_at(c(1,3), as.factor) %>%
+            mutate(density = ifelse(effect_simplified2 == "Coding", count*100/(9407-790),count*100/(9626-9076+789-454)))
+
+counts$effect_simplified2 <- factor(
+    counts$effect_simplified2,
+    levels = c("Non-coding", "Coding")  # desired order
+)
+
+
+# visualize
+fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
+        geom_line(linewidth=1) +
+        labs(title = paste0("Normalized ",category, " Mutation Accumulation \n (Coding vs Non-Coding)"),
+        x="Transfer", y=paste0("Fixed mutation density (per nucleotide)"), color = "Population", linetype = "Region")+
+        scale_x_continuous(breaks = c(seq(0,end_psg,50), end_psg)) +
+        scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
+        scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
+        custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig, paste0(tolower(category), "_mut_accumulation_coding_vs_noncoding.pdf"), height = 14, width = 14)
+
+
+```

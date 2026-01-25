@@ -1,7 +1,8 @@
 
+
 ---
 title:  
-    "Divergence per gene"
+    "Divergence per genomic regions"
 date: 
     "Jan 21, 2026"
 author:  
@@ -102,7 +103,7 @@ feature_length <- data.frame(feature = c("5R","5UTR","5LTRLS","gag","pol","vif",
 
 # prepare data for visualization
 counts <- variants_ann_expiii %>% 
-            filter(feature %notin% c("5R", "3R")) %>%
+            filter(feature %notin% c("5R", "5UTR", "5LTRLS", "3UTR", "3R")) %>%
             filter(allele_freq >= min_threshold) %>%
             filter(passage == end_psg) %>%
             group_by(exp_line, feature, effect_simplified) %>%
@@ -119,19 +120,15 @@ fig <- ggplot(counts) +
     geom_bar(aes(x = effect_simplified, y = normalized_count, fill = exp_line),
         position = "stack",
         stat = "identity") +
-    labs(x = "Genomic Features", y = "Normalized Count", fill = "Population")+
+    labs(x = "Gene", y = "Fixed mutation density (per nucleotide)", fill = "Population")+
     scale_fill_manual(values = line_col_palette) +
     facet_grid(~ feature, switch = "x") +
-    theme_bw() +
-    theme(strip.placement = "outside",
-        strip.background = element_rect(fill = NA, color = "white"),
-        panel.spacing = unit(-.01,"cm"),
-        axis.title = element_text(size = 40, margin = margin(t = 20, r = 20)),
-        axis.text.x = element_text(size = 20),
-        axis.text.y = element_text(size = 30),
-        strip.text.x = element_text(size = 30, angle=90),
-        legend.text=element_text(size=35),
-        legend.title = element_text(size=30))
+    custom_plot_theme(application = "publication") +
+    theme(
+        axis.text.x = element_text(angle = 0))
 
 fig
+
+### save figure
+custom_plot_save(fig, paste0("fixed_mutation.pdf"), height = 14, width = 28)
 ```

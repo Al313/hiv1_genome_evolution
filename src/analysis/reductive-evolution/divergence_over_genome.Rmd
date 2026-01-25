@@ -1,0 +1,153 @@
+
+---
+title:  
+    "Divergence over genome"
+date: 
+    "Jan 23, 2026"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(ggplot2)
+library(ggpubr)
+library(plotly)
+library(hrbrthemes)
+library(irr)
+library(dplyr)
+library(zoo) # estimate na's if any 
+library(tidyr)
+library(Biostrings)
+library(stringr)
+library(magrittr)
+library(rstatix)
+library(RColorBrewer)
+library(vegan)
+
+
+```
+
+
+
+```{r read-in variant data}
+
+# set working directory
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
+
+```
+
+```{r load visualization settings}
+
+# load visual settings
+source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
+
+
+```
+
+
+
+
+```{r compute divergence rate for sliding windows}
+
+# ### PARAMETERS
+# window_size  <- 300
+# genome_start <- 525
+# genome_end   <- 9554
+
+# ### Pre-filter data
+# df <- variants_expiii %>%
+#     filter(passage == end_psg,
+#             allele_freq >= 0.01) %>%
+#     select(exp_line, genomic_pos, allele_freq)
+
+# ### Define sliding windows (step = 1 bp)
+# windows <- tibble(
+#     window_start = seq(genome_start,
+#                         genome_end - window_size + 1,
+#                         by = 1)
+#     ) %>%
+#     mutate(
+#         window_end = window_start + window_size,
+#         mid_window = (window_start + window_end) / 2
+#     )
+
+# ### Compute divergence rate per exp_line per window
+# divergence_rates <- df %>%
+#     group_by(exp_line) %>%
+#     group_modify(~{
+#         pos_vec <- .x$genomic_pos
+#         af_vec  <- .x$allele_freq
+        
+#         div <- sapply(windows$window_start, function(ws){
+#         we <- ws + window_size - 1
+#         sum(af_vec[pos_vec >= ws & pos_vec < we]) / (window_size-1)
+#         })
+        
+#         windows %>% mutate(divergence_rate = div)
+#     }) %>%
+#     ungroup()
+
+# ### Add mean line
+# mean_line <- divergence_rates %>%
+#     group_by(mid_window) %>%
+#     summarise(
+#         divergence_rate = mean(divergence_rate, na.rm = TRUE),
+#         window_start = dplyr::first(window_start),
+#         window_end   = dplyr::first(window_end),
+#         .groups = "drop"
+#     ) %>%
+#     mutate(exp_line = "Average")
+
+# ### Combine and set factor levels
+# divergence_rates <- bind_rows(divergence_rates, mean_line) %>% mutate(exp_line = factor(exp_line, levels = c(exp_line_factor, "Average")))
+
+# ### Save results
+# saveRDS(divergence_rates, file = paste0(wd, "results/tables/divergence_rate_sliding_window_", window_size,".rds"))
+
+### Load pre-computed results
+divergence_rates <- readRDS(file = paste0(wd, "results/tables/divergence_rate_sliding_window_", window_size,".rds"))
+
+### Plot divergence rates over genome
+fig <- divergence_rates %>% ggplot(aes(x = mid_window, y = log(divergence_rate), color = exp_line)) +
+    geom_line(aes(alpha = exp_line, linewidth = exp_line)) +
+    labs(x = "Genomic Position", y = "Divergence Rate", color = "Population")+
+    scale_x_continuous(breaks = c(454, seq(0, 9000, by = 1000), genome_end), limits = c(genome_start, genome_end)) +
+    scale_color_manual(values = c(line_col_palette, "Average" = "#000000")) +
+    scale_linewidth_manual(values = c(rep(1, length(exp_line_factor)), 2)) +
+    scale_alpha_manual(values = c(rep(0.5, length(exp_line_factor)), 1)) +
+    guides(alpha = "none", linewidth = "none") +
+    coord_cartesian(ylim = c(-5, -2)) +
+    custom_plot_theme(application = "publication")
+
+
+### save figure
+custom_plot_save(fig, paste0("divergence_rate_over_genome.pdf"), height = 14, width = 28)
+
+
+
+```
