@@ -72,7 +72,7 @@ del <- levels(nef_deletions$deletion_id)[1]
 
 for (del in levels(nef_deletions$deletion_id)){
     max_record <- max(nef_deletions$passage[nef_deletions$deletion_id == del])
-    next_psgs <- seq(max_record,500,10)
+    next_psgs <- seq(max_record,end_psg,10)
     row_to_repeat <- nef_deletions[nef_deletions$deletion_id == del & nef_deletions$passage == max_record,]
     repeated_df <- bind_rows(replicate(length(next_psgs), row_to_repeat, simplify = FALSE))
     repeated_df$passage <- next_psgs
@@ -111,9 +111,9 @@ legend_colors <- setNames(sample(color, length(levels(nef_deletions$deletion_nam
 fig <- nef_deletions %>%
     ggplot(aes(x = passage, y = consensus_vf, color = deletion_name, linetype = line_type)) + 
     facet_wrap(~exp_line, ncol = 1) +
-    labs(x="Transfer", y= "Deletion frequency",  color = "Deletion ID") +
-    ggtitle("Frequency of nef Large Deletions in MT-2_1") +
     geom_line(size = 2) +
+    scale_x_continuous(breaks = c(seq(0,end_psg, 50), 630)) +
+    labs(x="Transfer", y= "Deletion frequency",  color = "Deletion ID", title = "") +
     scale_color_manual(values = legend_colors) +
     custom_plot_theme(application = "publication") +
     guides(linetype = "none")

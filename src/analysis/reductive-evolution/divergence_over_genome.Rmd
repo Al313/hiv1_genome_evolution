@@ -75,9 +75,9 @@ source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 ```{r compute divergence rate for sliding windows}
 
 # ### PARAMETERS
-# window_size  <- 300
-# genome_start <- 525
-# genome_end   <- 9554
+window_size  <- 300
+genome_start <- 525
+genome_end   <- 9554
 
 # ### Pre-filter data
 # df <- variants_expiii %>%
@@ -135,8 +135,9 @@ divergence_rates <- readRDS(file = paste0(wd, "results/tables/divergence_rate_sl
 ### Plot divergence rates over genome
 fig <- divergence_rates %>% ggplot(aes(x = mid_window, y = log(divergence_rate), color = exp_line)) +
     geom_line(aes(alpha = exp_line, linewidth = exp_line)) +
-    labs(x = "Genomic Position", y = "Divergence Rate", color = "Population")+
+    labs(x = "Genomic position", y = "Divergence rate [1/site/year]", color = "Population")+
     scale_x_continuous(breaks = c(454, seq(0, 9000, by = 1000), genome_end), limits = c(genome_start, genome_end)) +
+    # scale_y_continuous(limits = c(-8,-5)) +
     scale_color_manual(values = c(line_col_palette, "Average" = "#000000")) +
     scale_linewidth_manual(values = c(rep(1, length(exp_line_factor)), 2)) +
     scale_alpha_manual(values = c(rep(0.5, length(exp_line_factor)), 1)) +

@@ -73,7 +73,7 @@ source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 ```{r text numbers}
 
 # set parameters
-category <- "Fixed" 
+category <- "Minority" 
 
 if (category == "Minority"){
     min_threshold <- 0.01
@@ -166,8 +166,9 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             geom_point(size = 8) +
             geom_smooth(method = "lm", se = T)+
             scale_shape_manual(values = c(15, 16,17,18)) +
+            scale_x_continuous(limits = c(0.2,1), breaks = seq(0,1,0.2)) +
             scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
-            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.13, y = 1.15, color = "black", size = 9) +
+            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
             labs(x="Fraction polymorphic site", y= "dN/dS",  color = "Gene", shape = "Population",
             title = "")+
             scale_color_manual(values = set1) +
@@ -243,6 +244,7 @@ fig <- ggplot(merged_df, aes(x = mut_count_normalized, y = dnds, color = feature
     geom_point(size = 8) +
     stat_ellipse(level = 0.95, linewidth = 1.5) +  # 95% confidence ellipse per gene
     scale_shape_manual(values = c(15, 16,17,18)) +
+    scale_x_continuous(limits = c(0.05,1.3), breaks = seq(0.2,1,0.2)) +
     scale_y_continuous(limits = c(0,1.6), breaks = seq(0,1.6,0.2)) +
     labs(x="Fraction polymorphic site", y= "dN/dS",  color = "Gene", shape = "Population",
     title = "")+
