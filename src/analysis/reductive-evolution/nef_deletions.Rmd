@@ -26,6 +26,10 @@ library(magrittr)
 library(dplyr)
 library(ggplot2)
 library(stringr)
+library(rstatix)
+library(effsize)
+library(purrr)
+library(ggpubr)
 
 ```
 
@@ -68,7 +72,7 @@ nef_deletions %<>%
     deletion_id = as.factor(deletion_id)) 
 
 
-del <- levels(nef_deletions$deletion_id)[1]
+nef_deletions_extended <- nef_deletions
 
 for (del in levels(nef_deletions$deletion_id)){
     max_record <- max(nef_deletions$passage[nef_deletions$deletion_id == del])
@@ -76,39 +80,38 @@ for (del in levels(nef_deletions$deletion_id)){
     row_to_repeat <- nef_deletions[nef_deletions$deletion_id == del & nef_deletions$passage == max_record,]
     repeated_df <- bind_rows(replicate(length(next_psgs), row_to_repeat, simplify = FALSE))
     repeated_df$passage <- next_psgs
-    nef_deletions <- rbind(nef_deletions, repeated_df)
+    nef_deletions_extended <- rbind(nef_deletions_extended, repeated_df)
 }
 
-nef_deletions$line_type <- "solid"
+nef_deletions_extended$line_type <- "solid"
 
-for (del in levels(nef_deletions$deletion_id)){
-    min_record <- min(nef_deletions$passage[nef_deletions$deletion_id == del])
+for (del in levels(nef_deletions_extended$deletion_id)){
+    min_record <- min(nef_deletions_extended$passage[nef_deletions_extended$deletion_id == del])
     prev_psgs <- seq(10,min_record,10)
-    row_to_repeat <- nef_deletions[nef_deletions$deletion_id == del & nef_deletions$passage == min_record,]
+    row_to_repeat <- nef_deletions_extended[nef_deletions_extended$deletion_id == del & nef_deletions_extended$passage == min_record,]
     repeated_df <- bind_rows(replicate(length(prev_psgs), row_to_repeat, simplify = FALSE))
     repeated_df$passage <- prev_psgs
     repeated_df$consensus_vf[1:(length(prev_psgs)-1)] <- 0
     repeated_df$line_type <- "dashed"
-    nef_deletions <- rbind(nef_deletions, repeated_df)
+    nef_deletions_extended <- rbind(nef_deletions_extended, repeated_df)
 }
 
 
-nef_deletions$line_type <- factor(nef_deletions$line_type, levels = c("solid", "dashed"))
+nef_deletions_extended$line_type <- factor(nef_deletions_extended$line_type, levels = c("solid", "dashed"))
 
-nef_deletions$deletion_name[nef_deletions$deletion_id == levels(nef_deletions$deletion_id)]
 
-vec <- nef_deletions$deletion_name
-names(vec) <- nef_deletions$deletion_id
+vec <- nef_deletions_extended$deletion_name
+names(vec) <- nef_deletions_extended$deletion_id
 vec <- vec[!duplicated(vec)]
 
 
-nef_deletions$deletion_name <- factor(nef_deletions$deletion_name, levels = as.character(vec))
-color = grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+nef_deletions_extended$deletion_name <- factor(nef_deletions_extended$deletion_name, levels = as.character(vec))
+color_set <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
 set.seed(-2)
-legend_colors <- setNames(sample(color, length(levels(nef_deletions$deletion_name))), levels(nef_deletions$deletion_name))
+legend_colors <- setNames(sample(color_set, length(levels(nef_deletions_extended$deletion_name))), levels(nef_deletions_extended$deletion_name))
 
 
-fig <- nef_deletions %>%
+fig <- nef_deletions_extended %>%
     ggplot(aes(x = passage, y = consensus_vf, color = deletion_name, linetype = line_type)) + 
     facet_wrap(~exp_line, ncol = 1) +
     geom_line(size = 2) +
@@ -126,20 +129,119 @@ fig <- nef_deletions %>%
 custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 21)
 ```
 
-```{r initial relative fitness of deletions}
 
-nef_deletions <- read.table(file = paste0(wd,"results/tables/misc/nef_deletions.tsv"), sep = "", header = T)
+```{r time to fixation of deletions}
 
-nef_deletions %<>% 
-    mutate(length = end - start + 1,
-    right_vf = 1 - coverage_after_start/coverage_before_start,
-    left_vf = 1 - coverage_before_end/coverage_after_end,
-    deletion_id = paste0(exp_line, ":", deletion_id)) %>%
-    mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
-    deletion_name = paste0(length, ":", start, "_", end),
-    deletion_id = as.factor(deletion_id)) 
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+t_2_f <- data.frame()
+
+for (exp_line in exp_line_factor){
+    nef_deletions_extended_sub <- nef_deletions_extended[nef_deletions_extended$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    deletion_ids <- unique(nef_deletions_extended_sub$deletion_id[nef_deletions_extended_sub$consensus_vf >= 0.99 & nef_deletions_extended_sub$passage == end_psg])
+    for (id in deletion_ids){
+        nef_deletions_extended_sub2 <- nef_deletions_extended_sub[nef_deletions_extended_sub$deletion_id == id,]
+        fixation <- min(as.numeric(as.vector(nef_deletions_extended_sub$passage[nef_deletions_extended_sub$deletion_id == id & nef_deletions_extended_sub$consensus_vf >= 0.95])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(nef_deletions_extended_sub2$passage[(nef_deletions_extended_sub2$deletion_id == id & nef_deletions_extended_sub2$consensus_vf >= 0.01)]))))) + 10
+        disappearance_vec <- as.numeric(as.vector(nef_deletions_extended_sub$passage[nef_deletions_extended_sub$deletion_id == id & nef_deletions_extended_sub$consensus_vf < 0.05]))
+        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
+        length <- unique(nef_deletions_extended_sub2$length)
+        deletion_name <- unique(as.character(nef_deletions_extended_sub2$deletion_name))
+        t_2_f <- rbind(t_2_f, c(exp_line, id, deletion_name, length, appearance, fixation, disappearance, fixation-appearance))
+    }
+}
 
 
+# set column names and right data types
+t_2_f %<>% set_colnames(c("exp_line", "deletion_id", "deletion_name", "length", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
+        mutate_at(c(4,5,6,8), as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
+
+jpos_points <- position_jitter(width = 0.2, height = 0)
+
+
+
+fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
+    geom_boxplot(outlier.shape = NA, width = 0.3, linewidth = 1.5, size = 2) +
+    geom_hline(yintercept = 150, linetype = "dashed", linewidth = 1) +
+    geom_hline(yintercept = 160, linetype = "solid", linewidth = 1) +
+    labs(x="", y= "Time to fixation") +
+    geom_jitter(aes(color = deletion_name, size = length), position = jpos_points, alpha = 1) +
+    scale_y_continuous(breaks = seq(0,300, 50)) +
+    scale_size_continuous(range = c(5, 15), name = "Length") +
+    scale_color_manual(values = legend_colors) +
+    guides(color = "none") +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 10.5)
+
+
+```
+
+
+```{r calculate time to fixation for substitutions}
+
+# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
+t_2_f_sbs <- data.frame()
+
+
+for (exp_line in exp_line_factor){
+    variants_expiii_sub <- variants_expiii[variants_expiii$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
+    fixed_muts <- unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$passage == end_psg])
+    for (mut in fixed_muts){
+        variants_expiii_sub2 <- variants_expiii_sub[variants_expiii_sub$mut_info == mut,]
+        fixation <- min(as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq >= 0.99])))
+        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(variants_expiii_sub2$passage[(variants_expiii_sub2$mut_info == mut & variants_expiii_sub2$allele_freq >= 0.01)]))))) + 10
+        disappearance_vec <- as.numeric(as.vector(variants_expiii_sub$passage[variants_expiii_sub$mut_info == mut & variants_expiii_sub$allele_freq < 0.5]))
+        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
+        translational_impact <- unique(as.character(variants_expiii_sub$effect_simplified[variants_expiii_sub$mut_info == mut]))
+        t_2_f_sbs <- rbind(t_2_f_sbs, c(exp_line, mut, translational_impact, appearance, fixation, disappearance, fixation-appearance))
+    }
+}
+
+
+# set column names and right data types
+t_2_f_sbs %<>% set_colnames(c("exp_line", "mut_info", "effect_simplified", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
+        mutate_at(c(4,5,7), as.integer) %>%
+        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
+        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"),
+        effect_simplified = factor(effect_simplified, levels = translational_impacts))
+
+t_2_f_sbs[!is.na(t_2_f_sbs$disappearance),]
+aa <- t_2_f_sbs$mut_info[!is.na(t_2_f_sbs$disappearance)]
+
+# average time to fixation for fixated mutations based on how many times they are repeated
+
+fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
+
+
+
+fix_count_table_list <- list("4" = fix_count_table[fix_count_table==4],
+    "3" = fix_count_table[fix_count_table==3],
+    "2" = fix_count_table[fix_count_table==2],
+    "1" = fix_count_table[fix_count_table==1])
+
+sum(fix_count_table_list[[4]]) + sum(fix_count_table_list[[3]]) + sum(fix_count_table_list[[2]]) + sum(fix_count_table_list[[1]])
+
+
+
+
+t_2_f_sbs$Occurrence <- NA
+t_2_f_sbs$Occurrence[t_2_f_sbs$mut_info %in% names(fix_count_table_list[["1"]])] <- "1 out of 4"
+t_2_f_sbs$Occurrence[t_2_f_sbs$mut_info %in% names(fix_count_table_list[["2"]])] <- "2 out of 4"
+t_2_f_sbs$Occurrence[t_2_f_sbs$mut_info %in% names(fix_count_table_list[["3"]])] <- "3 out of 4"
+t_2_f_sbs$Occurrence[t_2_f_sbs$mut_info %in% names(fix_count_table_list[["4"]])] <- "4 out of 4"
+t_2_f_sbs <- t_2_f_sbs[!is.na(t_2_f_sbs$Occurrence),]
+t_2_f_sbs$Occurrence <- factor(t_2_f_sbs$Occurrence, levels = c("1 out of 4", "2 out of 4", "3 out of 4", "4 out of 4"))
+
+
+wilcox.test(t_2_f$time_to_fixation[t_2_f$length >= 50], t_2_f_sbs$time_to_fixation[t_2_f_sbs$Occurrence == "1 out of 4"])
+
+
+```
+
+```{r initial relative fitness, comparison between short and large deletions}
 
 initial_rel_fitness <- function(t1, af1, t2, af2) {
     rel_fit <- (1/(3*(t2-t1)))*(log(af2/(1-af2))-log(af1/(1-af1)))
@@ -217,255 +319,4 @@ custom_plot_save(fig,  "nef_del_length_vs_initial_rel_fitness_boxplot.pdf", heig
 
 ```
 
-```{r time to maj and length}
 
-
-# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
-t_2_m <- data.frame()
-
-for (exp_line in exp_line_factor){
-    nef_deletions_sub <- nef_deletions[nef_deletions$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    deletion_ids <- unique(nef_deletions_sub$deletion_id[nef_deletions_sub$consensus_vf >= 0.5 & nef_deletions_sub$passage == 500])
-    for (id in deletion_ids){
-        nef_deletions_sub2 <- nef_deletions_sub[nef_deletions_sub$deletion_id == id,]
-        majority <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.5])))
-        appearance <- max(setdiff(seq(0,majority,10), as.numeric(as.vector(unique(nef_deletions_sub2$passage[(nef_deletions_sub2$deletion_id == id & nef_deletions_sub2$consensus_vf >= 0.01)]))))) + 10
-        disappearance_vec <- as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf < 0.05]))
-        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > majority]) == 0, NA, min(disappearance_vec[disappearance_vec > majority]))
-        length <- unique(nef_deletions_sub2$length)
-        t_2_m <- rbind(t_2_m, c(exp_line, id, length, appearance, majority, disappearance, majority-appearance))
-    }
-}
-
-
-# set column names and right data types
-t_2_m %<>% set_colnames(c("exp_line", "deletion_id", "length", "appearance", "majority", "disappearance","time_to_majority")) %>% 
-        mutate_at(c(3,4,5,7), as.integer) %>%
-        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
-        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
-
-t_2_m$deletion_id_nm <- str_split(t_2_m$deletion_id, pattern = ":", simplify = TRUE)[,2]
-
-
-fig <- ggplot(t_2_m, aes(x = time_to_majority, y = length, color = exp_line)) +
-    geom_point(size = 2) +
-    geom_hline(yintercept = 50, linetype = "dashed") +
-    geom_text(aes(label=deletion_id), vjust=-1, size=4) +
-    scale_color_manual(values = line_col_palette) +
-    labs(x="Time to 0.5", y= "Deletion length",  color = "Population") +
-    custom_plot_theme(application = "publication")
-
-# save figure
-custom_plot_save(fig,  "nef_del_length_vs_time_to_maj.pdf", height = 14, width = 14)
-
-
-t_2_m$group <- ifelse(t_2_m$length >= 50, "Long deletions", "Short deletions")
-
-
-
-# Run t-test
-tt <- t.test(
-    time_to_majority ~ group,
-    data = t_2_m
-)
-
-
-
-# Compute y position for annotation
-y_pos <- max(t_2_m$time_to_majority, na.rm = TRUE)
-
-fig <- ggplot(t_2_m, aes(x = group, y = time_to_majority, fill = group)) +
-    geom_violin(trim = FALSE, alpha = 0.6) +
-    geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
-    annotate(
-        "text",
-        x = 1.5,
-        y = y_pos,
-        label = paste0(
-        "t-test p = ", signif(tt$p.value, 3), "\n",
-        "mean(Long) = ", round(tt$estimate[1], 2), "\n",
-        "mean(Short) = ", round(tt$estimate[2], 2)
-        ),
-        size = 6
-    ) +
-    labs(
-        x = NULL,
-        y = "Time to majority",
-        title = "Time to majority by deletion length",
-        fill = "Group"
-    ) +
-    theme_classic() +
-    theme(legend.position = "none") +
-    custom_plot_theme(application = "publication")
-
-# save figure
-custom_plot_save(fig,  "nef_del_length_vs_time_to_maj_boxplot.pdf", height = 14, width = 14)
-
-```
-
-
-```{r time to majority}
-
-
-# record at what passages the fixed mutations first appeared and reached fixation (AF above 0.99)
-t_2_f <- data.frame()
-
-for (exp_line in exp_line_factor){
-    nef_deletions_sub <- nef_deletions[nef_deletions$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    deletion_ids <- unique(nef_deletions_sub$deletion_id[nef_deletions_sub$consensus_vf >= 0.95 & nef_deletions_sub$passage == 500])
-    for (id in deletion_ids){
-        nef_deletions_sub2 <- nef_deletions_sub[nef_deletions_sub$deletion_id == id,]
-        fixation <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.95])))
-        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(nef_deletions_sub2$passage[(nef_deletions_sub2$deletion_id == id & nef_deletions_sub2$consensus_vf >= 0.01)]))))) + 10
-        disappearance_vec <- as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf < 0.05]))
-        disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
-        length <- unique(nef_deletions_sub2$length)
-        deletion_name <- unique(as.character(nef_deletions_sub2$deletion_name))
-        t_2_f <- rbind(t_2_f, c(exp_line, id, deletion_name, length, appearance, fixation, disappearance, fixation-appearance))
-    }
-}
-
-
-# set column names and right data types
-t_2_f %<>% set_colnames(c("exp_line", "deletion_id", "deletion_name", "length", "appearance", "fixation", "disappearance","time_to_fixation")) %>% 
-        mutate_at(c(4,5,6,8), as.integer) %>%
-        mutate(exp_line = factor(exp_line, levels = exp_line_factor),
-        host_line = if_else(str_detect(exp_line, pattern = "MT-2"), "MT-2", "MT-4"))
-
-jpos_points <- position_jitter(width = 0.2, height = 0)
-# jpos_text <- position_jitter(width = 0.4, height = 5)
-
-
-fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
-    geom_boxplot(outlier.shape = NA, width = 0.3, linewidth = 1.5, size = 2) +
-    geom_hline(yintercept = 150, linetype = "dashed", linewidth = 1) +
-    geom_hline(yintercept = 160, linetype = "solid", linewidth = 1) +
-    labs(x="", y= "Time to fixation") +
-    geom_jitter(aes(color = deletion_name), position = jpos_points, size = 10, alpha = 1) +
-    # geom_text(aes(label=deletion_name, color = deletion_name), position = jpos_text, vjust=-1, size=10) +
-    scale_color_manual(values = legend_colors) +
-    custom_plot_theme(application = "publication") +
-    theme(legend.position = "none")
-
-# save figure
-custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 10.5)
-
-
-```
-
-
-
-
-
-```{r}
-
-
-
-fixed_muts <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$allele_freq >= 0.99])
-
-
-variants_expiii_subset <- variants_expiii %>%
-                                mutate(mut_info_line = paste0(exp_line, "_", mut_info))
-
-
-
-variants_expiii_subset_mt21 <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts & variants_expiii_subset$exp_line == "MT-2_1",c("exp_line", "passage", "allele_freq", "mut_info")]
-colnames(variants_expiii_subset_mt21)[4] <- "variant_info"
-variants_expiii_subset_mt21$line_type <- "solid"
-variants_expiii_subset_mt21$mut_type <- "Substitutions"
-variants_expiii_subset_mt21$mut_type2 <- "Substitutions"
-
-nef_deletions_subset <- nef_deletions[,c("exp_line", "passage", "consensus_vf", "deletion_id", "line_type")]
-colnames(nef_deletions_subset)[3] <- "allele_freq"
-colnames(nef_deletions_subset)[4] <- "variant_info"
-nef_deletions_subset$mut_type <- nef_deletions_subset$variant_info
-nef_deletions_subset$mut_type2 <- "LD"
-# nef_deletions_subset$passage[nef_deletions_subset$variant_info == "2_9224:9246"] <- nef_deletions_subset$passage[nef_deletions_subset$variant_info == "2_9224:9246"] + 30
-# nef_deletions_subset <- nef_deletions_subset[nef_deletions_subset$passage <= 500,]
-
-# colnames(variants_expiii_subset_mt21) == colnames(nef_deletions_subset)
-
-all <- rbind(variants_expiii_subset_mt21, nef_deletions_subset)
-
-all$mut_type2 <- factor(all$mut_type2, levels = c("Substitutions", "LD"))
-all$mut_type <- factor(all$mut_type, levels = c("Substitutions", "1_9102:9223", "2_9224:9246", "3_9392:9418", "4_8859:9039", "5_8790:8858"))
-all$passage <- as.numeric(as.character(all$passage))
-
-fig <- all %>% ggplot(aes(x = passage, y = allele_freq, group = variant_info, color = mut_type)) +
-    geom_line(aes(alpha = mut_type2, linewidth = mut_type2)) +
-    facet_wrap(~exp_line, ncol = 1) +
-    labs(title = "Variant Frequency Trajectories Overlaid by \n Large Deletion Frequencies \n", y = "Frequency \n", x = "\n Passage", color = "Mutation") +
-    scale_x_continuous(breaks = seq(0,500, 50))+
-    scale_color_manual(values = c("#67000D",brewer.pal(5, "Dark2"))) +
-    scale_alpha_manual(values = c(0.15,1)) +
-    scale_linewidth_manual(values = c(1,2))+
-    theme_bw() +
-    theme(plot.title = element_text(size = 55, hjust = 0.5),
-            axis.title = element_text(size = 45),
-            axis.text.x = element_text(size = 20, angle = 90),
-            axis.text.y = element_text(size = 30),
-            strip.text.x = element_text(size = 35, angle=0),
-            legend.title = element_text(size=40),
-            legend.text = element_text(size = 35))
-
-
-
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "MT-2_1_nef_deletion_overlaid_fixed_mutations.pdf"), height = 14, width = 14)
-fig
-dev.off()
-
-
-```
-
-
-```{r later to remove variants occurring in deleted regions}
-
-
-lis <- names(table(nef_deletions$deletion_id))
-for (line in exp_line_factor){
-  for (id in lis){
-    print(id)
-    df_sub <- nef_deletions[nef_deletions$exp_line == line & nef_deletions$deletion_id == id,]
-    print(df_sub$passage[which.max(df_sub$consensus_vf)-1])
-    nef_deletions$purge_psg[nef_deletions$exp_line == line & nef_deletions$deletion_id == id] <- df_sub$passage[which.max(df_sub$consensus_vf)-1]
-  }
-
-}
-
-nef_deletions_distinct <- unique(nef_deletions[,c("exp_line", "start", "end", "purge_psg")])
-i <- 1
-for (i in 1:nrow(nef_deletions_distinct)){
-  variants_expiii %<>% filter(!(exp_line == nef_deletions_distinct$exp_line[i] & passage > nef_deletions_distinct$purge_psg[i] & genomic_pos >= nef_deletions_distinct$start[i] & genomic_pos <= nef_deletions_distinct$end[i]))
-}
-
-```
-
-
-```{r nef stop-gained}
-
-variants_ann_expiii[variants_ann_expiii$effect == "stop_gained" & variants_ann_expiii$allele_freq >= 0.99 & variants_ann_expiii$feature == "nef",]
-
-case <- "8801_G_A"
-
-fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
-    geom_line() +
-    facet_wrap(~exp_line, ncol = 1, drop = FALSE) +
-    scale_alpha_manual(values = c(0.1,1)) +
-    scale_y_continuous(breaks = c(0, -1, -2, -3), labels = c("1", "0.1", "0.01", "0.001")) +
-    labs(title = paste0(case, "\n"), y = "Frequency \n", x = "\n Transfer") +
-    # scale_color_manual(values = my_col_pal) +
-    theme_bw() +
-    theme(plot.title = element_text(size = 55, hjust = 0.5),
-        axis.title = element_text(size = 45),
-        axis.text.x = element_text(size = 20, angle = 90),
-        axis.text.y = element_text(size = 30),
-        strip.text.x = element_text(size = 35, angle=0),
-        legend.position="none")
-
-fig
-
-
-```
