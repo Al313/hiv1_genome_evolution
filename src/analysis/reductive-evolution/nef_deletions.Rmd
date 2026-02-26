@@ -235,7 +235,7 @@ t_2_f_sbs$Occurrence[t_2_f_sbs$mut_info %in% names(fix_count_table_list[["4"]])]
 t_2_f_sbs <- t_2_f_sbs[!is.na(t_2_f_sbs$Occurrence),]
 t_2_f_sbs$Occurrence <- factor(t_2_f_sbs$Occurrence, levels = c("1 out of 4", "2 out of 4", "3 out of 4", "4 out of 4"))
 
-
+wilcox.test(t_2_f$time_to_fixation, t_2_f_sbs$time_to_fixation[t_2_f_sbs$Occurrence == "1 out of 4"])
 wilcox.test(t_2_f$time_to_fixation[t_2_f$length >= 50], t_2_f_sbs$time_to_fixation[t_2_f_sbs$Occurrence == "1 out of 4"])
 
 
@@ -278,28 +278,20 @@ df2 <- df %>% set_colnames(c("exp_line", "deletion_id", "length", "appearance_ps
         filter(!is.nan(init_rel_fit))
 
 df2$group <- ifelse(df2$length >= 50, "Long \n(> 50bp del)", "Short \n(<= 50bp del)")
+df2 %<>% mutate(group = factor(group, levels = c("Short \n(<= 50bp del)", "Long \n(> 50bp del)")))
 
-tt <- t.test(
-    init_rel_fit ~ group,
-    data = df2
-)
-
-# Compute y position for annotation
-y_pos <- max(df2$init_rel_fit, na.rm = TRUE)
-
+# create figure
 fig <- ggplot(df2, aes(x = group, y = init_rel_fit, fill = group)) +
     geom_violin(trim = FALSE, alpha = 0.6) +
     geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
-    annotate(
-        "text",
-        x = 1.5,
-        y = y_pos,
-        label = paste0(
-        "t-test p = ", signif(tt$p.value, 3), "\n",
-        "mean(Long) = ", round(tt$estimate[1], 2), "\n",
-        "mean(Short) = ", round(tt$estimate[2], 2)
-        ),
-        size = 6
+    stat_compare_means(
+        comparisons = list(c("Short \n(<= 50bp del)", "Long \n(> 50bp del)")),
+        method = "wilcox.test",
+        label = "p.signif",   # shows asterisks
+        label.y = 0.08,
+        colour = "black",
+        bracket.size = 0.8,
+        size = 15
     ) +
     labs(
         x = NULL,

@@ -74,3 +74,5 @@ dependencies:
   - weblogo
   - r-coin
   - r-reticulate
+  - r-gt
+  - r-webshot2

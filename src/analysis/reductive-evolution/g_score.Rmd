@@ -1,0 +1,483 @@
+---
+title:  
+    "computing g score per gene"
+date: 
+    "Feb 25, 2026"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(ggplot2)
+library(ggpubr)
+library(RColorBrewer)
+library(ggpattern)
+library(plotly)
+library(hrbrthemes)
+library(irr)
+library(dplyr)
+library(zoo) # estimate na's if any 
+library(tidyr)
+library(Biostrings)
+library(stringr)
+library(magrittr)
+library(rstatix)
+library(RColorBrewer)
+library(vegan)
+library(reshape2)
+library(effsize)
+
+
+```
+
+
+
+```{r read-in variant data}
+
+# set working directory
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# load data
+source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
+
+```
+
+```{r load visualization settings}
+
+# load visual settings
+source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
+
+
+```
+
+
+
+```{r text numbers}
+
+# set parameters
+category <- "Fixed" 
+
+if (category == "Minority"){
+    min_threshold <- 0.01
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
+
+```
+
+
+```{r}
+
+
+
+d <- variants_ann_expiii %>% filter(effect_simplified %in% c("U", "N") & passage == end_psg & allele_freq >= min_threshold) %>% select(c(exp_line, feature, mut_info)) %>% distinct() %>% group_by(exp_line, feature) %>% summarise(n = n())
+
+
+filtered_data <- variants_ann_expiii %>%
+    filter(effect_simplified %in% c("U", "N"),
+            allele_freq >= min_threshold) %>%
+    select(exp_line, feature, mut_info) %>%
+    distinct()
+
+
+
+mutation_classification <- filtered_data %>%
+    group_by(feature, mut_info) %>%
+    summarise(
+        n_exp_lines = n_distinct(exp_line),
+        .groups = "drop"
+    ) %>%
+    mutate(
+        mutation_type = if_else(n_exp_lines == 1, 
+                                "unique", 
+                                "shared")
+    )
+
+result <- mutation_classification %>%
+    mutate(
+        unique_count = if_else(n_exp_lines == 1, 1L, 0L),
+        shared_count = if_else(n_exp_lines > 1, n_exp_lines - 1L, 0L)
+    ) %>%
+    group_by(feature) %>%
+    summarise(
+        unique = sum(unique_count),
+        shared = sum(shared_count),
+        .groups = "drop"
+    ) %>% mutate(parallel_prop = shared / (shared + unique) %>% round(3))
+
+
+result_wide <- result %>% mutate(total = unique + shared) %>%
+    mutate(total_prop = total / sum(total) %>% round(3))
+
+
+result_wide <- merge(result_wide, feature_df[,c("feature", "length")], by = "feature") %>% mutate(length_prop = length / sum(length) %>% round(3))
+
+result_wide %<>% mutate(g_score = total_prop / length_prop)
+
+result_wide %<>% filter(feature %notin% c("5R", "3R")) %<>% arrange(desc(g_score))
+
+library(gt)
+library(webshot2)
+# Pipe your data to kable
+# Convert your data frame to gt table
+your_table <- result_wide %>%
+    select(c(feature, unique, shared, total, parallel_prop, length, g_score)) %>%
+    gt() %>%
+    tab_header(title = "Feature Overlap Analysis") %>%
+    fmt_number(columns = c("parallel_prop", "g_score"), decimals = 3) %>%
+    cols_label(
+        feature = "Feature",
+        unique = "Unique",
+        shared = "Parallel",
+        total = "Total",
+        parallel_prop = "Parallel Proportion",
+        length = "Length",
+        g_score = "G Score"
+    )
+    
+# Save as PDF
+gtsave(your_table, "/Users/alimos313/Documents/studies/phd/research/manuscripts/reductive-evolution/figures/fixed_mut_table.pdf")
+
+
+
+```
+
+
+
+```{r parallelism neutral randomization + heatmap}
+
+
+
+
+# feature_df$region <- paste(feature_df$start, feature_df$end, sep = ":")
+
+
+# overall_df <- data.frame()
+
+# for (k in 1:nrow(feature_df)){
+#     if (feature_df$feature[k] %in% c("tat1", "tat2")){
+#         if (feature_df$feature[k] == "tat2") {
+#             next
+#         }
+#         feature <- "tat"
+#         feature_range <- c(feature_df$start[feature_df$feature == "tat1"]:feature_df$end[feature_df$feature == "tat1"], 
+#                             feature_df$start[feature_df$feature == "tat2"]:feature_df$end[feature_df$feature == "tat2"])
+#     } else if (feature_df$feature[k] %in% c("rev1", "rev2")){
+#         if (feature_df$feature[k] == "rev2") {
+#             next
+#         }
+#         feature <- "rev"
+#         feature_range <- c(feature_df$start[feature_df$feature == "rev1"]:feature_df$end[feature_df$feature == "rev1"], 
+#                             feature_df$start[feature_df$feature == "rev2"]:feature_df$end[feature_df$feature == "rev2"])
+#     } else {
+#         feature <- as.character(feature_df$feature[k])
+#         feature_range <- feature_df$start[k]:feature_df$end[k]
+#     }
+#     effect_factor <- 1
+#     print(feature)
+
+
+
+#     # update data types
+#     variants_ann_expiii$passage <- as.integer(as.character(variants_ann_expiii$passage))
+#     variants_ann_expiii$feature <- as.character(variants_ann_expiii$feature)
+
+#     # initialize an empty data frame to store results
+#     df <- data.frame()
+
+#     # loop through all pairs of experimental lines
+#     for (line1 in exp_line_factor){
+#         for (line2 in exp_line_factor){
+#             if (str_detect(line1, "MT-2")){
+#                 offset1 <- 140 # median(df$time_to_fixation[df$exp_line %in% c("MT-2_1","MT-2_2")])
+#             } else {
+#                 offset1 <- 185 # median(df$time_to_fixation[df$exp_line %in% c("MT-4_1","MT-4_2")])
+#             }
+
+#             if (str_detect(line2, "MT-2")){
+#                 offset2 <- 140
+#             } else {
+#                 offset2 <- 185
+#             }
+
+#             exp_all <- data.frame()
+#             for (base1 in c("A", "C", "G", "T")){
+#                 for (base2 in setdiff(c("A", "C", "G", "T"), base1)){
+#                     variants_expiii_sub <- variants_ann_expiii[variants_ann_expiii$ref_allele == base1 & variants_ann_expiii$alt_allele == base2 & variants_ann_expiii$genomic_pos %in% feature_range & variants_ann_expiii$mut_type == "P",]
+#                     minority1 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-offset1]))
+#                     minority2 <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-offset2]))
+#                     shared_minority <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage <= end_psg-offset1],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.05 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage <= end_psg-offset2]))
+
+#                     variants_expiii_sub2 <- variants_expiii[variants_expiii$ref_allele == base1 & variants_expiii$alt_allele == base2 & variants_expiii$feature %in% feature & variants_expiii$mut_type == "P",]
+#                     fixed1 <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line1) & variants_expiii_sub2$passage == end_psg]))
+#                     fixed2 <- length(unique(variants_expiii_sub2$mut_info[variants_expiii_sub2$allele_freq >= 0.99 & variants_expiii_sub2$exp_line %in% c(line2) & variants_expiii_sub2$passage == end_psg]))
+                    
+                    
+#                     i <- 0
+                    
+#                     exp_base <- integer()
+#                     while (i <= 1000){
+#                         i <- i + 1
+#                         j <- sample(1:round(minority1*effect_factor), size = fixed1, replace = F)
+#                         z <- sample(1:round(minority2*effect_factor), size = fixed2, replace = F)
+#                         exp_base <- c(exp_base,sum(intersect(j,z)<=shared_minority))
+#                     }
+
+#                     exp_all <- rbind(exp_all, exp_base)
+#                 }
+#             }
+
+            
+#             exp_shared <- colSums(exp_all)
+#             variants_expiii_sub <- variants_expiii[variants_expiii$feature %in% feature & variants_expiii$mut_type == "P",]
+#             obs_all <- length(unique(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1,line2) & variants_expiii_sub$passage == end_psg]))
+#             obs_shared <- length(intersect(variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line1) & variants_expiii_sub$passage == end_psg],variants_expiii_sub$mut_info[variants_expiii_sub$allele_freq >= 0.99 & variants_expiii_sub$exp_line %in% c(line2) & variants_expiii_sub$passage == end_psg]))
+            
+#             # Calculate mean and standard deviation
+#             mean_data <- mean(exp_shared)
+#             sd_data <- sd(exp_shared)
+#             # Calculate the z-score
+#             z_score <- (obs_shared - mean_data) / sd_data
+#             # Calculate the p-value
+#             if (obs_shared > mean_data){
+#                 p_value <- 2 * (1 - pnorm(z_score))
+#             } else {
+#                 p_value <- 1
+#             }
+#             df <- rbind(df,c(line1,line2,obs_all,obs_shared,obs_shared/obs_all,mean_data/obs_all,p_value))
+#         }
+#     }
+
+#     df %<>% set_colnames(c("Var1", "Var2", "total_unique", "shared", "%shared", "expected_%shared", "p.val"))
+
+#     #######################
+    
+#     # uniqueness of fixed variants observed at the end of experiment
+#     variants_expiii_sub <- variants_expiii[variants_expiii$feature %in% feature & variants_expiii$mut_type == "P",]
+#     end_fixed <- variants_expiii_sub %>%
+#                             filter(allele_freq >= min_threshold, allele_freq < max_threshold, passage == end_psg) %>%
+#                             select(c(exp_line,mut_info)) %>%
+#                             distinct()
+
+
+
+
+#     # create a named vector from the df
+#     muts <- end_fixed$mut_info
+#     names(muts) <- end_fixed$exp_line
+
+#     # convert named vector to list
+#     muts_list <- lapply(split(muts, names(muts)), unname)
+
+#     for (line in exp_line_factor){
+#         if (!line %in% names(muts_list)){
+#             muts_list[[line]] <- NA
+#         }
+#     }
+    
+
+#     shared_percent <- c()
+
+
+#     for (i in 1:4){
+#             dd <- muts_list[[i]]
+#             for (j in 1:4){
+#                 if (i<=j){
+#                     shared_percent <- append(shared_percent,100*(sum(dd %in% muts_list[[j]])/(length(muts_list[[i]])+length(muts_list[[j]])-sum(dd %in% muts_list[[j]]))))
+#                 } else {shared_percent <- append(shared_percent,NA)}
+#             }
+            
+#     }
+
+
+#     shared_mat <- matrix(shared_percent, ncol = 4)
+#     row.names(shared_mat) <- exp_line_factor
+#     colnames(shared_mat) <- exp_line_factor
+
+#     shared_df <- as.data.frame(shared_mat) %>% 
+#                             `colnames<-`(names(muts_list)) %>%
+#                             mutate(line1 = names(muts_list)) %>%
+#                             mutate(line1 = factor(line1, levels = exp_line_factor)) %>%
+#                             gather(key = "line2", value = "val", 1:4) %>%
+#                             mutate(line2 = factor(line2, levels = exp_line_factor)) %>%
+#                             mutate(val = round(val, 2))
+
+
+
+#     melted_cormat <- melt(shared_mat, na.rm = TRUE)
+
+#     melted_cormat$value <- round(melted_cormat$value, digits = 1)
+
+#     # merge simulation data
+#     melted_cormat <- merge(melted_cormat, df[,c(1,2,6,7)], by = c("Var1", "Var2"))
+#     melted_cormat <- melted_cormat %>%
+#         mutate(p.val = as.numeric(p.val)) %>%
+#         mutate(p.adj = p.adjust(p.val, method = "BH")) %>%
+#         mutate(p_value_category = case_when(
+#             p.adj >= 0.05 ~ "n.s.",
+#             p.adj >= 0.01 & p.adj < 0.05 ~ "*",
+#             p.adj >= 0.001 & p.adj < 0.01 ~ "**",
+#             p.adj < 0.001 ~ "***"
+#         ))
+
+#     melted_cormat$`expected_%shared` <- round(as.numeric(melted_cormat$`expected_%shared`)*100, digits = 1)
+#     melted_cormat$`expected_%shared`[melted_cormat$val == 100] <- 100
+#     melted_cormat$p_value_category[melted_cormat$val == 100] <- ""
+
+#     # generate heatmap
+#     fig <- ggplot(data = as.data.frame(melted_cormat), aes(x=Var1, y=Var2, fill=value)) + 
+#             geom_tile(color = "white") +
+#             geom_text(aes(Var1, Var2, label = paste0(value, "(", `expected_%shared`,")\n", p_value_category)), color = "black", size = 13) +
+#             labs(title = paste0("Pairwise Overlap Among ", category, " Variants \nat Passage #", end_psg)) +
+#             scale_fill_gradient2(low = "white", high = "red", 
+#             midpoint = 1, limit = c(0,100), space = "Lab", 
+#             name="Parallel (%)") +
+#             custom_plot_theme() +
+#             theme(axis.title.x = element_blank(),
+#                     axis.title.y = element_blank())+
+#             coord_fixed()
+
+
+
+#     # save figure
+#     custom_plot_save(fig, paste0("parallel_heatmap_", feature,".pdf"), height = 14, width = 14)
+    
+#     #######################
+
+#     obs <- melted_cormat$value[melted_cormat$value != 100]
+#     mean_obs <- mean(obs)
+#     se_obs <- sd(obs)/sqrt(length(obs))
+#     exp <- melted_cormat$`expected_%shared`[melted_cormat$value != 100]
+#     mean_exp <- mean(exp)
+#     se_exp <- sd(exp)/sqrt(length(exp))
+
+#     wilcox_res <- wilcox.test(obs, exp)
+
+
+#     cohen_d <- cohen.d(obs, exp)
+#     ratio <- mean(obs)/ mean(exp)
+
+
+#     p_val <- wilcox_res$p.value
+
+#     overall_df <- rbind(overall_df, c(feature, "Observed", mean_obs, se_obs, p_val, cohen_d$estimate, ratio))
+#     overall_df <- rbind(overall_df, c(feature, "Simulated", mean_exp, se_exp, p_val, cohen_d$estimate, ratio))
+
+# }
+
+# colnames(overall_df) <- c("Translation_impact", "group", "mean", "se", "p.val", "cohen_d", "ratio")
+
+
+# overall_df %<>% mutate_at(1, as.factor)
+# overall_df$group <- factor(overall_df$group, levels = c("Observed", "Simulated"))
+# overall_df %<>% mutate_at(3:7, as.numeric)
+# overall_df$adj.p.val <- p.adjust(overall_df$p.val, method = "BH")
+
+# saveRDS(overall_df, file = paste0(wd, "results/tables/parallel_randomized_per_genomic_region.rds"))
+
+overall_df <- readRDS(file = paste0(wd, "results/tables/parallel_randomized_per_genomic_region.rds"))
+
+```
+
+
+
+```{r parallel translational impact barplot summary}
+
+
+overall_df_sub <- overall_df %>%
+    filter(Translation_impact %notin% c("5R", "3R")) %>%
+    group_by(Translation_impact) %>%
+    mutate(
+        ratio = mean[group == "Observed"] /
+                mean[group == "Simulated"]
+    ) %>%
+    ungroup() %>%
+    arrange(desc(cohen_d)) %>%
+    mutate(Translation_impact = factor(Translation_impact, levels = unique(Translation_impact)))
+
+
+# generate barplot
+fig <- ggplot(overall_df_sub, 
+            aes(x = Translation_impact, y = mean, pattern = group)) +
+    geom_col_pattern(
+        position = position_dodge(width = 0.9),
+        color = "black",
+        fill = "white",
+        pattern_fill = "black",
+        pattern_density = 0.3,
+        pattern_spacing = 0.03,
+        pattern_key_scale_factor = 0.6,
+        width = 0.8
+    ) +
+    geom_errorbar(aes(ymin = mean - se, ymax = mean + se),
+        position = position_dodge(width = 0.9),
+        width = 0.3, color = "black", size = 1.5) +
+    labs(
+        title = paste0("Summary of Parallelism at Transfer #", end_psg),
+        y = "Parallel (%)",
+        x = "\nTranslational impact"
+    ) +
+    scale_x_discrete(
+        labels = c("All" = "All", "Syn" = "Synonymous", "Non_Syn" = "Nonsynonymous")
+    ) +
+    scale_pattern_manual(
+        name = "Dataset",
+        values = c("Observed" = "stripe", "Randomized" = "circle"),
+        labels = c("Observed", "Randomized")
+    ) +
+    scale_pattern_fill_manual(
+        values = c("Observed" = "black", "Randomized" = "black"),
+        guide = "none"
+    ) +
+    guides(
+        fill = "none",
+        pattern = guide_legend(
+        override.aes = list(
+            pattern_fill = "black",
+            fill = "white",
+            color = "black"
+        )
+        )
+    ) +
+    geom_text(
+        data = overall_df_sub %>% filter(group == "Observed"),
+        aes(y= mean + se + 2, label = ifelse(p.val < 0.001, "***", ifelse(p.val < 0.01, "**", ifelse(p.val < 0.05, "*", "n.s.")))),
+        position = position_dodge(width = 0.9),
+        size = 10
+    ) +
+    custom_plot_theme(application = "publication") +
+    theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title.x = element_blank()
+    )
+
+# save figure
+custom_plot_save(fig, "parallel_summary_barplot_translational_impact.pdf", height = 14, width = 14)
+```

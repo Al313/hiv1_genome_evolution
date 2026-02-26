@@ -111,8 +111,7 @@ counts <- variants_ann_expiii %>%
             mutate_at(c(1,2,3), as.factor) %>%
             left_join(feature_length, by = join_by(feature == feature)) %>%
             mutate(normalized_count = count*100/feature_length) %>%
-            mutate(feature = factor(feature, levels = c("5UTR", "5LTRLS", "gag", "pol", "vif","vpr", "tat","rev","vpu","env","nef","3UTR")))
-
+            mutate(feature = factor(feature, levels = c("gag", "pol", "vif","vpr", "tat","rev","vpu","env","nef")))
 
 
 # make the visualization
