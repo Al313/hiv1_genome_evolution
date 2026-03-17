@@ -37,8 +37,12 @@ variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == "B"] <- "13"
 
 end_psg <- 630
 
+# correct the feature name
 variants_ann_expiii <- variants_ann_expiii %>% filter(passage <= end_psg) %>%
-        mutate(feature = ifelse(feature == "envelope", "env", feature)) # correct the feature name
+        mutate(feature = ifelse(feature == "envelope", "env", feature)) %>%
+        mutate(feature = ifelse(feature == "3UTR", "U3", feature)) %>%
+        mutate(feature = ifelse(feature == "5UTR", "U5", feature)) %>%
+        mutate(feature = ifelse(feature == "5LTRLS", "GLS", feature))
 
 
 
@@ -48,7 +52,7 @@ host_factor <- c("MT2", "MT4")
 exp_line_factor <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 translational_impacts <- c("U", "S", "N")
 gene_factor <- c("gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "env", "nef")
-feature_factor <- c("5R","5UTR", "5LTRLS", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "env", "tat2", "rev2", "nef", "3UTR", "3R")
+feature_factor <- c("5R","U5", "GLS", "gag", "pol", "vif", "vpr", "tat1", "rev1", "vpu", "env", "tat2", "rev2", "nef", "U3", "3R")
 feature_start <- c(454,551,635,790,2085,5041,5559,5830,5969,6061,6221,8369,8369,8787,9408,9529)
 feature_end <- c(550,634,789,2292,5096,5619,5849,6044,6044,6306,8785,8414,8643,9407,9528,9625)
 
@@ -57,13 +61,13 @@ feature_df <- data.frame(feature = feature_factor,
                             end = feature_end,
                             length = feature_end - feature_start + 1)
 
-feature_df <- rbind(feature_df, c("tat", sum(feature_df$length[feature_df$feature %in% c("tat1", "tat2")])))
-feature_df$length <- as.numeric(feature_df$length)
-feature_df <- rbind(feature_df, c("rev", sum(feature_df$length[feature_df$feature %in% c("rev1", "rev2")])))
-feature_df$length <- as.numeric(feature_df$length)
+feature_df_p <- rbind(feature_df, c("tat", sum(feature_df$length[feature_df$feature %in% c("tat1", "tat2")])))
+feature_df_p$length <- as.numeric(feature_df_p$length)
+feature_df_p <- rbind(feature_df_p, c("rev", sum(feature_df_p$length[feature_df_p$feature %in% c("rev1", "rev2")])))
+feature_df_p$length <- as.numeric(feature_df_p$length)
 
-feature_df <- feature_df[feature_df$feature %notin% c("tat1", "tat2", "rev1", "rev2"),]
-feature_df$feature <- factor(feature_df$feature, levels = c("5R","5UTR", "5LTRLS", "gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "env", "nef", "3UTR", "3R"))
+feature_df_p <- feature_df_p[feature_df_p$feature %notin% c("tat1", "tat2", "rev1", "rev2"),]
+feature_df_p$feature <- factor(feature_df_p$feature, levels = c("5R","U5", "GLS", "gag", "pol", "vif", "vpr", "tat", "rev", "vpu", "env", "nef", "U3", "3R"))
 
 
 
