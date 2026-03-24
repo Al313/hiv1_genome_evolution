@@ -1,7 +1,7 @@
 
 
 # variables
-line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
+line_col_palette <- c("#944B94", "#ff2400", "#6600cc", "#0000ff")
 names(line_col_palette) <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 breaks_step <- 50
 
@@ -45,23 +45,27 @@ custom_plot_theme <- function(application = "publication", scale = 1) {
     size_set <- multiply_nested_list(size_set, scale)
     
     
-    theme_bw() +
+    theme_minimal() +
     theme(
         plot.title = element_text(size = size_set[[application]]["title"], hjust = 0.5),
         axis.title.x = element_text(
+            family = "Helvetica-Narrow",
+            color = "#373636",
             size = size_set[[application]]["axis_title"],
             margin = margin(t = size_set[[application]]["top_gap"])  # space above x-axis title
         ),
         axis.title.y = element_text(
+            family = "Helvetica-Narrow",
+            color = "#373636",
             size = size_set[[application]]["axis_title"],
             margin = margin(r = size_set[[application]]["right_gap"])  # space to the right of y-axis title
         ),
-        axis.text.x = element_text(size = size_set[[application]]["axis_text"], color = "black", angle = 90),
-        axis.text.y = element_text(size = size_set[[application]]["axis_text"], color = "black"),
+        axis.text.x = element_text(family = "Courier", size = size_set[[application]]["axis_text"], color = "#5e5e5e", angle = 90),
+        axis.text.y = element_text(family = "Courier", size = size_set[[application]]["axis_text"], color = "#5e5e5e"),
         strip.text.x = element_text(size = 50, angle=0),
         strip.text.y = element_text(size = 50, angle=270),
-        legend.title = element_text(size = size_set[[application]]["legend_title"]),
-        legend.text = element_text(size = size_set[[application]]["legend_text"])
+        legend.title = element_text(family = "Helvetica-Narrow", size = size_set[[application]]["legend_title"], color = "#373636"),
+        legend.text = element_text(family = "Helvetica-Narrow", size = size_set[[application]]["legend_text"], color = "#5e5e5e")
     )
 }
 

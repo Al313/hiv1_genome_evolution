@@ -47,11 +47,11 @@ counts$effect_simplified2 <- factor(
 
 # visualize
 fig <- counts %>%  ggplot(aes(x=passage, y = density, color = exp_line, linetype = effect_simplified2)) +
-        geom_line(linewidth=1) +
+        geom_line(linewidth=1, alpha = 0.75) +
         labs(title = paste0("Normalized ",category, " Mutation Accumulation \n (Coding vs Non-Coding)"),
         x="Transfer", y=paste0("Fixed mutation density (per nucleotide)"), color = "Population", linetype = "Region")+
         scale_x_continuous(breaks = c(seq(0,end_psg,50), end_psg)) +
-        scale_y_continuous(limits = c(0,max(counts$density)+1),breaks = seq(0,max(counts$density)+1,1)) +
+        scale_y_continuous(limits = c(0,max(counts$density)+0.2),breaks = seq(0,max(counts$density)+1,1)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication")
 

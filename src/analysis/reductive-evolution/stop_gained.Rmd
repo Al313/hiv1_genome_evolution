@@ -2,7 +2,7 @@
 title:  
     "Loss of function mutations"
 date: 
-    "n 26th, 2025"
+    "Feb 26th, 2026"
 author:  
     "Ali Movasati"  
 output:  
@@ -24,18 +24,18 @@ output:
 ```{r loading libraries, echo=FALSE}
 
 # loading libraries
-library("ggplot2")
-library("ggpubr")
-library("plotly")
-library("hrbrthemes")
-library("DT")
-library("dplyr")
-library("zoo") # estimate na's if any 
-library("tidyr")
-library("Biostrings")
-library("stringr")
-library("magrittr")
-library("RColorBrewer")
+library(ggplot2)
+library(ggpubr)
+library(plotly)
+library(hrbrthemes)
+library(DT)
+library(dplyr)
+library(zoo) # estimate na's if any 
+library(tidyr)
+library(Biostrings)
+library(stringr)
+library(magrittr)
+library(RColorBrewer)
 
 
 ```
