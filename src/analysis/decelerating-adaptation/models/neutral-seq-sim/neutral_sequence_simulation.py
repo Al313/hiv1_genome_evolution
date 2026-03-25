@@ -12,7 +12,7 @@ import re
 
 # Get command-line arguments
 args = sys.argv[1:] if len(sys.argv) > 1 else ["MT-2_1", "Majority", 180]
-exp_line, generation_time, sample_nr, bottleneck_freq, seq_sampling_freq = args
+exp_line, generation_time, run_nr, sample_nr, bottleneck_freq, seq_sampling_freq = args
 
 # Determine working directory
 if os.path.exists("/home/amovas/"):
@@ -80,15 +80,15 @@ seq_sampling_freq = int(seq_sampling_freq)
 
 
 # Define path and filename
-folder_path_population = f"{wd}results/tables/neutral-seq-sim/populations/{bottleneck_intervals}/{exp_line}"
-folder_path_sequence = f"{wd}results/tables/neutral-seq-sim/sequences/{bottleneck_intervals}/{exp_line}"
+folder_path_population = f"{wd}results/tables/neutral-seq-sim/populations/{bottleneck_intervals}/{exp_line}/run{run_nr}"
+folder_path_sequence = f"{wd}results/tables/neutral-seq-sim/sequences/{bottleneck_intervals}/{exp_line}/run{run_nr}"
 # Ensure the directory exists
 os.makedirs(folder_path_population, exist_ok=True)
 os.makedirs(folder_path_sequence, exist_ok=True)
 
 
 # Create and save initial ancestral population and read previous populations
-np.random.seed(sample_nr+2)
+np.random.seed(sample_nr+int(run_nr))
 
 if sample_nr == 1:
     init_population = np.tile(np.random.choice([1, 2, 3, 4], neutral_pos, replace=True).astype(np.uint8), (initial_population, 1))

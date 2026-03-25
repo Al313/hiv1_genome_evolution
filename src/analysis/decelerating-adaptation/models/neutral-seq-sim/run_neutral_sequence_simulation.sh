@@ -41,6 +41,7 @@ tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
 exp_line="MT-2_1"
+tot_run=3
 
 
 
@@ -70,7 +71,9 @@ fi
 rm /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/*
 rm /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/sequences/\${bottleneck_freq}/\${exp_line}/*
 
+# Loop over runs
 
+for run_nr in \$(seq 2 \${tot_run}); do
 
 # Loop over samples
 
@@ -96,7 +99,7 @@ echo "#!/bin/bash
 source activate ha_proj
 
 # Run the python script
-stdbuf -oL ./neutral_sequence_simulation.py \${exp_line} \${tot_gen_nr} \${sample_nr} \${bottleneck_freq} \${seq_sampling_freq}
+stdbuf -oL ./neutral_sequence_simulation.py \${exp_line} \${tot_gen_nr} \${run_nr} \${sample_nr} \${bottleneck_freq} \${seq_sampling_freq}
 
 " > \${job_file}
 
@@ -107,7 +110,7 @@ job_id=\$(echo \${job_submission_output} | awk '{print \$4}')
 touch \${output_dir}/\${job_id}
 
 # Path to the file youre waiting for
-FILE="/home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/\${sample_nr}.npy"
+FILE="/home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/run\${run_nr}/\${sample_nr}.npy"
 
 while [ ! -f "\$FILE" ]; do
 echo "Waiting for \$FILE to be created..."
@@ -115,6 +118,7 @@ sleep 10  # Check every 10 seconds
 done
 
 
+done
 done
 EOF
 
