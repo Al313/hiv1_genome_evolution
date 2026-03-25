@@ -22,8 +22,10 @@ min_af <- 0.99
 mut_count_all <- list()
 long_df_all <- data.frame()
 exp_line <- "MT-4_2"
-run_nr <- 2
+total_run <- 10
 i <- 1
+for (run_nr in 1:total_run){
+  print(run_nr)
 for (exp_line in exp_lines){
   print(exp_line)
   mut_count <- c()
@@ -86,7 +88,8 @@ for (exp_line in exp_lines){
     long_df <- long_df[order(long_df$pos),]
     long_df$passage <- i*10
     long_df$exp_line <- exp_line
-    long_df <- long_df[,c("exp_line", "passage", "pos", "base_allele", "alt_allele", "allele_freq")]
+    long_df$run_nr <- run_nr
+    long_df <- long_df[,c("run_nr","exp_line", "passage", "pos", "base_allele", "alt_allele", "allele_freq")]
 
     long_df_all <- rbind(long_df_all, long_df)
     count <- sum(long_df$allele_freq >= min_af)
@@ -94,9 +97,9 @@ for (exp_line in exp_lines){
     mut_count_all[[exp_line]] <- mut_count
   }
 }
+}
 
-
-saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all1.rds"))
-saveRDS(mut_count_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all1.rds"))
+saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.rds"))
+saveRDS(mut_count_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all_runs.rds"))
 
 

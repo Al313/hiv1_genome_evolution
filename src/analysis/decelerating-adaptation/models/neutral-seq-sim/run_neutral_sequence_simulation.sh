@@ -41,7 +41,7 @@ tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
 exp_line="MT-2_1"
-tot_run=3
+tot_run=10
 
 
 
@@ -73,7 +73,7 @@ rm /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/sequences/\$
 
 # Loop over runs
 
-for run_nr in \$(seq 2 \${tot_run}); do
+for run_nr in \$(seq 1 \${tot_run}); do
 
 # Loop over samples
 
