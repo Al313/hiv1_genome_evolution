@@ -20,13 +20,12 @@ exp_lines <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")
 bottleneck_freq <- 3
 min_af <- 0.99
 total_run <- 10
-# mut_count_all <- list()
 long_df_all <- data.frame()
-fixed_df_all <- data.frame(run_nr = NA, exp_line = NA, passage = NA, count = NA)
+fixed_df_all <- data.frame(run_nr = integer(), exp_line = character(), passage = integer(), count = integer())
 
 for (run_nr in 1:total_run){
   print(run_nr)
-  fixed_df <- data.frame(run_nr = NA, exp_line = NA, passage = NA, count = NA)
+  fixed_df <- data.frame(run_nr = integer(), exp_line = character(), passage = integer(), count = integer())
   for (exp_line in exp_lines){
     print(exp_line)
     for (i in seq(1,50)){
@@ -93,11 +92,16 @@ for (run_nr in 1:total_run){
 
       long_df_all <- rbind(long_df_all, long_df)
       count <- sum(long_df$allele_freq >= min_af)
-      fixed_df <- rbind(fixed_df, c(run_nr, exp_line, i*10, count))
-      # mut_count <- append(mut_count, count)
-      # mut_count_all[[exp_line]] <- mut_count
+      fixed_df <- rbind(fixed_df, data.frame(
+		 			 run_nr = run_nr,
+		  			 exp_line = exp_line,
+		  			 passage = i*10,
+		  			 count = count,
+		  			 stringsAsFactors = FALSE))
     }
   }
+  print(colnames(fixed_df))
+  print(colnames(fixed_df_all))
   fixed_df_all <- rbind(fixed_df_all, fixed_df)
 }
 
