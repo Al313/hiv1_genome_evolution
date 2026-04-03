@@ -1,0 +1,17 @@
+exp_line     deletion_id     start_psg     end_psg     start_pos     end_pos     offset_length     adjacent_deletion
+MT-2_1     1     80     200     9102     9223     0     NA
+MT-2_1     2     170     340     9224     9246     0     start
+MT-2_1     3     300     370     9392     9418     3     NA
+MT-2_1     4     350     490     8859     9039     5     start
+MT-2_1     5     440     560     8790     8858     1     end
+MT-2_2     1     160     270     9141     9335     5     NA
+MT-2_2     2     260     500     9336     9339     2     start
+MT-2_2     3     350     570     9022     9026     1     NA
+MT-2_2     4     510     580     9009     9049     5     NA
+MT-4_1     1     60     150     9154     9291     0     NA  
+MT-4_1     2     160     300     8932     9014     1     start
+MT-4_1     3     160     300     8810     9003     2     end  
+MT-4_1     4     280     630     9130     9153     1     end
+MT-4_1     5     280     580     9325     9340     2     NA
+MT-4_2     1     80     200     9236     9244     0     NA
+MT-4_2     2     240     580     9251     9259     3     start 

@@ -57,20 +57,36 @@ source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 
 ```
 
-```{r}
+```{r read in deletion frequency data}
 
+# data obtained by eyeballing
+nef_deletions_eye <- read.table(file = paste0(wd,"results/tables/misc/nef_deletions.tsv"), sep = "", header = T)
 
-nef_deletions <- read.table(file = paste0(wd,"results/tables/misc/nef_deletions.tsv"), sep = "", header = T)
-
-nef_deletions %<>% 
+nef_deletions_eye %<>% 
     mutate(length = end - start + 1,
     right_vf = 1 - coverage_after_start/coverage_before_start,
     left_vf = 1 - coverage_before_end/coverage_after_end,
     deletion_id = paste0(exp_line, ":", deletion_id)) %>%
     mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
     deletion_name = paste0(length, ":", start, "_", end),
-    deletion_id = as.factor(deletion_id)) 
+    deletion_id = as.factor(deletion_id))
 
+
+# data obtained by systematic script
+nef_deletions <- readRDS(file = paste0(wd,"results/tables/misc/nef_deletions_list_processed.Rds"))
+
+nef_deletions %<>% 
+    mutate_at(c(3:8,10:13), as.integer) %>%
+    mutate(length = end_pos - start_pos + 1,
+    right_vf = 1 - start_pos_cov/start_pos_left_cov,
+    left_vf = 1 - end_pos_cov/end_pos_right_cov,
+    deletion_id = paste0(exp_line, ":", deletion_id)) %>%
+    mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
+    deletion_name = paste0(length, ":", start_pos, "_", end_pos),
+    deletion_id = as.factor(deletion_id)) 
+```
+
+```{r frequency plot}
 
 nef_deletions_extended <- nef_deletions
 
@@ -126,7 +142,7 @@ fig <- nef_deletions_extended %>%
 
 
 # save figure
-custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 21)
+custom_plot_save(fig,  "t.pdf", height = 14, width = 21) # nef_deletion_freq
 ```
 
 
@@ -174,7 +190,7 @@ fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
     custom_plot_theme(application = "publication")
 
 # save figure
-custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 10.5)
+custom_plot_save(fig,  "tt.pdf", height = 14, width = 10.5) # nef_del_dist_time_to_fix
 
 
 ```
@@ -306,7 +322,7 @@ fig <- ggplot(df2, aes(x = group, y = init_rel_fit, fill = group)) +
 
 
 # save figure
-custom_plot_save(fig,  "nef_del_length_vs_initial_rel_fitness_boxplot.pdf", height = 14, width = 14)
+custom_plot_save(fig,  "ttt.pdf", height = 14, width = 14) # nef_del_length_vs_initial_rel_fitness_boxplot
 
 
 ```
