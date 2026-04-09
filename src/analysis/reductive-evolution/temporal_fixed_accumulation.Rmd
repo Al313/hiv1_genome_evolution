@@ -108,19 +108,25 @@ counts$group <- "Observed"
 
 # simulated data (own simulation)
 bottleneck_freq <- 3
-sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all.rds"))
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all_runs.rds"))
 
-# Convert to data frame
-sim_data_long_df <- purrr::imap_dfr(sim_data, ~ {
-    tibble(
-        exp_line = .y,
-        passage = seq_along(.x) * 10,     # multiply by 10 as per your example
-        mut_count = .x,
-        group = "Simulated"
+sim_data_sum <- sim_data %>% group_by(exp_line, passage) %>% summarise(
+        n = n(),
+        mut_count = mean(count),
+        sd_count = sd(count),
+        se = sd_count / sqrt(n),
+        t_crit = qt(0.975, df = n - 1),
+        lower_95 = mut_count - t_crit * se,
+        upper_95 = mut_count + t_crit * se,
+        .groups = "drop"
     )
-})
 
-counts_all <- rbind(counts, sim_data_long_df)
+sim_data_sum$group <- "Simulated"
+
+
+counts$lower_95 <- NA
+counts$upper_95 <- NA
+counts_all <- rbind(counts, sim_data_sum[,c(1,2,4,8,9,10)])
 counts_all$group <- factor(counts_all$group, levels = c("Observed", "Simulated"))
 
 ```
@@ -167,14 +173,28 @@ df_lm_mt4$group <- "Observed"
 ```{r visualization1: fixed accumulation + regression + simulated data}
 
 # visualize
-fig <- counts_all[counts_all$group == "Observed",] %>%  ggplot(aes(x=passage, y = mut_count, color = exp_line)) +
+fig <- counts_all %>%  ggplot(aes(x=passage, y = mut_count, linetype = group, color = exp_line)) +
         geom_line(linewidth=2) +
-        geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2)+
-        geom_line(data = df_lm_mt2, aes(x = passage, y = predicted), color = "#ff8b08", size = 2)+
-        labs(x="Transfer", y= paste0(category, " mutation count"), color = "Population", title = "")+
+        geom_line(data = df_lm_mt4, aes(x = passage, y = predicted), color = "#00c8ff", size = 2, inherit.aes = FALSE)+
+        geom_line(data = df_lm_mt2, aes(x = passage, y = predicted), color = "#ff8b08", size = 2, inherit.aes = FALSE)+
+        geom_ribbon(
+            data = counts_all %>% dplyr::filter(group == "Simulated"),
+            aes(
+                x = passage,
+                ymin = lower_95,
+                ymax = upper_95,
+                fill = exp_line,
+                group = interaction(exp_line)
+            ),
+            alpha = 0.2,
+            inherit.aes = FALSE,
+            show.legend = FALSE
+        )+
+        labs(x="Transfer", y= paste0(category, " mutation count"), color = "Population", linetype = "Dataset", title = "")+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts$mut_count)+2),breaks = seq(0,max(counts$mut_count)+20,20)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
+        scale_fill_manual(labels = exp_line_factor, values = line_col_palette) +
         custom_plot_theme(application = "publication") +
         guides(
             color = guide_legend(order = 1),     # Line legend first
