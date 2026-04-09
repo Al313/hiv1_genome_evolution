@@ -31,7 +31,6 @@ library(plotly)
 library(hrbrthemes)
 library(irr)
 library(dplyr)
-library(zoo) # estimate na's if any 
 library(tidyr)
 library(Biostrings)
 library(stringr)
@@ -134,15 +133,17 @@ divergence_rates <- readRDS(file = paste0(wd, "results/tables/divergence_rate_sl
 
 # plot divergence rates over genome
 fig <- divergence_rates[divergence_rates$passage == end_psg & divergence_rates$window_start >= 551 & divergence_rates$window_end <= 9529,] %>%
-    ggplot(aes(x = mid_window, y = log(divergence_rate_per_year), color = exp_line)) +
+    ggplot(aes(x = mid_window, y = log10(divergence_rate_per_year), color = exp_line)) +
     geom_line(aes(alpha = exp_line, linewidth = exp_line)) +
     labs(x = "Genomic position", y = "Divergence rate [1/site/year]", color = "Population")+
     scale_x_continuous(breaks = c(454, seq(0, 9000, by = 1000), genome_end), limits = c(genome_start, genome_end)) +
+    scale_y_continuous(
+        labels = function(x) parse(text = paste0("10^", x))) +
     scale_color_manual(values = c(line_col_palette, "Average" = "#000000")) +
     scale_linewidth_manual(values = c(rep(1, length(exp_line_factor)), 2)) +
     scale_alpha_manual(values = c(rep(0.5, length(exp_line_factor)), 1)) +
     guides(alpha = "none", linewidth = "none") +
-    coord_cartesian(ylim = c(-7, -4)) +
+    coord_cartesian(ylim = c(-3, -1.5)) +
     custom_plot_theme(application = "publication")
 
 
@@ -166,10 +167,10 @@ divergence_rates %<>%
     mutate(exp_line = factor(exp_line, levels = c(exp_line_factor, "Average")))
 
 # plot genome-wide average divergence rate over time
-fig <- divergence_rates %>% ggplot(aes(x = passage, y = log(genome_divergence_rate_per_year), color = exp_line)) +
+fig <- divergence_rates %>% ggplot(aes(x = passage, y = genome_divergence_rate_per_year, color = exp_line)) +
     geom_line(aes(alpha = exp_line, linewidth = exp_line)) +
-    labs(x = "Passage", y = "divergence rate [1/genome/year]", color = "Population")+
-    scale_x_continuous(breaks = c(seq(0, end_psg, by = 50), 630)) +
+    labs(x = "Transfer", y = "Divergence rate [1/genome/year]", color = "Population")+
+    scale_x_continuous(breaks = seq(0, end_psg, by = 50)) +
     scale_color_manual(values = c(line_col_palette, "Average" = "#000000")) +
     scale_linewidth_manual(values = c(rep(1, length(exp_line_factor)), 2)) +
     scale_alpha_manual(values = c(rep(0.5, length(exp_line_factor)), 1)) +

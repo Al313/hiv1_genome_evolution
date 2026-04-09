@@ -32,7 +32,6 @@ library(plotly)
 library(hrbrthemes)
 library(irr)
 library(dplyr)
-library(zoo) # estimate na's if any 
 library(tidyr)
 library(Biostrings)
 library(stringr)
@@ -66,9 +65,6 @@ if (file.exists("/home/amovas/")){
 # load data
 source(paste0(wd, "src/analysis/reductive-evolution/readin_data.R"))
 
-# further script-specific processing
-variants_ann_expiii %<>% filter(feature %notin% c("5R", "3R"))
-feature_df %<>% filter(feature %notin% c("5R", "3R"))
 ```
 
 ```{r load visualization settings}
@@ -107,7 +103,6 @@ filtered_data <- variants_ann_expiii %>%
     filter(feature %notin% c("3R", "5R"),
             effect_simplified %in% c("U", "N"),
             allele_freq >= min_threshold) %>%
-    filter(!(genomic_pos <= 9407 & genomic_pos > 8787 & effect_simplified == "U")) %>%
     select(exp_line, feature, mut_info) %>%
     distinct()
 
@@ -164,10 +159,9 @@ table <- result_wide %>%
         parallel_prop = "Parallel Proportion",
         length = "Length"
     )
-    
+
 # Save as PDF
 gtsave(table, "/Users/alimos313/Documents/studies/phd/research/manuscripts/reductive-evolution/figures/fixed_mut_table.pdf")
-
 
 
 ```
@@ -175,8 +169,6 @@ gtsave(table, "/Users/alimos313/Documents/studies/phd/research/manuscripts/reduc
 
 
 ```{r parallelism neutral randomization + heatmap}
-
-
 
 
 # Bootstrap function for mean
@@ -191,6 +183,9 @@ base1 <- "A"
 base2 <- "G"
 
 overall_df <- data.frame()
+
+pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/reductive-evolution/figures/parallel_heatmaps_per_region.pdf", height = 14, width = 14)
+
 
 for (k in 1:nrow(feature_df)){
     if (feature_df$feature[k] %in% c("tat1", "tat2")){
@@ -333,7 +328,8 @@ for (k in 1:nrow(feature_df)){
 
 
     # save figure
-    custom_plot_save(fig, paste0("parallel_heatmap_", feature,".pdf"), height = 14, width = 14)
+    print(fig)
+    
     
     #######################
 
@@ -367,6 +363,8 @@ for (k in 1:nrow(feature_df)){
 
 }
 
+dev.off()
+
 colnames(overall_df) <- c("feature", "group", "mean", "se", "ci_lower", "ci_upper", "p.val", "cohen_d", "ratio")
 
 
@@ -393,7 +391,6 @@ saveRDS(overall_df, file = paste0(wd, "results/tables/parallel_randomized_per_ge
 
 overall_df <- readRDS(file = paste0(wd, "results/tables/parallel_randomized_per_genomic_region.rds"))
 
-overall_df2 <- overall_df
 
 ```
 

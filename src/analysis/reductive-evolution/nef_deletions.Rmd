@@ -73,7 +73,8 @@ nef_deletions_eye %<>%
 
 
 # data obtained by systematic script
-nef_deletions <- readRDS(file = paste0(wd,"results/tables/misc/nef_deletions_list_processed.Rds"))
+nef_deletions <- as.data.frame(readRDS(file = paste0(wd,"results/tables/misc/nef_deletions_list_processed2.Rds")))
+
 
 nef_deletions %<>% 
     mutate_at(c(3:8,10:13), as.integer) %>%
@@ -83,12 +84,20 @@ nef_deletions %<>%
     deletion_id = paste0(exp_line, ":", deletion_id)) %>%
     mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
     deletion_name = paste0(length, ":", start_pos, "_", end_pos),
-    deletion_id = as.factor(deletion_id)) 
+    deletion_id = as.factor(deletion_id)) %>%
+    mutate(consensus_vf = round(consensus_vf, 2)) %>%
+    filter(consensus_vf >= 0)
+
+
+nef_deletions <- nef_deletions[nef_deletions$passage <= end_psg,]
+
+
 ```
 
 ```{r frequency plot}
 
 nef_deletions_extended <- nef_deletions
+
 
 for (del in levels(nef_deletions$deletion_id)){
     max_record <- max(nef_deletions$passage[nef_deletions$deletion_id == del])
@@ -138,11 +147,8 @@ fig <- nef_deletions_extended %>%
     guides(linetype = "none")
 
 
-
-
-
 # save figure
-custom_plot_save(fig,  "t.pdf", height = 14, width = 21) # nef_deletion_freq
+custom_plot_save(fig,  "nef_deletion_freq.pdf", height = 14, width = 21)
 ```
 
 
@@ -153,12 +159,12 @@ t_2_f <- data.frame()
 
 for (exp_line in exp_line_factor){
     nef_deletions_extended_sub <- nef_deletions_extended[nef_deletions_extended$exp_line == exp_line,] #& variants_expiii$genomic_pos >= 8787 & variants_expiii$genomic_pos <= 9400
-    deletion_ids <- unique(nef_deletions_extended_sub$deletion_id[nef_deletions_extended_sub$consensus_vf >= 0.99 & nef_deletions_extended_sub$passage == end_psg])
+    deletion_ids <- unique(nef_deletions_extended_sub$deletion_id[nef_deletions_extended_sub$consensus_vf >= 0.98 & nef_deletions_extended_sub$passage == end_psg])
     for (id in deletion_ids){
         nef_deletions_extended_sub2 <- nef_deletions_extended_sub[nef_deletions_extended_sub$deletion_id == id,]
-        fixation <- min(as.numeric(as.vector(nef_deletions_extended_sub$passage[nef_deletions_extended_sub$deletion_id == id & nef_deletions_extended_sub$consensus_vf >= 0.95])))
-        appearance <- max(setdiff(seq(0,fixation,10), as.numeric(as.vector(unique(nef_deletions_extended_sub2$passage[(nef_deletions_extended_sub2$deletion_id == id & nef_deletions_extended_sub2$consensus_vf >= 0.01)]))))) + 10
-        disappearance_vec <- as.numeric(as.vector(nef_deletions_extended_sub$passage[nef_deletions_extended_sub$deletion_id == id & nef_deletions_extended_sub$consensus_vf < 0.05]))
+        fixation <- min(as.numeric(as.vector(nef_deletions_extended_sub$passage[nef_deletions_extended_sub$deletion_id == id & nef_deletions_extended_sub$consensus_vf >= 0.98])))
+        appearance <- min(as.numeric(as.vector(unique(nef_deletions_extended_sub2$passage[(nef_deletions_extended_sub2$deletion_id == id & nef_deletions_extended_sub2$consensus_vf >= 0.01)]))))
+        disappearance_vec <- as.numeric(as.vector(nef_deletions_extended_sub$passage[nef_deletions_extended_sub$deletion_id == id & nef_deletions_extended_sub$consensus_vf < 0.01]))
         disappearance <- ifelse(length(disappearance_vec[disappearance_vec > fixation]) == 0, NA, min(disappearance_vec[disappearance_vec > fixation]))
         length <- unique(nef_deletions_extended_sub2$length)
         deletion_name <- unique(as.character(nef_deletions_extended_sub2$deletion_name))
@@ -176,7 +182,7 @@ t_2_f %<>% set_colnames(c("exp_line", "deletion_id", "deletion_name", "length", 
 jpos_points <- position_jitter(width = 0.2, height = 0)
 
 
-
+set.seed(-4)
 fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
     geom_boxplot(outlier.shape = NA, width = 0.3, linewidth = 1.5, size = 2) +
     geom_hline(yintercept = 150, linetype = "dashed", linewidth = 1) +
@@ -190,8 +196,7 @@ fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
     custom_plot_theme(application = "publication")
 
 # save figure
-custom_plot_save(fig,  "tt.pdf", height = 14, width = 10.5) # nef_del_dist_time_to_fix
-
+custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 10.5)
 
 ```
 
@@ -228,7 +233,6 @@ t_2_f_sbs[!is.na(t_2_f_sbs$disappearance),]
 aa <- t_2_f_sbs$mut_info[!is.na(t_2_f_sbs$disappearance)]
 
 # average time to fixation for fixated mutations based on how many times they are repeated
-
 fix_count_table <- table(variants_expiii$mut_info[variants_expiii$allele_freq >= 0.99 & variants_expiii$passage == end_psg])
 
 
@@ -257,6 +261,68 @@ wilcox.test(t_2_f$time_to_fixation[t_2_f$length >= 50], t_2_f_sbs$time_to_fixati
 
 ```
 
+
+
+```{r comapring time to fixation between large and small deletions}
+
+
+
+t_2_f$group <- ifelse(t_2_f$length >= 25, "Long \n(> 25bp del)", "Short \n(<= 25bp del)")
+t_2_f %<>% mutate(group = factor(group, levels = c("Short \n(<= 25bp del)", "Long \n(> 25bp del)")))
+
+# create figure
+fig <- ggplot(t_2_f, aes(x = group, y = time_to_fixation, fill = group)) +
+    geom_violin(trim = FALSE, alpha = 0.6) +
+    geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
+    stat_compare_means(
+        comparisons = list(c("Short \n(<= 25bp del)", "Long \n(> 25bp del)")),
+        method = "wilcox.test",
+        label = "p.signif",   # shows asterisks
+        label.y = 500,
+        colour = "black",
+        bracket.size = 0.8,
+        size = 15
+    ) +
+    labs(
+        x = NULL,
+        y = "Time to fixation",
+        title = "Time to majority by deletion length",
+        fill = "Group"
+    ) +
+    theme_classic() +
+    theme(legend.position = "none") +
+    custom_plot_theme(application = "publication") +
+    theme(axis.text.x = element_blank())
+
+
+# save figure
+custom_plot_save(fig,  "nef_del_length_vs_time_to_fixation_boxplot.pdf", height = 14, width = 14) # nef_del_length_vs_initial_rel_fitness_boxplot
+
+
+
+
+fig <- ggplot(t_2_f, aes(x = length, y = time_to_fixation)) +
+    geom_point(size = 5) +
+    geom_smooth(method = "lm", se = T) +
+    labs(x="Deletion length", y= "Time to fixation") +
+    # scale_y_continuous(breaks = seq(0,300, 50)) +
+    # scale_size_continuous(range = c(5, 15), name = "Length") +
+    scale_color_manual(values = legend_colors) +
+    guides(color = "none") +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig,  "nef_del_length_vs_time_to_fixation_scatterplot.pdf", height = 14, width = 14) # nef_del_length_vs_initial_rel_fitness_boxplot
+
+
+modell <- lm(time_to_fixation ~ length, data = t_2_f)
+summary(modell)
+
+```
+
+
+
+
 ```{r initial relative fitness, comparison between short and large deletions}
 
 initial_rel_fitness <- function(t1, af1, t2, af2) {
@@ -272,9 +338,9 @@ for (exp_line in exp_line_factor){
     
     for (id in unique(as.character(nef_deletions_sub$deletion_id))){
         print(id)
-        appearance_psg <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.01]))) #  & variants_expiii_sub$allele_freq >= 0.01
+        appearance_psg <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.1]))) #  & variants_expiii_sub$allele_freq >= 0.01
         freq_appearance <- nef_deletions_sub$consensus_vf[nef_deletions_sub$deletion_id == id & nef_deletions_sub$passage == appearance_psg]
-        ten_percent_psg <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.1])))
+        ten_percent_psg <- min(as.numeric(as.vector(nef_deletions_sub$passage[nef_deletions_sub$deletion_id == id & nef_deletions_sub$consensus_vf >= 0.01])))
         freq_ten_percent <- nef_deletions_sub$consensus_vf[nef_deletions_sub$deletion_id == id & nef_deletions_sub$passage == ten_percent_psg]
         
 
@@ -293,7 +359,7 @@ df2 <- df %>% set_colnames(c("exp_line", "deletion_id", "length", "appearance_ps
         mutate_at(3:8, as.numeric) %>%
         filter(!is.nan(init_rel_fit))
 
-df2$group <- ifelse(df2$length >= 50, "Long \n(> 50bp del)", "Short \n(<= 50bp del)")
+df2$group <- ifelse(df2$length >= 25, "Long \n(> 50bp del)", "Short \n(<= 50bp del)")
 df2 %<>% mutate(group = factor(group, levels = c("Short \n(<= 50bp del)", "Long \n(> 50bp del)")))
 
 # create figure
@@ -326,5 +392,4 @@ custom_plot_save(fig,  "ttt.pdf", height = 14, width = 14) # nef_del_length_vs_i
 
 
 ```
-
 

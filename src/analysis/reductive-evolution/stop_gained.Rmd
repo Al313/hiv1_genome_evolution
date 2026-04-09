@@ -30,7 +30,6 @@ library(plotly)
 library(hrbrthemes)
 library(DT)
 library(dplyr)
-library(zoo) # estimate na's if any 
 library(tidyr)
 library(Biostrings)
 library(stringr)

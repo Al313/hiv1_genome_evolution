@@ -12,7 +12,6 @@ if (file.exists("/home/amovas/")){
 }
 
 # define functions
-
 `%notin%` <- Negate(`%in%`)
 
 # load data
@@ -34,8 +33,7 @@ variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == "A"] <- "16"
 variants_ann_expiii$exp_line[variants_ann_expiii$exp_line == "B"] <- "13"
 
 # determine what data to be included
-
-end_psg <- 630
+end_psg <- 600
 
 # correct the feature name
 variants_ann_expiii <- variants_ann_expiii %>% filter(passage <= end_psg) %>%
@@ -83,9 +81,10 @@ variants_ann_expiii <- variants_ann_expiii %>%
                             host_line = factor(host_line, levels = host_factor),
                             effect_simplified = factor(effect_simplified, levels = translational_impacts)) 
 
+
+# remove annotation for U3 which overlaps with nef
+variants_ann_expiii %<>% filter(!(genomic_pos >= 9076 & genomic_pos <= 9407 & effect_simplified == "U"))
+
+
 # remove duplicate records for the same variants
 variants_expiii <- variants_ann_expiii %>% filter(!duplicated(variant_id))
-
-
-line_col_palette <- c("#ff00ff", "#ff2400", "#6600cc", "#0000ff")
-names(line_col_palette) <- c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")

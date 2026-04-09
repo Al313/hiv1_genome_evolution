@@ -1,17 +1,27 @@
+#!/usr/bin/env Rscript
 
+# load libraries
+library(dplyr)
+library(stringr)
 
+# set working directory
+if (file.exists("/home/amovas/")){
+    print("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    print("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
 
+# read in data
 deletion_junctions <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/nef_deletions_list.tsv",
                                 sep = "",
                                 header = TRUE)
 
-
-row <- 13
-psg <- 620
-
 df <- data.frame()
+row <- 3
 line_conversion <- c("MT-2_1" = "13", "MT-2_2" = "14", "MT-4_1" = "15", "MT-4_2" = "16")
-for (row in 7:7){
+for (row in 1:16){
     print(row)
     start_psg <- deletion_junctions$start_psg[row]
     end_psg <- deletion_junctions$end_psg[row]
@@ -28,7 +38,7 @@ for (row in 7:7){
         print(psg)
         file <- list.files(
             path = paste0("/Users/alimos313/Desktop/scrap/bam-portal/", exp_line_no),
-            pattern = paste0("VP", psg, ".*\\.bam$"),
+            pattern = paste0("VP", psg, "[A-Za-z].*\\.bam$"),
             full.names = TRUE
         )
 
@@ -49,7 +59,7 @@ for (row in 7:7){
             if (length(depth) == 0){
                 cov <- 0
             } else {
-                cov <- str_split(depth, pattern = "\t")[[1]][3]
+                cov <- as.numeric(tail(str_split(depth, pattern = "\t")[[1]],1))
             }
             cov_all <- c(cov_all, cov)
         }
@@ -69,6 +79,10 @@ for (row in 7:7){
 colnames(df) <- c("exp_line", "deletion_id", "passage", "start_psg", "end_psg", "start_pos", "end_pos", "offset_length", 
     "adjacent_deletion", "start_pos_cov", "start_pos_left_cov", "end_pos_cov", "end_pos_right_cov")
 
-saveRDS(df, file = paste0(wd,"results/tables/misc/nef_deletions_list_processed.Rds"))
+saveRDS(df, file = paste0(wd,"results/tables/misc/nef_deletions_list_processed2.Rds"))
 
-
+## 
+# df2 <- readRDS(file = paste0(wd,"results/tables/misc/nef_deletions_list_processed.Rds"))
+# df2 %<>% filter(deletion_id != "MT-4_2:2")
+# df2 <- rbind(df2, df)
+# saveRDS(df2, file = paste0(wd,"results/tables/misc/nef_deletions_list_processed.Rds"))

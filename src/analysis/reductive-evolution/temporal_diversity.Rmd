@@ -198,7 +198,7 @@ fig <- ggplot(shannon_measure_all[shannon_measure_all$data == "Observed",], aes(
     labs(x="Transfer", y= "Mean entropy (H)", color = "Population", title = "") +
     scale_color_manual(values = line_col_palette) +
     scale_y_continuous(limits = c(0,max(shannon_measure_all$mean_ent)+0.001),breaks = seq(0,max(shannon_measure_all$mean_ent)+0.001,0.005)) +
-    scale_x_continuous(breaks = c(seq(0,end_psg+10,50), 630)) +
+    scale_x_continuous(breaks = seq(0,end_psg+10,50)) +
     custom_plot_theme(application = "publication") +
     guides(
         color = guide_legend(order = 1),     # Line legend first

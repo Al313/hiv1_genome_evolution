@@ -1,7 +1,3 @@
-
-
-
-
 ---
 title:  
     "Divergence coding vs noncoding"
@@ -22,7 +18,23 @@ output:
         code_download: true # to make the Rmd source code available
 ---
 
+```{r text numbers}
 
+# set parameters
+category <- "Fixed" 
+
+if (category == "Minority"){
+    min_threshold <- 0.01
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
+
+```
 
 ```{r}
 

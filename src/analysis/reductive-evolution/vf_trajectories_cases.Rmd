@@ -107,7 +107,7 @@ variants_expiii_subset <- variants_ann_expiii %>%
                                 passage = as.numeric(as.character(passage)))
 
 
-gene_of_interest <- c("vpr")
+gene_of_interest <- c("nef")
 
 
 

@@ -1,5 +1,3 @@
-
-
 ---
 title:  
     "Divergence per genomic regions"
@@ -32,7 +30,6 @@ library(plotly)
 library(hrbrthemes)
 library(irr)
 library(dplyr)
-library(zoo) # estimate na's if any 
 library(tidyr)
 library(Biostrings)
 library(stringr)
@@ -103,14 +100,14 @@ feature_length <- data.frame(feature = c("5R","5UTR","5LTRLS","gag","pol","vif",
 
 # prepare data for visualization
 counts <- variants_ann_expiii %>% 
-            filter(feature %notin% c("5R", "5UTR", "5LTRLS", "3UTR", "3R")) %>%
+            filter(feature %notin% c("5R", "U5", "GLS", "U3", "3R")) %>%
             filter(allele_freq >= min_threshold) %>%
             filter(passage == end_psg) %>%
             group_by(exp_line, feature, effect_simplified) %>%
             summarise(count = n()) %>%
             mutate_at(c(1,2,3), as.factor) %>%
-            left_join(feature_length, by = join_by(feature == feature)) %>%
-            mutate(normalized_count = count*100/feature_length) %>%
+            left_join(feature_df_p[,c(1,4)], by = join_by(feature == feature)) %>%
+            mutate(normalized_count = count*100/length) %>%
             mutate(feature = factor(feature, levels = c("gag", "pol", "vif","vpr", "tat","rev","vpu","env","nef")))
 
 
@@ -129,5 +126,5 @@ fig <- ggplot(counts) +
 fig
 
 ### save figure
-custom_plot_save(fig, paste0("fixed_mutation.pdf"), height = 14, width = 28)
+custom_plot_save(fig, paste0("fixed_mutation_density_per_gene_per_translation.pdf"), height = 14, width = 28)
 ```
