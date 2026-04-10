@@ -155,8 +155,8 @@ merged_df %<>% mutate(S = ifelse(S == 0, 1, S)) %>%
 merged_df$bind <- paste0(counts$exp_line, counts$feature)
 
 
-# get pearson r measure for the correlation
-pearson_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "pearson")
+# get spearman r measure for the correlation
+spearman_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "spearman")
 
 
 
@@ -167,9 +167,9 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             geom_smooth(method = "lm", se = T)+
             # geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
             scale_shape_manual(values = c(15, 16,17,18)) +
-            scale_x_continuous(limits = c(0,0.05), breaks = seq(0,1,0.2)) +
+            scale_x_continuous(limits = c(0.2,1), breaks = seq(0,1,0.2)) +
             scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
-            geom_text(label = paste0("Pearson's r: ", round(pearson_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
+            geom_text(label = paste0("Spearman's rho: ", round(spearman_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
             labs(x="Fraction polymorphic site", y= "dN/dS",  color = "Gene", shape = "Population",
             title = "")+
             scale_color_manual(values = set1) +
@@ -335,19 +335,19 @@ for (psg in seq(10,end_psg,10)){
     merged_df$bind <- paste0(merged_df$exp_line, merged_df$feature)
 
 
-    # get pearson r measure for the correlation
-    pearson_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "pearson")
-    cor_vec <- c(cor_vec, pearson_cor)
+    # get spearman r measure for the correlation
+    spearman_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "spearman")
+    cor_vec <- c(cor_vec, spearman_cor)
     for (exp_line in exp_line_factor){
-        pearson_cor <- cor(merged_df$dnds[merged_df$exp_line == exp_line],merged_df$mut_count[merged_df$exp_line == exp_line], method = "pearson")
-        cor_vec <- c(cor_vec, pearson_cor)
+        spearman_cor <- cor(merged_df$dnds[merged_df$exp_line == exp_line],merged_df$mut_count[merged_df$exp_line == exp_line], method = "spearman")
+        cor_vec <- c(cor_vec, spearman_cor)
     }
     cor_df <- rbind(cor_df, c(psg, cor_vec))
 }
 
 colnames(cor_df) <- c("passage", "All", exp_line_factor)
 
-cor_df_long <- cor_df %>% tidyr::pivot_longer(cols = -passage, names_to = "exp_line", values_to = "pearson_r") %>%
+cor_df_long <- cor_df %>% tidyr::pivot_longer(cols = -passage, names_to = "exp_line", values_to = "spearman_rho") %>%
             mutate(exp_line = factor(exp_line, levels = c("All", exp_line_factor)))
 
 
@@ -356,15 +356,16 @@ saveRDS(cor_df_long, paste0(wd, "results/tables/dnds_diversity_cor_over_time_", 
 
 cor_df_long <- readRDS(paste0(wd, "results/tables/dnds_diversity_cor_over_time_", category,".rds"))
 
+cor_df_long <- cor_df_long[!is.na(cor_df_long$spearman_rho) & cor_df_long$spearman_rho >= 0,]
 
-fig <- cor_df_long[!is.na(cor_df_long$pearson_r),] %>% ggplot(aes(x=passage, y=pearson_r, color=exp_line, linewidth = exp_line == "All", alpha = exp_line == "All")) +
+fig <- cor_df_long %>% ggplot(aes(x=passage, y=spearman_rho, color=exp_line, linewidth = exp_line == "All", alpha = exp_line == "All")) +
     geom_line() +
     geom_point(size=5) +
-    labs(x="Transfer", y= "Pearson's r", color = "Population",
+    labs(x="Transfer", y= "Spearman's rho", color = "Population",
     title = "") +
     scale_x_continuous(breaks = c(seq(0, end_psg, 50), end_psg)) +
-    scale_y_continuous(limits = c(min(0, round(min(cor_df_long$pearson_r, na.rm = TRUE), digits = 0.1)),round(max(cor_df_long$pearson_r, na.rm = TRUE))),
-        breaks = seq(min(0, round(min(cor_df_long$pearson_r, na.rm = TRUE), digits = 0.1)), round(max(cor_df_long$pearson_r, na.rm = TRUE)), 0.1)) +
+    scale_y_continuous(limits = c(min(0, round(min(cor_df_long$spearman_rho, na.rm = TRUE), digits = 0.1)),round(max(cor_df_long$spearman_rho, na.rm = TRUE))),
+        breaks = seq(min(0, round(min(cor_df_long$spearman_rho, na.rm = TRUE), digits = 0.1)), round(max(cor_df_long$spearman_rho, na.rm = TRUE)), 0.1)) +
     scale_color_manual(values = c("All"= "black", line_col_palette)) +
     scale_linewidth_manual(values = c(`TRUE` = 2, `FALSE` = 0.8), guide = "none") +
     scale_alpha_manual(values = c(`TRUE` = 1, `FALSE` = 0.5), guide = "none") +
