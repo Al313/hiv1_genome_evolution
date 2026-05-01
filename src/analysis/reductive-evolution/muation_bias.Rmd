@@ -1,0 +1,108 @@
+---
+title:  
+    "variant freq. trajectories of certain cases of EXPIII"
+date: 
+    "April 26th, 2026"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+```{r load libraries}
+
+library(Biostrings)
+
+```
+
+
+```{r function to obtain the null distribution of substitutions causing LOF}
+
+
+
+count_stop_gain_substitution <- function(seq) {
+    dna <- DNAString(seq)
+    codons_vec <- as.character(codons(dna))
+    
+    bases <- c("A", "C", "G", "T")
+    stop_codons <- c("TAA", "TAG", "TGA")
+    
+    total_nonsense <- 0
+    per_codon_counts <- numeric(length(codons_vec))
+    
+    sub_counts <- matrix(0, nrow = 4, ncol = 4,
+                        dimnames = list(bases, bases))
+    
+    for (i in seq_along(codons_vec)) {
+        codon_chars <- strsplit(codons_vec[i], "")[[1]]
+        nonsense_count <- 0
+        
+        for (pos in 1:3) {
+        from <- codon_chars[pos]
+        
+        for (to in bases) {
+            if (to != from) {
+            mutated <- codon_chars
+            mutated[pos] <- to
+            mutated_codon <- paste0(mutated, collapse = "")
+            
+            if (mutated_codon %in% stop_codons) {
+                nonsense_count <- nonsense_count + 1
+                sub_counts[from, to] <- sub_counts[from, to] + 1
+            }
+            }
+        }
+        }
+        
+        per_codon_counts[i] <- nonsense_count
+        total_nonsense <- total_nonsense + nonsense_count
+    }
+    
+    list(
+        total_nonsense = total_nonsense,
+        per_codon = per_codon_counts,
+        substitution_matrix = sub_counts
+    )
+}
+
+
+```
+
+
+
+```{r measure the null distribution}
+
+# read in fasta file to retrieve ref information for adjacent positions
+fastaFile <- readDNAStringSet("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta")
+seq_name = names(fastaFile)
+sequence = paste(fastaFile)
+
+seq_vpr <- substr(sequence, feature_df$start[feature_df$feature == "vpr"], feature_df$end[feature_df$feature == "vpr"])
+seq_nef <- substr(sequence, feature_df$start[feature_df$feature == "nef"], feature_df$end[feature_df$feature == "nef"])
+
+result_vpr <- count_stop_gain_substitution(seq_vpr)
+result_nef <- count_stop_gain_substitution(seq_nef)
+result$total_nonsense
+result$per_codon
+
+
+```
+
+```{r test against the null distribution}
+
+binom.test(x = 3, n = 3, p = result_vpr$substitution_matrix["G", "A"]/sum(result_vpr$substitution_matrix), alternative = "greater")
+
+
+binom.test(x = 3, n = 5, p = result_nef$substitution_matrix["G", "A"]/sum(result_nef$substitution_matrix), alternative = "greater")
+
+
+```

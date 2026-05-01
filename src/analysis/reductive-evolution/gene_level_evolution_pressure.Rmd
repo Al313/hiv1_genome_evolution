@@ -94,6 +94,7 @@ if (category == "Minority"){
 # prepare variant data for visualization
 counts <- variants_ann_expiii %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
+            filter(passage <= end_psg) %>%
             filter(allele_freq >= min_threshold) %>%
             mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
             mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%

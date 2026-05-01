@@ -39,17 +39,17 @@ if (category == "Minority"){
 ```{r}
 
 # prepare data for visualization
-counts <- variants_ann_expiii %>% 
+counts <- variants_expiii %>% 
             filter(allele_freq >= min_threshold & allele_freq < max_threshold) %>%
-            mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-            mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
             mutate(effect_simplified2 = ifelse(effect_simplified %in% c("S","N"), "Coding", "Non-coding")) %>%
             group_by(exp_line, passage, effect_simplified2) %>%
             summarise(count = n()) %>%
             mutate_at(4, as.numeric) %>%
             mutate(passage = as.numeric(as.character(passage))) %>%
             mutate_at(c(1,3), as.factor) %>%
-            mutate(density = ifelse(effect_simplified2 == "Coding", count*100/(9407-790),count*100/(9626-9076+789-454)))
+            mutate(density = ifelse(effect_simplified2 == "Coding", count*100/(9407-790),count*100/(9625-9408+789-454)))
+
+
 
 counts$effect_simplified2 <- factor(
     counts$effect_simplified2,

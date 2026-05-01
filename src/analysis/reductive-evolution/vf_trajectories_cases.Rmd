@@ -74,9 +74,10 @@ source(paste0(wd, "src/analysis/reductive-evolution/plot_custom.R"))
 
 ```{r arbitrary cases}
 
-cases <- c("5611_G_A", "5671_G_A", "5672_G_A", "5725_GA_G", "5784_TGTCGACATAGCA_T")
-case <- cases[2]
+cases <- c("AGACATTTTCCTAGGATATGGCTCCATAACTTAG5652A")
+case <- cases[1]
 
+variants_expiii[variants_expiii$mut_info %in% case & variants_expiii$exp_line == "MT-4_1",]
 
 fig <- variants_expiii[variants_expiii$mut_info %in% case,] %>% ggplot(aes(x = passage, y = log10(allele_freq), group = mut_info)) +
     geom_line() +
@@ -106,7 +107,6 @@ variants_expiii_subset <- variants_ann_expiii %>%
                                 mutate(mut_info_line = paste0(exp_line, "_", mut_info),
                                 passage = as.numeric(as.character(passage)))
 
-
 gene_of_interest <- c("nef")
 
 
@@ -120,6 +120,13 @@ cases_50 <- unique(variants_expiii_subset$mut_info_line[variants_expiii_subset$f
     variants_expiii_subset$allele_freq >= 0.5])
 
 
+# if (gene_of_interest == "vpr"){
+#     variants_expiii_subset$mut_info[variants_expiii_subset$mut_info == "AGACATTTTCCTAGGATATGGCTCCATAACTTAG5652A"] <- "33bpdel5652"
+#     variants_expiii_subset$mut_info_line[variants_expiii_subset$mut_info_line == "MT-4_1_AGACATTTTCCTAGGATATGGCTCCATAACTTAG5652A"] <- "MT-4_1_33bpdel5652"
+#     cases_10 <- append(cases_10, "MT-4_1_33bpdel5652")
+#     cases_50 <- append(cases_50, "MT-4_1_33bpdel5652")
+# }
+
 variants_expiii_subset <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% cases_10,]
 
 variants_expiii_subset <- variants_expiii_subset %>%
@@ -127,6 +134,11 @@ variants_expiii_subset <- variants_expiii_subset %>%
 
 
 color_code_cases_50 <- unique(sapply(str_split(cases_50, "_"), "[[", 3))
+
+# # inspecting the list of lof mutations
+# variants_expiii_subset %>% filter(mut_info %in% color_code_cases_50 & feature == "nef") %>%
+#                             select(effect, impact, aa_change, loc_in_cds, loc_in_protein, loss_of_function, nonsense_mediated_decay, mut_context, mut_info) %>%
+#                             distinct()
 
 
 

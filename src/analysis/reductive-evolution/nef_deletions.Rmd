@@ -68,12 +68,12 @@ nef_deletions_eye %<>%
     left_vf = 1 - coverage_before_end/coverage_after_end,
     deletion_id = paste0(exp_line, ":", deletion_id)) %>%
     mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
-    deletion_name = paste0(length, ":", start, "_", end),
+    deletion_name = paste0(length, ":", start, "-", end),
     deletion_id = as.factor(deletion_id))
 
 
 # data obtained by systematic script
-nef_deletions <- as.data.frame(readRDS(file = paste0(wd,"results/tables/misc/nef_deletions_list_processed2.Rds")))
+nef_deletions <- as.data.frame(readRDS(file = paste0(wd,"results/tables/misc/nef_deletions_list_processed.Rds")))
 
 
 nef_deletions %<>% 
@@ -83,7 +83,7 @@ nef_deletions %<>%
     left_vf = 1 - end_pos_cov/end_pos_right_cov,
     deletion_id = paste0(exp_line, ":", deletion_id)) %>%
     mutate(consensus_vf = rowMeans(select(.,right_vf, left_vf), na.rm = T),
-    deletion_name = paste0(length, ":", start_pos, "_", end_pos),
+    deletion_name = paste0(length, ":", start_pos, "-", end_pos),
     deletion_id = as.factor(deletion_id)) %>%
     mutate(consensus_vf = round(consensus_vf, 2)) %>%
     filter(consensus_vf >= 0)
@@ -189,7 +189,7 @@ fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
     geom_hline(yintercept = 160, linetype = "solid", linewidth = 1) +
     labs(x="", y= "Time to fixation") +
     geom_jitter(aes(color = deletion_name, size = length), position = jpos_points, alpha = 1) +
-    scale_y_continuous(breaks = seq(0,300, 50)) +
+    scale_y_continuous(breaks = seq(0,400, 50)) +
     scale_size_continuous(range = c(5, 15), name = "Length") +
     scale_color_manual(values = legend_colors) +
     guides(color = "none") +
@@ -268,17 +268,17 @@ wilcox.test(t_2_f$time_to_fixation[t_2_f$length >= 50], t_2_f_sbs$time_to_fixati
 
 
 t_2_f$group <- ifelse(t_2_f$length >= 25, "Long \n(> 25bp del)", "Short \n(<= 25bp del)")
-t_2_f %<>% mutate(group = factor(group, levels = c("Short \n(<= 25bp del)", "Long \n(> 25bp del)")))
+t_2_f %<>% mutate(group = factor(group, levels = c("Long \n(> 25bp del)", "Short \n(<= 25bp del)")))
 
 # create figure
 fig <- ggplot(t_2_f, aes(x = group, y = time_to_fixation, fill = group)) +
     geom_violin(trim = FALSE, alpha = 0.6) +
     geom_boxplot(width = 0.15, outlier.shape = NA, alpha = 0.8) +
     stat_compare_means(
-        comparisons = list(c("Short \n(<= 25bp del)", "Long \n(> 25bp del)")),
+        comparisons = list(c("Long \n(> 25bp del)", "Short \n(<= 25bp del)")),
         method = "wilcox.test",
         label = "p.signif",   # shows asterisks
-        label.y = 500,
+        label.y = 550,
         colour = "black",
         bracket.size = 0.8,
         size = 15

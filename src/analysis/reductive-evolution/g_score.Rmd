@@ -101,15 +101,15 @@ if (category == "Minority"){
 
 filtered_data <- variants_ann_expiii %>%
     filter(feature %notin% c("3R", "5R"),
-            effect_simplified %in% c("U", "N"),
+            effect_simplified %in% c("U", "N", "S"),
             allele_freq >= min_threshold) %>%
-    select(exp_line, feature, mut_info) %>%
+    select(exp_line, feature, mut_info, effect_simplified) %>%
     distinct()
 
 
 
 mutation_classification <- filtered_data %>%
-    group_by(feature, mut_info) %>%
+    group_by(feature, mut_info, effect_simplified) %>%
     summarise(
         n_exp_lines = n_distinct(exp_line),
         .groups = "drop"
@@ -118,26 +118,32 @@ mutation_classification <- filtered_data %>%
         mutation_type = if_else(n_exp_lines == 1, 
                                 "unique", 
                                 "shared")
+    ) %>% 
+    mutate(
+        mutation_type = if_else(effect_simplified == "S", NA, mutation_type)
     )
 
 result <- mutation_classification %>%
     mutate(
-        unique_count = if_else(n_exp_lines == 1, 1L, 0L),
-        shared_count = if_else(n_exp_lines > 1, n_exp_lines, 0L)
+        unique_count = if_else(n_exp_lines == 1 & effect_simplified != "S", 1L, 0L),
+        shared_count = if_else(n_exp_lines > 1 & effect_simplified != "S", n_exp_lines, 0L),
+        synonymous_count = if_else(effect_simplified == "S", n_exp_lines, 0L)
     ) %>%
     group_by(feature) %>%
     summarise(
         unique = sum(unique_count),
         shared = sum(shared_count),
+        synonymous = sum(synonymous_count),
         .groups = "drop"
     ) %>% mutate(parallel_prop = shared / (shared + unique) %>% round(3))
 
 
-result_wide <- result %>% mutate(total = unique + shared) %>%
-    mutate(total_prop = total / sum(total) %>% round(3))
+result_wide <- result %>% mutate(total = unique + shared + synonymous) %>%
+    mutate(total_prop = total / sum(total) %>% round(3)) %>%
+    mutate(synonymous_prop = synonymous / total %>% round(3))
 
 
-result_wide <- merge(result_wide, feature_df_p[,c("feature", "length")], by = "feature") %>% mutate(length_prop = length / sum(length) %>% round(3))
+result_wide <- merge(result_wide, feature_df_p[,c("feature", "length")], by = "feature") %>% mutate(length_prop = length / sum(length) %>% round(3), total_per_site = total / length)
 
 result_wide %<>% mutate(g_score = total_prop / length_prop)
 
@@ -147,15 +153,17 @@ result_wide %<>% arrange(desc(parallel_prop))
 # Pipe data to kable
 # Convert data frame to gt table
 table <- result_wide %>%
-    select(c(feature, length, unique, shared, total, parallel_prop)) %>%
+    select(c(feature, length, synonymous, unique, shared, total, total_per_site, synonymous_prop, parallel_prop)) %>%
     gt() %>%
     tab_header(title = "Overview of fixed mutation counts per region") %>%
-    fmt_number(columns = c("parallel_prop"), decimals = 3) %>%
+    fmt_number(columns = c("parallel_prop", "total_per_site", "synonymous_prop"), decimals = 3) %>%
     cols_label(
         feature = "Feature",
+        synonymous = "Synonymous",
         unique = "Unique",
         shared = "Parallel",
         total = "Total",
+        total_per_site = "Total per Site",
         parallel_prop = "Parallel Proportion",
         length = "Length"
     )
@@ -171,40 +179,36 @@ gtsave(table, "/Users/alimos313/Documents/studies/phd/research/manuscripts/reduc
 ```{r parallelism neutral randomization + heatmap}
 
 
-# Bootstrap function for mean
 boot_mean <- function(data, indices) {
-    mean(data[indices])
+    d <- data[indices]
+    mean(d)
 }
-
-k <- 14
-line1 <- "MT-4_1"
-line2 <- "MT-4_1"
-base1 <- "A"
-base2 <- "G"
 
 overall_df <- data.frame()
 
 pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/reductive-evolution/figures/parallel_heatmaps_per_region.pdf", height = 14, width = 14)
 
+feature_df_sub <- feature_df[feature_df$feature %notin% c("5R", "3R"),]
 
-for (k in 1:nrow(feature_df)){
-    if (feature_df$feature[k] %in% c("tat1", "tat2")){
-        if (feature_df$feature[k] == "tat2") {
+
+for (k in 1:nrow(feature_df_sub)){
+    if (feature_df_sub$feature[k] %in% c("tat1", "tat2")){
+        if (feature_df_sub$feature[k] == "tat2") {
             next
         }
         feature <- "tat"
-        range_of_feature <- c(feature_df$start[feature_df$feature == "tat1"]:feature_df$end[feature_df$feature == "tat1"], 
-                            feature_df$start[feature_df$feature == "tat2"]:feature_df$end[feature_df$feature == "tat2"])
-    } else if (feature_df$feature[k] %in% c("rev1", "rev2")){
-        if (feature_df$feature[k] == "rev2") {
+        range_of_feature <- c(feature_df_sub$start[feature_df_sub$feature == "tat1"]:feature_df_sub$end[feature_df_sub$feature == "tat1"], 
+                            feature_df_sub$start[feature_df_sub$feature == "tat2"]:feature_df_sub$end[feature_df_sub$feature == "tat2"])
+    } else if (feature_df_sub$feature[k] %in% c("rev1", "rev2")){
+        if (feature_df_sub$feature[k] == "rev2") {
             next
         }
         feature <- "rev"
-        range_of_feature <- c(feature_df$start[feature_df$feature == "rev1"]:feature_df$end[feature_df$feature == "rev1"], 
-                            feature_df$start[feature_df$feature == "rev2"]:feature_df$end[feature_df$feature == "rev2"])
+        range_of_feature <- c(feature_df_sub$start[feature_df_sub$feature == "rev1"]:feature_df_sub$end[feature_df_sub$feature == "rev1"], 
+                            feature_df_sub$start[feature_df_sub$feature == "rev2"]:feature_df_sub$end[feature_df_sub$feature == "rev2"])
     } else {
-        feature <- as.character(feature_df$feature[k])
-        range_of_feature <- feature_df$start[k]:feature_df$end[k]
+        feature <- as.character(feature_df_sub$feature[k])
+        range_of_feature <- feature_df_sub$start[k]:feature_df_sub$end[k]
     }
     print(feature)
 
@@ -310,7 +314,7 @@ for (k in 1:nrow(feature_df)){
         ))
 
     melted_cormat$`expected_%shared` <- round(as.numeric(melted_cormat$`expected_%shared`)*100, digits = 1)
-    melted_cormat$`expected_%shared`[melted_cormat$val == 100] <- 100
+    melted_cormat$`expected_%shared`[melted_cormat$Var1 == melted_cormat$Var2] <- 100
     melted_cormat$p_value_category[melted_cormat$val == 100] <- ""
 
     # generate heatmap
@@ -332,15 +336,14 @@ for (k in 1:nrow(feature_df)){
     
     
     #######################
-
-    obs <- melted_cormat$`%shared`[melted_cormat$`%shared` != 100]
+    obs <- melted_cormat$`%shared`[melted_cormat$Var1 != melted_cormat$Var2]
     mean_obs <- mean(obs)
     se_obs <- sd(obs)/sqrt(length(obs))
-    exp <- melted_cormat$`expected_%shared`[melted_cormat$`%shared` != 100]
+    exp <- melted_cormat$`expected_%shared`[melted_cormat$Var1 != melted_cormat$Var2]
     mean_exp <- mean(exp)
     se_exp <- sd(exp)/sqrt(length(exp))
 
-    # 1000 bootstrap replicates (matches your perms)
+    # 1000 bootstrap replicates 
     boot_obs <- boot(obs, boot_mean, R = 1000)
     boot_exp <- boot(exp, boot_mean, R = 1000)
 
@@ -348,36 +351,39 @@ for (k in 1:nrow(feature_df)){
     ci_obs <- boot.ci(boot_obs, type = "perc")$percent[4:5]
     ci_exp <- boot.ci(boot_exp, type = "perc")$percent[4:5]
 
+    boot_diff <- boot_obs$t - boot_exp$t
 
-    wilcox_res <- t.test(obs, exp, paired = TRUE)
+    obs_diff <- mean(obs) - mean(exp)
+
+    p_value_boot <- mean(boot_diff <= 0)
+
+    t_test_res <- t.test(obs, exp, paired = TRUE)   
 
 
     cohen_d <- cohen.d(obs, exp)
     ratio <- mean(obs)/ mean(exp)
 
 
-    p_val <- wilcox_res$p.value
-
-    overall_df <- rbind(overall_df, c(feature, "Observed", mean_obs, se_obs, ci_obs[1], ci_obs[2], p_val, cohen_d$estimate, ratio))
-    overall_df <- rbind(overall_df, c(feature, "Simulated", mean_exp, se_exp, ci_exp[1], ci_exp[2],p_val, cohen_d$estimate, ratio))
+    overall_df <- rbind(overall_df, c(feature, "Observed", mean_obs, t_test_res$p.value, se_obs, ci_obs[1], ci_obs[2], p_value_boot, cohen_d$estimate, ratio))
+    overall_df <- rbind(overall_df, c(feature, "Simulated", mean_exp, t_test_res$p.value, se_exp, ci_exp[1], ci_exp[2], p_value_boot, cohen_d$estimate, ratio))
 
 }
 
 dev.off()
 
-colnames(overall_df) <- c("feature", "group", "mean", "se", "ci_lower", "ci_upper", "p.val", "cohen_d", "ratio")
+colnames(overall_df) <- c("feature", "group", "mean", "p.val_t.test", "se", "ci_lower", "ci_upper", "p.val_boot", "cohen_d", "ratio")
 
 
 
 overall_df %<>% mutate_at(1, as.factor)
 overall_df$group <- factor(overall_df$group, levels = c("Observed", "Simulated"))
-overall_df %<>% mutate_at(3:9, as.numeric)
+overall_df %<>% mutate_at(3:10, as.numeric)
 
 # Keep one p-value per Translation_impact
 unique_tests <- overall_df[!duplicated(overall_df$feature), ]
 
 # Apply BH
-unique_tests$adj.p.val <- p.adjust(unique_tests$p.val, method = "BH")
+unique_tests$adj.p.val <- p.adjust(unique_tests$p.val_boot, method = "BH")
 
 # Merge back if needed
 overall_df <- merge(
@@ -387,7 +393,7 @@ overall_df <- merge(
 )
 
 
-saveRDS(overall_df, file = paste0(wd, "results/tables/parallel_randomized_per_genomic_region.rds"))
+saveRDS(overall_df1, file = paste0(wd, "results/tables/parallel_randomized_per_genomic_region.rds"))
 
 overall_df <- readRDS(file = paste0(wd, "results/tables/parallel_randomized_per_genomic_region.rds"))
 
@@ -407,7 +413,7 @@ overall_df_sub <- overall_df %>%
                 mean[group == "Simulated"]
     ) %>%
     ungroup() %>%
-    arrange(desc(cohen_d)) %>%
+    arrange(desc(mean)) %>%
     mutate(feature = factor(feature, levels = unique(feature)))
 
 
@@ -424,7 +430,7 @@ fig <- ggplot(overall_df_sub,
         pattern_key_scale_factor = 0.6,
         width = 0.8
     ) +
-    geom_errorbar(aes(ymin = mean-se, ymax = mean+se),
+    geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
         position = position_dodge(width = 0.9),
         width = 0.3, color = "black", size = 1.5) +
     labs(
@@ -457,7 +463,7 @@ fig <- ggplot(overall_df_sub,
     ) +
     geom_text(
         data = overall_df_sub %>% filter(group == "Observed"),
-        aes(y= mean + se + 2, label = ifelse(p.val < 0.001, "***", ifelse(p.val < 0.01, "**", ifelse(p.val < 0.05, "*", "n.s.")))),
+        aes(y= ci_upper + 2, label = ifelse(adj.p.val < 0.001, "***", ifelse(adj.p.val < 0.01, "**", ifelse(adj.p.val < 0.05, "*", "n.s.")))),
         position = position_dodge(width = 0.9),
         size = 10
     ) +
