@@ -170,7 +170,7 @@ fig <- merged_df %>% ggplot(aes(x = mut_count_normalized, y = dnds, color = feat
             scale_shape_manual(values = c(15, 16,17,18)) +
             scale_x_continuous(limits = c(0.2,1), breaks = seq(0,1,0.2)) +
             scale_y_continuous(limits = c(0,1.2), breaks = seq(0,1.2,0.2)) +
-            geom_text(label = paste0("Spearman's rho: ", round(spearman_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9) +
+            geom_text(label = paste0("Spearman's rho: ", round(spearman_cor,2)), x= 0.4, y = 1.15, color = "black", size = 9, family = "Helvetica") +
             labs(x="Fraction polymorphic site", y= "dN/dS",  color = "Gene", shape = "Population",
             title = "")+
             scale_color_manual(values = set1) +
@@ -262,97 +262,97 @@ custom_plot_save(fig, "dnds_diversity_cor_scatter_ellipses.pdf", height = 14, wi
 
 
 
-cor_df <- data.frame()
+# cor_df <- data.frame()
 
 
-for (psg in seq(10,end_psg,10)){
-    cor_vec <- c()
-    # prepare variant data for visualization
-    counts <- variants_ann_expiii %>%
-                mutate(passage = as.numeric(as.character(passage))) %>%
-                filter(allele_freq >= min_threshold & passage <= psg) %>%
-                mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
-                mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
-                filter(effect_simplified != "U") %>%
-                mutate(feature = factor(feature, levels = gene_factor),
-                effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
-                select(exp_line, feature, effect_simplified, mut_info) %>%
-                distinct() %>%
-                group_by(exp_line, effect_simplified, feature, .drop = FALSE) %>%
-                summarise(count = n()) %>%
-                pivot_wider(names_from = effect_simplified, values_from = count)
+# for (psg in seq(10,end_psg,10)){
+#     cor_vec <- c()
+#     # prepare variant data for visualization
+#     counts <- variants_ann_expiii %>%
+#                 mutate(passage = as.numeric(as.character(passage))) %>%
+#                 filter(allele_freq >= min_threshold & passage <= psg) %>%
+#                 mutate(effect_simplified = case_when(effect == "synonymous_variant" ~ "S", effect == "untranslated_region" ~ "U")) %>%
+#                 mutate(effect_simplified = replace_na(effect_simplified, "N")) %>%
+#                 filter(effect_simplified != "U") %>%
+#                 mutate(feature = factor(feature, levels = gene_factor),
+#                 effect_simplified = factor(effect_simplified, levels = c("N", "S"))) %>%
+#                 select(exp_line, feature, effect_simplified, mut_info) %>%
+#                 distinct() %>%
+#                 group_by(exp_line, effect_simplified, feature, .drop = FALSE) %>%
+#                 summarise(count = n()) %>%
+#                 pivot_wider(names_from = effect_simplified, values_from = count)
 
-    # read in the gene summary data
-    gene_summary <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/gene_summary_table.tsv", sep = "\t", header = T)
-    gene_summary %<>% mutate(gene = ifelse(gene == "envelope", "env", gene))
-
-
-    # prepare dn/ds data for visualization (combine tat and rev genes)
-    ## tat gene
-    gene_summary <- rbind(gene_summary, c("tat",
-                                gene_summary$gene_length[gene_summary$gene == "tat1"]+gene_summary$gene_length[gene_summary$gene == "tat2"],
-                                gene_summary$synonymous_count[gene_summary$gene == "tat1"]+gene_summary$synonymous_count[gene_summary$gene == "tat2"],
-                                NA,
-                                gene_summary$nonsynonymous_count[gene_summary$gene == "tat1"]+gene_summary$nonsynonymous_count[gene_summary$gene == "tat2"],
-                                NA,
-                                gene_summary$all_count[gene_summary$gene == "tat1"]+gene_summary$all_count[gene_summary$gene == "tat2"]))
-
-    gene_summary %<>% mutate_at(2:7, as.numeric)
-
-    gene_summary$synonymous_percentage[gene_summary$gene == "tat"] <- gene_summary$synonymous_count[gene_summary$gene == "tat"]/gene_summary$all_count[gene_summary$gene == "tat"]
-    gene_summary$nonsynonymous_percentage[gene_summary$gene == "tat"] <- gene_summary$nonsynonymous_count[gene_summary$gene == "tat"]/gene_summary$all_count[gene_summary$gene == "tat"]
-
-    ## rev gene
-    gene_summary <- rbind(gene_summary, c("rev",
-                                gene_summary$gene_length[gene_summary$gene == "rev1"]+gene_summary$gene_length[gene_summary$gene == "rev2"],
-                                gene_summary$synonymous_count[gene_summary$gene == "rev1"]+gene_summary$synonymous_count[gene_summary$gene == "rev2"],
-                                NA,
-                                gene_summary$nonsynonymous_count[gene_summary$gene == "rev1"]+gene_summary$nonsynonymous_count[gene_summary$gene == "rev2"],
-                                NA,
-                                gene_summary$all_count[gene_summary$gene == "rev1"]+gene_summary$all_count[gene_summary$gene == "rev2"]))
-
-    gene_summary %<>% mutate_at(2:7, as.numeric)
-
-    gene_summary$synonymous_percentage[gene_summary$gene == "rev"] <- as.numeric(gene_summary$synonymous_count[gene_summary$gene == "rev"])/as.numeric(gene_summary$all_count[gene_summary$gene == "rev"])
-    gene_summary$nonsynonymous_percentage[gene_summary$gene == "rev"] <- as.numeric(gene_summary$nonsynonymous_count[gene_summary$gene == "rev"])/as.numeric(gene_summary$all_count[gene_summary$gene == "rev"])
+#     # read in the gene summary data
+#     gene_summary <- read.table(file = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/gene_summary_table.tsv", sep = "\t", header = T)
+#     gene_summary %<>% mutate(gene = ifelse(gene == "envelope", "env", gene))
 
 
-    gene_summary %<>% filter(gene %notin% c("tat1", "tat2", "rev1", "rev2"))
+#     # prepare dn/ds data for visualization (combine tat and rev genes)
+#     ## tat gene
+#     gene_summary <- rbind(gene_summary, c("tat",
+#                                 gene_summary$gene_length[gene_summary$gene == "tat1"]+gene_summary$gene_length[gene_summary$gene == "tat2"],
+#                                 gene_summary$synonymous_count[gene_summary$gene == "tat1"]+gene_summary$synonymous_count[gene_summary$gene == "tat2"],
+#                                 NA,
+#                                 gene_summary$nonsynonymous_count[gene_summary$gene == "tat1"]+gene_summary$nonsynonymous_count[gene_summary$gene == "tat2"],
+#                                 NA,
+#                                 gene_summary$all_count[gene_summary$gene == "tat1"]+gene_summary$all_count[gene_summary$gene == "tat2"]))
+
+#     gene_summary %<>% mutate_at(2:7, as.numeric)
+
+#     gene_summary$synonymous_percentage[gene_summary$gene == "tat"] <- gene_summary$synonymous_count[gene_summary$gene == "tat"]/gene_summary$all_count[gene_summary$gene == "tat"]
+#     gene_summary$nonsynonymous_percentage[gene_summary$gene == "tat"] <- gene_summary$nonsynonymous_count[gene_summary$gene == "tat"]/gene_summary$all_count[gene_summary$gene == "tat"]
+
+#     ## rev gene
+#     gene_summary <- rbind(gene_summary, c("rev",
+#                                 gene_summary$gene_length[gene_summary$gene == "rev1"]+gene_summary$gene_length[gene_summary$gene == "rev2"],
+#                                 gene_summary$synonymous_count[gene_summary$gene == "rev1"]+gene_summary$synonymous_count[gene_summary$gene == "rev2"],
+#                                 NA,
+#                                 gene_summary$nonsynonymous_count[gene_summary$gene == "rev1"]+gene_summary$nonsynonymous_count[gene_summary$gene == "rev2"],
+#                                 NA,
+#                                 gene_summary$all_count[gene_summary$gene == "rev1"]+gene_summary$all_count[gene_summary$gene == "rev2"]))
+
+#     gene_summary %<>% mutate_at(2:7, as.numeric)
+
+#     gene_summary$synonymous_percentage[gene_summary$gene == "rev"] <- as.numeric(gene_summary$synonymous_count[gene_summary$gene == "rev"])/as.numeric(gene_summary$all_count[gene_summary$gene == "rev"])
+#     gene_summary$nonsynonymous_percentage[gene_summary$gene == "rev"] <- as.numeric(gene_summary$nonsynonymous_count[gene_summary$gene == "rev"])/as.numeric(gene_summary$all_count[gene_summary$gene == "rev"])
 
 
-    # merge the two datasets
-    merged_df <- merge(counts, gene_summary[,c("gene", "gene_length", "nonsynonymous_count", "synonymous_count")], by.x = "feature", by.y = "gene")
+#     gene_summary %<>% filter(gene %notin% c("tat1", "tat2", "rev1", "rev2"))
 
 
-    merged_df %<>% filter(N != 0 & S != 0)
-    if (nrow(merged_df) < 3){
-        cor_df <- rbind(cor_df, c(psg, rep(NA, 5)))
-        next
-    }
-
-    merged_df %<>% mutate(dnds = (N/nonsynonymous_count)/(S/synonymous_count),
-                mut_count_normalized = (N+S)/(gene_length*3))
-
-    merged_df$bind <- paste0(merged_df$exp_line, merged_df$feature)
+#     # merge the two datasets
+#     merged_df <- merge(counts, gene_summary[,c("gene", "gene_length", "nonsynonymous_count", "synonymous_count")], by.x = "feature", by.y = "gene")
 
 
-    # get spearman r measure for the correlation
-    spearman_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "spearman")
-    cor_vec <- c(cor_vec, spearman_cor)
-    for (exp_line in exp_line_factor){
-        spearman_cor <- cor(merged_df$dnds[merged_df$exp_line == exp_line],merged_df$mut_count[merged_df$exp_line == exp_line], method = "spearman")
-        cor_vec <- c(cor_vec, spearman_cor)
-    }
-    cor_df <- rbind(cor_df, c(psg, cor_vec))
-}
+#     merged_df %<>% filter(N != 0 & S != 0)
+#     if (nrow(merged_df) < 3){
+#         cor_df <- rbind(cor_df, c(psg, rep(NA, 5)))
+#         next
+#     }
 
-colnames(cor_df) <- c("passage", "All", exp_line_factor)
+#     merged_df %<>% mutate(dnds = (N/nonsynonymous_count)/(S/synonymous_count),
+#                 mut_count_normalized = (N+S)/(gene_length*3))
 
-cor_df_long <- cor_df %>% tidyr::pivot_longer(cols = -passage, names_to = "exp_line", values_to = "spearman_rho") %>%
-            mutate(exp_line = factor(exp_line, levels = c("All", exp_line_factor)))
+#     merged_df$bind <- paste0(merged_df$exp_line, merged_df$feature)
 
 
-saveRDS(cor_df_long, paste0(wd, "results/tables/dnds_diversity_cor_over_time_", category,".rds"))
+#     # get spearman r measure for the correlation
+#     spearman_cor <- cor(merged_df$dnds,merged_df$mut_count, method = "spearman")
+#     cor_vec <- c(cor_vec, spearman_cor)
+#     for (exp_line in exp_line_factor){
+#         spearman_cor <- cor(merged_df$dnds[merged_df$exp_line == exp_line],merged_df$mut_count[merged_df$exp_line == exp_line], method = "spearman")
+#         cor_vec <- c(cor_vec, spearman_cor)
+#     }
+#     cor_df <- rbind(cor_df, c(psg, cor_vec))
+# }
+
+# colnames(cor_df) <- c("passage", "All", exp_line_factor)
+
+# cor_df_long <- cor_df %>% tidyr::pivot_longer(cols = -passage, names_to = "exp_line", values_to = "spearman_rho") %>%
+#             mutate(exp_line = factor(exp_line, levels = c("All", exp_line_factor)))
+
+
+# saveRDS(cor_df_long, paste0(wd, "results/tables/dnds_diversity_cor_over_time_", category,".rds"))
 
 
 cor_df_long <- readRDS(paste0(wd, "results/tables/dnds_diversity_cor_over_time_", category,".rds"))
@@ -364,7 +364,7 @@ fig <- cor_df_long %>% ggplot(aes(x=passage, y=spearman_rho, color=exp_line, lin
     geom_point(size=5) +
     labs(x="Transfer", y= "Spearman's rho", color = "Population",
     title = "") +
-    scale_x_continuous(breaks = c(seq(0, end_psg, 50), end_psg)) +
+    scale_x_continuous(breaks = seq(0, end_psg, 50)) +
     scale_y_continuous(limits = c(min(0, round(min(cor_df_long$spearman_rho, na.rm = TRUE), digits = 0.1)),round(max(cor_df_long$spearman_rho, na.rm = TRUE))),
         breaks = seq(min(0, round(min(cor_df_long$spearman_rho, na.rm = TRUE), digits = 0.1)), round(max(cor_df_long$spearman_rho, na.rm = TRUE)), 0.1)) +
     scale_color_manual(values = c("All"= "black", line_col_palette)) +
