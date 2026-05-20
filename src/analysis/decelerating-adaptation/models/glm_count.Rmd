@@ -61,17 +61,57 @@ source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 ```{r counts per bins}
 
+# choose scope of parallelism (across environment or within environment)
 
-t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
+scope <- "within"
 
-t_2_f <- t_2_f %>% mutate(host = case_when(exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2", exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"),
-                        group = case_when(Occurrence %in% c("1 out of 4") ~ "Line-specific", Occurrence %in% c("3 out of 4", "4 out of 4") ~ "Highly-parallel")) %>%
+t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation_", scope, ".Rds"))
+
+if (scope == "within"){
+  t_2_f_summary <- t_2_f %>% mutate(host = case_when(exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2", exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"),
+                        group = case_when(Occurrence %in% c("1 out of 2") ~ "replicate-specific", Occurrence %in% c("2 out of 2") ~ "replicate-parallel")) %>%
                         filter(!is.na(group))
 
-t_2_f %>% filter(group == "Highly-parallel") %>% dplyr::select(c(mut_info, effect_simplified, Occurrence)) %>% distinct()
 
 
-bins <- seq(0,500, 100)
+  bins <- seq(0,500, 100)
+
+
+
+  t_2_f_summary <- t_2_f_summary %>%
+          mutate(group = factor(group, levels = c("replicate-specific", "replicate-parallel")), 
+              bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE)) %>%
+          group_by(group, exp_line, host) %>%
+          count(bin, .drop = FALSE)
+
+
+  t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
+} else if (scope == "across"){
+
+  t_2_f <- t_2_f %>% mutate(host = case_when(exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2", exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"),
+                          group = case_when(Occurrence %in% c("1 out of 4") ~ "Line-specific", Occurrence %in% c("3 out of 4", "4 out of 4") ~ "Highly-parallel")) %>%
+                          filter(!is.na(group))
+
+
+
+  bins <- seq(0,500, 100)
+
+
+  t_2_f_summary <- t_2_f %>%
+          mutate(group = factor(group, levels = c("Line-specific", "Highly-parallel")), 
+              bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE)) %>%
+          group_by(group, exp_line, host) %>%
+          count(bin, .drop = FALSE)
+
+
+  t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
+
+}
+
+```
+
+
+```{r}
 
 nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel" & t_2_f$fixation <= 200,])/
 nrow(t_2_f[t_2_f$host == "MT-2" & t_2_f$group == "Highly-parallel",])
@@ -85,15 +125,6 @@ nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel",])
 nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel" & t_2_f$fixation >= 400,])/
 nrow(t_2_f[t_2_f$host == "MT-4" & t_2_f$group == "Highly-parallel",])
 
-
-t_2_f_summary <- t_2_f %>%
-        mutate(group = factor(group, levels = c("Line-specific", "Highly-parallel")), 
-            bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE)) %>%
-        group_by(group, exp_line, host) %>%
-        count(bin, .drop = FALSE)
-
-
-t_2_f_summary <- t_2_f_summary[!is.na(t_2_f_summary$bin),]
 ```
 
 
@@ -322,7 +353,7 @@ fit_table <- fit_stats_comparison %>%
 # =====================================================
 # PDF Summary Report (text summary)
 # =====================================================
-pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/reports/glmer_model_comparison.pdf", width = 11, height = 8.5)
+pdf(paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/reports/glmer_model_comparison_", scope,".pdf"), width = 11, height = 8.5)
 
 par(mar = c(1, 1, 1, 1))
 plot.new()
@@ -368,12 +399,12 @@ text(0.5, 0.05,
 
 dev.off()
 
-cat("\nPDF saved as: glmer_model_comparison.pdf\n")
+cat(paste0("\nPDF saved as: glmer_model_comparison_", scope, ".pdf\n"))
 
 # =====================================================
 # PDF with Tables (Detailed)
 # =====================================================
-pdf("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/figures/glmer_comparison_detailed.pdf", width = 11, height = 8.5)
+pdf(paste0("/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/figures/glmer_comparison_detailed_", scope, ".pdf"), width = 11, height = 8.5)
 
 grid.text("GLMER Model Summary for MT-2 and MT-4", 
           x = 0.5, y = 0.95, 
@@ -403,7 +434,7 @@ grid.text("Both models exhibit boundary/singular fits (random effect variance â‰
 
 dev.off()
 
-cat("\nDetailed PDF saved as: glmer_comparison_detailed.pdf\n")
+cat(paste0("\nDetailed PDF saved as: glmer_comparison_detailed_", scope, ".pdf\n"))
 
 # =====================================================
 # Print to console
@@ -475,7 +506,7 @@ fig_pred <- ggplot(t_2_f_summary, aes(x = bin, y = n, fill = exp_line)) +
             legend.position = "none")
 
 # save figure
-custom_plot_save(fig_pred, "highly-parallel_vs_line-specific_time-trend_glm.pdf", height = 31.5, width = 21)
+custom_plot_save(fig_pred, paste0("parallel_vs_non_parallel_count_glm_", scope, ".pdf"), height = 31.5, width = 21)
 
 ```
 

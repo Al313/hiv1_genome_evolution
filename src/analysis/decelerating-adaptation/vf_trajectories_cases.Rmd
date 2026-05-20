@@ -179,14 +179,21 @@ variants_expiii_subset <- variants_expiii %>%
 variants_expiii_subset$color_group <- as.character(variants_expiii_subset$exp_line)
 variants_expiii_subset$color_group[variants_expiii_subset$mut_info == case[1]] <- "special_case_1"
 
-color_palette <- c(
-  "MT-2_1" = "grey", # unname(line_col_palette[1]),
-  "MT-2_2" = "grey", # unname(line_col_palette[2]),
-  "MT-4_1" = "grey", # unname(line_col_palette[3]),
-  "MT-4_2" = "grey", # unname(line_col_palette[4]),
-  "special_case_1" = brewer.pal(5, "Reds")[3]
-)
+# black when allele frequency < 0.01
+variants_expiii_subset$color_group[
+    variants_expiii_subset$mut_info == case[1] &
+    variants_expiii_subset$allele_freq < 0.01
+] <- "below_threshold"
 
+
+color_palette <- c(
+    "MT-2_1" = "grey",
+    "MT-2_2" = "grey",
+    "MT-4_1" = "grey",
+    "MT-4_2" = "grey",
+    "special_case_1" = brewer.pal(5, "Reds")[3],
+    "below_threshold" = "black"
+)
 
 
 fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_muts,] %>% 
@@ -194,7 +201,7 @@ fig <- variants_expiii_subset[variants_expiii_subset$mut_info_line %in% fixed_mu
     geom_line() +
     facet_grid(rows = vars(exp_line), switch = "y") +
     scale_x_continuous(breaks = seq(0, 500, by = 50)) +
-    scale_alpha_manual(values = c(0.1,1)) +
+    scale_alpha_manual(values = c(0.2,1)) +
     labs(title = paste0(case, " variant"), y = "Frequency", x = "Transfer") + #title = paste0(case, "\n")
     scale_color_manual(values = color_palette) +
     scale_linewidth(range = c(1, 3)) +

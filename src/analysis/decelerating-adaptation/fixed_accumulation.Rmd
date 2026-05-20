@@ -146,18 +146,23 @@ counts2 <- counts %>% select(passage,mut_count,host_line) %>% group_by(passage,h
 
 
 #### 
+
 lm_mt2 <- lm(ave_count ~ passage, data = counts2[counts2$host_line == "MT2",])
+summary(lm_mt2)
 
 df_lm_mt2 <- data.frame(passage = as.numeric(seq(10,500,10)))
 df_lm_mt2$predicted <- predict(lm_mt2, newdata = df_lm_mt2)
 df_lm_mt2$group <- "Observed"
 
 #### 
+
 lm_mt4 <- lm(ave_count ~ passage, data = counts2[counts2$host_line == "MT4",])
+summary(lm_mt4)
 
 df_lm_mt4 <- data.frame(passage = as.numeric(seq(10,500,10)))
 df_lm_mt4$predicted <- predict(lm_mt4, newdata = df_lm_mt4)
 df_lm_mt4$group <- "Observed"
+
 
 
 ```
@@ -260,6 +265,7 @@ custom_plot_save(fig, paste0(tolower(category), "_mut_accumulation_coding_vs_non
 
 ```
 
+
 ```{r visualization4: gif of mutated sites over time per min_threshold}
 
 
@@ -307,5 +313,4 @@ fig_dir <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/
 anim_save(gg_fig, file = paste0(fig_dir, "mutated_sites_over_time_per_min-threshold.gif"))
 
 
-```
 ```

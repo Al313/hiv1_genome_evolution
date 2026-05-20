@@ -29,6 +29,8 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(magrittr)
+library(lme4)
+library(lmerTest)
 
 
 
@@ -264,8 +266,10 @@ counts <- diff_df %>%
                     removal_mean = mean(removal), .groups = 'drop')
 
 
-# store the statistical test result
-t_test_result_removal <- t.test(counts$removal_mean[counts$host_line == "MT2"], counts$removal_mean[counts$host_line == "MT4"], paired = TRUE, alternative = "two.sided")
+# compare the removal rate statistically 
+model <- lmer(removal~host_line+(1|passage)+(1|exp_line), data = diff_df)
+summary(model)
+
 
 # visualize using plotly
 fig <- diff_df %>%  ggplot(aes(x=passage, y = removal, color = exp_line)) +

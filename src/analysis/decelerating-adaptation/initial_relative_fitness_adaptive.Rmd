@@ -253,7 +253,7 @@ adaptive_df[adaptive_df$exp_line == "MT-4_2" & adaptive_df$relative_order == 7, 
 ```{r linear model specifics}
 
 # Fit a linear model for each experimental line
-models <- df1 %>%
+models <- adaptive_df %>%
     group_by(exp_line) %>%
     do(tidy(lm(log10(init_rel_fit) ~ relative_order, data = .)))
 

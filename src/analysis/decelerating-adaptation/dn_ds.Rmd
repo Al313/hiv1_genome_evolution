@@ -154,7 +154,12 @@ counts <- variants_ann_expiii%>%
 
 
 
-counts_wide <- counts %>% select(exp_line, passage, effect_simplified, normalized_rate) %>% pivot_wider(names_from = effect_simplified, values_from = c(normalized_rate))
+counts_wide <- counts %>% group_by(exp_line, passage, .drop = FALSE) %>% 
+                        mutate(total_count = sum(count)) %>%
+                        ungroup() %>%
+                        select(exp_line, passage, total_count, effect_simplified, normalized_rate) %>% 
+                        pivot_wider(names_from = effect_simplified, values_from = c(normalized_rate))
+
 counts_wide$dS[counts_wide$dS == 0] <- counts_wide$dN[counts_wide$dS == 0]/4
 
 
@@ -162,15 +167,16 @@ counts_wide$dnds <- counts_wide$dN/counts_wide$dS
 
 
 # visualize
-fig <- counts_wide %>%  ggplot(aes(x=passage, y = dnds, color = exp_line)) +
-        # geom_line(linewidth=1) +
-        geom_smooth(method = "gam", se = FALSE) +
+fig <- counts_wide %>%  ggplot(aes(x=passage, y = dnds, color = exp_line, linewidth = total_count)) +
+        geom_line() +
+        # geom_smooth(method = "gam", se = FALSE) +
         labs(x="Transfer", y= "dN/dS",  color = "Population",
         title = paste0(category, " dN/dS over Time"))+
         scale_x_continuous(breaks = seq(0,end_psg,50)) +
         scale_y_continuous(limits = c(0,max(counts_wide$dnds, na.rm = T)+0.1),breaks = seq(0,max(counts_wide$dnds, na.rm = T)+0.1,0.25)) +
         scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
-        custom_plot_theme(application = "publication")
+        custom_plot_theme(application = "publication") +
+        guides(linewidth = "none")
 
 
 
