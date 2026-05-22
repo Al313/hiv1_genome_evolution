@@ -70,10 +70,6 @@ seq_sampling_frac = 1000
 infection_success_rate = 0.1
 sample_nr = int(sample_nr)
 bottleneck_intervals = int(bottleneck_freq)
-if bottleneck_intervals == 2:
-    R0 = 44
-elif bottleneck_intervals == 3:
-    R0 = 12
 seq_sampling_freq = int(seq_sampling_freq)
 
 
@@ -124,6 +120,11 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
         population[mutation_indices] = np.array([modify_base(x) for x in population[mutation_indices]])
 
     # Step 2: Replication - Each genome produces R0 offspring
+    if bottleneck_intervals == 2:
+        R0 = np.random.poisson(lam=44, size=1)
+    elif bottleneck_intervals == 3:
+        R0 = np.random.poisson(lam=12, size=1)
+
     if gen % bottleneck_intervals == 0:
         population = population[np.repeat(np.random.choice(population.shape[0], population.shape[0], replace=True), repeats = R0)]
     else :
