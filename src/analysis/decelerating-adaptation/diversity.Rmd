@@ -104,49 +104,9 @@ fig <- ggplot(shannon_measure, aes(x = passage, y = mean_ent, color = exp_line))
 ```{r read in simulated diversity}
 
 
-# simulated data (own simulation)
+# read in simulated diversity data
 bottleneck_freq <- 3
-sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.rds"))
-
-# define function to calculate Shannon entropy
-shannon <- function(x, seq_err = 0.01){
-    if(x >= seq_err) {-x*log2(x)} else (0)
-}
-
-
-
-# # create a dataframe to store diversity results
-# sim_diversity_df <- data.frame()
-
-
-# for (line in exp_line_factor){
-#   for (psg in seq(10,500,10)){
-#     for (run_nr in 1:max(sim_data$run_nr)){
-#       print(psg)
-#       sim_data_sub <- sim_data[sim_data$run_nr == run_nr & sim_data$exp_line == line & sim_data$passage == psg & sim_data$pos >= 454 & sim_data$pos <= 9625,] 
-#       for (i in sim_data_sub$pos){
-#         if (is.na(i)) {
-#           break
-#         }
-#         ss <- sim_data_sub[sim_data_sub$pos == i,]
-        
-#         # get shannon
-#         alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
-#         ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
-#         total_shannon <- alt_shannon + ref_shannon
-
-#         sim_diversity_df <- rbind(sim_diversity_df, c(run_nr, line, psg, i, total_shannon))
-#       }
-#     }
-#   }
-# }
-
-# colnames(sim_diversity_df) <- c("run_nr", "exp_line", "passage", "genomic_position","shannon_entropy")
-
-# saveRDS(sim_diversity_df, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_diversity_all_runs.rds"))
-
 sim_diversity_df <- readRDS(file = paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_diversity_all_runs.rds"))
-
 sim_diversity_df %<>% mutate_at(c(1,3:5), as.numeric)
 
 
@@ -193,9 +153,21 @@ shannon_measure_sim$group <- "Simulated"
 
 shannon_measure_all <- rbind(shannon_measure, shannon_measure_sim[,c(1:3,5,9:11)])
 
+# Calibrate
+
+offset <- mean(shannon_measure_all$mean_ent[shannon_measure_all$group == "Observed" & shannon_measure_all$passage == 10])
+cols <- c("mean_ent", "lower_95", "upper_95")
+
+shannon_measure_all[
+  shannon_measure_all$group == "Simulated",
+  cols
+] <- shannon_measure_all[
+  shannon_measure_all$group == "Simulated",
+  cols
+] + offset
 
 
-# visualize 
+# visualize
 fig <- ggplot(shannon_measure_all, aes(x = passage, y = mean_ent, color = exp_line, linetype = group)) +
   geom_line(linewidth=2) + 
   geom_ribbon(

@@ -69,15 +69,15 @@ mutation_rate = 2e-5
 seq_sampling_frac = 1000
 infection_success_rate = 0.1
 sample_nr = int(sample_nr)
-bottleneck_intervals = int(bottleneck_freq)
+bottleneck_freq = int(bottleneck_freq)
 seq_sampling_freq = int(seq_sampling_freq)
 
 
 
 
 # Define path and filename
-folder_path_population = f"{wd}results/tables/neutral-seq-sim/populations/{bottleneck_intervals}/{exp_line}/run{run_nr}"
-folder_path_sequence = f"{wd}results/tables/neutral-seq-sim/sequences/{bottleneck_intervals}/{exp_line}/run{run_nr}"
+folder_path_population = f"{wd}results/tables/neutral-seq-sim/populations/{bottleneck_freq}/{exp_line}/run{run_nr}"
+folder_path_sequence = f"{wd}results/tables/neutral-seq-sim/sequences/{bottleneck_freq}/{exp_line}/run{run_nr}"
 # Ensure the directory exists
 os.makedirs(folder_path_population, exist_ok=True)
 os.makedirs(folder_path_sequence, exist_ok=True)
@@ -109,7 +109,7 @@ else:
 for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_freq + 1):
     print(gen, flush = True)
 
-    bottleneck_size = calculate_transfer_size(max(1, (gen + 1) // bottleneck_intervals), base_transfer_sizes)
+    bottleneck_size = calculate_transfer_size(max(1, (gen + 1) // bottleneck_freq), base_transfer_sizes)
     bottleneck_size = round(bottleneck_size*infection_success_rate)
     print(bottleneck_size, flush = True)
 
@@ -120,12 +120,9 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
         population[mutation_indices] = np.array([modify_base(x) for x in population[mutation_indices]])
 
     # Step 2: Replication - Each genome produces R0 offspring
-    if bottleneck_intervals == 2:
-        R0 = np.random.poisson(lam=44, size=1)
-    elif bottleneck_intervals == 3:
-        R0 = np.random.poisson(lam=12, size=1)
+    R0 = np.random.poisson(lam=12, size=1)
 
-    if gen % bottleneck_intervals == 0:
+    if gen % bottleneck_freq == 0:
         population = population[np.repeat(np.random.choice(population.shape[0], population.shape[0], replace=True), repeats = R0)]
     else :
         population = population[np.random.choice(population.shape[0], population.shape[0]*R0, replace=True)]
@@ -142,7 +139,7 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
         
     
     # Step 5: Apply bottleneck every 2 generations
-    if gen % bottleneck_intervals == 0:
+    if gen % bottleneck_freq == 0:
         population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
         if gen % seq_sampling_freq == 0:
             np.save(f"{folder_path_population}/{sample_nr}.npy", population)

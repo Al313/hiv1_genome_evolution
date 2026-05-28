@@ -109,3 +109,52 @@ saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_fr
 saveRDS(fixed_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all_runs.rds"))
 
 
+# calculate diversity for simulation data
+
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.rds"))
+
+
+###################
+
+print("calculate diversity for simulation data")
+
+# define function to calculate Shannon entropy
+
+shannon <- function(x, seq_err = 0.01){
+    if(x >= seq_err) {-x*log2(x)} else (0)
+}
+
+
+
+# create a dataframe to store diversity results
+sim_diversity_df <- data.frame()
+
+
+for (line in exp_line_factor){
+  print(line)
+  for (psg in seq(10,500,10)){
+    print(psg)
+    for (run_nr in 1:max(sim_data$run_nr)){
+      print(run_nr)
+      sim_data_sub <- sim_data[sim_data$run_nr == run_nr & sim_data$exp_line == line & sim_data$passage == psg & sim_data$pos >= 454 & sim_data$pos <= 9625,] 
+      for (i in sim_data_sub$pos){
+        if (is.na(i)) {
+          break
+        }
+        ss <- sim_data_sub[sim_data_sub$pos == i,]
+        
+        # get shannon
+        alt_shannon <- sum(sapply(as.numeric(ss$allele_freq), FUN = shannon))
+        ref_shannon <- shannon(1-sum(ss$allele_freq[ss$allele_freq >= 0.01]))
+        total_shannon <- alt_shannon + ref_shannon
+
+        sim_diversity_df <- rbind(sim_diversity_df, c(run_nr, line, psg, i, total_shannon))
+      }
+    }
+  }
+}
+
+colnames(sim_diversity_df) <- c("run_nr", "exp_line", "passage", "genomic_position","shannon_entropy")
+
+saveRDS(sim_diversity_df, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_diversity_all_runs.rds"))
+
