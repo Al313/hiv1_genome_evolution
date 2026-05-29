@@ -4,22 +4,17 @@
 timestamp=$(date +%F_%T)
 
 
-job_dir="/home/amovas/scratch/.slurm/jobs/${timestamp}"
+exp_lines=("MT-2_1" "MT-2_2" "MT-4_1" "MT-4_2")
 
+for exp_line in "${exp_lines[@]}"; do
 
-if [ ! -d ${job_dir} ]; then
-  mkdir -p ${job_dir};
-fi
+job_dir="/home/amovas/scratch/.slurm/jobs/${timestamp}/${exp_line}"
+mkdir -p ${job_dir}
+
+output_dir="/home/amovas/scratch/.slurm/outs/${timestamp}/${exp_line}"
+mkdir -p ${output_dir}
 
 job_file=${job_dir}/neutral_seq_sim_main.job
-
-
-output_dir="/home/amovas/scratch/.slurm/outs/${timestamp}"
-
-if [ ! -d ${output_dir} ]; then
-  mkdir -p ${output_dir};
-fi
-
 
 cat > "${job_file}" <<EOF
 #!/bin/bash
@@ -40,7 +35,7 @@ bottleneck_freq=3
 tot_gen_nr=\$(( 500 * bottleneck_freq ))
 seq_sampling_freq=\$(( 10 * bottleneck_freq ))
 tot_seq=\$(( tot_gen_nr / seq_sampling_freq ))
-exp_line="MT-4_2"
+exp_line="${exp_line}"
 tot_run=10
 
 
@@ -67,9 +62,8 @@ if [ ! -d \${output_dir} ]; then
 fi
 
 
-
-rm /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/*
-rm /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/sequences/\${bottleneck_freq}/\${exp_line}/*
+find * -type f -delete /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populations/\${bottleneck_freq}/\${exp_line}/*
+find * -type f -delete /home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/sequences/\${bottleneck_freq}/\${exp_line}/*
 
 # Loop over runs
 
@@ -115,13 +109,13 @@ FILE="/home/amovas/data/genome-evo-proj/results/tables/neutral-seq-sim/populatio
 while [ ! -f "\$FILE" ]; do
 echo "Waiting for \$FILE to be created..."
 sleep 10  # Check every 10 seconds
-done
-
 
 done
 done
+done
+
 EOF
 
 sbatch ${job_file}
 
-#done
+done
