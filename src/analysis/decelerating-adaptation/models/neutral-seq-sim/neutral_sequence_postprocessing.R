@@ -23,6 +23,8 @@ total_run <- 10
 long_df_all <- data.frame()
 fixed_df_all <- data.frame(run_nr = integer(), exp_line = character(), passage = integer(), count = integer())
 
+if (FALSE){
+
 for (run_nr in 1:total_run){
   print(run_nr)
   fixed_df <- data.frame(run_nr = integer(), exp_line = character(), passage = integer(), count = integer())
@@ -108,7 +110,7 @@ for (run_nr in 1:total_run){
 saveRDS(long_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.rds"))
 saveRDS(fixed_df_all, paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_count_all_runs.rds"))
 
-
+}
 # calculate diversity for simulation data
 
 sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.rds"))
@@ -130,7 +132,7 @@ shannon <- function(x, seq_err = 0.01){
 sim_diversity_df <- data.frame()
 
 
-for (line in exp_line_factor){
+for (line in exp_lines){
   print(line)
   for (psg in seq(10,500,10)){
     print(psg)
