@@ -135,7 +135,7 @@ b_mt2/b_mt4
 
 
 
-```{r visualization1: cumulative plot of unique mutations}
+```{r visualization1: cumulative plot of uniquely mutated positions}
 
 
 
@@ -164,7 +164,7 @@ fig <- df %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
         custom_plot_theme(application = "publication")
 
 # save figure
-custom_plot_save(fig, paste0(tolower(category), "_cumulative_unique_mutations.pdf"), height = 14, width = 14)
+custom_plot_save(fig, paste0(tolower(category), "_cumulative_uniquely_mutated_positions.pdf"), height = 14, width = 14)
 
 ```
 

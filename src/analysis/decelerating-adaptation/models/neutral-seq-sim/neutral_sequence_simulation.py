@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-
-
-
+# load packages
 import numpy as np
 import pandas as pd
 import sys
@@ -10,7 +8,7 @@ import os
 import math
 import re
 
-# Get command-line arguments
+# get command-line arguments
 args = sys.argv[1:] if len(sys.argv) > 1 else ["MT-2_1", "Majority", 180]
 exp_line, generation_time, run_nr, sample_nr, bottleneck_freq, seq_sampling_freq = args
 
@@ -23,13 +21,11 @@ else:
     wd = "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
     exp_line, generation_time = "MT-2_1", 180
 
-
-
-# Define logarithmic mean function
+# define logarithmic mean function
 def logarithmic_mean(a, b):
     return a if a == b else (a - b) / (np.log(a) - np.log(b))
 
-# Define transfer size calculation function
+# define transfer size calculation function
 def calculate_transfer_size(t, base_transfer_sizes):
     if not (1 <= t <= 500):
         raise ValueError("Time t must be between 1 and 500")
@@ -38,31 +34,25 @@ def calculate_transfer_size(t, base_transfer_sizes):
     size_floor, size_ceil = base_transfer_sizes.get(floor_t), base_transfer_sizes.get(ceil_t)
     return round(logarithmic_mean(size_ceil, size_floor))
 
-# Function to mutate a base
+# define mutation function
 def modify_base(x):
     return np.random.choice([b for b in range(1, 5) if b != x])
 
-# Base encoding to save memory
+# base encoding to save memory
 base_encoding = {'A': 1, 'C': 2, 'G': 3, 'T': 4}
 base_decoding = {v: k for k, v in base_encoding.items()}
 value_types = np.array(list(base_encoding.values()))
 
-
-# Read MOI data for transfer size estimation
+# read MOI data for transfer size estimation
 MOI_results = pd.read_csv(wd + "results/tables/moi_cleaned.tsv", sep="\t")
 base_transfer_sizes = dict(zip(MOI_results[MOI_results['exp_line'] == exp_line]['passage'], MOI_results[MOI_results['exp_line'] == exp_line]['btk_size']))
 base_transfer_sizes[0] = base_transfer_sizes[list(base_transfer_sizes.keys())[0]]
 
-# Set simulation parameters
-print(exp_line, flush = True)
-
+# set simulation parameters
 if re.match(r"^MT-2(?:_|$)", exp_line):
     neutral_pos = 2000
 elif re.match(r"^MT-4(?:_|$)", exp_line):
     neutral_pos = 1500
-
-print(exp_line)
-print(neutral_pos)
 
 initial_population = 400
 mutation_rate = 2e-5
@@ -75,15 +65,16 @@ seq_sampling_freq = int(seq_sampling_freq)
 
 
 
-# Define path and filename
+# define path and filename
 folder_path_population = f"{wd}results/tables/neutral-seq-sim/populations/{bottleneck_freq}/{exp_line}/run{run_nr}"
 folder_path_sequence = f"{wd}results/tables/neutral-seq-sim/sequences/{bottleneck_freq}/{exp_line}/run{run_nr}"
-# Ensure the directory exists
+
+# ensure the directory exists
 os.makedirs(folder_path_population, exist_ok=True)
 os.makedirs(folder_path_sequence, exist_ok=True)
 
 
-# Create and save initial ancestral population and read previous populations
+# create and save initial ancestral population and read previous populations
 np.random.seed(1+sample_nr+int(run_nr))
 
 if sample_nr == 1:
@@ -99,7 +90,7 @@ else:
 
 
 
-# Simulation loop
+# simulation loop
 if sample_nr == 1:
     population = init_population.copy()
 else:
@@ -113,13 +104,13 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
     bottleneck_size = round(bottleneck_size*infection_success_rate)
     print(bottleneck_size, flush = True)
 
-    # Step 1: Mutation - Apply mutation rate
+    # step 1: mutation - apply mutation rate
     mutation_mask = np.random.rand(*population.shape) < mutation_rate
     mutation_indices = np.where(mutation_mask)
     if mutation_indices[0].size > 0:
         population[mutation_indices] = np.array([modify_base(x) for x in population[mutation_indices]])
 
-    # Step 2: Replication - Each genome produces R0 offspring
+    # step 2: replication - each genome produces R0 offspring
     R0 = np.random.poisson(lam=12, size=1)
 
     if gen % bottleneck_freq == 0:
@@ -128,17 +119,17 @@ for gen in range(((sample_nr-1)*seq_sampling_freq)+1, sample_nr*seq_sampling_fre
         population = population[np.random.choice(population.shape[0], population.shape[0]*R0, replace=True)]
 
 
-    # Step 3: Sequencing
+    # step 3: sequencing
     if gen % seq_sampling_freq == 0:
 
-        # Sampling for sequencing
+        # sampling for sequencing
         sampled_population = population[np.random.choice(population.shape[0], round(population.shape[0]/seq_sampling_frac))]
 
 
         np.save(f"{folder_path_sequence}/{sample_nr}.npy", sampled_population)
         
     
-    # Step 5: Apply bottleneck every 2 generations
+    # step 5: apply bottleneck every nth generations
     if gen % bottleneck_freq == 0:
         population = population[np.random.choice(population.shape[0], bottleneck_size, replace=False)]
         if gen % seq_sampling_freq == 0:

@@ -1,11 +1,12 @@
 #!/bin/bash
 
-
+# set time stamp
 timestamp=$(date +%F_%T)
 
-
+# define exp lines
 exp_lines=("MT-2_1" "MT-2_2" "MT-4_1" "MT-4_2")
 
+# loop over exp lines
 for exp_line in "${exp_lines[@]}"; do
 
 job_dir="/home/amovas/scratch/.slurm/jobs/${timestamp}/${exp_line}"
@@ -15,6 +16,7 @@ output_dir="/home/amovas/scratch/.slurm/outs/${timestamp}/${exp_line}"
 mkdir -p ${output_dir}
 
 job_file=${job_dir}/neutral_seq_sim_main.job
+
 
 cat > "${job_file}" <<EOF
 #!/bin/bash

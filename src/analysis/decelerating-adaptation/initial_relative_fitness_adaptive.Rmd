@@ -112,9 +112,9 @@ source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 # read in data
 df <- readRDS("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
-t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
+t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation_across.Rds"))
 
-# df from ## Method 2 in time_to_fixation.Rmd
+# merge
 merged <- merge(t_2_f, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
 
 
@@ -318,6 +318,7 @@ fig <- ggplot(models_df, aes(x = init_rel_fit, y = predicted_prob, color = exp_l
         y = "Probability of fixation",
         color = "Population"
     ) +
+    scale_color_manual(values = line_col_palette) +
     custom_plot_theme(application = "publication")
 
 # save figure
