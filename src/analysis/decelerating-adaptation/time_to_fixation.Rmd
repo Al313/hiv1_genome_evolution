@@ -214,8 +214,8 @@ my_col_pal <- c(alpha("grey"), "green", "blue", "red")
 ```
 
 ```{r average time to fixation of neutral sequence simulations}
-bottleneck_freq <- 2
-sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all.Rds"))
+bottleneck_freq <- 3
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.Rds"))
 
 sim_data$mut_info <- paste0(sim_data$pos, "_", sim_data$base_allele, "_", sim_data$alt_allele)
 
@@ -268,28 +268,60 @@ custom_plot_save(fig, "time-to-fixation-based-on-recurrence.pdf", height = 14, w
 
 ```
 
-```{r}
-t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
+```{r review response analysis}
 
-t_2_f_summary <- t_2_f %>%
-        mutate(bin = cut(fixation, breaks = bins, left = FALSE, right = TRUE))
+# load packages
+library(patchwork)
+library(scales)
 
-fig <- ggplot(t_2_f_summary, aes(x = bin, y=time_to_fixation, fill = exp_line)) + 
+# read in data
+t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation_across.Rds"))
+df <- readRDS("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
+
+bins <- seq(0,500, 100)
+
+# merge
+merged <- merge(t_2_f_summary, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
+
+fig1 <- ggplot(merged[!is.na(merged$bin),], aes(x = bin, y=time_to_fixation, fill = exp_line)) + 
     geom_boxplot(color = "black", alpha = 0.7, outliers = FALSE) +
     geom_jitter(aes(color = exp_line), width = 0.2, size = 2, alpha = 0.9) +
-    # geom_hline(yintercept = median(t_2_f_sim$time_to_fixation), linetype = "dashed", color = "black", size = 1) +
-    # geom_hline(yintercept = median(t_2_f$time_to_fixation), linetype = "solid", color = "black", size = 1) +
-    # stat_compare_means(comparisons = comparisons, method = "wilcox.test", p.adjust.method = "BH", label = "p.adj", size = 12) +
     scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 50)) +
     scale_fill_manual(values = line_col_palette) +
     scale_color_manual(values = line_col_palette) +
-    labs(fill = "Population", x= "Bin", y = "Time to fixation", title = "") + # Label for the legend
+    labs(fill = "Population", x= "Fixation period", y = "Time to fixation", title = "") + # Label for the legend
     custom_plot_theme() +
     guides(color = "none")
 
-# save figure
-custom_plot_save(fig, "time_to_fixation_based_on_fixation_period.pdf", height = 14, width = 14)
 
+
+fig2 <- ggplot(merged[!is.na(merged$bin),], aes(x = bin, y=init_rel_fit, fill = exp_line)) + 
+    geom_boxplot(color = "black", alpha = 0.7, outliers = FALSE) +
+    geom_jitter(aes(color = exp_line), width = 0.2, size = 2, alpha = 0.9) +
+    scale_y_continuous(trans = log10_trans(),
+    breaks = c(3*10^-1, 10^-1, 5*10^-2, 10^-2, 5*10^-3),
+    labels = scales::label_number(accuracy = 0.001)) +
+    scale_fill_manual(values = line_col_palette) +
+    scale_color_manual(values = line_col_palette) +
+    labs(fill = "Population", x= "Fixation period", y = "Initial relative fitness", title = "") + # Label for the legend
+    custom_plot_theme() +
+    guides(color = "none")
+
+
+
+
+combined <- fig1 + fig2 +
+    plot_layout(
+        ncol = 2,
+        guides = "collect"   # combine legends
+    ) &
+    theme(legend.position = "right")
+
+
+
+
+# save figure
+custom_plot_save(combined, "time_to_fixation_and_initial_rel_fitness_based_on_fixation_period.pdf", height = 14, width = 28)
 
 ```
 

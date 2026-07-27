@@ -227,6 +227,7 @@ custom_plot_save(fig, paste0(tolower(category), "_appearance.pdf"), height = 14,
 ```
 
 
+
 ```{r visualization3: disappearance}
 
 
@@ -242,7 +243,7 @@ for (i in 1:49){
 
         prev <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == prev_in & variants_expiii$allele_freq >= min_threshold & variants_expiii$allele_freq < max_threshold]
 
-        pres <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == pres_in & variants_expiii$allele_freq >= min_threshold & variants_expiii$allele_freq < max_threshold]
+        pres <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == pres_in & variants_expiii$allele_freq >= min_threshold]
 
         addition <- length(setdiff(pres, prev))
         removal <- length(setdiff(prev,pres))

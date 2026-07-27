@@ -59,7 +59,7 @@ source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 
 # read in data
 df <- readRDS("/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/results/tables/misc/init_rel_fitness.rds")
-t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation.Rds"))
+t_2_f <- readRDS(paste0(wd, "results/tables/time_to_fixation_across.Rds"))
 
 # df from ## Method 2 in time_to_fixation.Rmd
 merged <- merge(t_2_f, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("exp_line", "mut_info"), all.y = TRUE)
@@ -68,13 +68,13 @@ merged <- merge(t_2_f, df[,c("exp_line", "mut_info", "init_rel_fit")], by = c("e
 
 # get relative order of fixation per experimental line
 line_specific_df <- merged %>%
-    filter(Occurrence %in% c("1 out of 4")) %>%
+    filter(!is.na(Occurrence)) %>%
     group_by(exp_line) %>%
     arrange(fixation, appearance, .by_group = TRUE) %>%
     mutate(relative_order = row_number()) %>%
     ungroup()
 
-
+min(line_specific_df$init_rel_fit)
 max(line_specific_df$relative_order)
 
 fig <- line_specific_df %>%
@@ -88,9 +88,9 @@ fig <- line_specific_df %>%
         color = "Population"
     ) +
     scale_color_manual(values = line_col_palette) +
-    scale_x_continuous(breaks = seq(0, 90, 5)) +
+    scale_x_continuous(breaks = seq(0, 120, 10)) +
     scale_y_continuous(trans = log10_trans(),
-    breaks = c(3*10^-1, 10^-1, 5*10^-2, 10^-2, 5*10^-3),
+    breaks = c(3*10^-1, 10^-1, 5*10^-2, 10^-2, 5*10^-3, 1*10^-3),
     labels = scales::label_number(accuracy = 0.001)) +
     custom_plot_theme(application = "publication") +
     theme(axis.text.x = element_text(angle = 90)) +
@@ -103,7 +103,7 @@ fig <- line_specific_df %>%
     theme(
         axis.text.y = element_text(margin = margin(r = 8))
     ) +
-    coord_cartesian(ylim = c(4*10^-3, 3*10^-1), 
+    coord_cartesian(ylim = c(1*10^-3, 3*10^-1), 
         clip = "off")
 
 

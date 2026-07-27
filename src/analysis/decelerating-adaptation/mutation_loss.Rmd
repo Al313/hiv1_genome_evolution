@@ -1,0 +1,371 @@
+---
+title:  
+    "Mutable position"
+date: 
+    "May 26th, 2026"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+```{r loading libraries, echo=FALSE}
+
+# loading libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(magrittr)
+library(pscl)
+library(kableExtra)
+library(gridExtra)
+library(grid)
+
+
+```
+
+
+```{r set paths and load data}
+
+# Set working directory
+if (file.exists("/home/amovas/")) {
+    # Running on HPC
+    message("Remote HPC Connection!")
+    wd <- "/home/amovas/data/genome-evo-proj/"
+} else {
+    # Running locally
+    message("Local PC Connection!")
+    wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
+}
+
+# Load project-specific functions and data readers
+source(file.path(wd, "src/analysis/decelerating-adaptation/readin_data.R"))
+source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
+
+```
+
+
+```{r category thresholds}
+
+# set parameters
+category <- "Minority"
+
+if (category == "Minority"){
+    min_threshold <- 0.01
+    max_threshold <- 0.5
+} else if (category == "Majority"){
+    min_threshold <- 0.5
+    max_threshold <- 1.01
+} else if (category == "Fixed"){
+    min_threshold <- 0.99
+    max_threshold <- 1.01
+}
+```
+
+
+
+```{r obtain mutation loss data}
+
+
+passages <- seq(10,500, 10)
+diff_df <- data.frame()
+
+
+for (i in 2:50){
+    for (exp_line in exp_line_factor){
+        
+        # determine consecutive samples
+        present_psg <- passages[i]
+        preceding_psg <- passages[i-1]
+
+        # get the list of mutations
+        present_mut_list <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == present_psg & variants_expiii$allele_freq >= min_threshold]
+
+        preceding_mut_df <- variants_expiii[variants_expiii$exp_line == exp_line & variants_expiii$passage == preceding_psg & variants_expiii$allele_freq >= min_threshold & variants_expiii$allele_freq < max_threshold, c("mut_info", "allele_freq")]
+
+        # determine presence and absence
+        removed_mut_df <- preceding_mut_df %>% mutate(loss = ifelse(mut_info %in% present_mut_list, 0, 1)) %>%
+            mutate(passage = passages[i], exp_line = exp_line)
+
+        # append the results 
+        diff_df <- rbind(diff_df, removed_mut_df)
+
+    }
+}
+
+```
+
+```{r visualize logistic regression for a single plot}
+
+fig <- ggplot(
+    filter(diff_df, exp_line == "MT-2_1", passage == 290),
+    aes(allele_freq, loss)
+    ) +
+    geom_jitter(height = 0.03, width = 0) +
+    stat_smooth(
+        method = "glm",
+        method.args = list(family = "binomial"),
+        formula = y ~ x,
+        se = TRUE
+    ) +
+    labs(x= "Frequency", y = "Loss") +
+    custom_plot_theme(application = "publication")
+
+
+
+# save figure
+custom_plot_save(fig, "mutation_loss_MT-2_1_290.pdf", height = 14, width = 14)
+```
+
+
+```{r obtain logistic regression for each time point}
+# prepare data for modeling
+diff_df <- diff_df %>%
+    mutate(
+        host_line = ifelse(grepl("^MT-2", exp_line), "MT-2", "MT-4"),
+        host_line = factor(host_line),
+        exp_line = factor(exp_line)
+    )
+
+
+
+# fit a logistic regression with both the main effects and interaction
+fit <- glm(loss ~ allele_freq*host_line*passage,
+                data = diff_df,
+                family = binomial)
+
+# get model summary 
+summary(fit)
+
+# goodness of fit
+pR2(fit)
+anova(fit, test = "Chisq")
+
+```
+
+
+```{r visualize model outcome}
+
+newdat <- expand.grid(
+    allele_freq = seq(0.01, 0.2, length.out = 200),
+    host_line = c("MT-2", "MT-4"),
+    passage = c(10, 250, 500)
+)
+
+pred <- predict(fit, newdata = newdat,
+                type = "link", se.fit = TRUE)
+
+newdat$prob <- plogis(pred$fit)
+newdat$lower <- plogis(pred$fit - 1.96 * pred$se.fit)
+newdat$upper <- plogis(pred$fit + 1.96 * pred$se.fit)
+
+newdat$passage <- as.factor(newdat$passage)
+
+fig <- ggplot(
+    newdat,
+    aes(
+        allele_freq,
+        prob*100,
+        colour = host_line,
+        linetype = passage
+    )
+) +
+    geom_line(linewidth = 1.2) +
+    labs(
+        x = "Frequency",
+        y = "Probability of loss (%)",
+        colour = "Host",
+        linetype = "Transfer"
+    ) +
+    scale_linetype_manual(values = c("solid", "twodash", "dotted"), labels = c("10-20", "250-260", "490-500"))+
+    scale_color_manual(values = c("#ff8b08", "#00c8ff")) +
+    scale_y_continuous(breaks = seq(0,70,10)) +
+    scale_x_continuous(breaks = c(0.01,seq(0,0.2,0.02))) +
+    guides(
+        colour = guide_legend(order = 1),
+        linetype = guide_legend(order = 2)
+    ) +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig, "mutation_loss_logistic.pdf", height = 14, width = 14)
+
+```
+
+
+```{r save model coefficient estimates}
+
+library(broom)
+library(dplyr)
+
+coef_table <- tidy(fit) %>%
+    mutate(
+        term = recode(term,
+            "(Intercept)" = "Intercept",
+            "allele_freq" = "Allele frequency",
+            "host_lineMT-4" = "Host (MT-4)",
+            "passage" = "Transfer",
+            "allele_freq:host_lineMT-4" = "Freq × Host",
+            "allele_freq:passage" = "Freq × Transfer",
+            "host_lineMT-4:passage" = "Host × Transfer",
+            "allele_freq:host_lineMT-4:passage" = "Freq × Host × Transfer"
+        ),
+        estimate = formatC(estimate, format = "e", digits = 3),
+        std.error = formatC(std.error, format = "e", digits = 3),
+        statistic = round(statistic, 2),
+        p.value = ifelse(p.value < 0.001, "< 0.001", formatC(p.value, format = "f", digits = 3)),
+        sig = ifelse(p.value < 0.001, "***", ifelse(p.value < 0.01, "**", ifelse(p.value < 0.05, "*", "n.s")))
+    ) %>%
+    rename(
+        Term = term,
+        Estimate = estimate,
+        `Std. Error` = std.error,
+        `z value` = statistic,
+        `p value` = p.value,
+        `Sig` = sig
+    )
+
+pdf(
+    "/Users/alimos313/Documents/studies/phd/research/manuscripts/decelerating-adaptation/figures/mutation_loss_logistic_regression_coefficients.pdf",
+    width = 7,
+    height = 4.5
+)
+
+grid.text(
+    "\nMutation Loss Logistic Regression Coefficients\n",
+    x = 0.5,
+    y = 0.95,
+    gp = gpar(fontsize = 18, fontface = "bold")
+)
+
+grid.text(
+    "\nformula: loss ~ allele_freq * host_line * transfer",
+    x = 0.5,
+    y = 0.91,
+    gp = gpar(fontsize = 12, fontface = "italic")
+)
+
+pushViewport(
+    viewport(
+        x = 0.5,
+        y = 0.45,
+        width = 0.90,
+        height = 0.70
+    )
+)
+
+grid.table(coef_table, rows = NULL)
+
+
+dev.off()
+
+
+```
+
+
+```{r obtain mutation loss data for simulated data}
+
+# read in simulated diversity data
+bottleneck_freq <- 3
+sim_data <- readRDS(paste0(wd, "results/tables/neutral-seq-sim/", bottleneck_freq, "_sim_freq_all_runs.rds"))
+sim_data <- sim_data[sim_data$run_nr == 1,]
+sim_data %<>% mutate(mut_info = paste(base_allele, pos, alt_allele, sep = "_"))
+
+passages <- seq(10,500, 10)
+diff_df_sim <- data.frame()
+
+
+for (i in 2:50){
+    for (exp_line in exp_line_factor){
+        
+        # determine consecutive samples
+        present_psg <- passages[i]
+        preceding_psg <- passages[i-1]
+
+        # get the list of mutations
+        present_mut_list <- sim_data$mut_info[sim_data$exp_line == exp_line & sim_data$passage == present_psg & sim_data$allele_freq >= min_threshold]
+
+        preceding_mut_df <- sim_data[sim_data$exp_line == exp_line & sim_data$passage == preceding_psg & sim_data$allele_freq >= min_threshold & sim_data$allele_freq < max_threshold, c("mut_info", "allele_freq")]
+
+        # determine presence and absence
+        removed_mut_df <- preceding_mut_df %>% mutate(loss = ifelse(mut_info %in% present_mut_list, 0, 1)) %>%
+            mutate(passage = passages[i], exp_line = exp_line)
+
+        # append the results 
+        diff_df_sim <- rbind(diff_df_sim, removed_mut_df)
+
+    }
+}
+
+# label data by host_line
+diff_df_sim <- diff_df_sim %>%
+    mutate(
+        host_line = ifelse(grepl("^MT-2", exp_line), "MT-2", "MT-4"),
+        host_line = factor(host_line),
+        exp_line = factor(exp_line)
+    )
+
+
+
+# modeling
+fit_sim <- glm(loss ~ allele_freq*host_line + passage,
+                data = diff_df_sim,
+                family = binomial)
+
+summary(fit_sim)
+
+# generate prediction
+newdat <- expand.grid(
+    allele_freq = seq(0.01, 0.50, length.out = 1000),
+    host_line = c("MT-2", "MT-4"),
+    passage = median(diff_df_sim$passage)
+)
+
+pred <- predict(fit_sim, newdata = newdat,
+                type = "link", se.fit = TRUE)
+
+newdat$prob <- plogis(pred$fit)
+newdat$lower <- plogis(pred$fit - 1.96 * pred$se.fit)
+newdat$upper <- plogis(pred$fit + 1.96 * pred$se.fit)
+
+
+fig_sim <- ggplot(
+    newdat,
+    aes(
+        allele_freq,
+        prob*100,
+        colour = host_line,
+        group = host_line
+    )
+) +
+    geom_ribbon(
+        aes(ymin = lower*100, ymax = upper*100, colour = host_line),
+        alpha = 0.2
+    ) +
+    geom_line(linewidth = 1.2) +
+    labs(
+        x = "Frequency",
+        y = "Probability of loss (%)",
+        colour = "Host"
+    ) +
+    scale_color_manual(values = c("#ff8b08", "#00c8ff")) +
+    scale_y_continuous(breaks = seq(0,60,10)) +
+    scale_x_continuous(breaks = seq(0,0.5,0.05)) +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig_sim, "mutation_loss_logistic_sim_data.pdf", height = 14, width = 14)
+
+```
+

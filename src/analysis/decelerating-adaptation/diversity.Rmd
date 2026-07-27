@@ -112,7 +112,7 @@ sim_diversity_df %<>% mutate_at(c(1,3:5), as.numeric)
 
 # create full grid to include all positions including zeros (i.e., positions with no variants)
 all_positions <- expand.grid(
-  run_nr = 1:max(sim_data$run_nr),
+  run_nr = 1:max(sim_diversity_df$run_nr),
   exp_line = exp_line_factor,
   passage = seq(10, 500, 10),
   genomic_position = 454:9625,
@@ -155,8 +155,10 @@ shannon_measure_all <- rbind(shannon_measure, shannon_measure_sim[,c(1:3,5,9:11)
 
 # Calibrate
 
-offset <- mean(shannon_measure_all$mean_ent[shannon_measure_all$group == "Observed" & shannon_measure_all$passage == 10])
 cols <- c("mean_ent", "lower_95", "upper_95")
+obs <- mean(shannon_measure_all$mean_ent[shannon_measure_all$group == "Observed" & shannon_measure_all$passage == 10])
+sim <- mean(shannon_measure_all$mean_ent[
+  shannon_measure_all$group == "Simulated" & shannon_measure_all$passage == 10])
 
 shannon_measure_all[
   shannon_measure_all$group == "Simulated",
@@ -164,7 +166,7 @@ shannon_measure_all[
 ] <- shannon_measure_all[
   shannon_measure_all$group == "Simulated",
   cols
-] + offset
+] * (obs/sim)
 
 
 # visualize

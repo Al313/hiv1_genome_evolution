@@ -177,8 +177,8 @@ custom_plot_save(fig, "ld_per_transfer.pdf", height = 14, width = 14)
 
 
 
-t.test(all_ld_summary$mean_r2[all_ld_summary$exp_line == 13 & all_ld_summary$psg <= 50],
-    all_ld_summary$mean_r2[all_ld_summary$exp_line == 13 & all_ld_summary$psg > 50])
+t.test(all_ld_summary$mean_r2[all_ld_summary$exp_line %in% c("MT-2_1", "MT-2_2")],
+    all_ld_summary$mean_r2[all_ld_summary$exp_line %in% c("MT-4_1", "MT-4_2")])
 
 ```
 
@@ -241,10 +241,9 @@ all_ld_summary <- all_ld %>% group_by(exp_line, mid_pos) %>%
 
 fig <- all_ld_summary %>% ggplot(aes(x = mid_pos, y = mean_r2, color = as.factor(exp_line))) +
     geom_point(alpha = 0.5) +
-    labs(x = "\n Distance between SNPs (bp)",
-        y = "r^2 > 0.1",
-        title = "Mean LD decay with distance across Experimental Lines",
-        color = "Line") +
+    labs(x = "\n Genome",
+        y = "r^2 > 0.2",
+        color = "Population") +
     scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
     scale_x_continuous(breaks = seq(0,10000, by = 400)) +
     scale_y_continuous(breaks = seq(0,1, by = 0.1)) +

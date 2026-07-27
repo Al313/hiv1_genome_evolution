@@ -161,7 +161,6 @@ p_value_df <- data.frame(exp_line = line_labels, p_val = c(p_value_A, p_value_B,
 # make the ggplot object
 
 
-
 qpcr_fig <- data_cleaned %>% ggplot(aes(x = passage, y = log10(mean_quantity_per_ml_cell_culture_supernatant), color = exp_line)) +
                 facet_wrap(~exp_line) +
                 geom_line() +

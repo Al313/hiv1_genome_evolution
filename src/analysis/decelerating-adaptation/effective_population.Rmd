@@ -71,9 +71,9 @@ source(file.path(wd, "src/analysis/decelerating-adaptation/plot_custom.R"))
 df <- data.frame()
 
 
-# exp_line <- "MT-4_1"
-# pres_psg <- 130
-# trans_effect <- "S"
+exp_line <- "MT-4_1"
+pres_psg <- 130
+trans_effect <- "S"
 
 # 8787 9408
 for (exp_line in names(line_col_palette)){
@@ -246,4 +246,163 @@ ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
 pdf(file = paste0(fig_dir, "bayesina_ne_estimates.pdf"), height = 14, width = 21)
 ne__fig
 dev.off()
+```
+
+
+```{r ne estimate using down-sampled data}
+
+
+df_down <- data.frame()
+
+variants_expiii_down <- variants_expiii %>%
+    mutate(
+        coverage_down = pmax(1, round(0.8 * coverage)),
+        alt_reads_down = rbinom(
+        n = n(),
+        size = coverage_down,
+        prob = allele_freq
+        ),
+        allele_freq_down = alt_reads_down / coverage_down
+    )
+
+
+for (exp_line in names(line_col_palette)){
+    
+    print(exp_line)
+    
+    for (trans_effect in c("S", "ALL")) {
+        if (trans_effect == "ALL"){
+            variants_expiii_sub_down <- variants_expiii_down[variants_expiii_down$exp_line == exp_line & variants_expiii_down$genomic_pos >= 8787 & variants_expiii_down$genomic_pos <= 9408,]
+        } else {
+            variants_expiii_sub_down <- variants_expiii_down[variants_expiii_down$exp_line == exp_line & variants_expiii_down$effect_simplified == trans_effect,]
+        }
+        
+        # set generation number between time points
+        gen_nr <- 30
+
+        for (pres_psg in seq(20,570,10)){
+            print(pres_psg)
+            prev_psg <- pres_psg - 10
+            
+            pres_muts <- unique(variants_expiii_sub_down$mut_info[variants_expiii_sub_down$passage == pres_psg & variants_expiii_sub_down$allele_freq_down >= 0.01])
+            prev_muts <- unique(variants_expiii_sub_down$mut_info[variants_expiii_sub_down$passage == prev_psg & variants_expiii_sub_down$allele_freq_down >= 0.01])
+            union_muts <- union(pres_muts, prev_muts)
+            intersect_muts <- intersect(pres_muts, prev_muts)
+            
+            delta_afs <- c()
+            for (mut in intersect_muts){
+                if (mut %in% pres_muts){
+                    pres_mut_af <- variants_expiii_sub_down$allele_freq_down[variants_expiii_sub_down$passage == pres_psg & variants_expiii_sub_down$mut_info == mut]
+                } else {pre_mut_af <- 0}
+                if (mut %in% prev_muts){
+                    prev_mut_af <- variants_expiii_sub_down$allele_freq_down[variants_expiii_sub_down$passage == prev_psg & variants_expiii_sub_down$mut_info == mut]
+                } else {prev_mut_af <- 0}
+                
+                delta_af <- pres_mut_af - prev_mut_af
+                delta_afs <- append(delta_afs, delta_af)
+            }
+            
+            af_pres <- sum(variants_expiii_sub_down$allele_freq_down[variants_expiii_sub_down$passage == pres_psg & variants_expiii_sub_down$allele_freq_down >= 0.01])
+            af_prev <- sum(variants_expiii_sub_down$allele_freq_down[variants_expiii_sub_down$passage == prev_psg & variants_expiii_sub_down$allele_freq_down >= 0.01])
+            af_ave <- af_pres/length(pres_muts)
+            
+            Ne <- tryCatch({1/(2*(1-(1-(var(delta_afs)/(af_ave*(1-af_ave))))^(1/gen_nr)))}, error = function(e){NA})
+            
+            df_down <- rbind(df_down, c(exp_line, trans_effect, pres_psg, length(union_muts), length(intersect_muts), af_ave, tryCatch({var(delta_afs)}, error = function(e){NA}), Ne))
+        }
+    }
+    
+}
+
+
+
+df_down %<>% set_colnames(c("exp_line", "effect_simplified", "psg", "union_count", "intersect_count", "average_allele_freq", "var_freq_change", "Ne_downsampled")) %>%
+        mutate(
+            psg = as.numeric(psg),
+            var_freq_change = as.numeric(var_freq_change),
+            union_count = as.integer(union_count),
+            intersect_count = as.integer(intersect_count),
+            Ne = as.numeric(Ne))
+
+
+
+# save data on disk
+save(df_down, file = paste0(wd,"results/tables/misc/variance_effective_size_nef_downsampled.RData"))
+
+
+```
+
+
+```{r visualize variance ne for original and downsampled data}
+
+
+load(paste0(wd,"results/tables/misc/variance_effective_size_nef.RData")) # or all of genome: variance_effective_size.RData
+load(paste0(wd,"results/tables/misc/variance_effective_size_nef_downsampled.RData"))
+
+df_all <- merge(df[,c(1,2,3,8)], df_down[,c(1,2,3,8)], by = c("exp_line", "psg", "effect_simplified"))
+
+df_all_long <- df_all %>% pivot_longer(cols= c("Ne", "Ne_downsampled"), names_to = "group", values_to = "value")
+
+df_all_long %<>%
+    mutate(
+        group = case_when(
+        group == "Ne" ~ "Original",
+        group == "Ne_downsampled" ~ "Downsampled",
+        TRUE ~ group
+        )
+    ) %>%
+    mutate(group = factor(group, levels = c("Original", "Downsampled")))
+
+df_all_subset <- df_all_long[df_all_long$effect_simplified == "S",]
+
+
+hline_df <- df_all_subset %>%
+    filter(exp_line %in% c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")) %>%
+    mutate(pop = case_when(
+        exp_line %in% c("MT-2_1", "MT-2_2") ~ "MT-2",
+        exp_line %in% c("MT-4_1", "MT-4_2") ~ "MT-4"
+    )) %>%
+    group_by(group, pop) %>%
+    summarise(
+        yintercept = log10(mean(value, na.rm = TRUE)),
+        .groups = "drop"
+    )
+
+line_col_palette <- c(line_col_palette, "MT-2" = "#ff8b08", "MT-4" = "#00bbff")
+
+# plot Ne
+fig <- df_all_subset %>%
+    ggplot(aes(x = psg, y = log10(value), col = exp_line)) +
+    facet_wrap(~ group) +
+    geom_line() +
+    geom_hline(
+        data = hline_df,
+        aes(yintercept = yintercept, color = pop),
+        linetype = "dashed",
+        linewidth = 2,
+        inherit.aes = FALSE,
+        show.legend = FALSE
+    ) +
+    geom_smooth(method = "loess", se = FALSE) +
+    scale_y_continuous(breaks = seq(1.5,4,0.5), limits = c(1.5,4)) +
+    scale_x_continuous(breaks = seq(0,500,50), limits = c(0,500)) +
+    scale_color_manual(values = line_col_palette, breaks = c("MT-2_1", "MT-2_2", "MT-4_1", "MT-4_2")) +
+    labs(
+        x = "Transfer",
+        y = "Log10(Ne)",
+        title = "Variance Effective Population Size (nef Variants)",
+        color = "Population"
+    ) +
+    custom_plot_theme(application = "publication")
+
+# save figure
+custom_plot_save(fig, "variance_ne_syn_original_vs_downsampled.pdf", height = 14, width = 14)
+
+# in-line numbers
+log10(mean(df_all_subset$value[df_all_subset$group == "Original" & df_all_subset$exp_line %in% c("MT-2_1","MT-2_2")], na.rm = TRUE))
+log10(mean(df_all_subset$value[df_all_subset$group == "Downsampled" & df_all_subset$exp_line %in% c("MT-2_1","MT-2_2")], na.rm = TRUE))
+
+log10(mean(df_all_subset$value[df_all_subset$group == "Original" & df_all_subset$exp_line %in% c("MT-4_1","MT-4_2")], na.rm = TRUE))
+log10(mean(df_all_subset$value[df_all_subset$group == "Downsampled" & df_all_subset$exp_line %in% c("MT-4_1","MT-4_2")], na.rm = TRUE))
+
 ```
