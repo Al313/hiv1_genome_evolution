@@ -1,14 +1,12 @@
 
-# load libraries
-
-
+### load libraries
 library("magrittr")
 library("stringr")
 library("dplyr")
 library("tidyr")
 
 
-# take command line variables
+### take command line variables
 args <- commandArgs(trailingOnly = TRUE)
 
 if (length(args) == 0){
@@ -23,10 +21,9 @@ if (cl_line %in% 13:16){
 	exp <- "iv"
 }
 
-print(cl_line)
 
 
-
+### determine the server and path
 if (dir.exists("/Users/alimos313")){
     main_wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/"
 } else {
@@ -34,19 +31,19 @@ if (dir.exists("/Users/alimos313")){
 }
 
 
-# read in the variant data
+
+### read in the variant data
 variants_ann <- read.table(file = paste0(main_wd, "genome-evo-proj/results/tables/pipeline-outputs/", exp, "/", exp, "_annotated_variants.tsv.gz"), 
 sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 
 
-# account for the switched experimental lines
+
+### account for the switched experimental lines
 variants_ann$exp_line[variants_ann$exp_line == 15 & variants_ann$passage > 360] <- "A"
 variants_ann$exp_line[variants_ann$exp_line == 16 & variants_ann$passage > 360] <- "B"
 
 variants_ann$exp_line[variants_ann$exp_line == "A"] <- "16"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "15"
-
-
 
 variants_ann$exp_line[variants_ann$exp_line == 18 & variants_ann$passage > 350] <- "A"
 variants_ann$exp_line[variants_ann$exp_line == 19 & variants_ann$passage > 350] <- "B"
@@ -55,8 +52,8 @@ variants_ann$exp_line[variants_ann$exp_line == "A"] <- "19"
 variants_ann$exp_line[variants_ann$exp_line == "B"] <- "18"
 
 
-## prepare data
 
+### prepare data
 variants_ann %<>% 
                 filter(coverage >= 500) %>%
                 filter(mut_type == "P") %>%
@@ -71,9 +68,12 @@ variants_ann %<>%
 
 variants <- variants_ann %>% filter(!duplicated(variant_id))
 
+# subset data
+variants_sub <- variants[variants$exp_line == cl_line & variants$genomic_pos >= 454 & variants$genomic_pos <= 9625,]
 
 
 
+### define functions for quantifying diversity measures
 # vectorized Shannon entropy
 shannon <- function(x, seq_err = 0.01) {
     ifelse(x >= seq_err, -x * log2(x), 0)
@@ -90,11 +90,8 @@ polymorph <- function(x){
 }
 
 
-# subset data
-variants_sub <- variants[variants$exp_line == cl_line & variants$genomic_pos >= 454 & variants$genomic_pos <= 9625,]
 
-
-# Compute metrics only for positions that exist
+### Compute diversity metrics
 diversity_df <- variants_sub %>%
     filter(allele_freq >= 0.01) %>%
     group_by(exp_line, passage, genomic_pos) %>%
@@ -112,15 +109,12 @@ diversity_df <- variants_sub %>%
     ) %>%
     select(exp_line, passage, genomic_position = genomic_pos, polymorphic, heterozygosity, shannon_entropy)
 
-
-
 # Add missing positions back in
 all_pos <- expand.grid(
     exp_line = as.character(unique(variants_sub$exp_line)),
     passage = sort(unique(variants_sub$passage)),
     genomic_position = 454:9625
 )
-
 
 diversity_df <- all_pos %>%
     left_join(diversity_df, by = c("exp_line", "passage", "genomic_position")) %>%
@@ -133,8 +127,5 @@ diversity_df <- all_pos %>%
 
 
 
-
-
+### save data
 write.table(diversity_df, file = paste0(main_wd, "genome-evo-proj/results/tables/diversity/", exp, "/", cl_line,"_diversity_measures.tsv"), quote = F, row.names = F, sep = "\t")
-
-

@@ -1,11 +1,11 @@
 
-
-# load the libraries
-
+### load libraries
 library(Biostrings)
 library(stringr)
 
-# set working directory
+
+
+### set working directory
 if (file.exists("/home/amovas/")){
     print("Remote HPC Connection!")
     wd <- "/home/amovas/data/genome-evo-proj/"
@@ -14,7 +14,10 @@ if (file.exists("/home/amovas/")){
     wd <- "/Users/alimos313/Documents/studies/phd/hpc-research/genome-evo-proj/"
 }
 
-# read in fasta file to retrieve ref information for adjacent positions
+
+
+### load data
+# read-in fasta file to retrieve ref information for adjacent positions
 fastaFile <- readDNAStringSet(paste0(wd, "data/reference/plasmid/plasmid-consensus/hiv_plasmid_consensus_genome.fasta"))
 seq_name = names(fastaFile)
 
@@ -26,37 +29,39 @@ args <- commandArgs(trailingOnly = TRUE)
 # Access the first argument
 exp <- args[1]
 
-# read in the variant file
+# read-in the variant file
 variants <- read.table(file = paste0(wd, "results/tables/pipeline-outputs/", exp, "/", exp, "_variants.csv.gz"), sep = ",", stringsAsFactors = F, header = T)
 
 # remove the large deletion variations
 variants<-variants[variants$mut_type!= "LD",]
-# remove variants with AF below 0.01
-# variants <- variants[variants$fraction > 0.01,]
 
-# 1st field of VCF in CHROM #! use the same name as ncbi reference for compatibility of annotations (later changed to "NL43_ann_wk0virusPassRef_plasmid")
+# 1st field of VCF in CHROM # use the same name as ncbi reference for compatibility of annotations (later changed to "NL43_ann_wk0virusPassRef_plasmid")
 variants$CHROM <- "AF324493.2"
 
 # 2nd filed of VCF is POS and 3rd and 4th are REF and ALT fields (remember that they are all in 1-based index coordinate system)
-## for single base substitutions the conversion is pretty simple and straightforward.
+# for single base substitutions the conversion is pretty simple and straightforward.
 variants$POS[variants$mut_type=="P"] <- variants$end[variants$mut_type=="P"] #end and start positions for SBS are the same and can be used interchangeably
 variants$REF[variants$mut_type=="P"] <- variants$ref[variants$mut_type=="P"]
 variants$ALT[variants$mut_type=="P"] <- variants$alt[variants$mut_type=="P"]
 
-## for small insertions the conversion is done as follow:
-### first the position of the insertion is the 1-based position of the base before the actual insertion
+
+
+### for small insertions the conversion is done as follow:
+# first the position of the insertion is the 1-based position of the base before the actual insertion
 variants$POS[variants$mut_type=="I"] <- variants$start[variants$mut_type=="I"]
-### second the REF field in a VCF has to have the sequence of one base prior to the insetions (as opposed to being empty)
+# second the REF field in a VCF has to have the sequence of one base prior to the insetions (as opposed to being empty)
 variants$REF[variants$mut_type=="I"] <- stringr::str_sub(sequence, start = variants$start[variants$mut_type=="I"], end = variants$start[variants$mut_type=="I"])
-### lastly the ALT field of a VCF contains the one base prior to insetion and full sequence of insertion
+# lastly the ALT field of a VCF contains the one base prior to insetion and full sequence of insertion
 variants$ALT[variants$mut_type=="I"] <- paste0(variants$REF[variants$mut_type=="I"],variants$alt[variants$mut_type=="I"])
 
-## for small deletions the conversion is done as follows:
-### first the position of deletion is the 1-based index of the base right before the deletion occurs
+
+
+### for small deletions the conversion is done as follows:
+# first the position of deletion is the 1-based index of the base right before the deletion occurs
 variants$POS[variants$mut_type=="D"] <- variants$start[variants$mut_type=="D"]
-### second the REF field in a VCF has to have the sequence of one base prior to deletion and the full sequence of the bases that are deleted 
+# second the REF field in a VCF has to have the sequence of one base prior to deletion and the full sequence of the bases that are deleted 
 variants$REF[variants$mut_type=="D"] <- paste0(stringr::str_sub(sequence, start = variants$start[variants$mut_type=="D"], end = variants$start[variants$mut_type=="D"]),variants$ref[variants$mut_type=="D"])
-### lastly the ALT field of a VCF for small deletions only contains the sequence of the one base prior to the deletion
+# lastly the ALT field of a VCF for small deletions only contains the sequence of the one base prior to the deletion
 variants$ALT[variants$mut_type=="D"] <- stringr::str_sub(sequence, start = variants$start[variants$mut_type=="D"], end = variants$start[variants$mut_type=="D"])
 
 # sort the dataframe based on the position of variants and reassign the row numbers to be used as ids
@@ -83,8 +88,10 @@ variants <- variants[,-c(1:10)]
 vcf_variants <- variants
 vcf_variants <- vcf_variants[,c(1,2,5,3,4,6,7,8,9)]
 
-# Let's save the dataframe in VCF format. I'd try to   do so using vcfR package.
 
+
+### save the dataframe in VCF format.
+# create vcf header
 vcf_header <- '##fileformat=VCFv4.3
 ##contig=<ID=AF324493.2,length=14825>
 ##INFO=<ID=AF,Number=1,Type=Float,Description="Allele Freq.">
@@ -96,6 +103,8 @@ vcf_header <- '##fileformat=VCFv4.3
 colnames(vcf_variants)[1] <- paste0("#",colnames(vcf_variants)[1])
 
 cat(vcf_header, file = paste0(wd,"results/tables/pipeline-outputs/", exp, "/", exp, "_variants.vcf"), sep = "\n")
+
+
+
+### save data
 write.table(vcf_variants, file = paste0(wd, "results/tables/pipeline-outputs/", exp, "/", exp, "_variants.vcf"), sep = "\t", row.names = F, quote = F, append = T)  
-
-

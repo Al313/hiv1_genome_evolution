@@ -114,36 +114,3 @@ sum(rowSums(as.matrix(table(end_fixed$mut_info, end_fixed$exp_line))) == 4)/leng
 
 
 ```
-
-```{r visualization11: throughout venn diagram}
-
-# # prepare data for visualization
-# throughout <- 
-#         variants_expiii %>%
-#         filter(allele_freq >= min_threshold, allele_freq < max_threshold) %>%
-#         select(c(exp_line,mut_info)) %>%
-#         distinct()
-
-
-
-# # create a named vector from the df
-# muts <- throughout$mut_info
-# names(muts) <- throughout$exp_line
-
-# # convert named vector to list
-# muts_list <- lapply(split(muts, names(muts)), unname)
-
-
-# # visualization
-# fig <- ggvenn(muts_list) +
-#         # labs(title = paste0(category, " Mutations Occurrence Venn Diagram"))+
-#         scale_fill_manual(labels = exp_line_factor, values = unname(line_col_palette)) +
-#         theme(plot.title = element_text(size = 40, hjust = 0.5))
-
-
-# # save figure
-# custom_plot_save(fig, paste0("parallel_venn_throughout.pdf"), height = 14, width = 14)
-
-
-```
-

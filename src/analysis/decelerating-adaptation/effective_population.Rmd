@@ -207,47 +207,6 @@ df[df$psg == 130 & df$effect_simplified == "S",]
 ```
 
 
-## Effective population size by BEAST
-
-```{r}
-
-# read-in data
-skyline_data <- data.frame()
-line_labels
-for (line in line_labels){
-    data <- read.table(file = paste0("/Applications/BEAST_2.7.6/ltee/ne-estimate/gag/",line,"/",line,"_skyline_data.txt"), sep = "\t", header = T, skip = 1)
-    data$exp_line <- line
-    skyline_data <- rbind(skyline_data, data)
-}
-
-skyline_data %<>% mutate(lower = (lower+mean)/2, upper = (upper+mean)/2)
-
-
-ne__fig <- skyline_data %>% 
-    ggplot(aes(x = time, y = mean, color = exp_line)) +
-    geom_line() +
-    geom_ribbon(aes(ymin = lower, ymax = upper, fill = exp_line), alpha = 0.1, linetype = 0) +
-    labs(title = "Bayesian Skyline Ne Estimates \n", x= "\n Days", y= "Baysian Ne Estimate \n", color = "Virus Line") +
-    scale_color_manual(values = line_col_palette) +
-    scale_fill_manual(values = line_col_palette) +
-    guides(fill = "none") +
-    theme_bw() +
-    theme(
-        plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
-        axis.title.x = element_text(size = 25),
-        axis.title.y = element_text(size = 25),
-        axis.text = element_text(size = 15))
-
-
-# save figure
-date <- str_split(Sys.time(), pattern = " ")[[1]][1]
-fig_dir <- paste0(wd, "results/figs/publication/expiii/provisional/", date, "/")
-ifelse(!dir.exists(file.path(fig_dir)), dir.create(file.path(fig_dir)), FALSE)
-pdf(file = paste0(fig_dir, "bayesina_ne_estimates.pdf"), height = 14, width = 21)
-ne__fig
-dev.off()
-```
-
 
 ```{r ne estimate using down-sampled data}
 

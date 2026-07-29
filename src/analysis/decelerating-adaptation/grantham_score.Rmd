@@ -1,4 +1,26 @@
-```{r}
+---
+title:  
+    "Grantham score"
+date: 
+    "July 26th, 2025"
+author:  
+    "Ali Movasati"  
+output:  
+    html_document:
+        #css: style.css
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        number_sections: true
+        theme: lumen
+        highlight: zenburn
+        code_folding: hide
+        code_download: true # to make the Rmd source code available
+---
+
+
+
+```{r create grantham score matrix}
 
 
 aa <- c("Ala", "Arg", "Asn", "Asp", "Cys", "Gln", "Glu", "Gly", "His", "Ile",
@@ -82,7 +104,6 @@ variants_expiiifiltered$grantham_score <- mapply(grantham_score, variants_expiii
 
 head(variants_expiiifiltered)
 
-variants_expiiifiltered[] <- variants_expiiifiltered[variants_expiiifiltered$grantham_score != 0,]
 
 variants_expiiifiltered %>% filter(allele_freq >= 0.99 & passage == 500) %>% group_by(feature) %>%
   summarise(mean_grantham = mean(grantham_score), sd_grantham = sd(grantham_score), n = n()) %>%

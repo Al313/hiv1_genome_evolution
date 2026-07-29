@@ -100,37 +100,6 @@ b_mt2/b_mt4
 ```
 
 
-```{r with all group}
-
-
-# # all group
-# variants_expiii_subset2 <- variants_expiii_subset
-# variants_expiii_subset2$exp_line <- "All"
-
-# variants_expiii_subset_pooled <- rbind(variants_expiii_subset, variants_expiii_subset2)
-
-
-# variants_expiii_subset_pooled$passage <- as.integer(as.character(variants_expiii_subset_pooled$passage))
-
-
-# counts <- data.frame()
-# for (psg in seq(10,end_psg,10)){
-#     d <- variants_expiii_subset_pooled[variants_expiii_subset_pooled$passage <= psg,]
-#     dd <- d %>% dplyr::select(genomic_pos, exp_line) %>% distinct() %>% group_by(exp_line) %>% summarise(count = n())
-#     dd$passage <- psg
-#     counts <- rbind(counts, dd)
-# }
-
-# fig <- counts %>%  ggplot(aes(x=passage, y = count, color = exp_line)) +
-#         geom_line(linewidth=2) +
-#         labs(x="\nTransfer", y= "Position count\n", color = "Lineage", title = paste0("Cumulative Number of Uniquely Mutated Positions (", category,")"))+
-#         scale_x_continuous(breaks = seq(0,end_psg,50)) +
-#         scale_y_continuous(limits = c(0,max(counts$count)+20),breaks = seq(0,max(counts$count)+20,200)) +
-#         scale_color_manual(labels = c(exp_line_factor, "All"), values = c(line_col_palette, All = "black")) +
-#         custom_plot_theme(application = "publication")
-
-
-```
 
 
 
@@ -224,69 +193,6 @@ fig <- counts %>%  ggplot(aes(x=appearance, y = mut_count, color = exp_line)) +
 custom_plot_save(fig, paste0(tolower(category), "_appearance.pdf"), height = 14, width = 14)
 
 
-```
-
-
-
-```{r visualization3: disappearance}
-
-
-passages <- seq(10,500, 10)
-diff_df <- data.frame()
-
-
-
-for (i in 1:49){
-    for (exp_line in exp_line_factor){
-        prev_in <- passages[i]
-        pres_in <- passages[i+1]
-
-        prev <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == prev_in & variants_expiii$allele_freq >= min_threshold & variants_expiii$allele_freq < max_threshold]
-
-        pres <- variants_expiii$mut_info[variants_expiii$exp_line == exp_line & variants_expiii$passage == pres_in & variants_expiii$allele_freq >= min_threshold]
-
-        addition <- length(setdiff(pres, prev))
-        removal <- length(setdiff(prev,pres))
-
-        diff_df <- rbind(diff_df, c(exp_line, passages[i+1], addition, removal))
-
-    }
-    
-}
-
-diff_df %<>% set_colnames(c("exp_line", "passage", "addition", "removal")) %>%
-            arrange(exp_line) %>%
-            mutate(host_line = ifelse(exp_line %in% c("MT-2_1", "MT-2_2"), "MT2", "MT4")) %>%
-            mutate_at(c(1,5), as.factor) %>%
-            mutate_at(2:4, as.numeric)
-
-# prepare the data for statistical test
-counts <- diff_df %>%
-            group_by(passage, host_line) %>%
-            summarize(addition_mean = mean(addition),
-                    removal_mean = mean(removal), .groups = 'drop')
-
-
-# compare the removal rate statistically 
-model <- lmer(removal~host_line+(1|passage)+(1|exp_line), data = diff_df)
-summary(model)
-
-
-# visualize using plotly
-fig <- diff_df %>%  ggplot(aes(x=passage, y = removal, color = exp_line)) +
-        geom_line(linewidth=1, alpha = 0.5) +
-        geom_smooth(se = F) +
-        labs(x="Transfer", y= "Minority mutation disappearance", color = "Population", title = paste0(category, " Mutations Disappearance"))+
-        scale_x_continuous(breaks = seq(0,500,50)) +
-        scale_y_continuous(limits = c(max(0,min(diff_df$removal)-21),max(diff_df$removal)+16),breaks = seq(max(0,min(diff_df$removal)-21),max(diff_df$removal)+16,20)) +
-        scale_color_manual(labels = exp_line_factor, values = line_col_palette) +
-        custom_plot_theme(application = "publication")
-
-
-
-
-# save figure
-custom_plot_save(fig, paste0(tolower(category),"_disappearance.pdf"), height = 14, width = 14)
 ```
 
 
