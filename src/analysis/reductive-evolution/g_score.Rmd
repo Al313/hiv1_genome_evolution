@@ -96,7 +96,7 @@ if (category == "Minority"){
 ```
 
 
-```{r}
+```{r making summary table}
 
 
 filtered_data <- variants_ann_expiii %>%
@@ -158,7 +158,7 @@ table <- result_wide %>%
     tab_header(title = "Overview of fixed mutation counts per region") %>%
     fmt_number(columns = c("parallel_prop", "total_per_site", "synonymous_prop"), decimals = 3) %>%
     cols_label(
-        feature = "Feature",
+        feature = "Region",
         synonymous = "Synonymous",
         unique = "Unique",
         shared = "Parallel",
@@ -435,7 +435,7 @@ fig <- ggplot(overall_df_sub,
         width = 0.3, color = "black", size = 1.5) +
     labs(
         title = paste0("Summary of Parallelism at Transfer #", end_psg),
-        y = "Parallel (%)",
+        y = "Mean pairwise parallelism (%)",
         x = "\nTranslational impact"
     ) +
     scale_x_discrete(

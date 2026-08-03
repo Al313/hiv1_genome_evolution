@@ -198,6 +198,7 @@ fig <- ggplot(t_2_f, aes(x = "", y = time_to_fixation)) +
 # save figure
 custom_plot_save(fig,  "nef_del_dist_time_to_fix.pdf", height = 14, width = 10.5)
 
+
 ```
 
 
@@ -262,13 +263,53 @@ wilcox.test(t_2_f$time_to_fixation[t_2_f$length >= 50], t_2_f_sbs$time_to_fixati
 ```
 
 
+```{r time to fixation of deletions + distribution of line-specific SBS}
+
+
+t_2_f_sbs_subset <- t_2_f_sbs[t_2_f_sbs$Occurrence == "1 out of 4",]
+t_2_f_sbs_subset$deletion_name <- "SBS"
+legend_colors["SBS"] <- "grey"
+t_2_f$type <- "Deletions"
+t_2_f_sbs_subset$type <- "Line-specific \n SBS"
+t_2_f_sbs_subset$length <- 1
+
+t_2_f_all <- rbind(t_2_f[,c("exp_line", "time_to_fixation", "type", "deletion_name", "length")], t_2_f_sbs_subset[,c("exp_line", "time_to_fixation", "type", "deletion_name", "length")])
+
+jpos_points <- position_jitter(
+    width = 0.15,
+    height = 0,
+    seed = 0
+)
+
+fig <- ggplot(t_2_f_all, aes(x = type, y = time_to_fixation)) +
+    geom_boxplot(outlier.shape = NA, width = 0.3, linewidth = 1.5, size = 2) +
+    geom_hline(yintercept = 150, linetype = "dashed", linewidth = 1) +
+    labs(x="", y= "Time to fixation") +
+    geom_jitter(aes(color = deletion_name, size = length), position = jpos_points, alpha = 1) +
+    scale_y_continuous(breaks = seq(0,600, 50)) +
+    scale_size_continuous(range = c(1, 15), name = "Length", limits = c(1, 200), breaks = c(1, 50, 100, 150, 200)) +
+    scale_color_manual(values = legend_colors) +
+    guides(color = "none") +
+    custom_plot_theme(application = "publication")
+
+fig
+
+# save figure
+custom_plot_save(fig,  "nef_del_dist_time_to_fix_sbs.pdf", height = 14, width = 10.5)
+
+
+
+```
+
+
+
 
 ```{r comapring time to fixation between large and small deletions}
 
 
 
-t_2_f$group <- ifelse(t_2_f$length >= 25, "Long \n(> 25bp del)", "Short \n(<= 25bp del)")
-t_2_f %<>% mutate(group = factor(group, levels = c("Long \n(> 25bp del)", "Short \n(<= 25bp del)")))
+t_2_f$group <- ifelse(t_2_f$length >= 25, "Long \n(>= 25bp del)", "Short \n(< 25bp del)")
+t_2_f %<>% mutate(group = factor(group, levels = c("Long \n(>= 25bp del)", "Short \n(< 25bp del)")))
 
 # create figure
 fig <- ggplot(t_2_f, aes(x = group, y = time_to_fixation, fill = group)) +
