@@ -1,0 +1,7 @@
+/home/amovas/data/.conda/envs/iva/bin/iva --verbose -f 17MT2EXPIVVP600seq23012025_S3_L001_R1_001.fastq.gz -r 17MT2EXPIVVP600seq23012025_S3_L001_R2_001.fastq.gz ../../../../denovo-assembly/iva/17/
+IVA version 1.0.8
+Using kmc version 3.2.4
+Using kmc_dump version 3.2.4
+Using nucmer version 3.1
+Using samtools version 1.24
+Using smalt version 0.7.6
