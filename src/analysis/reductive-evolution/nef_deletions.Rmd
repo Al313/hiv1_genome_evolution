@@ -101,11 +101,13 @@ nef_deletions_extended <- nef_deletions
 
 for (del in levels(nef_deletions$deletion_id)){
     max_record <- max(nef_deletions$passage[nef_deletions$deletion_id == del])
-    next_psgs <- seq(max_record,end_psg,10)
-    row_to_repeat <- nef_deletions[nef_deletions$deletion_id == del & nef_deletions$passage == max_record,]
-    repeated_df <- bind_rows(replicate(length(next_psgs), row_to_repeat, simplify = FALSE))
-    repeated_df$passage <- next_psgs
-    nef_deletions_extended <- rbind(nef_deletions_extended, repeated_df)
+    if (max_record +10 < 600){
+        next_psgs <- seq(max_record +10,end_psg,10)
+        row_to_repeat <- nef_deletions[nef_deletions$deletion_id == del & nef_deletions$passage == max_record,]
+        repeated_df <- bind_rows(replicate(length(next_psgs), row_to_repeat, simplify = FALSE))
+        repeated_df$passage <- next_psgs
+        nef_deletions_extended <- rbind(nef_deletions_extended, repeated_df)
+    }
 }
 
 nef_deletions_extended$line_type <- "solid"
@@ -140,7 +142,7 @@ fig <- nef_deletions_extended %>%
     ggplot(aes(x = passage, y = consensus_vf, color = deletion_name, linetype = line_type)) + 
     facet_wrap(~exp_line, ncol = 1) +
     geom_line(size = 2) +
-    scale_x_continuous(breaks = c(seq(0,end_psg, 50), 630)) +
+    scale_x_continuous(breaks = c(seq(0,end_psg, 50), 600)) +
     labs(x="Transfer", y= "Deletion frequency",  color = "Deletion ID", title = "") +
     scale_color_manual(values = legend_colors) +
     custom_plot_theme(application = "publication") +
@@ -433,4 +435,80 @@ custom_plot_save(fig,  "ttt.pdf", height = 14, width = 14) # nef_del_length_vs_i
 
 
 ```
+
+
+```{r temporal distribution of short and large deletions}
+
+wilcox.test(t_2_f$fixation[t_2_f$group == "Long \n(>= 25bp del)"], t_2_f$fixation[t_2_f$group == "Short \n(< 25bp del)"])
+
+
+```
+
+
+```{r average genome length over time}
+
+
+diff_df_indel <- data.frame()
+
+for (exp_line in exp_line_factor){
+    for (psg in seq(10,end_psg,10)){
+        variants_expiii_sub <- variants_expiii[variants_expiii$passage == psg & variants_expiii$exp_line == exp_line & variants_expiii$feature != "nef",]
+        diff <- sum((nchar(variants_expiii_sub$alt_allele[variants_expiii_sub$mut_type == "I" & variants_expiii_sub$allele_freq >= 0.01])-1)*variants_expiii_sub$allele_freq[variants_expiii_sub$mut_type == "I" & variants_expiii_sub$allele_freq >= 0.01]) -
+        sum((nchar(variants_expiii_sub$ref_allele[variants_expiii_sub$mut_type == "D" & variants_expiii_sub$allele_freq >= 0.01])-1)*variants_expiii_sub$allele_freq[variants_expiii_sub$mut_type == "D" & variants_expiii_sub$allele_freq >= 0.01])
+        diff_df_indel <- rbind(diff_df_indel, c(psg, exp_line, diff))
+    }
+}
+
+colnames(diff_df_indel) <- c("passage", "exp_line", "value_indel")
+
+diff_df_ld <- data.frame()
+for (exp_line in exp_line_factor){
+    for (psg in seq(10,end_psg,10)){
+        nef_deletions_extended_sub <- nef_deletions_extended[nef_deletions_extended$passage == psg & nef_deletions_extended$exp_line == exp_line & nef_deletions_extended$line_type != "dashed",]
+        diff <- -sum(nef_deletions_extended_sub$length[nef_deletions_extended_sub$consensus_vf >= 0.01]*nef_deletions_extended_sub$consensus_vf[nef_deletions_extended_sub$consensus_vf >= 0.01])
+        diff_df_ld <- rbind(diff_df_ld, c(psg, exp_line, diff))
+    }
+}
+colnames(diff_df_ld) <- c("passage", "exp_line", "value_ld")
+
+diff_df_all <- cbind(diff_df_indel, value_ld= diff_df_ld$value_ld)
+
+diff_df_all %<>% mutate_at(3:4, as.numeric)
+diff_df_all %<>% mutate_at(1, as.integer)
+
+diff_df_all$value_tot <- rowSums(diff_df_all[,3:4])
+
+diff_df_all$ave_genome_ln <- 9171 + diff_df_all$value_tot
+
+
+fig <- diff_df_all %>%
+    ggplot(aes(x = passage, y = ave_genome_ln, shape = exp_line, group = exp_line)) +
+    geom_line(linewidth = 1) +
+    geom_point(data = ~ dplyr::filter(.x, passage %% 50 == 0), size = 5) +
+    geom_hline(yintercept = 9171, linetype = "dashed", color = "black") +
+    labs(
+        x = "Passage",
+        y = "Average genome length (nt)",
+        shape = "Population"
+    ) +
+    scale_shape_manual(values = c(15, 16,17,18)) +
+    scale_x_continuous(breaks = c(seq(0,end_psg, 50), 600)) +
+    scale_y_continuous(breaks = seq(8600,9200, 100)) +
+    theme_classic() +
+    theme(legend.position = "none") +
+    custom_plot_theme(application = "publication") +
+    coord_cartesian(ylim = c(8600, 9200))
+
+
+# save figure
+custom_plot_save(fig,  "ave_genome_length_over_time.pdf", height = 14, width = 21)
+
+# inline numbers
+100 - 100*(diff_df_all$ave_genome_ln[diff_df_all$passage == 600]/9171)
+
+mean(diff_df_all$value_tot[diff_df_all$passage == 600])/(600*3)
+
+
+```
+
 
